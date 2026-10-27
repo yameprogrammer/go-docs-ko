@@ -30,6 +30,30 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Check if upstream Go docs changed
+        id: upstream_check
+        shell: bash
+        run: |
+          set -e
+
+          latest_sha=$(git ls-remote https://github.com/golang/go.git HEAD | awk '{print $1}')
+          current_sha=""
+
+          if [ -f .upstream-go-sha ]; then
+            current_sha=$(cat .upstream-go-sha)
+          fi
+
+          echo "latest_sha=$latest_sha"
+          echo "current_sha=$current_sha"
+
+          if [ "$latest_sha" = "$current_sha" ]; then
+            echo "No upstream Go doc changes detected. Skipping translation."
+            echo "UPSTREAM_CHANGED=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Upstream Go doc changes detected."
+            echo "UPSTREAM_CHANGED=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -41,13 +65,20 @@ jobs:
           pip install -r scripts/requirements.txt
 
       - name: Sync and translate Go docs
+        if: steps.upstream_check.outputs.UPSTREAM_CHANGED == 'true'
         run: |
+          set -e
+
           python scripts/translate_docs.py \
             --source-repo "$SOURCE_REPO" \
             --source-branch "$SOURCE_BRANCH" \
             --output-dir "$OUTPUT_DIR"
 
+          latest_sha=$(git ls-remote https://github.com/golang/go.git HEAD | awk '{print $1}')
+          echo "$latest_sha" > .upstream-go-sha
+
       - name: Create or update pull request
+        if: steps.upstream_check.outputs.UPSTREAM_CHANGED == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
           commit-message: 'docs: sync Go official docs to Korean'
