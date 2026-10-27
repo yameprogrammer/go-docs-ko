@@ -1,47 +1,144 @@
-# Go 표준 라이브러리 문서 미러
+# Go 표준 라이브러리 학습 허브
 
 - 원문: <https://pkg.go.dev/std>
-- 이 디렉터리는 `go list std` 결과를 기반으로 생성됩니다.
-- API 상세의 권위 있는 원문은 pkg.go.dev 및 golang/go입니다.
+- 각 패키지 페이지에는 한국어 요약과 `go doc -all` API 상세가 포함됩니다.
+- API 권위 원문은 pkg.go.dev 및 golang/go입니다.
 
-## 패키지 섹션
+## 추천 학습 트랙
 
-### archive
+### 입문 트랙 (기본 문법/출력/오류)
+
+- [fmt](fmt.md)
+- [errors](errors.md)
+- [strings](strings.md)
+- [strconv](strconv.md)
+
+### 백엔드 실무 트랙 (HTTP/JSON/컨텍스트)
+
+- [net/http](net/http.md)
+- [encoding/json](encoding/json.md)
+- [context](context.md)
+- [io](io.md)
+
+### 데이터/스토리지 트랙
+
+- [database/sql](database/sql.md)
+- [encoding/csv](encoding/csv.md)
+- [encoding/xml](encoding/xml.md)
+- [bufio](bufio.md)
+
+### 동시성/운영 트랙
+
+- [sync](sync.md)
+- [sync/atomic](sync/atomic.md)
+- [time](time.md)
+- [os/signal](os/signal.md)
+- [runtime](runtime.md)
+
+## 도메인별 패키지 탐색
+
+관심 있는 주제부터 선택해서 학습하세요.
+
+### 입출력/파일
 
 - [archive/tar](archive/tar.md)
 - [archive/zip](archive/zip.md)
-
-### bufio
-
 - [bufio](bufio.md)
-
-### bytes
-
-- [bytes](bytes.md)
-
-### cmp
-
-- [cmp](cmp.md)
-
-### compress
-
 - [compress/bzip2](compress/bzip2.md)
 - [compress/flate](compress/flate.md)
 - [compress/gzip](compress/gzip.md)
 - [compress/lzw](compress/lzw.md)
 - [compress/zlib](compress/zlib.md)
+- [io](io.md)
+- [io/fs](io/fs.md)
+- [io/ioutil](io/ioutil.md)
+- [os](os.md)
+- [os/exec](os/exec.md)
+- [os/exec/internal/fdtest](os/exec/internal/fdtest.md)
+- [os/signal](os/signal.md)
+- [os/user](os/user.md)
+- [path](path.md)
+- [path/filepath](path/filepath.md)
 
-### container
+### 데이터 처리
 
-- [container/heap](container/heap.md)
-- [container/list](container/list.md)
-- [container/ring](container/ring.md)
+- [bytes](bytes.md)
+- [encoding](encoding.md)
+- [encoding/ascii85](encoding/ascii85.md)
+- [encoding/asn1](encoding/asn1.md)
+- [encoding/base32](encoding/base32.md)
+- [encoding/base64](encoding/base64.md)
+- [encoding/binary](encoding/binary.md)
+- [encoding/csv](encoding/csv.md)
+- [encoding/gob](encoding/gob.md)
+- [encoding/hex](encoding/hex.md)
+- [encoding/json](encoding/json.md)
+- [encoding/json/internal](encoding/json/internal.md)
+- [encoding/json/internal/jsonflags](encoding/json/internal/jsonflags.md)
+- [encoding/json/internal/jsonopts](encoding/json/internal/jsonopts.md)
+- [encoding/json/internal/jsontest](encoding/json/internal/jsontest.md)
+- [encoding/json/internal/jsonwire](encoding/json/internal/jsonwire.md)
+- [encoding/json/jsontext](encoding/json/jsontext.md)
+- [encoding/json/v2](encoding/json/v2.md)
+- [encoding/pem](encoding/pem.md)
+- [encoding/xml](encoding/xml.md)
+- [regexp](regexp.md)
+- [regexp/syntax](regexp/syntax.md)
+- [strconv](strconv.md)
+- [strings](strings.md)
+- [unicode](unicode.md)
+- [unicode/utf16](unicode/utf16.md)
+- [unicode/utf8](unicode/utf8.md)
 
-### context
+### 웹/네트워크
+
+- [html](html.md)
+- [html/template](html/template.md)
+- [mime](mime.md)
+- [mime/multipart](mime/multipart.md)
+- [mime/quotedprintable](mime/quotedprintable.md)
+- [net](net.md)
+- [net/http](net/http.md)
+- [net/http/cgi](net/http/cgi.md)
+- [net/http/cookiejar](net/http/cookiejar.md)
+- [net/http/fcgi](net/http/fcgi.md)
+- [net/http/httptest](net/http/httptest.md)
+- [net/http/httptrace](net/http/httptrace.md)
+- [net/http/httputil](net/http/httputil.md)
+- [net/http/internal](net/http/internal.md)
+- [net/http/internal/ascii](net/http/internal/ascii.md)
+- [net/http/internal/http2](net/http/internal/http2.md)
+- [net/http/internal/httpcommon](net/http/internal/httpcommon.md)
+- [net/http/internal/httpsfv](net/http/internal/httpsfv.md)
+- [net/http/internal/testcert](net/http/internal/testcert.md)
+- [net/http/pprof](net/http/pprof.md)
+- [net/internal/cgotest](net/internal/cgotest.md)
+- [net/internal/socktest](net/internal/socktest.md)
+- [net/mail](net/mail.md)
+- [net/netip](net/netip.md)
+- [net/rpc](net/rpc.md)
+- [net/rpc/jsonrpc](net/rpc/jsonrpc.md)
+- [net/smtp](net/smtp.md)
+- [net/textproto](net/textproto.md)
+- [net/url](net/url.md)
+
+### 동시성/런타임
 
 - [context](context.md)
+- [runtime](runtime.md)
+- [runtime/coverage](runtime/coverage.md)
+- [runtime/debug](runtime/debug.md)
+- [runtime/metrics](runtime/metrics.md)
+- [runtime/pprof](runtime/pprof.md)
+- [runtime/race](runtime/race.md)
+- [runtime/race/internal/amd64v1](runtime/race/internal/amd64v1.md)
+- [runtime/trace](runtime/trace.md)
+- [sync](sync.md)
+- [sync/atomic](sync/atomic.md)
+- [time](time.md)
+- [time/tzdata](time/tzdata.md)
 
-### crypto
+### 보안/암호화
 
 - [crypto](crypto.md)
 - [crypto/aes](crypto/aes.md)
@@ -125,15 +222,47 @@
 - [crypto/tls/internal/fips140tls](crypto/tls/internal/fips140tls.md)
 - [crypto/x509](crypto/x509.md)
 - [crypto/x509/pkix](crypto/x509/pkix.md)
+- [hash](hash.md)
+- [hash/adler32](hash/adler32.md)
+- [hash/crc32](hash/crc32.md)
+- [hash/crc64](hash/crc64.md)
+- [hash/fnv](hash/fnv.md)
+- [hash/maphash](hash/maphash.md)
 
-### database
+### 개발도구/언어
 
+- [errors](errors.md)
+- [flag](flag.md)
+- [fmt](fmt.md)
+- [log](log.md)
+- [log/internal](log/internal.md)
+- [log/slog](log/slog.md)
+- [log/slog/internal](log/slog/internal.md)
+- [log/slog/internal/benchmarks](log/slog/internal/benchmarks.md)
+- [log/slog/internal/buffer](log/slog/internal/buffer.md)
+- [log/syslog](log/syslog.md)
+- [reflect](reflect.md)
+- [reflect/internal/example1](reflect/internal/example1.md)
+- [reflect/internal/example2](reflect/internal/example2.md)
+- [testing](testing.md)
+- [testing/cryptotest](testing/cryptotest.md)
+- [testing/fstest](testing/fstest.md)
+- [testing/internal/testdeps](testing/internal/testdeps.md)
+- [testing/iotest](testing/iotest.md)
+- [testing/quick](testing/quick.md)
+- [testing/slogtest](testing/slogtest.md)
+- [testing/synctest](testing/synctest.md)
+- [unsafe](unsafe.md)
+
+### 기타
+
+- [cmp](cmp.md)
+- [container/heap](container/heap.md)
+- [container/list](container/list.md)
+- [container/ring](container/ring.md)
 - [database/sql](database/sql.md)
 - [database/sql/driver](database/sql/driver.md)
 - [database/sql/internal](database/sql/internal.md)
-
-### debug
-
 - [debug/buildinfo](debug/buildinfo.md)
 - [debug/dwarf](debug/dwarf.md)
 - [debug/elf](debug/elf.md)
@@ -141,52 +270,9 @@
 - [debug/macho](debug/macho.md)
 - [debug/pe](debug/pe.md)
 - [debug/plan9obj](debug/plan9obj.md)
-
-### embed
-
 - [embed](embed.md)
 - [embed/internal/embedtest](embed/internal/embedtest.md)
-
-### encoding
-
-- [encoding](encoding.md)
-- [encoding/ascii85](encoding/ascii85.md)
-- [encoding/asn1](encoding/asn1.md)
-- [encoding/base32](encoding/base32.md)
-- [encoding/base64](encoding/base64.md)
-- [encoding/binary](encoding/binary.md)
-- [encoding/csv](encoding/csv.md)
-- [encoding/gob](encoding/gob.md)
-- [encoding/hex](encoding/hex.md)
-- [encoding/json](encoding/json.md)
-- [encoding/json/internal](encoding/json/internal.md)
-- [encoding/json/internal/jsonflags](encoding/json/internal/jsonflags.md)
-- [encoding/json/internal/jsonopts](encoding/json/internal/jsonopts.md)
-- [encoding/json/internal/jsontest](encoding/json/internal/jsontest.md)
-- [encoding/json/internal/jsonwire](encoding/json/internal/jsonwire.md)
-- [encoding/json/jsontext](encoding/json/jsontext.md)
-- [encoding/json/v2](encoding/json/v2.md)
-- [encoding/pem](encoding/pem.md)
-- [encoding/xml](encoding/xml.md)
-
-### errors
-
-- [errors](errors.md)
-
-### expvar
-
 - [expvar](expvar.md)
-
-### flag
-
-- [flag](flag.md)
-
-### fmt
-
-- [fmt](fmt.md)
-
-### go
-
 - [go/ast](go/ast.md)
 - [go/build](go/build.md)
 - [go/build/constraint](go/build/constraint.md)
@@ -204,23 +290,6 @@
 - [go/token](go/token.md)
 - [go/types](go/types.md)
 - [go/version](go/version.md)
-
-### hash
-
-- [hash](hash.md)
-- [hash/adler32](hash/adler32.md)
-- [hash/crc32](hash/crc32.md)
-- [hash/crc64](hash/crc64.md)
-- [hash/fnv](hash/fnv.md)
-- [hash/maphash](hash/maphash.md)
-
-### html
-
-- [html](html.md)
-- [html/template](html/template.md)
-
-### image
-
 - [image](image.md)
 - [image/color](image/color.md)
 - [image/color/palette](image/color/palette.md)
@@ -229,13 +298,7 @@
 - [image/internal/imageutil](image/internal/imageutil.md)
 - [image/jpeg](image/jpeg.md)
 - [image/png](image/png.md)
-
-### index
-
 - [index/suffixarray](index/suffixarray.md)
-
-### internal
-
 - [internal/abi](internal/abi.md)
 - [internal/asan](internal/asan.md)
 - [internal/bisect](internal/bisect.md)
@@ -335,33 +398,8 @@
 - [internal/unsafeheader](internal/unsafeheader.md)
 - [internal/xcoff](internal/xcoff.md)
 - [internal/zstd](internal/zstd.md)
-
-### io
-
-- [io](io.md)
-- [io/fs](io/fs.md)
-- [io/ioutil](io/ioutil.md)
-
-### iter
-
 - [iter](iter.md)
-
-### log
-
-- [log](log.md)
-- [log/internal](log/internal.md)
-- [log/slog](log/slog.md)
-- [log/slog/internal](log/slog/internal.md)
-- [log/slog/internal/benchmarks](log/slog/internal/benchmarks.md)
-- [log/slog/internal/buffer](log/slog/internal/buffer.md)
-- [log/syslog](log/syslog.md)
-
-### maps
-
 - [maps](maps.md)
-
-### math
-
 - [math](math.md)
 - [math/big](math/big.md)
 - [math/big/internal/asmgen](math/big/internal/asmgen.md)
@@ -369,151 +407,17 @@
 - [math/cmplx](math/cmplx.md)
 - [math/rand](math/rand.md)
 - [math/rand/v2](math/rand/v2.md)
-
-### mime
-
-- [mime](mime.md)
-- [mime/multipart](mime/multipart.md)
-- [mime/quotedprintable](mime/quotedprintable.md)
-
-### net
-
-- [net](net.md)
-- [net/http](net/http.md)
-- [net/http/cgi](net/http/cgi.md)
-- [net/http/cookiejar](net/http/cookiejar.md)
-- [net/http/fcgi](net/http/fcgi.md)
-- [net/http/httptest](net/http/httptest.md)
-- [net/http/httptrace](net/http/httptrace.md)
-- [net/http/httputil](net/http/httputil.md)
-- [net/http/internal](net/http/internal.md)
-- [net/http/internal/ascii](net/http/internal/ascii.md)
-- [net/http/internal/http2](net/http/internal/http2.md)
-- [net/http/internal/httpcommon](net/http/internal/httpcommon.md)
-- [net/http/internal/httpsfv](net/http/internal/httpsfv.md)
-- [net/http/internal/testcert](net/http/internal/testcert.md)
-- [net/http/pprof](net/http/pprof.md)
-- [net/internal/cgotest](net/internal/cgotest.md)
-- [net/internal/socktest](net/internal/socktest.md)
-- [net/mail](net/mail.md)
-- [net/netip](net/netip.md)
-- [net/rpc](net/rpc.md)
-- [net/rpc/jsonrpc](net/rpc/jsonrpc.md)
-- [net/smtp](net/smtp.md)
-- [net/textproto](net/textproto.md)
-- [net/url](net/url.md)
-
-### os
-
-- [os](os.md)
-- [os/exec](os/exec.md)
-- [os/exec/internal/fdtest](os/exec/internal/fdtest.md)
-- [os/signal](os/signal.md)
-- [os/user](os/user.md)
-
-### path
-
-- [path](path.md)
-- [path/filepath](path/filepath.md)
-
-### plugin
-
 - [plugin](plugin.md)
-
-### reflect
-
-- [reflect](reflect.md)
-- [reflect/internal/example1](reflect/internal/example1.md)
-- [reflect/internal/example2](reflect/internal/example2.md)
-
-### regexp
-
-- [regexp](regexp.md)
-- [regexp/syntax](regexp/syntax.md)
-
-### runtime
-
-- [runtime](runtime.md)
-- [runtime/coverage](runtime/coverage.md)
-- [runtime/debug](runtime/debug.md)
-- [runtime/metrics](runtime/metrics.md)
-- [runtime/pprof](runtime/pprof.md)
-- [runtime/race](runtime/race.md)
-- [runtime/race/internal/amd64v1](runtime/race/internal/amd64v1.md)
-- [runtime/trace](runtime/trace.md)
-
-### slices
-
 - [slices](slices.md)
-
-### sort
-
 - [sort](sort.md)
-
-### strconv
-
-- [strconv](strconv.md)
-
-### strings
-
-- [strings](strings.md)
-
-### structs
-
 - [structs](structs.md)
-
-### sync
-
-- [sync](sync.md)
-- [sync/atomic](sync/atomic.md)
-
-### syscall
-
 - [syscall](syscall.md)
-
-### testing
-
-- [testing](testing.md)
-- [testing/cryptotest](testing/cryptotest.md)
-- [testing/fstest](testing/fstest.md)
-- [testing/internal/testdeps](testing/internal/testdeps.md)
-- [testing/iotest](testing/iotest.md)
-- [testing/quick](testing/quick.md)
-- [testing/slogtest](testing/slogtest.md)
-- [testing/synctest](testing/synctest.md)
-
-### text
-
 - [text/scanner](text/scanner.md)
 - [text/tabwriter](text/tabwriter.md)
 - [text/template](text/template.md)
 - [text/template/parse](text/template/parse.md)
-
-### time
-
-- [time](time.md)
-- [time/tzdata](time/tzdata.md)
-
-### unicode
-
-- [unicode](unicode.md)
-- [unicode/utf16](unicode/utf16.md)
-- [unicode/utf8](unicode/utf8.md)
-
-### unique
-
 - [unique](unique.md)
-
-### unsafe
-
-- [unsafe](unsafe.md)
-
-### uuid
-
 - [uuid](uuid.md)
-
-### vendor
-
 - [vendor/golang.org/x/crypto/chacha20](vendor/golang.org/x/crypto/chacha20.md)
 - [vendor/golang.org/x/crypto/chacha20poly1305](vendor/golang.org/x/crypto/chacha20poly1305.md)
 - [vendor/golang.org/x/crypto/cryptobyte](vendor/golang.org/x/crypto/cryptobyte.md)
@@ -537,8 +441,11 @@
 - [vendor/golang.org/x/text/transform](vendor/golang.org/x/text/transform.md)
 - [vendor/golang.org/x/text/unicode/bidi](vendor/golang.org/x/text/unicode/bidi.md)
 - [vendor/golang.org/x/text/unicode/norm](vendor/golang.org/x/text/unicode/norm.md)
-
-### weak
-
 - [weak](weak.md)
+
+## 읽는 방법
+
+1. 추천 학습 트랙에서 목표에 맞는 트랙을 고릅니다.
+2. 패키지 페이지의 **한국어 요약**으로 개념을 먼저 파악합니다.
+3. 필요할 때 **API 상세 (go doc -all)** 섹션으로 내려가 시그니처/동작을 확인합니다.
 

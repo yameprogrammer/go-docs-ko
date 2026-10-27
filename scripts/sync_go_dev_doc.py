@@ -22,33 +22,136 @@ def sanitize_for_mkdocs(markdown: str) -> str:
 
 def build_index(output_dir: Path, translated_files: list[Path]) -> None:
     rel_paths = sorted([p.relative_to(output_dir) for p in translated_files if p.name != "index.md"])
+    rel_set = {p.as_posix() for p in rel_paths}
+
+    def pick(path: str) -> str | None:
+        return path if path in rel_set else None
+
+    learning_paths: list[tuple[str, list[str]]] = [
+        (
+            "입문 시작 (설치와 기본 개념)",
+            [p for p in [pick("root.md"), pick("install-source.md"), pick("faq.md"), pick("go1.md")] if p],
+        ),
+        (
+            "실무 튜토리얼 (따라 하며 학습)",
+            [
+                p
+                for p in [
+                    pick("tutorial/json.md"),
+                    pick("tutorial/database-access.md"),
+                    pick("tutorial/web-service-gin.md"),
+                    pick("tutorial/workspaces.md"),
+                ]
+                if p
+            ],
+        ),
+        (
+            "모듈/의존성 관리",
+            [
+                p
+                for p in [
+                    pick("modules/developing.md"),
+                    pick("modules/managing-dependencies.md"),
+                    pick("modules/release-workflow.md"),
+                    pick("modules/version-numbers.md"),
+                ]
+                if p
+            ],
+        ),
+        (
+            "운영/보안 심화",
+            [
+                p
+                for p in [
+                    pick("security/best-practices.md"),
+                    pick("security/threat-model.md"),
+                    pick("security/vulncheck.md"),
+                    pick("toolchain.md"),
+                    pick("telemetry.md"),
+                ]
+                if p
+            ],
+        ),
+    ]
+
     grouped: dict[str, list[Path]] = {}
     for rel in rel_paths:
-        top = rel.parts[0] if len(rel.parts) > 1 else "top-level"
-        grouped.setdefault(top, []).append(rel)
+        key = rel.parts[0] if len(rel.parts) > 1 else "top-level"
+        grouped.setdefault(key, []).append(rel)
+
+    section_order = ["tutorial", "database", "modules", "security", "top-level"]
+    section_titles = {
+        "tutorial": "튜토리얼",
+        "database": "데이터베이스",
+        "modules": "모듈",
+        "security": "보안",
+        "top-level": "기타 문서",
+    }
 
     lines = [
-        "# go.dev/doc 미러 문서",
+        "# go.dev/doc 학습 허브",
         "",
-        "이 디렉터리는 `golang/website` 저장소의 `_content/doc` 문서를 기반으로 생성됩니다.",
+        "이 섹션은 `go.dev/doc` 문서를 한국어로 따라가기 쉽게 정리한 학습 허브입니다.",
         "",
         "- 원문 권위: <https://go.dev/doc>",
         "- 이 저장소는 비공식 한국어 번역 미러입니다.",
         "",
-        "## 문서 섹션",
-        "",
-        "> 전체 페이지는 사이트 검색으로도 빠르게 찾을 수 있습니다.",
+        "## 추천 학습 순서",
         "",
     ]
-    for section in sorted(grouped.keys()):
-        title = "Top-level" if section == "top-level" else section
+    for title, items in learning_paths:
+        if not items:
+            continue
         lines.append(f"### {title}")
         lines.append("")
-        for rel in grouped[section]:
-            label = rel.name if section != "top-level" else rel.as_posix()
-            lines.append(f"- [{label}]({rel.as_posix()})")
+        for item in items:
+            label = item.replace(".md", "")
+            lines.append(f"- [{label}]({item})")
         lines.append("")
-    lines.append("")
+
+    lines.extend(
+        [
+            "## 주제별 문서 탐색",
+            "",
+            "관심 주제별로 바로 이동하세요.",
+            "",
+        ]
+    )
+
+    for key in section_order:
+        if key not in grouped:
+            continue
+        lines.append(f"### {section_titles[key]}")
+        lines.append("")
+        for rel in grouped[key]:
+            rel_str = rel.as_posix()
+            label = rel_str.replace(".md", "")
+            lines.append(f"- [{label}]({rel_str})")
+        lines.append("")
+
+    for key in sorted(grouped.keys()):
+        if key in section_order:
+            continue
+        lines.append(f"### {key}")
+        lines.append("")
+        for rel in grouped[key]:
+            rel_str = rel.as_posix()
+            label = rel_str.replace(".md", "")
+            lines.append(f"- [{label}]({rel_str})")
+        lines.append("")
+
+    lines.extend(
+        [
+            "## 읽는 방법",
+            "",
+            "1. **추천 학습 순서**에서 1개 트랙을 고릅니다.",
+            "2. 각 문서의 예제 코드를 로컬에서 직접 실행합니다.",
+            "3. 필요할 때 주제별 문서 탐색에서 관련 심화 문서를 확장합니다.",
+            "",
+            "> 전체 문서는 사이트 상단 검색으로도 빠르게 찾을 수 있습니다.",
+            "",
+        ]
+    )
     (output_dir / "index.md").write_text("\n".join(lines), encoding="utf-8")
 
 
