@@ -1,0 +1,35 @@
+site_name: Go 문서 한국어 미러
+site_description: 비공식 Go 공식 문서의 한국어 번역 미러
+site_url: https://yameprogrammer.github.io/go-docs-ko/
+repo_url: https://github.com/yameprogrammer/go-docs-ko
+
+docs_dir: docs/ko
+site_dir: site
+use_directory_urls: false
+exclude_docs: README.md
+
+theme:
+  name: material
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - toc
+
+validation:
+  nav:
+    omitted_files: ignore
+    not_found: ignore
+  links:
+    not_found: ignore
+    absolute_links: ignore
+    unrecognized_links: ignore
+    anchors: ignore
+
+nav:
+  - Home: index.md
+  - README: README-site.md
+  - 문서 소개: doc/README.md
+  - go.dev/doc 미러: go-dev-doc/index.md
+  - pkg.go.dev/std 미러: pkg/std/index.md

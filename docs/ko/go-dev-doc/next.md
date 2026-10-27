@@ -1,0 +1,1 @@
+{{with docNext}}{{.}}{{else}}No next release note fragments available.{{end}}
