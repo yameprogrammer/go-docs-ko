@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 `godebugs`는 `GODEBUG` 설정에 대한 테이블을 제공하며, 이는 `internal/godebug`, `runtime`, `runtime/metrics`, `cmd/go/internal/load` 등 다양한 패키지에서 사용될 수 있습니다.
+`godebugs` 패키지는 `internal/godebug`, `runtime`, `runtime/metrics`, `cmd/go/internal/load`를 포함한 다양한 다른 패키지에서 사용할 수 있도록 알려진 `GODEBUG` 설정 테이블을 제공합니다.
 
 ## 원문 요약
 
@@ -44,6 +44,7 @@ var All = []Info{
 	{Name: "httplaxcontentlength", Package: "net/http", Changed: 22, Old: "1"},
 	{Name: "httpmuxgo121", Package: "net/http", Changed: 22, Old: "1"},
 	{Name: "httpservecontentkeepheaders", Package: "net/http", Changed: 23, Old: "1"},
+	{Name: "httpservecontentmaxranges", Package: "net/http", Changed: 26, Old: "1"},
 	{Name: "installgoroot", Package: "go/build"},
 	{Name: "jstmpllitinterp", Package: "html/template", Opaque: true},
 

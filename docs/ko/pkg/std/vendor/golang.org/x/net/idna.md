@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 `idna`는 UTS (Unicode Technical Standard) #46에 정의된 호환성 처리를 사용하여 IDNA2008을 구현합니다. UTS #46은 IDNA2003에서 IDNA2008로의 전환을 처리하기 위한 표준을 정의합니다.
+package idna는 IDNA2003에서 IDNA2008로의 전환을 처리하기 위한 표준을 정의하는 UTS (Unicode Technical Standard) #46에 정의된 호환성 프로세싱을 사용하여 IDNA2008을 구현합니다.
 
 ## 원문 요약
 

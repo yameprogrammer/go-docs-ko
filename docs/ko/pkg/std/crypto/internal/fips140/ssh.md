@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 ssh는 RFC 4253, 7.2 섹션 및 SP 800-135 Revision 1에 명시된 대로 SSH KDF를 구현합니다.
+`ssh` 패키지는 RFC 4253, Section 7.2에 명시되어 있고 SP 800-135 Revision 1에서 허용하는 SSH KDF를 구현합니다.
 
 ## 원문 요약
 

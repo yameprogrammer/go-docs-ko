@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 `filepathlite`는 `path/filepath`의 일부 기능을 구현하며, "os"에서 가져올 수 있는 패키지만 사용합니다.
+Package filepathlite는 "os" 패키지에서 임포트할 수 있는 패키지만을 사용하여 path/filepath의 서브셋을 구현합니다.
 
 ## 원문 요약
 
@@ -24,8 +24,8 @@ Tests for these functions are in path/filepath.
 CONSTANTS
 
 const (
-	Separator     = '\\' // OS-specific path separator
-	ListSeparator = ';'  // OS-specific path list separator
+	Separator     = '/' // OS-specific path separator
+	ListSeparator = ':' // OS-specific path list separator
 )
 
 FUNCTIONS
@@ -45,7 +45,7 @@ func Ext(path string) string
 func FromSlash(path string) string
     FromSlash is filepath.FromSlash.
 
-func IsAbs(path string) (b bool)
+func IsAbs(path string) bool
     IsAbs reports whether the path is absolute.
 
 func IsLocal(path string) bool

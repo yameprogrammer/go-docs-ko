@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 tls13은 RFC 8446, 7.1 섹션 및 FIPS 140-3 IG 2.4.B Resolution 7에서 정의된 TLS 1.3 키 스케줄을 구현합니다.
+package tls13은 RFC 8446, Section 7.1에 정의되고 FIPS 140-3 IG 2.4.B Resolution 7에서 허용하는 TLS 1.3 키 스케줄(Key Schedule)을 구현합니다.
 
 ## 원문 요약
 

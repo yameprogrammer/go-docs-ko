@@ -1,17 +1,19 @@
-```markdown
+제공해주신 내용이 CSS 스타일 시트만 포함되어 있으며, 번역할 텍스트 콘텐츠가 없습니다. CSS 코드는 기술적인 식별자와 스타일 정의이므로 번역하지 않고 그대로 유지합니다.
+
+```html
 <style>
 .DocInfo {
-  배경색: var(--color-background-info);
-  패딩: 1.5rem 2rem 1.5rem 4rem;
-  왼쪽 테두리: 0.875rem 고체 var(--color-border);
-  위치: 상대적;
+  background-color: var(--color-background-info);
+  padding: 1.5rem 2rem 1.5rem 4rem;
+  border-left: 0.875rem solid var(--color-border);
+  position: relative;
 }
 .DocInfo:before {
-  콘텐츠: "ⓘ";
-  위치: 절대적;
-  상단: 1rem;
-  왼쪽: 1rem;
-  글꼴 크기: 2rem;
+  content: "ⓘ";
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  font-size: 2rem;
 }
 </style>
 ```
@@ -22,130 +24,124 @@
  [개요](#overview)\
  [설정](#config)\
  [카운터](#counters)\
- [보고서 및 업로드](#reports)\
+ [보고 및 업로드](#reports)\
  [차트](#charts) \
- [제안](#proposals)\
- [IDE 프롬프트](#ide) \
+ [텔레메트리 제안](#proposals)\
+ [IDE 프롬프팅](#ide) \
  [자주 묻는 질문](#faq)
 
 ## 배경 {#background}
 
-Go 텔러메트리는 Go 도구 체인 프로그램이 성능 및 사용에 대한 데이터를 수집하는 방법입니다. 여기서 "Go 도구 체인"은 Go 팀에서 유지 관리하는 개발 도구를 의미하며, 여기에는 `go` 명령과 `gopls` (Go 언어 서버) 또는 `govulncheck` (Go 보안 도구)와 같은 보조 도구가 포함됩니다. Go 텔러메트리는 Go 팀 및 선택된 의존체 (예: [Delve])에 의해 유지 관리되는 프로그램에서만 사용하도록 설계되었습니다.
+Go telemetry는 Go 툴체인 프로그램이 성능 및 사용량에 관한 데이터를 수집하기 위한 방법입니다. 여기서 "Go 툴체인"이란 `go` 명령어를 비롯하여 Go 언어 서버인 [`gopls`] 또는 Go 보안 도구인 [`govulncheck`]와 같은 보조 도구를 포함하여 Go 팀이 유지 관리하는 개발자 도구를 의미합니다. Go telemetry는 Go 팀이 유지 관리하는 프로그램과 [Delve]와 같이 선택된 종속성에서만 사용하도록 설계되었습니다.
 
-기본적으로, 텔레메트리 데이터는 로컬 컴퓨터에만 저장되지만, 사용자는 [telemetry.go.dev]로 승인된 텔레메트리 데이터의 일부를 업로드하도록 선택할 수 있습니다.
-업로드된 데이터는 Go 팀이 Go 언어와 도구를 개선하는 데 도움이 되며, 사용량 및 오류를 파악하는 데 활용됩니다.
+기본적으로 텔레메트리 데이터는 로컬 컴퓨터에만 저장되지만, 사용자는 승인된 텔레메트리 데이터의 일부를 [telemetry.go.dev]로 업로드하는 것에 동의할 수 있습니다. 업로드된 데이터는 사용 방식과 오류 사례를 이해하는 데 도움을 주어, Go 팀이 Go 언어와 도구들을 개선하는 데 기여합니다.
 
-단어 "Telemetry"는 오픈 소스 소프트웨어 분야에서 부정적인 의미를 갖게 되었으며, 이는 상당 부분 정당화될 수 있습니다. 하지만 사용자 경험을 측정하는 것은 현대적인 소프트웨어 엔지니어링의 중요한 요소이며, GitHub 이슈나 연례 설문조사와 같은 데이터 소스는 거친 정보이며, 지연된 지표로서, Go 팀이 답변해야 하는 질문에 충분하지 않습니다.
+"telemetry"라는 단어는 오픈 소스 소프트웨어 세계에서 부정적인 함의를 갖게 되었으며, 많은 경우 이는 당연한 결과였습니다. 하지만 사용자 경험을 측정하는 것은 현대 소프트웨어 공학의 중요한 요소이며, GitHub issue나 연례 설문조사와 같은 데이터 소스는 거칠고 뒤처지는 지표이기에 Go 팀이 답해야 하는 유형의 질문들에 대응하기에는 불충분합니다.
 
-Go telemetry는 프로그램이 자체의 신뢰성, 성능 및 사용에 대한 유용한 데이터를 수집하는 데 도움이 되도록 설계되었으며, 동시에 사용자가 Go 프로젝트에서 기대하는 투명성과 개인 정보를 유지합니다. telemetry의 설계 과정 및 동기에 대해 자세히 알아보려면 [telemetry 블로그 게시물](https://research.swtch.com/telemetry)을 참조하십시오.
+Go telemetry는 Go 프로젝트에 사용자가 기대하는 투명성과 개인정보 보호를 유지하면서, 툴체인의 프로그램들이 신뢰성, 성능 및 사용법에 관한 유용한 데이터를 수집할 수 있도록 설계되었습니다. telemetry의 설계 과정과 동기에 대해 더 자세히 알아보려면 [telemetry 블로그 포스트](https://research.swtch.com/telemetry)를 참조하십시오.
 
-telemetry 및 개인 정보에 대해 자세히 알아보려면 [telemetry 개인 정보 보호 정책](https://telemetry.go.dev/privacy)을 참조하십시오.
+telemetry와 개인정보 보호에 대해 더 자세히 알아보려면 [telemetry 개인정보 보호정책](https://telemetry.go.dev/privacy)을 참조하십시오.
 
-이 페이지는 Go 기반의 전력 측정 시스템이 어떻게 작동하는지에 대해 자세히 설명합니다. 자주 묻는 질문에 대한 빠른 답변을 원하시면 [자주 묻는 질문](#faq)를 참조하세요.
+이 페이지는 Go 텔레메트리가 어떻게 작동하는지 상세히 설명합니다. 자주 묻는 질문에 대한 빠른 답변은 [FAQ](#faq)를 참조하십시오.
 
-```markdown
 <div class="DocInfo">
-Go 1.23 또는 이후 버전을 사용하여, Go 팀으로 <strong>텔레메트리 데이터 업로드 활성화</strong>하려면 다음 명령어를 실행합니다.
+Go 1.23 이상 버전에서 Go 팀으로 텔레메트리 데이터를 업로드하는 것에 <strong>동의(opt in)</strong>하려면 다음을 실행하세요:
 <pre>
 go telemetry on
 </pre>
-로컬 수집을 포함하여 모든 텔레메트리 수집을 완전히 비활성화하려면 다음 명령어를 실행합니다.
+로컬 수집을 포함하여 텔레메트리를 완전히 비활성화하려면 다음을 실행하세요:
 <pre>
 go telemetry off
 </pre>
-로컬 전용 텔레메트리 모드로 되돌리려면 다음 명령어를 실행합니다.
+로컬 전용 텔레메트리라는 기본 모드로 되돌리려면 다음을 실행하세요:
 <pre>
 go telemetry local
 </pre>
-Go 1.23 이전 버전에서는 다음 명령어를 사용하여
-<code go="text"><a href="https://golang.org/x/telemetry/cmd/gotelemetry">golang.org/x/telemetry/cmd/gotelemetry</a></code>
-</code go="text">
-를 실행할 수 있습니다. 자세한 내용은 <a href="#config">Configuration</a>을 참조하십시오.
+Go 1.23 이전 버전에서는 <code>golang.org/x/telemetry/cmd/gotelemetry</code> 명령어로도 이를 수행할 수 있습니다. 자세한 내용은 <a
+href="#config">Configuration</a>을 참조하세요.
 </div>
-```
 
 ## 개요 {#overview}
 
-Go telemetry는 세 가지 핵심 데이터 유형을 사용합니다:
+Go 텔레메트리는 세 가지 핵심 데이터 타입을 사용합니다:
 
-- [_카운터_](#counters)는 이름이 지정된 이벤트의 가벼운 카운트이며, 툴체인 프로그램에서 측정됩니다. 수집이 활성화되어 있으면 (설정 모드가 **local** 또는 **on**인 경우), 카운터는 로컬 파일 시스템의 메모리 매핑된 파일에 기록됩니다.
-- [_보고서_](#reports)는 주어진 주에 대한 카운터의 집계된 요약입니다. 업로드가 활성화되어 있으면 (설정 모드가 **on**인 경우), [승인된 카운터](#proposals)에 대한 보고서가 [telemetry.go.dev]로 업로드되며, 여기에서 공개적으로 접근할 수 있습니다.
-- [_차트_](#charts)는 모든 사용자의 업로드된 보고서를 요약합니다. 차트는 [telemetry.go.dev]에서 볼 수 있습니다.
+- [_Counters_](#counters)는 툴체인 프로그램에 내장된 이름 지정 이벤트의 경량 카운트입니다. 수집이 활성화된 경우([mode](#config)가 **local** 또는 **on**), 카운터는 로컬 파일 시스템의 메모리 맵 파일(memory-mapped file)에 기록됩니다.
+- [_Reports_](#reports)는 특정 주에 대한 카운터의 집계 요약입니다. 업로드가 활성화된 경우([mode](#config)가 **on**), [approved counters](#proposals)에 대한 리포트가 [telemetry.go.dev]로 업로드되며, 여기에서 공개적으로 접근할 수 있습니다.
+- [_Charts_](#charts)는 모든 사용자에 대해 업로드된 리포트를 요약합니다. 차트는 [telemetry.go.dev]에서 확인할 수 있습니다.
 
-모든 로컬 Go 텔레메트리 데이터 및 구성은 다음 디렉토리에 저장됩니다.
-<code>[os.UserConfigDir()](/pkg/os#UserConfigDir)/go/telemetry</code>
-디렉토리입니다. 아래에서는 이 디렉토리를 `<gotelemetry>`라고 참조합니다.
+모든 로컬 Go 텔레메트리 데이터와 설정은 다음 디렉토리에 저장됩니다:
+`<code>[os.UserConfigDir()](/pkg/os#UserConfigDir)/go/telemetry</code>`
+디렉토리. 아래에서는 이 디렉토리를 `<gotelemetry>`라고 부르겠습니다.
 
 아래 다이어그램은 이러한 데이터 흐름을 보여줍니다.
 
-```markdown
 <div class="image">
   <center>
     <img max-width="800px" src="/doc/telemetry/dataflow.png" />
   </center>
 </div>
-```
 
-이 문서의 나머지 부분에서는 이 다이어그램의 구성 요소를 살펴보겠습니다. 하지만
-먼저, 이 구성 요소를 제어하는 구성에 대해 자세히 알아보겠습니다.
+이 문서의 나머지 부분에서는 이 다이어그램의 구성 요소들에 대해 살펴보겠습니다. 하지만 그 전에, 이를 제어하는 설정에 대해 더 자세히 알아보겠습니다.
 
 ## 설정 {#config}
 
-Go 텔레메트리의 동작은 단 하나의 값인 `mode`에 의해 제어됩니다. `mode`에 사용할 수 있는 값은 `local` (기본값), `on`, 또는 `off`입니다:
+Go 텔레메트리의 동작은 단일 값인 telemetry _mode_에 의해 제어됩니다. `mode`에 설정 가능한 값은 `local`(기본값), `on`, 또는 `off`입니다.
 
-- `mode`가 `local`일 때, 텔레메트리 데이터는 로컬 컴퓨터에서 수집 및 저장되지만, 원격 서버로 업로드되지 않습니다.
-- `mode`가 `on`일 때, 데이터가 수집되고, [샘플링](#uploads)에 따라 업로드될 수 있습니다.
-- `mode`가 `off`일 때, 데이터는 수집되거나 업로드되지 않습니다.
+- `mode`가 `local`일 때, 텔레메트리 데이터는 로컬 컴퓨터에 수집 및 저장되지만, 원격 서버로 업로드되지 않습니다.
+- `mode`가 `on`일 때, 데이터가 수집되며 [sampling](#uploads) 설정에 따라 업로드될 수 있습니다.
+- `mode`가 `off`일 때, 데이터는 수집되지도 업로드되지도 않습니다.
 
-Go 1.23 또는 이후 버전에서는 다음 명령이 텔레메트리 모드와 상호 작용합니다:
+Go 1.23 버전 이후부터는 다음 명령어를 통해 텔레메트리(telemetry) 모드와 상호작용할 수 있습니다.
 
 - `go telemetry`: 현재 모드를 확인합니다.
 - `go telemetry on`: 모드를 `on`으로 설정합니다.
-- `go telemetry off`: 모드를 `off`으로 설정합니다.
+- `go telemetry off`: 모드를 `off`로 설정합니다.
 - `go telemetry local`: 모드를 `local`로 설정합니다.
 
-텔레메트리 구성에 대한 정보는 다음과 같은 읽기 전용 Go 환경 변수를 통해 확인할 수 있습니다:
+텔레메트리 설정에 관한 정보는 읽기 전용 Go 환경 변수를 통해서도 확인할 수 있습니다:
 
 - `go env GOTELEMETRY`는 텔레메트리 모드를 보고합니다.
-- `go env GOTELEMETRYDIR`는 텔레메트리 구성 및 데이터를 저장하는 디렉토리를 보고합니다.
+- `go env GOTELEMETRYDIR`은 텔레메트리 설정 및 데이터가 저장된 디렉토리를 보고합니다.
 
-명령 [`gotelemetry`](/pkg/golang.org/x/telemetry/cmd/gotelemetry)는 또한 텔레메트리 모드를 구성하는 데 사용할 수 있으며, 로컬 텔레메트리 데이터를 검사하는 데도 사용할 수 있습니다. 다음 명령어를 사용하여 설치하십시오:
+[`gotelemetry`](/pkg/golang.org/x/telemetry/cmd/gotelemetry) 명령어를 사용하여 텔레메트리 모드를 설정하거나 로컬 텔레메트리 데이터를 확인할 수 있습니다. 다음 명령어를 사용하여 설치하십시오.
 
 ```
-go install golang.org/x/telemetry/cmd/gotelemetry@최신
+go install golang.org/x/telemetry/cmd/gotelemetry@latest
 ```
 
-`gotelemetry` 명령줄 도구의 전체 사용 정보는 다음 [패키지 설명서]( /pkg/golang.org/x/telemetry/cmd/gotelemetry)를 참조하십시오.
+`gotelemetry` 명령줄 도구의 전체 사용법에 대한 정보는 [패키지 문서](/pkg/golang.org/x/telemetry/cmd/gotelemetry)를 참조하세요.
 
-## 카운터 란 무엇인가? {#counters}
+## Counters {#counters}
 
-위에서 언급했듯이, Go 텔레메트리는 _카운터_를 통해 측정됩니다. 카운터는 다음과 같은 두 가지 유형으로 제공됩니다: 기본 카운터 및 스택 카운터.
+앞서 언급했듯이, Go 텔레메트리는 _counters_를 통해 계측됩니다. Counter에는 두 가지 변형이 있습니다: 기본 카운터(basic counters)와 스택 카운터(stack counters)입니다.
 
 ### 기본 카운터
 
-기본적인 _카운터_는 이름을 통해 설명되는 증가 가능한 값입니다. 예를 들어, `gopls/client:vscode` 카운터는 VS Code에서 시작된 `gopls` 세션의 횟수를 기록합니다. 이 카운터와 함께 `gopls/client:neovim`, `gopls/client:eglot` 등을 사용하여 다양한 편집기 또는 언어 클라이언트에 대한 세션을 기록할 수 있습니다. 만약 일주일 동안 여러 편집기를 사용했다면, 다음과 같은 카운터 데이터를 기록할 수 있습니다:
+_기본 카운터(basic counter)_는 이름이 지정된 증가 가능한 값으로, 해당 이름은 카운트하는 이벤트를 설명합니다. 예를 들어, `gopls/client:vscode` 카운터는 VS Code에 의해 `gopls` 세션이 시작된 횟수를 기록합니다. 이 카운터와 함께 `gopls/client:neovim`, `gopls/client:eglot` 등을 두어 서로 다른 에디터나 언어 클라이언트와의 세션을 기록할 수 있습니다. 일주일 동안 여러 에디터를 사용했다면 다음과 같은 카운터 데이터를 기록하게 될 것입니다:
 
-gopls/클라이언트: vscode 8
-    gopls/클라이언트: neovim 5
-    gopls/클라이언트: eglot 2
+gopls/client:vscode 8
+    gopls/client:neovim 5
+    gopls/client:eglot  2
 
-때문에 카운터들이 이런 식으로 관련되어 있을 때, 콜론(:) 앞부분인 _차트 이름_ (이 경우에는 `gopls/client`)과 콜론(:) 뒤부분인 _버킷 이름_ (이 경우에는 `vscode`)을 참조하는 경우가 있습니다. `charts`를 다루면서 왜 이것이 중요한지 알게 될 것입니다.
+카운터들이 이러한 방식으로 연관되어 있을 때, 우리는 때때로 `:` 앞부분을 *차트 이름*(`gopls/client`), `:` 뒷부분을 *버킷 이름*(`vscode`)이라고 부릅니다. 이것이 왜 중요한지는 [차트](#charts)에 대해 논의할 때 살펴보겠습니다.
 
-기본 카운터는 히스토그램을 나타낼 수도 있습니다. 예를 들어, {{raw
-`<code>gopls/completion/latency:&lt;50ms</code>`}} 카운터는 자동 완성 시간이 50ms 미만인 횟수를 기록합니다.
+기본 카운터는 _히스토그램_을 표현하는 데에도 사용될 수 있습니다. 예를 들어, {{raw
+`<code>gopls/completion/latency:&lt;50ms</code>`}} 카운터는 자동 완성이 50ms 미만으로 걸린 횟수를 기록합니다.
 
-```
-gopls/완성도 지연 시간: &lt;10ms
-gopls/완성도 지연 시간: &lt;50ms
-gopls/완성도 지연 시간: &lt;100ms
+{{raw `
+<pre>
+gopls/completion/latency:&lt;10ms
+gopls/completion/latency:&lt;50ms
+gopls/completion/latency:&lt;100ms
 ...
-```
+</pre>
+`}}
 
-이 히스토그램 데이터 기록 패턴은 관례입니다: {{raw `<code>&lt;50ms</code>`}}라는 래더 이름 자체에 특별한 의미는 없습니다. 이러한 카운터는 성능을 측정하는 데 일반적으로 사용됩니다.
+히스토그램 데이터를 기록하는 이 패턴은 관례입니다. `<code>&lt;50ms</code>` 버킷 이름에 특별한 의미가 있는 것은 아닙니다. 이러한 유형의 카운터는 일반적으로 성능 측정에 사용됩니다.
 
-### 스택 카운터
+### 스택 카운터(Stack counters)
 
-`_스택 카운터_는, 카운트가 증가될 때 현재 Go 툴체인 프로그램의 호출 스택을 기록하는 카운터입니다. 예를 들어, `crash/crash` 스택 카운터는 툴체인 프로그램이 충돌할 때 호출 스택을 기록합니다:
+_스택 카운터(stack counter)_는 카운트가 증가할 때 Go 툴체인 프로그램의 현재 호출 스택(call stack)을 함께 기록하는 카운터입니다. 예를 들어, `crash/crash` 스택 카운터는 툴체인 프로그램이 충돌(crash)했을 때의 호출 스택을 기록합니다.
 
 crash/crash
     golang.org/x/tools/gopls/internal/golang.hoverBuiltin:+22
@@ -153,108 +149,97 @@ crash/crash
     golang.org/x/tools/gopls/internal/server.Hover:+42
     ...
 
-스택 카운터는 일반적으로 프로그램의 일관성이 위반되는 이벤트를 측정합니다.
-가장 흔한 예는 충돌이지만, 또 다른 예는 `gopls/bug` 스택 카운터로, 프로그래머가 미리 파악한 비정상적인 상황을 셉니다. 예를 들어 복구된 패닉이나 "발생할 수 없는" 오류 등이 있습니다. 스택 카운터는 Go 툴체인 프로그램 내의 함수 이름과 라인 번호만 포함합니다. 사용자의 입력에 대한 정보, 예를 들어 사용자의 소스 코드의 이름이나 내용은 포함하지 않습니다.
+스택 카운터(Stack counters)는 일반적으로 프로그램 불변성(invariants)이 위반되는 이벤트를 측정합니다.
+가장 흔한 예는 크래시(crash)이지만, 다른 예로는 `gopls/bug` 스택 카운터가 있습니다. 이는 복구된 패닉(recovered panic)이나 "발생할 수 없는" 에러와 같이 프로그래머가 사전에 식별한 특이 상황을 카운트합니다. 스택 카운터에는 Go 툴체인 프로그램 내 함수들의 이름과 라인 번호만 포함됩니다. 사용자 소스 코드의 이름이나 내용과 같은 사용자 입력에 관한 정보는 포함되지 않습니다.
 
-스택 카운터는 다른 방법으로는 발견하기 어려운 희귀하거나 까다로운 버그를 추적하는 데 도움이 될 수 있습니다. `gopls/bug` 카운터를 도입한 이후, 실제로 실행되는 "접근 불가능한" 코드의 수십 건을 찾아냈으며, 이러한 예외를 추적하는 과정에서 사용자가 알아보기 어렵거나 보고하기 어려운 많은 버그를 발견하고 수정할 수 있었습니다. 특히 프리릴리즈 테스트의 경우, 스택 카운터는 자동화 없이도 제품 개선을 보다 효율적으로 할 수 있도록 도와줍니다.
+스택 카운터(Stack counters)는 다른 수단으로는 보고되지 않는 드물거나 까다로운 버그를 추적하는 데 도움이 됩니다. `gopls/bug` 카운터를 도입한 이후, 실제로 실행된 [수십 건의](https://github.com/golang/go/issues?q=label%3Agopls%2Ftelemetry-wins) "도달 불가능한(unreachable)" 코드 사례를 발견했습니다. 이러한 예외 상황을 추적함으로써 사용자에게 명확히 드러나지 않았거나 보고하기 너무 어려웠던 많은 사용자 가시적 버그를 발견하고 수정할 수 있었습니다. 특히 프리릴리스 테스트 단계에서 스택 카운터는 자동화 없이는 불가능했을 방식으로 제품을 더 효율적으로 개선하는 데 도움을 줍니다.
 
-### 카운터 파일
+### 카운터 파일 (Counter files)
 
-모든 카운터 데이터는 `<gotelemetry>/local` 디렉토리에 저장되며, 다음 스키마에 따라 이름이 지정된 파일에 저장됩니다:
+모든 카운터 데이터는 `<gotelemetry>/local` 디렉토리에 작성되며, 파일 이름은 다음 스키마에 따라 지정됩니다:
 
 ```
-[프로그램 이름]@[프로그램 버전]-[Go 버전]-[GOOS]-[GOARCH]-[날짜].v1.count
+[program name]@[program version]-[go version]-[GOOS]-[GOARCH]-[date].v1.count
 ```
 
-- **프로그램 이름**은 프로그램의 패키지 경로의 기본 이름으로, [debug.BuildInfo]에서 보고된 값입니다.
-- **프로그램 버전** 및 **go 버전** 또한 [debug.BuildInfo]에서 보고됩니다.
-- **GOOS** 및 **GOARCH** 값은 [`runtime.GOOS`](/pkg/runtime#GOOS) 및 [`runtime.GOARCH`](/pkg/runtime#GOARCH)에서 보고됩니다.
-- **날짜**는 카운터 파일이 생성된 날짜이며, `YYYY-MM-DD` 형식으로 표시됩니다.
+- **프로그램 이름**은 [debug.BuildInfo]에서 보고하는 프로그램 패키지 경로의 basename입니다.
+- **프로그램 버전**과 **go 버전** 또한 [debug.BuildInfo]에서 보고합니다.
+- **GOOS** 및 **GOARCH** 값은 [`runtime.GOOS`](/pkg/runtime#GOOS)와 [`runtime.GOARCH`](/pkg/runtime#GOARCH)에서 보고합니다.
+- **날짜**는 카운터 파일이 생성된 날짜이며, `YYYY-MM-DD` 형식입니다.
 
-이 파일들은 각 실행 중인 프로그래밍된 프로그램의 메모리에 매핑됩니다. 메모리에 매핑된 파일을 사용하는 것은 프로그램이 즉시 중단되거나 여러 개의 프로그래밍된 도구가 동시에 실행되는 경우에도 카운터가 안전하게 기록되도록 합니다.
+이 파일들은 계측된 프로그램의 각 실행 인스턴스에 메모리 맵핑(memory mapped)됩니다. 메모리 맵핑 파일을 사용하면 프로그램이 즉시 충돌하거나, 계측된 도구의 여러 복사본이 동시에 실행되더라도 카운터가 안전하게 기록됩니다.
 
-## 보고서 작성 및 업로드 {#보고서}
+## 리포팅 및 업로드 {#reports}
 
-이 섹션에서는 보고서 작성 및 업로드 방법에 대해 설명합니다.
+약 일주일에 한 번씩, 카운터 데이터가 `<gotelemetry>/local` 디렉토리의 `<date>.json`이라는 이름의 보고서로 집계됩니다. 이 보고서들은 카운터 파일에 사용된 것과 동일한 프로그램 식별자(프로그램 이름, 프로그램 버전, go 버전, GOOS 및 GOARCH)로 그룹화하여 지난 일주일 동안의 모든 카운트 합계를 계산합니다.
 
-약 1주에 한 번, 카운터 데이터가 `<date>.json`이라는 이름으로 `<gotelemetry>/local` 디렉터리에 보고서로 집계됩니다. 이러한 보고서는 이전 주의 모든 카운터를, 카운터 파일에 사용된 동일한 프로그램 식별자를 기준으로 그룹화하여 합산합니다 (프로그램 이름, 프로그램 버전, Go 버전, GOOS, GOARCH).
+로컬 보고서는 [`gotelemetry view`](/pkg/golang.org/x/telemetry/cmd/gotelemetry) 명령어를 사용하여 차트로 볼 수 있습니다.
+다음은 `gopls/completion/latency` 카운터의 요약 예시입니다:
 
-로컬 보고서를 차트 형태로 볼 수 있습니다.
-`gotelemetry view` 명령을 사용합니다.
-다음은 `gopls/completion/latency` 카운터의 예시 요약입니다:
-
-```markdown
 <div class="image">
   <center>
     <img max-width="800px" src="/doc/telemetry/gopls-latency.png" />
   </center>
 </div>
-```
 
 ### 업로드하기 {#uploads}
 
-만약 텔레메트리 업로드가 활성화되어 있다면, 주간 보고 프로세스는 또한 [업로드 설정](https://telemetry.go.dev/config)에 포함된 카운터의 하위 집합을 포함하는 보고서를 생성합니다. 이러한 카운터는 다음 섹션에 설명된 공개 검토 프로세스를 통해 승인되어야 합니다. 성공적으로 업로드되면, 업로드된 보고서의 복사본이 `<gotelemetry>/upload` 디렉토리에 저장됩니다.
+텔레메트리 업로드가 활성화된 경우, 주간 보고 프로세스는 [upload config](https://telemetry.go.dev/config)에 포함된 카운터의 서브셋을 포함하는 보고서도 함께 생성합니다. 이러한 카운터는 다음 섹션에서 설명하는 공개 검토 프로세스를 통해 승인을 받아야 합니다. 성공적으로 업로드되면, 업로드된 보고서의 복사본이 `<gotelemetry>/upload` 디렉토리에 저장됩니다.
 
-충분한 사용자가 텔레메트리 데이터를 업로드하도록 동의하면, 업로드 프로세스는 보고서의 일부를 무작위로 업로드하지 않도록 하여, 데이터 수집량을 줄이고 개인 정보 보호를 유지하면서 통계적 유의성을 유지합니다.
+충분한 수의 사용자가 텔레메트리(telemetry) 데이터 업로드에 동의하면, 통계적 유의성을 유지하면서 수집량을 줄이고 개인정보 보호를 강화하기 위해 일부 보고서에 대해 업로드 프로세스가 무작위로 업로드를 건너뛰게 됩니다.
 
 ## 차트 {#charts}
 
-뿐만 아니라 업로드 기능을 지원하는 [telemetry.go.dev] 웹사이트는 업로드된
-데이터를 공개적으로 사용할 수 있도록 합니다. 매일 업로드된 보고서는 두 가지 형태로
-처리되어 [telemetry.go.dev] 홈페이지에서 확인할 수 있습니다.
+[telemetry.go.dev] 웹사이트는 업로드를 받는 것 외에도, 업로드된 데이터를 공개적으로 제공합니다. 매일 업로드된 리포트가 두 가지 출력물로 처리되며, 이는 [telemetry.go.dev] 홈페이지에서 확인할 수 있습니다.
 
-- _병합된_ 보고서에는 주어진 날짜에 수신된 모든 업로드의 카운터 값을 병합했습니다.
-- _차트_는 [차트 구성]에 명시된 업로드된 데이터를 표시합니다. 이 구성은 제안 프로세스의 일부로 생성되었습니다. [카운터](#counters)에 대한 논의에서 알 수 있듯이, `foo:bar`와 같은 카운터 이름은 차트 이름 `foo`와 바구니 이름 `bar`로 분해됩니다. 각 차트는 동일한 차트 이름을 가진 카운터를 해당 바구니로 집계합니다.
+- _merged_는 해당 날짜에 수신된 모든 업로드로부터 병합된 카운터(counter)를 보고합니다.
+- _charts_는 [chart config]에 지정된 대로 업로드된 데이터를 플롯합니다. 이 설정은 제안 프로세스의 일부로 생성되었습니다. [counters](#counters)에 대한 논의에서 기억하시듯, `foo:bar`와 같은 카운터 이름은 차트 이름 `foo`와 버킷 이름 `bar`로 분해됩니다. 각 차트는 동일한 차트 이름을 가진 카운터들을 해당 버킷으로 집계합니다.
 
-차트는 `chartconfig` 패키지의 형식을 사용하여 정의됩니다. 예를 들어, `gopls/client` 차트의 차트 구성은 다음과 같습니다.
+차트는 [chartconfig] 패키지 형식으로 지정됩니다. 예를 들어, 다음은 `gopls/client` 차트의 차트 설정입니다.
 
-제목: 에디터 배포
-    카운터: gopls/클라이언트:{vscode, vscodium, vscode-insiders, code-server, eglot, govim, neovim, coc.nvim, sublime text, 기타}
-    설명: gopls 사용자를 위한 에디터 배포 측정.
-    유형: 파티션
-    문제: https://go.dev/issue/61038
-    문제: https://go.dev/issue/62214 # vscode-insiders 추가
-    프로그램: golang.org/x/tools/gopls
-    버전: v0.13.0 # 임시로 설정 생성 시연을 위해 버전 되돌림.
+title: 에디터 분포
+    counter: gopls/client:{vscode,vscodium,vscode-insiders,code-server,eglot,govim,neovim,coc.nvim,sublimetext,other}
+    description: gopls 사용자의 에디터 분포를 측정합니다.
+    type: partition
+    issue: https://go.dev/issue/61038
+    issue: https://go.dev/issue/62214 # vscode-insiders 추가
+    program: golang.org/x/tools/gopls
+    version: v0.13.0 # 설정 생성을 시연하기 위해 일시적으로 이전 버전으로 되돌림.
 
-이 구성은 생성될 차트, 집계할 카운터 집합, 그리고 해당 차트가 적용되는 프로그램 버전을 설명합니다. 또한, [제안 프로세스](#proposals)는 수락된 제안이 차트와 연결되어 있어야 합니다. 다음은 해당 구성에서 생성된 차트입니다:
+이 설정은 생성될 차트를 설명하고, 집계할 카운터 세트를 나열하며, 차트가 적용되는 프로그램 버전을 지정합니다. 또한, [제안 프로세스](#proposals)에 따라 승인된 제안이 차트와 연결되어 있어야 합니다. 해당 설정으로 인해 생성된 차트는 다음과 같습니다:
 
-```markdown
 <div class="image">
   <center>
     <img src="/doc/telemetry/gopls-clients.png" />
   </center>
 </div>
-```
 
 ## 텔레메트리 제안 프로세스 {#proposals}
 
-[telemetry.go.dev]에서 업로드 구성 또는 차트 세트에 대한 변경 사항은 `_telemetry proposal process_`를 통해 진행해야 합니다. 이는 텔레메트리 구성 변경에 대한 투명성을 보장하기 위한 것입니다.
+[telemetry.go.dev]의 업로드 설정 또는 차트 세트의 변경 사항은 _telemetry 제안 프로세스(telemetry proposal process)_를 거쳐야 하며, 이는 텔레메트리 설정 변경에 대한 투명성을 보장하기 위함입니다.
 
-특히, 이 프로세스에서 업로드 구성과 차트 구성 간에 실제로 차이가 없습니다. 업로드 구성은 telemetry.go.dev에서 표시하고자 하는 집계에 따라 정의되며, "우리가 보고 싶은 데이터만 수집해야 한다"는 원칙에 기반합니다.
+특히, 이 과정에서는 업로드 설정(upload configuration)과 차트 설정(chart configuration) 사이에 실제적인 구분이 없습니다. 업로드 설정 자체는 telemetry.go.dev에 렌더링하고자 하는 집계(aggregation) 관점에서 표현됩니다. 이는 우리가 _보고 싶은_ 데이터만 수집해야 한다는 원칙에 기반합니다.
 
-제안 절차는 다음과 같습니다:
+제안 프로세스는 다음과 같습니다:
 
-1. 제안자는 [config.txt] 파일을 [chartconfig] 패키지를 수정하여 원하는 새로운 카운터 집계를 포함하도록 변경합니다.
-2. 제안자는 이 변경 사항을 병합하기 위한 [proposal]를 제출합니다.
-3. 논의가 완료되면, Go 팀의 구성원이 제안을 승인하거나 거부합니다.
-4. 자동화된 프로세스가 업로드 설정을 재생성하여 새로운 차트에 필요한 카운터를 업로드할 수 있도록 합니다. 이 프로세스는 관련 프로그램의 새로운 버전을 업로드 설정에 주기적으로 추가합니다.
+1. 제안자는 `chartconfig` 패키지의 `config.txt`를 수정하여 원하는 새로운 카운터 집계(counter aggregations)를 포함하는 CL을 생성합니다.
+2. 제안자는 이 CL을 병합하기 위한 [proposal]을 제출합니다.
+3. 해당 이슈에 대한 논의가 완료되면, Go 팀의 구성원이 제안을 승인하거나 거절합니다.
+4. 자동화된 프로세스가 업로드 설정을 다시 생성하여 새 차트에 필요한 카운터 업로드를 허용합니다. 이 프로세스는 관련 프로그램의 새 버전이 릴리스될 때마다 업로드 설정에 정기적으로 추가합니다.
 
-새로운 차트는 민감한 사용자 정보를 포함할 수 없으며, 또한 유용하고 실현 가능해야 합니다. 유용하려면, 차트는 특정 목적을 달성하고 실행 가능한 결과를 가져야 합니다. 실현 가능하려면, 필요한 데이터를 안정적으로 수집할 수 있어야 하며, 결과로 얻은 측정값은 통계적으로 유의미해야 합니다. 실현 가능성을 입증하기 위해, 제안자는 대상 프로그램을 카운터로 장비하고 먼저 현장에서 수집하도록 요청할 수 있습니다.
+승인받기 위해 새로운 차트는 민감한 사용자 정보를 포함해서는 안 되며, 추가적으로 유용성과 실현 가능성을 모두 갖춰야 합니다. 유용하기 위해서는 차트가 실행 가능한 결과와 함께 구체적인 목적을 제공해야 합니다. 실현 가능하기 위해서는 필요한 데이터를 안정적으로 수집할 수 있어야 하며, 결과 측정값이 통계적으로 유의미해야 합니다. 실현 가능성을 입증하기 위해, 제안자는 대상 프로그램에 counter를 삽입하여 먼저 로컬에서 데이터를 수집하도록 요청받을 수 있습니다.
 
-전체 제안 목록은 GitHub의 [프로젝트](https://github.com/orgs/golang/projects/29) 페이지에서 확인할 수 있습니다.
+이러한 제안서의 전체 세트는 GitHub의 [proposal project](https://github.com/orgs/golang/projects/29)에서 확인할 수 있습니다.
 
-## IDE를 통한 제안 {#ide}
+## IDE 프롬프팅 {#ide}
 
-Telemetry가 우리가 질문하고자 하는 종류의 질문에 답변할 수 있도록, 업로드를 선택하는 사용자의 수는 크게 필요하지 않습니다. 약 16,000명의 참가자가 원하는 수준의 상세 정보에 대한 통계적으로 유의미한 측정을 가능하게 합니다. 그러나 이러한 건강한 샘플을 구성하는 데는 여전히 비용이 발생합니다: 우리는 많은 수의 Go 개발자에게 이메일로 문의하여 참여를 요청해야 합니다.
+텔레메트리가 우리가 묻고자 하는 유형의 질문에 답하기 위해, 업로드를 선택(opt-in)하는 사용자 집단이 반드시 클 필요는 없습니다. 약 16,000명의 참여자만으로도 원하는 수준의 세분성에서 통계적으로 유의미한 측정이 가능할 것입니다. 하지만 이러한 유효한 샘플을 수집하는 데에는 여전히 비용이 따릅니다. 즉, 수많은 Go 개발자들에게 참여 의사를 물어봐야 한다는 점입니다.
 
-또한, 만약 많은 사용자가 현재 _즉시_ 참여를 선택한다면 (예를 들어, Go 블로그 게시물을 읽은 후), 이러한 사용자는 주로 숙련된 Go 개발자로 구성될 수 있으며, 시간이 지남에 따라 초기 샘플은 더욱 편향될 것입니다.
+게다가, 설령 많은 수의 사용자가 *지금* (아마도 Go 블로그 게시물을 읽은 후) 참여(opt in)하기로 선택하더라도, 해당 사용자들은 숙련된 Go 개발자 쪽으로 편향될 가능성이 있으며, 시간이 지남에 따라 그 초기 표본은 더욱 편향될 것입니다.
+또한, 사용자가 컴퓨터를 교체할 때마다 다시 적극적으로 참여를 선택해야 합니다. 텔레메트리 블로그 게시물 시리즈에서는 이를 참여 모델의 ["캠페인 비용(campaign cost)"](https://research.swtch.com/telemetry-opt-in#campaign)이라고 부릅니다.
 
-또한, 사람들이 컴퓨터를 교체할 때, 그들은 다시 참여를 _적극적으로_ 선택해야 합니다. "Telemetry" 블로그 게시물 시리즈에서는, 이러한 현상을 "캠페인 비용"(https://research.swtch.com/telemetry-opt-in#campaign)이라고 합니다.
-
-참가 사용자 샘플을 최신 상태로 유지하는 데 도움이 되도록, Go 언어 서버
-[`gopls`]는 사용자가 Go 텔레메트리에 참여하도록 요청하는 프롬프트를 지원합니다.
-VS Code에서 이것은 다음과 같이 표시됩니다:
+참여 사용자 샘플을 최신 상태로 유지하기 위해, Go 언어 서버 [`gopls`]는 사용자에게 Go 텔레메트리(telemetry) 참여 여부를 묻는 프롬프트를 지원합니다.
+VS Code에서 어떻게 보이는지는 다음과 같습니다.
 
 <div class="image">
   <center>
@@ -262,39 +247,38 @@ VS Code에서 이것은 다음과 같이 표시됩니다:
   </center>
 </div>
 
-만약 사용자가 "예"를 선택하면, 그들의 텔레메트리 [모드](#config)는 `on`으로 설정됩니다. 이는 `gotelemetry on`을 실행한 것과 동일합니다 ((`/pkg/golang.org/x/telemetry/cmd/gotelemetry`) ). 이렇게 하면, 참여는 최대한 간단하며, 우리는 지속적으로 Go 개발자들의 대규모 및 다양한 그룹을 확보할 수 있습니다.
+사용자가 "Yes"를 선택하면, [`gotelemetry on`](/pkg/golang.org/x/telemetry/cmd/gotelemetry) 명령어를 실행한 것과 동일하게 텔레메트리 [모드](#config)가 `on`으로 설정됩니다. 이러한 방식을 통해 사용자가 최대한 쉽게 참여할 수 있도록 하며, 우리는 지속적으로 광범위하고 계층화된 Go 개발자 샘플을 확보할 수 있습니다.
 
 ## 자주 묻는 질문 {#faq}
 
-**Q: Go 프로그래밍의 통계를 활성화 또는 비활성화하는 방법은 무엇입니까?**
+**Q: Go 텔레메트리(telemetry)를 어떻게 활성화하거나 비활성화하나요?**
 
-A: `gotelemetry` 명령어를 사용합니다. `go install golang.org/x/telemetry/cmd/gotelemetry@latest`를 사용하여 설치할 수 있습니다. 로컬 수집을 포함하여 모든 것을 비활성화하려면 `gotelemetry off`를 실행합니다. 승인된 카운터를 [telemetry.go.dev]로 업로드하는 등 모든 기능을 활성화하려면 `gotelemetry on`을 실행합니다. 자세한 내용은 [Configuration](#config) 섹션을 참조하십시오.
+A: `go install golang.org/x/telemetry/cmd/gotelemetry@latest`로 설치할 수 있는 `gotelemetry` 명령어를 사용하세요. 로컬 수집을 포함한 모든 기능을 비활성화하려면 `gotelemetry off`를 실행하세요. [telemetry.go.dev]로의 승인된 카운터 업로드를 포함한 모든 기능을 활성화하려면 `gotelemetry on`을 실행하세요. 자세한 내용은 [Configuration](#config) 섹션을 참조하세요.
 
-**Q: 로컬 데이터는 어디에 저장됩니까?**
+**Q: 로컬 데이터는 어디에 저장되나요?**
 
-A: `<code>[os.UserConfigDir()](/pkg/os#UserConfigDir)/go/telemetry</code> 디렉토리 내에.
+A: `<code>[os.UserConfigDir()](/pkg/os#UserConfigDir)/go/telemetry</code>` 디렉토리에 있습니다.
 
-**Q: 데이터 업로드 빈도는 어떻게 되나요? (선택 시)**
+**Q: 데이터 업로드에 동의할 경우, 데이터는 얼마나 자주 업로드되나요?**
 
-A: 대략 일주일에 한 번.
+A: 대략 일주일에 한 번 정도입니다.
 
-**Q: 어떤 데이터가 업로드되나요? (선택 시)**
+**Q: 옵트인(opt in)을 선택하면 어떤 데이터가 업로드되나요?**
 
-A: 목록에 나열된 카운터만 업로드할 수 있습니다.
-[업로드 설정](https://telemetry.go.dev/config)에서 확인할 수 있습니다.
-이 정보는 [차트 설정]에서 생성되며, 더 읽기 쉬울 수 있습니다.
+[upload config](https://telemetry.go.dev/config)에 나열된 카운터만 업로드할 수 있습니다. 
+이는 더 읽기 쉬울 수 있는 [chart config]로부터 생성됩니다.
 
-**Q: 업로드 설정에 카운터는 어떻게 추가되나요?**
+**Q: 카운터가 업로드 설정(upload config)에 어떻게 추가되나요?**
 
-A: 공개 제안 프로세스를 통해: [제안](#proposals)
+A: [공개 제안 프로세스](#proposals)를 통해 가능합니다.
 
 **Q: 업로드된 텔레메트리 데이터를 어디에서 확인할 수 있나요?**
 
-A: 업로드된 데이터는 차트 또는 병합된 요약 형태로 [telemetry.go.dev]에서 확인 가능합니다.
+업로드된 데이터는 [telemetry.go.dev]에서 차트 또는 병합된 요약 형태로 확인할 수 있습니다.
 
-**Q: Go 기반의 텔레메트리 시스템의 소스 코드는 어디에 있습니까?**
+**Q: Go 텔레메트리(telemetry)의 소스 코드는 어디에 있나요?**
 
-A: [golang.org/x/telemetry](https://golang.org/x/telemetry)에서.
+A: [golang.org/x/telemetry](/pkg/golang.org/x/telemetry)에서 확인하세요.
 
 [`gopls`]: /pkg/golang.org/x/tools/gopls
 [`govulncheck`]: /pkg/golang.org/x/vuln/cmd/govulncheck

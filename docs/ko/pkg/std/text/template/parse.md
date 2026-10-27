@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 `parse`는 `text/template` 및 `html/template`에 정의된 템플릿에 대한 파싱 트리를 생성합니다.
+`parse` 패키지는 `text/template` 및 `html/template`에 정의된 템플릿의 파스 트리(parse tree)를 생성합니다.
 
 ## 원문 요약
 

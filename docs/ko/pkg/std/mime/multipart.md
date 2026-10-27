@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 multipart은 RFC 2046에 정의된 MIME multipart 파싱을 구현합니다.
+`multipart` 패키지는 RFC 2046에 정의된 MIME multipart 파싱을 구현합니다.
 
 ## 원문 요약
 

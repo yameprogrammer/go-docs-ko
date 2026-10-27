@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 `metrics`는 Go 런타임에서 구현 정의된 메트릭에 안정적인 인터페이스를 제공합니다.
+`metrics` 패키지는 Go 런타임에서 내보내는 구현 정의 메트릭(implementation-defined metrics)에 접근할 수 있는 안정적인 인터페이스를 제공합니다.
 
 ## 원문 요약
 
@@ -343,6 +343,11 @@ Below is the full list of supported metrics, ordered lexicographically.
     	The number of non-default behaviors executed
     	by the net/http package due to a non-default
     	GODEBUG=httpservecontentkeepheaders=... setting.
+
+    /godebug/non-default-behavior/httpservecontentmaxranges:events
+    	The number of non-default behaviors executed
+    	by the net/http package due to a non-default
+    	GODEBUG=httpservecontentmaxranges=... setting.
 
     /godebug/non-default-behavior/installgoroot:events
     	The number of non-default behaviors executed by the go/build

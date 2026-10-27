@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 fnv는 글렌 포울러, 랜드온 커트 놀, 그리고 퐁 보가 만든 비암호화 해시 함수인 FNV-1 및 FNV-1a를 구현합니다.
+`fnv` 패키지는 Glenn Fowler, Landon Curt Noll, Phong Vo가 만든 비암호화 해시 함수인 FNV-1 및 FNV-1a를 구현합니다.
 
 ## 원문 요약
 

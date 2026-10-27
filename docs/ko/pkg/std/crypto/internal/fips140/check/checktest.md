@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 `checktest`는 `crypto/internal/fips140/check` 테스트에 사용될 코드와 데이터를 정의합니다.
+Package checktest는 crypto/internal/fips140/check 테스트에서 사용하기 위한 일부 코드와 데이터를 정의합니다.
 
 ## 원문 요약
 

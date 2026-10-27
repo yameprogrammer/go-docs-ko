@@ -1,49 +1,41 @@
----
-제목: Go 위협 모델
-레이아웃: 기사
-내비게이션: true
-
 ## 개요
 
-이 문서는 Go 도구 체인 및 표준 라이브러리에 대한 일반적인 위협 모델을 정의합니다. 패키지 문서가 위협 모델을 정의하지 않는 경우, 이 문서에 설명된 모델은 표준 라이브러리의 모든 패키지에 적용된다고 가정합니다.
+이 문서는 Go 툴체인 및 표준 라이브러리에 대한 일반적인 위협 모델을 정의합니다. 패키지 문서에 정의된 위협 모델이 없는 경우, 이 문서에 설명된 모델이 표준 라이브러리의 모든 패키지에 적용되는 것으로 간주해야 합니다.
 
-### 위협 모델
+### 위협 모델 (Threat Model)
 
-#### 안전 빌드
+#### 빌드 안전성 (Build Safety)
 
-Go 코드 빌드 과정은 안전하다고 가정하며, 예기치 않은 실행과 같은 부작용이 없어야 합니다.
+Go 코드를 빌드하는 것은 안전한 것으로 간주되며, 예기치 않은 실행과 같은 부작용이 없어야 합니다.
 
 #### 런타임 실행
 
-일반적으로 악성 코드 실행을 보안 문제로 간주하지 않습니다. Go에 익숙한 사용자는 자신이 실행하는 코드가 무엇인지 이해한다고 가정합니다.
+일반적으로 당사는 악성 코드의 실행을 관련 보안 문제로 간주하지 않습니다. Go에 익숙한 사용자는 자신이 무엇을 실행하고 있는지 이해하고 있다고 가정합니다.
 
-#### 메모리 안전성
+#### 메모리 안전성 (Memory Safety)
 
-다음과 같이 가정합니다. `unsafe` 패키지를 사용하지 않는 경우, 런타임 환경이 메모리 안전성을 보장합니다.
+`unsafe` 패키지를 사용하지 않는 한, 메모리 안전성은 런타임에 의해 보장되는 것으로 간주됩니다.
 
-#### 신뢰 영역
+#### 신뢰 경계 (Trust Boundaries)
 
-API는 사용자가 제공하는 임의의 입력을 수락할 것으로 예상되므로, 다음과 같은 사항에 대해 보호되어 있다고 가정합니다:
+임의의 사용자 제공 입력을 수락할 것으로 합리적으로 예상되는 API는 패닉(panic) 및 임의의 리소스 소비에 대해 하드닝(hardening) 처리가 되어 있는 것으로 간주합니다.
 
-*   예상치 못한 오류(panics) 방지
-*   자원 소비 제한
-
-API에 불필요한 데이터를 전달하여 예상치 못한 결과를 얻는 것은 보안 문제로 간주되지 않습니다.
+API에 쓰레기 값(garbage)을 전달하여 예상치 못한 결과가 발생하는 것은 보안 문제로 간주되지 않습니다.
 
 #### 환경 제어
 
-다음과 같이 가정합니다. 로컬 시스템이 안전하다고 가정합니다. 이미 운영체제가 손상된 경우에 의존하는 공격은 관련이 없습니다. 예를 들어, 파일 시스템, 환경 변수(예: PATH), 메모리 접근 또는 제어를 통한 공격은 우리의 모델에 포함되지 않습니다.
+로컬 시스템은 안전하다고 가정합니다. OS가 이미 침해된 상태에 의존하는 공격은 관련이 없는 것으로 간주합니다. 예를 들어, 공격자가 파일 시스템, `PATH`와 같은 환경 변수를 제어하거나 메모리 접근 및 제어권을 갖는 것은 본 모델의 범위에 포함되지 않습니다.
 
-### 자체 모델을 가진 패키지
+### 자체 모델을 보유한 패키지들
 
-* [encoding/json](/pkg/encoding/json/#hdr-보안_고려사항)
-* [encoding/json/v2](/pkg/encoding/json/v2/#hdr-보안_고려사항)
-* [encoding/json/jsontext](/pkg/encoding/json/jsontext/#hdr-보안_고려사항)
-* [encoding/gob](/pkg/encoding/gob/#hdr-보안)
-* [html/template](/pkg/html/template/#hdr-보안_모델)
-* [image](/pkg/image/#hdr-보안_고려사항)
-* [debug/pe](/pkg/debug/pe/#hdr-보안)
-* [debug/macho](/pkg/debug/macho/#hdr-보안)
-* [debug/dwarf](/pkg/debug/dwarf/#hdr-보안)
-* [debug/plan9obj](/pkg/debug/plan9obj/#hdr-보안)
-* [debug/elf](/pkg/debug/elf/#hdr-보안)
+* [encoding/json](/pkg/encoding/json/#hdr-Security_Considerations)
+* [encoding/json/v2](/pkg/encoding/json/v2/#hdr-Security_Considerations)
+* [encoding/json/jsontext](/pkg/encoding/json/jsontext/#hdr-Security_Considerations)
+* [encoding/gob](/pkg/encoding/gob/#hdr-Security)
+* [html/template](/pkg/html/template/#hdr-Security_Model)
+* [image](/pkg/image/#hdr-Security_Considerations)
+* [debug/pe](/pkg/debug/pe/#hdr-Security)
+* [debug/macho](/pkg/debug/macho/#hdr-Security)
+* [debug/dwarf](/pkg/debug/dwarf/#hdr-Security)
+* [debug/plan9obj](/pkg/debug/plan9obj/#hdr-Security)
+* [debug/elf](/pkg/debug/elf/#hdr-Security)

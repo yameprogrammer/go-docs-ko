@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 `gccgoimporter`는 `gccgo`-생성된 객체 파일에 대한 `Import` 기능을 구현합니다.
+`gccgoimporter` 패키지는 gccgo로 생성된 객체 파일에 대한 `Import`를 구현합니다.
 
 ## 원문 요약
 

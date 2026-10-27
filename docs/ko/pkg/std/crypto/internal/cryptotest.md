@@ -20,9 +20,9 @@ package cryptotest // import "crypto/internal/cryptotest"
 FUNCTIONS
 
 func BoundarySlices(t *testing.T, size int) (start, end []byte)
-    BoundarySlices allocates a pair of slices of the given size.
-
-    On this platform, the slices are not special.
+    BoundarySlices allocates a pair of slices of the given size one at the
+    start of a page, another at the end. Any access beyond or before the slice
+    boundaries should cause a fault.
 
 func FetchModule(t *testing.T, module, version string) string
     FetchModule fetches the module at the given version and returns the

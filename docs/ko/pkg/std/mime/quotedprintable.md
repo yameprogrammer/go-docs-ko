@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 `quotedprintable`는 RFC 2045에서 정의된 쿼드 프린테이블 인코딩을 구현합니다.
+`quotedprintable` 패키지는 RFC 2045에 명시된 quoted-printable 인코딩을 구현합니다.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 `goexperiment`는 툴체인 실험 기능을 지원합니다.
+`goexperiment` 패키지는 툴체인 실험(toolchain experiments)에 대한 지원을 구현합니다.
 
 ## 원문 요약
 

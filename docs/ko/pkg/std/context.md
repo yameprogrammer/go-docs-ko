@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 `context`는 `Context` 유형을 정의하며, 이는 API 경계 내와 프로세스 간에 타임아웃, 취소 신호, 그리고 기타 요청 범위에 속하는 값을 전달합니다.
+`context` 패키지는 API 경계와 프로세스 간에 마감 기한(deadlines), 취소 신호(cancellation signals) 및 기타 요청 범위의 값(request-scoped values)을 전달하는 `Context` 타입을 정의합니다.
 
 ## 원문 요약
 

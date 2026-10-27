@@ -53,6 +53,17 @@ type NotForPublicUse struct{}
 var AllowInternalUse NotForPublicUse
     AllowInternalUse is passed from "json" to "jsontext" to authenticate that
     the caller can have access to internal functionality.
+
+type ValueError struct {
+	Val any
+	Err error
+}
+    ValueError wraps the error with a Go value relevant to the error. This is
+    only used for v1 compatibility purposes.
+
+func (ve *ValueError) Error() string
+
+func (ve *ValueError) Unwrap() error
 ~~~
 
 > 이 페이지는 비공식 한국어 미러 문서입니다. API의 권위 있는 원문은 pkg.go.dev 및 golang/go에 있습니다.

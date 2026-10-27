@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 bidirule는 RFC 5893에 정의된 Bidi Rule를 구현합니다.
+`bidirule` 패키지는 RFC 5893에 정의된 Bidi Rule을 구현합니다.
 
 ## 원문 요약
 

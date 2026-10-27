@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 edwards25519는 Twisted Edwards 곡선의 그룹 로직을 구현합니다.
+package edwards25519는 twisted Edwards 곡선을 위한 그룹 로직을 구현합니다.
 
 ## 원문 요약
 

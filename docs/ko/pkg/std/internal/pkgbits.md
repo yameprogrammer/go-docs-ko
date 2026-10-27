@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 `pkgbits`는 유니파이드 IR (UIR)의 바이너리 내보내기 데이터 형식에 대한 저수준 코딩 추상화를 구현합니다.
+`pkgbits` 패키지는 Unified IR(UIR)의 바이너리 내보내기 데이터 형식을 위한 저수준 코딩 추상화(coding abstractions)를 구현합니다.
 
 ## 원문 요약
 
@@ -271,6 +271,10 @@ const (
 
 	// Generic methods may appear as standalone function objects.
 	GenericMethods
+
+	// Method index is encoded to preserve relative order of
+	// nongeneric and generic methods.
+	PreserveMethodOrder
 )
 type Index int32
     An Index represents a bitstream element index *within* (i.e., relative to) a
@@ -531,6 +535,10 @@ const (
 
 	// V4: encodes generic methods as standalone function objects
 	V4
+
+	// V5: encodes the index of methods to preserve relative order
+	// of nongeneric and generic methods (go.dev/issue/81188).
+	V5
 )
 func (v Version) Has(f Field) bool
     Has reports whether field f is present in a bitstream at version v.

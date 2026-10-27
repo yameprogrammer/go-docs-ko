@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 `socktest`은 소켓 테스트를 위한 유틸리티를 제공합니다.
+`socktest` 패키지는 소켓 테스트를 위한 유틸리티를 제공합니다.
 
 ## 원문 요약
 
@@ -61,7 +61,7 @@ const (
 	FilterGetsockoptInt                   // for GetsockoptInt
 	FilterClose                           // for Close or Closesocket
 )
-type Sockets map[syscall.Handle]Status
+type Sockets map[int]Status
     Sockets maps a socket descriptor to the status of socket.
 
 type Stat struct {
@@ -99,32 +99,35 @@ type Switch struct {
 }
     A Switch represents a callpath point switch for socket system calls.
 
-func (sw *Switch) AcceptEx(ls syscall.Handle, as syscall.Handle, b *byte, rxdatalen uint32, laddrlen uint32, raddrlen uint32, rcvd *uint32, overlapped *syscall.Overlapped) error
-    AcceptEx wraps syscall.AcceptEx.
+func (sw *Switch) Accept(s int) (ns int, sa syscall.Sockaddr, err error)
+    Accept wraps syscall.Accept.
 
-func (sw *Switch) Closesocket(s syscall.Handle) (err error)
-    Closesocket wraps syscall.Closesocket.
+func (sw *Switch) Accept4(s, flags int) (ns int, sa syscall.Sockaddr, err error)
+    Accept4 wraps syscall.Accept4.
 
-func (sw *Switch) Connect(s syscall.Handle, sa syscall.Sockaddr) (err error)
+func (sw *Switch) Close(s int) (err error)
+    Close wraps syscall.Close.
+
+func (sw *Switch) Connect(s int, sa syscall.Sockaddr) (err error)
     Connect wraps syscall.Connect.
 
-func (sw *Switch) ConnectEx(s syscall.Handle, sa syscall.Sockaddr, b *byte, n uint32, nwr *uint32, o *syscall.Overlapped) (err error)
-    ConnectEx wraps syscall.ConnectEx.
+func (sw *Switch) GetsockoptInt(s, level, opt int) (soerr int, err error)
+    GetsockoptInt wraps syscall.GetsockoptInt.
 
-func (sw *Switch) Listen(s syscall.Handle, backlog int) (err error)
+func (sw *Switch) Listen(s, backlog int) (err error)
     Listen wraps syscall.Listen.
 
 func (sw *Switch) Set(t FilterType, f Filter)
     Set deploys the socket system call filter f for the filter type t.
+
+func (sw *Switch) Socket(family, sotype, proto int) (s int, err error)
+    Socket wraps syscall.Socket.
 
 func (sw *Switch) Sockets() Sockets
     Sockets returns mappings of socket descriptor to socket status.
 
 func (sw *Switch) Stats() []Stat
     Stats returns a list of per-cookie socket statistics.
-
-func (sw *Switch) WSASocket(family, sotype, proto int32, protinfo *syscall.WSAProtocolInfo, group uint32, flags uint32) (s syscall.Handle, err error)
-    WSASocket wraps syscall.WSASocket.
 ~~~
 
 > 이 페이지는 비공식 한국어 미러 문서입니다. API의 권위 있는 원문은 pkg.go.dev 및 golang/go에 있습니다.

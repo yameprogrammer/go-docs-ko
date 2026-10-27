@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 `cfg`는 `go` 명령어와 `internal/testenv`에서 공유되는 설정을 포함합니다.
+`cfg` 패키지는 `go` 커맨드와 `internal/testenv`에서 공유하는 설정(configuration)을 보유합니다.
 
 ## 원문 요약
 

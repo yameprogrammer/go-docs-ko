@@ -1,622 +1,270 @@
+제공해주신 내용에는 번역할 텍스트가 포함되어 있지 않으며, HTML 주석 내의 정규식 치환 패턴(sed 스타일)만 포함되어 있습니다.
+
+해당 부분은 코드/스크립트의 일부이므로 기술적 무결성을 위해 번역하지 않고 그대로 유지합니다. 번역할 본문 내용을 제공해 주시면 정성껏 번역해 드리겠습니다.
+
 <!--
-수정: .,s;^PKG:([a-z][A-Za-z0-9_/]+);<a href="/pkg/\1/"><code>\1</code></a>;g
-수정: .,s;^([a-z][A-Za-z0-9_/]+)\.([A-Z][A-Za-z0-9_]+\.)?([A-Z][A-Za-z0-9_]+)([ .',]|$);<a href="/pkg/\1/#\2\3"><code>\3</code></a>\4;g
+Edit .,s;^PKG:([a-z][A-Za-z0-9_/]+);<a href="/pkg/\1/"><code>\1</code></a>;g
+Edit .,s;^([a-z][A-Za-z0-9_/]+)\.([A-Z][A-Za-z0-9_]+\.)?([A-Z][A-Za-z0-9_]+)([ .',]|$);<a href="/pkg/\1/#\2\3"><code>\3</code></a>\4;g
 -->
 
-```markdown
 <style>
   main ul li { margin: 0.5em 0; }
 </style>
-```
 
 ## Go 1.6 소개 {#introduction}
 
-### 개요
+최신 Go 릴리스인 버전 1.6가 1.5 출시 6개월 만에 공개되었습니다.
+대부분의 변경 사항은 언어, 런타임 및 라이브러리의 구현 부분에 집중되어 있습니다.
+언어 명세(language specification)에는 변경 사항이 없습니다.
+언제나 그랬듯, 이번 릴리스에서도 Go 1의 [호환성 약속](/doc/go1compat.html)을 유지합니다.
+거의 모든 Go 프로그램이 이전과 동일하게 컴파일되고 실행될 것으로 예상합니다.
 
-이 문서는 Go 1.6 버전의 주요 기능과 변경 사항을 소개합니다.
-
-가장 최신 Go 릴리스인 버전 1.6은 1.5 이후 6개월 만에 출시되었습니다.
-대부분의 변경 사항은 언어, 런타임 및 라이브러리의 구현에 있습니다.
-언어 사양에는 변경 사항이 없습니다.
-항상처럼, 이번 릴리스는 Go 1의 [호환성 약속](/doc/go1compat.html)을 유지합니다.
-대부분의 Go 프로그램이 이전과 동일하게 컴파일되고 실행될 것으로 예상합니다.
-
-이 릴리스는 다음을 추가합니다:
-* [Linux on 64-bit MIPS 및 Android on 32-bit x86](#ports)에 대한 새로운 포트
-* C와 Go 포인터를 공유하기 위한 [규칙 정의 및 적용](#cgo)
-* 투명하고 자동화된 [HTTP/2 지원](#http2)
-* 새로운 템플릿 재사용 메커니즘 [템플릿](#template)
+이번 릴리스에서는 [64비트 MIPS 기반 Linux 및 32비트 x86 기반 Android](#ports)에 대한 새로운 포트가 추가되었으며,
+[C와 Go 포인터를 공유하기 위한](#cgo) 정의 및 강제 규칙이 도입되었습니다.
+또한 [HTTP/2](#http2)에 대한 투명하고 자동화된 지원과
+[템플릿 재사용](#template)을 위한 새로운 메커니즘이 추가되었습니다.
 
 ## 언어 변경 사항 {#language}
 
-이 릴리스에는 언어 변경 사항이 없습니다.
+이번 릴리스에서는 언어 변경 사항이 없습니다.
 
-## 포트
+## 포트 {#ports}
 
-Go 1.6는 실험적인 MIPS 아키텍처 (64비트: `linux/mips64` 및 `linux/mips64le`)를 위한 포트를 추가합니다.
-이 포트는 `cgo`를 지원하지만, 내부 링크만 지원합니다.
+Go 1.6에서는 64비트 MIPS Linux(`linux/mips64` 및 `linux/mips64le`)에 대한 실험적 포트가 추가되었습니다.
+이 포트들은 `cgo`를 지원하지만, 내부 링킹(internal linking)을 통해서만 가능합니다.
 
-Go 1.6는 또한 32비트 x86 아키텍처 (`android/386`)에서 Android용의 실험적인 포트를 추가합니다.
+Go 1.6는 32비트 x86(`android/386`) 기반의 Android 실험적 포트를 추가했습니다.
 
-프리BSD에서 Go 1.6는 기본적으로 `clang`을 외부 C 컴파일러로 사용합니다. `gcc`가 아닌.
+FreeBSD에서 Go 1.6은 외부 C 컴파일러로 `gcc`가 아닌 `clang`을 사용하는 것이 기본 설정입니다.
 
-리눅스, 리틀 엔디안 64비트 파워PC (`linux/ppc64le`)에서,
-Go 1.6는 이제 `cgo`를 외부 링크와 함께 지원하며, 기능적으로 거의 완성되었습니다.
+리틀 엔디안 64비트 PowerPC(`linux/ppc64le`) 기반의 Linux에서,
+Go 1.6은 이제 외부 링킹을 통한 `cgo`를 지원하며
+대략적으로 기능 구현이 완료되었습니다.
 
-NaCl에서 Go 1.5는 SDK 버전 41을 필요로 했습니다.
-Go 1.6는 더 높은 SDK 버전에 대한 지원을 추가합니다.
+NaCl에서 Go 1.5는 SDK 버전 pepper-41이 필요했습니다.
+Go 1.6에서는 더 최신 SDK 버전에 대한 지원이 추가되었습니다.
 
-32비트 x86 시스템에서 `-dynlink` 또는 `-shared` 컴파일 모드를 사용하는 경우,
-`CX` 레지는 특정 메모리 참조에 의해 덮어쓰이게 되므로,
-수동으로 작성된 어셈블리 코드에서는 사용하지 않아야 합니다.
+`-dynlink` 또는 `-shared` 컴파일 모드를 사용하는 32비트 x86 시스템에서, 이제 CX 레지스터는 특정 메모리 참조에 의해 덮어씌워지므로 수동으로 작성한 어셈블리에서는 사용을 피해야 합니다.
 자세한 내용은 [어셈블리 문서](/doc/asm#x86)를 참조하십시오.
 
 ## 도구 {#tools}
 
 ### Cgo {#cgo}
 
-다음 중 주요 변경 사항이 하나 있으며, 미미한 변경 사항도 하나 있습니다. [`cgo`](/cmd/cgo/)
+[`cgo`](/cmd/cgo/)에 한 가지 주요 변경 사항과 한 가지 부수적인 변경 사항이 있습니다.
 
-주요 변경 사항은 Go 포인터를 C 코드와 공유하는 규칙을 정의하는 것입니다.
-이를 통해 C 코드가 Go의 가비지 컬렉터와 함께 동작할 수 있도록 합니다.
-간단히 말해서, Go가 가비지 컬렉션으로 할당된 메모리를 사용하고,
-C 코드로 전달할 때, Go 포인터로 가비지 컬렉션으로 할당된 메모리에 대한 포인터가 포함되지 않아야 하고,
-C 코드가 호출이 완료된 후 포인터를 유지하지 않아야 합니다.
-이러한 규칙은 프로그램 실행 중에 런타임에 의해 검사됩니다.
-런타임이 위반 사항을 감지하면, 오류 메시지를 출력하고 프로그램을 종료합니다.
-이러한 검사를 비활성화하려면 환경 변수 `GODEBUG=cgocheck=0`을 설정할 수 있지만,
-대부분의 검출된 코드가 가비지 컬렉션과 어느 정도 호환되지 않는다는 점에 유의해야 합니다.
-검사를 비활성화하면 일반적으로 더 많은 의심스러운 오류가 발생합니다.
-문제의 코드를 수정하는 것이 검사를 비활성화하는 것보다 훨씬 권장됩니다.
-자세한 내용은 [`cgo` 문서를 참조하십시오](/cmd/cgo/#hdr-Passing_pointers).
+가장 주요한 변경 사항은 Go 포인터를 C 코드와 공유하기 위한 규칙의 정의이며, 이는 해당 C 코드가 Go의 가비지 컬렉터와 공존할 수 있도록 하기 위함입니다. 간단히 말해, Go와 C는 `cgo` 호출의 일부로 해당 메모리에 대한 포인터가 C로 전달될 때 Go가 할당한 메모리를 공유할 수 있습니다. 단, 해당 메모리 자체가 Go가 할당한 메모리에 대한 포인터를 포함하고 있지 않아야 하며, C가 호출 종료 후에도 해당 포인터를 유지하지 않아야 한다는 조건이 있습니다. 이러한 규칙은 프로그램 실행 중에 런타임에 의해 확인됩니다. 런타임이 위반 사항을 감지하면 진단 내용을 출력하고 프로그램을 종료(crash)시킵니다. 환경 변수 `GODEBUG=cgocheck=0`을 설정하여 이 확인 과정을 비활성화할 수 있지만, 이 확인 과정에서 식별된 코드의绝대다수는 어떤 방식으로든 가비지 컬렉션과 미묘하게 호환되지 않는다는 점에 유의하십시오. 확인 과정을 비활성화하면 일반적으로 더 미스터리한 실패 모드로 이어질 뿐입니다. 확인 과정을 끄는 것보다 문제가 되는 코드를 수정하는 것이 강력히 권장됩니다. 자세한 내용은 [`cgo` 문서](/cmd/cgo/#hdr-Passing_pointers)를 참조하십시오.
 
-작은 변경은 다음과 같습니다.
-명시적인 `C.complexfloat` 및 `C.complexdouble` 유형의 추가,
-이는 Go의 `complex64` 및 `complex128` 유형과 분리됩니다.
-다른 숫자 유형과 마찬가지로, C의 복소수 유형과 Go의 복소수 유형은
-더 이상 상호 교환될 수 없습니다.
+소소한 변경 사항은 Go의 `complex64` 및 `complex128`과 별개로, 명시적인 `C.complexfloat` 및 `C.complexdouble` 타입이 추가되었다는 점입니다. 다른 숫자 타입들과 마찬가지로, C의 복소수 타입과 Go의 복소수 타입은 더 이상 상호 교환 가능하지 않습니다.
 
-### 컴파일러 도구 체인 {#compiler}
+### 컴파일러 툴체인 {#compiler}
 
-컴파일러 도구 체인은 대부분 변경되지 않았습니다.
-내부적으로 가장 중요한 변경 사항은 파서가 이제 [yacc](/cmd/yacc/)에서 생성되는 대신 수동으로 작성되었다는 것입니다.
+컴파일러 툴체인은 대부분 변경되지 않았습니다.
+내부적으로 가장 중요한 변경 사항은 파서(parser)가 더 이상 [yacc](/cmd/yacc/)로 생성되지 않고 이제 직접 작성(hand-written)되었다는 점입니다.
 
-컴파일러, 링커, 그리고 `go` 명령어에는 새로운 플래그 `-msan`이 있으며, 이는 `-race`와 유사하며 Linux/amd64에서만 사용 가능합니다.
-이 플래그는 [Clang MemorySanitizer](https://clang.llvm.org/docs/MemorySanitizer.html)과의 상호 작용을 활성화합니다.
-이러한 상호 작용은 특히 의심스러운 C 또는 C++ 코드를 포함하는 프로그램을 테스트하는 데 유용합니다.
+컴파일러, 링커, 그리고 `go` 명령에 `-race`와 유사한 새로운 플래그인 `-msan`이 추가되었습니다. 이 플래그는 linux/amd64에서만 사용할 수 있으며, [Clang MemorySanitizer](https://clang.llvm.org/docs/MemorySanitizer.html)와의 상호 운용을 활성화합니다. 이러한 상호 운용은 주로 의심스러운 C 또는 C++ 코드가 포함된 프로그램을 테스트할 때 유용합니다.
 
-링커에는 이제 `-libgcc` 옵션이 추가되어, `cgo` 코드를 링크할 때 C 컴파일러 지원 라이브러리의 예상 위치를 지정할 수 있습니다.
-이 옵션은 `-linkmode=internal`을 사용할 때만 참조되며, 지원 라이브러리의 사용을 비활성화하려면 `none`으로 설정할 수 있습니다.
+링커에 [`cgo`](/cmd/cgo/) 코드를 링크할 때 C 컴파일러 지원 라이브러리의 예상 위치를 설정하는 새로운 옵션 `-libgcc`가 추가되었습니다. 이 옵션은 `-linkmode=internal`을 사용할 때만 참조되며, `none`으로 설정하여 지원 라이브러리 사용을 비활성화할 수 있습니다.
 
-[빌드 모드의 구현은 Go 1.5부터](/doc/go1.5#link) 더 많은 시스템으로 확장되었습니다.
-이번 릴리스는 다음 모드에 대한 지원을 추가합니다:
-- `c-shared` 모드: `android/386`, `android/amd64`, `android/arm64`, `linux/386`, `linux/arm64`
-- `shared` 모드: `linux/386`, `linux/arm`, `linux/amd64`, `linux/ppc64le`
-- 새로운 `pie` 모드 (상대적 위치 독립 실행 파일을 생성): `android/386`, `android/amd64`, `android/arm`, `android/arm64`, `linux/386`, `linux/amd64`, `linux/arm`, `linux/arm64`, `linux/ppc64le`
+[Go 1.5에서 시작된 빌드 모드 구현](/doc/go1.5#link)이 더 많은 시스템으로 확장되었습니다.
+이번 릴리스에서는 `android/386`, `android/amd64`, `android/arm64`, `linux/386`, `linux/arm64` 시스템의 `c-shared` 모드 지원이 추가되었습니다.
+또한 `linux/386`, `linux/arm`, `linux/amd64`, `linux/ppc64le` 시스템의 `shared` 모드 지원과,
+`android/386`, `android/amd64`, `android/arm`, `android/arm64`, `linux/386`, `linux/amd64`, `linux/arm`, `linux/arm64`, `linux/ppc64le` 시스템의 새로운 `pie` 모드(위치 독립 실행 파일 생성) 지원이 추가되었습니다.
 자세한 내용은 [설계 문서](/s/execmodes)를 참조하십시오.
 
-리링크의 `-X` 플래그는 Go 1.5에서 변경되었습니다.
-Go 1.4 및 이전 버전에서는 두 개의 인수를 사용했습니다.
+참고로, Go 1.5에서 링커의 `-X` 플래그가 변경되었습니다.
+Go 1.4 및 그 이전 버전에서는 다음과 같이 두 개의 인자를 받았습니다.
 
--X importpath.name 값
+-X importpath.name value
 
-Go 1.5에서 단일 인수를 사용하여 대체 구문을 추가했습니다.
-이 인수는 `name=value` 쌍 자체입니다:
+Go 1.5에서는 단일 인수를 사용하는 대체 구문이 추가되었으며, 이 인수는 그 자체로 `name=value` 쌍입니다:
 
 -X importpath.name=value
 
-Go 1.5에서는 이전 구문이 여전히 허용되었지만, 새 구문을 사용하는 것을 제안하는 경고 메시지가 표시되었습니다.
-Go 1.6은 이전 구문을 계속 허용하고 경고 메시지를 표시합니다.
-Go 1.7에서는 이전 구문에 대한 지원이 제거됩니다.
+Go 1.5에서는 새로운 구문 사용을 권장하는 경고 메시지를 출력하며 기존 구문을 여전히 허용했습니다.
+Go 1.6에서도 기존 구문을 계속 허용하며 경고 메시지를 출력합니다.
+Go 1.7에서는 기존 구문에 대한 지원이 제거될 예정입니다.
 
 ### Gccgo {#gccgo}
 
-GCC 및 Go 프로젝트의 릴리즈 일정은 일치하지 않습니다.
-GCC 5 릴리즈에는 Go 1.4 버전의 `gccgo`가 포함되어 있습니다.
-다음 릴리즈인 GCC 6에는 Go 1.6.1 버전의 `gccgo`가 포함됩니다.
+GCC와 Go 프로젝트의 릴리스 일정은 서로 일치하지 않습니다.
+GCC 릴리스 5에는 gccgo의 Go 1.4 버전이 포함되어 있습니다.
+다음 릴리스인 GCC 6에는 gccgo의 Go 1.6.1 버전이 포함될 예정입니다.
 
-### Go 명령어 {#go_command}
+### Go command {#go_command}
 
-`[go](cmd/go)` 명령어의 기본 작동 방식은 동일하지만, 몇 가지 주목할 만한 변경 사항이 있습니다.
+[`go`](/cmd/go) 명령의 기본 동작은 변경되지 않았지만, 주목할 만한 몇 가지 변경 사항이 있습니다.
 
-Go 1.5에서 벤더링에 대한 실험적인 지원이 도입되었으며, `GO15VENDOREXPERIMENT` 환경 변수를 `1`로 설정하여 활성화할 수 있습니다.
-Go 1.6은 벤더링 지원을 유지하며, 더 이상 실험적인 기능으로 간주되지 않으며, 기본적으로 활성화됩니다.
-필요에 따라 `GO15VENDOREXPERIMENT` 환경 변수를 `0`로 설정하여 명시적으로 비활성화할 수 있습니다.
-Go 1.7에서는 환경 변수 지원이 제거됩니다.
+Go 1.5에서는 `GO15VENDOREXPERIMENT` 환경 변수를 `1`로 설정하여 활성화할 수 있는 vendoring에 대한 실험적 지원이 도입되었습니다.
+Go 1.6에서도 vendoring 지원이 유지되며, 더 이상 실험적인 기능으로 간주되지 않고 기본적으로 활성화됩니다.
+`GO15VENDOREXPERIMENT` 환경 변수를 `0`으로 설정하여 명시적으로 비활성화할 수 있습니다.
+Go 1.7에서는 해당 환경 변수에 대한 지원이 제거될 예정입니다.
 
-가장 흔하게 발생하는 문제는, 기본적으로 벤더링을 활성화했을 때, 기존의 `vendor`라는 이름의 디렉터리가 포함된 소스 트리에 발생합니다. 이 디렉터리는 새로운 벤더링 규칙에 따라 해석되지 않도록 설계되었습니다.
-이 경우 가장 간단한 해결책은 디렉터리의 이름을 `vendor`가 아닌 다른 이름으로 바꾸고, 영향을 받는 모든 임포트 경로를 업데이트하는 것입니다.
+기본적으로 벤더링(vendoring)을 활성화했을 때 발생할 가능성이 가장 높은 문제는, 새로운 벤더링 시맨틱에 따라 해석되는 것을 의도하지 않은 `vendor`라는 이름의 기존 디렉토리가 소스 트리 내에 포함되어 있는 경우에 발생합니다. 이 경우, 가장 간단한 해결 방법은 해당 디렉토리의 이름을 `vendor`가 아닌 다른 이름으로 변경하고, 영향을 받는 모든 임포트 경로(import paths)를 업데이트하는 것입니다.
 
-자세한 내용은 다음 문서를 참조하십시오.
-[`go` 명령의 문서](/cmd/go/#hdr-Vendor_Directories)
-및 [설계 문서](/s/go15vendor).
+벤더링(vendoring)에 대한 자세한 내용은
+[`go` 명령어](/cmd/go/#hdr-Vendor_Directories) 문서와
+[설계 문서](/s/go15vendor)를 참조하십시오.
 
-다음과 같은 새로운 빌드 플래그 `-msan`이 있습니다.
-이 플래그는 Go 컴파일을 LLVM 메모리 산산화 기능을 지원하도록 합니다.
-이는 주로 C 또는 C++ 코드를 메모리 산산화 기능으로 검사할 때 링크할 때 사용하는 데 목적이 있습니다.
+새로운 빌드 플래그인 `-msan`이 추가되었습니다.
+이 플래그는 LLVM memory sanitizer 지원과 함께 Go를 컴파일합니다.
+이는 주로 memory sanitizer로 검사 중인 C 또는 C++ 코드와 링크할 때 사용하도록 설계되었습니다.
 
-### Go 문서 생성 명령어 {#doc_command}
+### Go doc 명령어 {#doc_command}
 
-Go 1.5에서 `go doc` 명령이 도입되었으며, 이를 통해 패키지 이름을만 사용하여 패키지를 참조할 수 있습니다 (예: `go doc http`).
-모호한 경우, Go 1.5의 동작 방식은 가장 먼저 임포트된 패키지를 사용했습니다.
-Go 1.6에서는, 임포트 경로의 요소 수가 적은 것을 선호하여 모호성을 해결합니다. 이때, 어휘적 비교를 통해 동일한 경우를 결정합니다.
-이 변경의 중요한 결과는 원본 패키지의 복사본이 이제 임포트된 복사본보다 선호된다는 것입니다.
-성공적인 검색 또한 더 빠르게 실행되는 경향이 있습니다.
+Go 1.5에서는 [`go doc`](/cmd/go/#hdr-Show_documentation_for_package_or_symbol) 명령어가 도입되어, `go` `doc` `http`와 같이 패키지 이름만으로 패키지를 참조할 수 있게 되었습니다.
+모호함이 발생하는 경우, Go 1.5의 동작 방식은 사전순으로 가장 빠른 임포트 경로(import path)를 가진 패키지를 사용하는 것이었습니다.
+Go 1.6에서는 요소 수가 더 적은 임포트 경로를 우선시하며, 동일한 경우 사전순 비교를 통해 모호함을 해결합니다.
+이 변경 사항의 중요한 영향은 이제 벤더링된(vendored) 복사본보다 패키지의 원본 복사본이 우선시된다는 점입니다.
+또한 성공적인 검색 속도가 빨라지는 경향이 있습니다.
 
-### Go vet 명령어 {#vet_command}
+### Go vet 명령 {#vet_command}
 
-```shell
-go vet
-```
-
-[`go vet`](/cmd/vet) 명령은 이제 `Printf` 함수에 함수 또는 메서드 값을 인수로 전달하는 것을 진단합니다. 예를 들어 `f`를 전달하는 경우, 여기서 `f()`가 호출되도록 의도되었을 때입니다.
+[`go vet`](/cmd/vet) 명령어가 이제 `Printf`에 함수나 메서드 값을 인자로 전달하는 경우를 진단합니다. 예를 들어, `f()`를 의도했으나 `f`를 전달하는 경우 등이 이에 해당합니다.
 
 ## 성능 {#performance}
 
-물론, 변경 사항이 너무 광범위하고 다양하기 때문에 정확한 성능에 대한 언급을 하는 것은 어렵습니다.
-일부 프로그램은 더 빠르게 실행될 수 있고, 일부는 더 느리게 실행될 수 있습니다.
-평균적으로 Go 1 벤치마크 스위트에 있는 프로그램은 Go 1.6에서 Go 1.5보다 몇 퍼센트 더 빠르게 실행됩니다.
-특히, 많은 양의 메모리를 사용하는 프로그램의 경우, 가비지 컬렉터의 중단 시간은 Go 1.5보다 훨씬 짧습니다.
+언제나 그렇듯, 변경 사항이 매우 일반적이고 다양하여 성능에 대해 정확하게 진술하기는 어렵습니다.
+어떤 프로그램은 더 빠르게 실행될 수도 있고, 어떤 프로그램은 더 느려질 수도 있습니다.
+평균적으로 Go 1 벤치마크 슈트의 프로그램들은 Go 1.5에서보다 Go 1.6에서 몇 퍼센트 더 빠르게 실행됩니다.
+가비지 컬렉터(garbage collector)의 일시 중단(pause) 시간은 Go 1.5보다 더 짧아졌으며, 특히 많은 양의 메모리를 사용하는 프로그램에서 더욱 그러합니다.
 
-다음 패키지의 구현에 상당한 최적화가 이루어져 10% 이상의 성능 향상을 가져왔습니다.
-* `compress/bzip2` ([/pkg/compress/bzip2/](pkg/compress/bzip2/))
-* `compress/gzip` ([/pkg/compress/gzip/](pkg/compress/gzip/))
-* `crypto/aes` ([/pkg/crypto/aes/](pkg/crypto/aes/))
-* `crypto/elliptic` ([/pkg/crypto/elliptic/](pkg/crypto/elliptic/))
-* `crypto/ecdsa` ([/pkg/crypto/ecdsa/](pkg/crypto/ecdsa/))
-* `sort` ([/pkg/sort/](pkg/sort/))
+[`compress/bzip2`](/pkg/compress/bzip2/),
+[`compress/gzip`](/pkg/compress/gzip/),
+[`crypto/aes`](/pkg/crypto/aes/),
+[`crypto/elliptic`](/pkg/crypto/elliptic/),
+[`crypto/ecdsa`](/pkg/crypto/ecdsa/), 그리고
+[`sort`](/pkg/sort/) 패키지의 구현체에 10% 이상의 성능 향상을 가져오는 상당한 최적화가 이루어졌습니다.
 
 ## 표준 라이브러리 {#library}
 
 ### HTTP/2 {#http2}
 
-Go 1.6는 [`net/http`](/pkg/net/http/) 패키지에 HTTP/2 프로토콜에 대한 투명한 지원을 추가합니다.
-[HTTP/2 프로토콜](https://http2.github.io/).
-Go 클라이언트와 서버는 HTTPS를 사용할 때 적절하게 HTTP/2를 자동으로 사용합니다.
-HTTP/2 프로토콜 처리의 세부 사항에 대한 특정 내보낸 API가 없으며, HTTP/1.1에 대한 특정 내보낸 API가 없는 것과 동일합니다.
+Go 1.6에서는 [`net/http`](/pkg/net/http/) 패키지에 새로운 [HTTP/2 프로토콜](https://http2.github.io/)에 대한 투명한 지원이 추가되었습니다.
+Go 클라이언트와 서버는 HTTPS를 사용할 때 상황에 맞춰 자동으로 HTTP/2를 사용합니다.
+HTTP/1.1과 마찬가지로, HTTP/2 프로토콜 처리의 세부 사항에 특화된 공개(exported) API는 제공되지 않습니다.
 
-프로그램이 HTTP/2를 비활성화해야 하는 경우, 다음을 설정하여 수행할 수 있습니다.
-[`Transport.TLSNextProto`](/pkg/net/http/#Transport) (클라이언트용)
-또는
-[`Server.TLSNextProto`](/pkg/net/http/#Server) (서버용)
-을 비어 있지 않은 맵으로 설정합니다.
+HTTP/2를 비활성화해야 하는 프로그램은
+(클라이언트의 경우) [`Transport.TLSNextProto`](/pkg/net/http/#Transport) 또는
+(서버의 경우) [`Server.TLSNextProto`](/pkg/net/http/#Server)를
+nil이 아닌 빈 맵으로 설정하여 비활성화할 수 있습니다.
 
-프로그램은 HTTP/2 프로토콜에 특정한 세부 사항을 조정해야 하는 경우,
-[`golang.org/x/net/http2`](https://golang.org/x/net/http2)를 가져와 사용할 수 있습니다.
-특히,
-[ConfigureServer](https://godoc.org/golang.org/x/net/http2/#ConfigureServer)
-및
-[ConfigureTransport](https://godoc.org/golang.org/x/net/http2/#ConfigureTransport)
-함수를 사용합니다.
+HTTP/2 프로토콜의 세부 사항을 조정해야 하는 프로그램은 [`golang.org/x/net/http2`](https://golang.org/x/net/http2)를 임포트하여 사용할 수 있으며, 특히 [ConfigureServer](https://godoc.org/golang.org/x/net/http2/#ConfigureServer) 및 [ConfigureTransport](https://godoc.org/golang.org/x/net/http2/#ConfigureTransport) 함수를 활용할 수 있습니다.
 
 ### 런타임 {#runtime}
 
-런타임은 가벼운 방식으로, 맵의 동시 오용을 감지하는 기능을 추가했습니다.
-항상 그렇듯이, 만약 하나의 goroutine이 맵에 쓰기 작업을 수행하는 경우, 다른 goroutine은 맵을 동시에 읽거나 쓰지 않아야 합니다.
-런타임이 이러한 조건을 감지하면, 진단 메시지를 출력하고 프로그램을 종료합니다.
-이 문제를 더 자세히 파악하는 가장 좋은 방법은 [레이스 디텍터](/blog/race-detector)를 사용하여 프로그램을 실행하는 것입니다. 이는 레이스를 더 신뢰성 있게 식별하고 더 자세한 정보를 제공합니다.
+런타임에 맵(map)의 동시성 오용을 감지하는 경량의 최선 노력(best-effort) 감지 기능이 추가되었습니다.
+언제나 그렇듯이, 한 고루틴이 맵에 쓰고 있다면 다른 어떤 고루틴도 동시에 해당 맵을 읽거나 써서는 안 됩니다.
+런타임이 이러한 상태를 감지하면 진단 내용을 출력하고 프로그램을 충돌(crash)시킵니다.
+이 문제에 대해 더 자세히 알아보는 가장 좋은 방법은 [race detector](/blog/race-detector)를 사용하여 프로그램을 실행하는 것이며, 이를 통해 데이터 경합(race)을 더 확실하게 식별하고 더 상세한 정보를 얻을 수 있습니다.
 
-프로그램 종료 시 패닉 발생 시, 런타임은 기본적으로
-현재 실행 중인 고루틴의 스택만 출력하며,
-다른 모든 고루틴은 출력하지 않습니다.
-일반적으로 패닉은 현재 고루틴에만 관련이 있으므로,
-다른 고루틴을 제외하면, 충돌 메시지에 불필요한 출력을 크게 줄일 수 있습니다.
-충돌 메시지에 모든 고루틴의 스택을 보려면, 환경 변수 `GOTRACEBACK`을 `all`로 설정하거나,
-충돌 발생 전에 [`debug.SetTraceback`](/pkg/runtime/debug/#SetTraceback) 함수를 호출하고 프로그램을 다시 실행합니다.
+프로그램을 종료시키는 패닉(panic)이 발생했을 때, 이제 런타임은 기본적으로 모든 고루틴이 아닌 현재 실행 중인 고루틴의 스택만 출력합니다.
+보통 패닉과 관련이 있는 것은 현재 고루틴뿐이므로, 다른 고루틴들을 생략하면 크래시 메시지에서 불필요한 출력을 크게 줄일 수 있습니다.
+크래시 메시지에서 모든 고루틴의 스택을 확인하려면, 환경 변수 `GOTRACEBACK`을 `all`로 설정하거나 크래시 발생 전에 [`debug.SetTraceback`](/pkg/runtime/debug/#SetTraceback)을 호출한 후 프로그램을 다시 실행하십시오.
 자세한 내용은 [런타임 문서](/pkg/runtime/#hdr-Environment_Variables)를 참조하십시오.
 
 _업데이트_:
-예상치 못한 오류(panic)가 프로그램 전체의 상태를 dump하는 것을 의도하며,
-예를 들어 타임아웃이 감지되거나 수신된 신호를 명시적으로 처리할 때,
-panic 발생 전에 `debug.SetTraceback("all")`를 호출해야 합니다.
-`signal.Notify` 사용을 검색하면 이러한 코드를 식별하는 데 도움이 될 수 있습니다.
+타임아웃이 감지되었을 때나 수신된 시그널을 명시적으로 처리할 때와 같이, 전체 프로그램의 상태를 덤프하려는 의도로 발생하는 Uncaught panic은 이제 패닉이 발생하기 전에 `debug.SetTraceback("all")`을 호출해야 합니다.
+[`signal.Notify`](/pkg/os/signal/#Notify) 사용 사례를 검색하면 이러한 코드를 식별하는 데 도움이 될 수 있습니다.
 
-Windows에서, Go 1.5 이전 버전에 작성된 Go 프로그램은 `timeBeginPeriod(1)`를 호출하여 전역 Windows 타이머 해상도를 시작 시 1ms로 강제했습니다.
-Go는 더 이상 이를 필요로 하지 않으며, 전역 타이머 해상도를 변경하면 일부 시스템에서 문제가 발생했기 때문에 해당 호출은 제거되었습니다.
+Windows에서 Go 1.5 및 그 이전 버전의 Go 프로그램은 시작 시 `timeBeginPeriod(1)`을 호출하여 전역 Windows 타이머 해상도를 1ms로 강제 설정했습니다.
+이제 Go는 우수한 스케줄러 성능을 위해 더 이상 이 작업이 필요하지 않으며, 전역 타이머 해상도를 변경하는 것이 일부 시스템에서 문제를 일으켰기 때문에 해당 호출이 제거되었습니다.
 
-`-buildmode=c-archive` 또는
-`-buildmode=c-shared`을 사용하여 아카이브 또는 공유 라이브러리를 빌드할 때, 신호 처리 방식이 변경되었습니다.
-Go 1.5에서는 아카이브 또는 공유 라이브러리가 대부분의 신호에 대해 신호 처리기를 설치했습니다.
-Go 1.6에서는 Go 코드 내에서 발생하는 런타임 패닉을 처리하는 데 필요한 동기 신호에 대해서만 신호 처리기를 설치합니다:
-SIGBUS, SIGFPE, SIGSEGV.
+`-buildmode=c-archive` 또는 `-buildmode=c-shared`를 사용하여 아카이브나 공유 라이브러리를 빌드할 때, 시그널 처리 방식이 변경되었습니다.
+
+Go 1.5에서는 아카이브나 공유 라이브러리가 대부분의 시그널에 대해 시그널 핸들러를 설치했습니다.
+
+Go 1.6에서는 Go 코드의 런타임 패닉을 처리하는 데 필요한 동기식 시그널인 `SIGBUS`, `SIGFPE`, `SIGSEGV`에 대해서만 시그널 핸들러를 설치합니다.
+
 자세한 내용은 [os/signal](/pkg/os/signal) 패키지를 참조하십시오.
 
-### 반사 {#reflect}
+### Reflect {#reflect}
 
-[`reflect`](/pkg/reflect/) 패키지는
-[해결된 오래된 호환성 문제](https://github.com/golang/go/issues/12367)를
-gc 및 gccgo 도구 체인 간에
-내부적으로 정의된 내보내기 필드가 있는 구조체 유형에 대한
-관련하여 해결했습니다.
-반사(reflection)를 사용하여 데이터 구조를 탐색하는 코드는, 특히
-`encoding/json` 및 `encoding/xml` 패키지의
-예시를 따르는 직렬화 구현에 사용될 때 업데이트가 필요할 수 있습니다.
+[`reflect`](/pkg/reflect/) 패키지에서 내보내지 않은(unexported) 구조체 타입이 내보낸(exported) 필드를 포함하고 있을 때, gc와 gccgo 툴체인 사이에 오랫동안 존재했던 [호환성 문제](/issue/12367)가 해결되었습니다.
 
-문제는 `reflect`를 사용하여 내장된 비공개 구조체 유형의 필드를 해당 구조체의 공개 필드로 탐색할 때 발생합니다.
-이 경우, `reflect`는 잘못하여 내장된 필드를 공개된 것으로 보고했으며, `Field.PkgPath`를 비어 있는 값으로 반환했습니다.
-이제 필드를 올바르게 비공개로 보고하지만, 구조체 내부에 있는 공개 필드에 액세스할 때 이를 무시합니다.
+리플렉션을 사용하여 데이터 구조를 탐색하는 코드, 특히 [`encoding/json`](/pkg/encoding/json/) 및 [`encoding/xml`](/pkg/encoding/xml/) 패키지의 방식대로 직렬화를 구현하는 코드는 업데이트가 필요할 수 있습니다.
+
+이 문제는 리플렉션을 사용하여 내장된(embedded) 비공개(unexported) 구조체 타입 필드를 거쳐 해당 구조체의 공개(exported) 필드에 접근하려 할 때 발생합니다.
+이전에는 `reflect`가 빈 `Field.PkgPath`를 반환함으로써 내장된 필드를 공개된 것으로 잘못 보고했습니다.
+이제는 해당 필드를 비공개로 정확하게 보고하지만, 구조체 내부에 포함된 공개 필드에 대한 접근 권한을 평가할 때는 이 사실을 무시합니다.
 
 _업데이트_:
-일반적으로, 이전에 구조체에 접근하고 사용하던 코드를 업데이트해야 합니다.
+일반적으로, 이전에는 구조체를 순회하며 사용했던 코드가
 
-f.PkgPath != ""
+`f.PkgPath != ""`
 
 접근 불가능한 필드를 제외하려면
 이제 다음을 사용해야 합니다
 
-f.PkgPath != "" && !f.Anonymous
+`f.PkgPath != "" && !f.Anonymous`
 
-예를 들어, 다음 구현의 변경 사항을 참조하십시오.
-[`encoding/json`](https://go-review.googlesource.com/#/c/14011/2/src/encoding/json/encode.go) 및
-[`encoding/xml`](https://go-review.googlesource.com/#/c/14012/2/src/encoding/xml/typeinfo.go).
+예를 들어, [`encoding/json`](https://go-review.googlesource.com/#/c/14011/2/src/encoding/json/encode.go) 및 [`encoding/xml`](https://go-review.googlesource.com/#/c/14012/2/src/encoding/xml/typeinfo.go)의 구현 변경 사항을 확인하십시오.
 
 ### 정렬 {#sort}
 
-`sort` 패키지에서,
-[`Sort`](/pkg/sort/#Sort)
-구현이 재작성되어,
-`Interface`의
-`Less` 및 `Swap`
-메서드 호출 횟수를 약 10% 줄였으며, 이에 따라 전반적인 시간 절약 효과가 있습니다.
-새로운 알고리즘은 동일한 값을 비교하는 값에 대해 이전과 다른 순서를 선택합니다 (즉, `Less(i, j)` 및 `Less(j, i)`가 false인 경우).
+[`sort`](/pkg/sort/) 패키지에서, [`Sort`](/pkg/sort/#Sort)의 구현이 다시 작성되었습니다. 이를 통해 [`Interface`](/pkg/sort/#Interface)의 `Less` 및 `Swap` 메서드 호출 횟수를 약 10% 줄였으며, 이에 따라 전체적인 실행 시간이 단축되었습니다. 새로운 알고리즘은 값이 동일하다고 비교되는 경우(`Less(i,` `j)`와 `Less(j,` `i)`가 모두 false인 쌍들) 이전과는 다른 순서를 선택합니다.
 
 _업데이트_:
-`Sort` 함수의 정의는 동일한 값의 최종 순서에 대해 어떤 보장도 하지 않습니다.
-그러나 새로운 동작이 특정 순서를 예상하는 프로그램에 영향을 줄 수 있습니다.
-이러한 프로그램은 `Less` 구현을 수정하여 원하는 순서를 보고하거나,
-[`Stable`](/pkg/sort/#Stable)로 변경하여
-동일한 값의 원래 입력 순서를 유지할 수 있습니다.
+`Sort`의 정의는 동일한 값들의 최종 순서에 대해 아무런 보장을 하지 않지만, 새로운 동작 방식은 여전히 특정 순서를 기대하는 프로그램들을 중단시킬 수 있습니다.
+이러한 프로그램들은 원하는 순서를 보고하도록 `Less` 구현을 개선하거나,
+동일한 값들의 원래 입력 순서를 유지하는
+[`Stable`](/pkg/sort/#Stable)로 전환해야 합니다.
 
 ### 템플릿 {#template}
 
-`text/template` 패키지에는 템플릿 작성 작업을 더 쉽게 만들어주는 두 가지 주요 새로운 기능이 있습니다.
+[text/template](/pkg/text/template/) 패키지에는 템플릿 작성을 더 쉽게 만들기 위한 두 가지 중요한 새로운 기능이 추가되었습니다.
 
-먼저, 이제 템플릿 액션 주위의 공백을 제거할 수 있습니다. (`/pkg/text/template/#hdr-Text_and_spaces`)
-이를 통해 템플릿 정의를 더 읽기 쉽게 만들 수 있습니다.
-액션의 시작 부분에 있는 마이너스 기호는 액션 앞에 있는 공백을 제거하도록 지시하고, 액션의 끝 부분에 있는 마이너스 기호는 액션 뒤에 있는 공백을 제거하도록 지시합니다.
-예를 들어, 템플릿은
+우선, 이제 [템플릿 액션 주변의 공백을 제거](/pkg/text/template/#hdr-Text_and_spaces)할 수 있게 되었으며, 이를 통해 템플릿 정의의 가독성을 높일 수 있습니다.
+액션 시작 부분의 마이너스(`-`) 기호는 액션 이전의 공백을 제거하라는 의미이며, 액션 끝 부분의 마이너스(`-`) 기호는 액션 이후의 공백을 제거하라는 의미입니다.
+예를 들어, 다음과 같은 템플릿은
 
 {{23 -}}
 	   <
 	{{- 45}}
 
-형식은 `23<45`입니다.
+`23<45`와 같은 형식입니다.
 
-둘째, 새로운 [`{{block}}` 액션](/pkg/text/template/#hdr-Actions)과 함께, 이름이 지정된 템플릿의 재정의를 허용함으로써, 템플릿의 여러 인스턴스에서 대체될 수 있는 템플릿의 부분을 간단하게 정의할 수 있습니다.
-`text/template` 패키지에 [예제](/pkg/text/template/#example_Template_block)가 있으며, 이 새로운 기능을 보여줍니다.
+둘째로, 새로운 [`{{block}}` 액션](/pkg/text/template/#hdr-Actions)은 이름이 지정된 템플릿의 재정의를 허용함으로써, 서로 다른 인스턴스화 과정에서 교체될 수 있는 템플릿 조각들을 정의하는 간단한 방법을 제공합니다. `text/template` 패키지에 이 새로운 기능을 보여주는 [예제](/pkg/text/template/#example_Template_block)가 있습니다.
 
-### 라이브러리의 세부 변경 사항 {#minor_library_changes}
+### 라이브러리의 소규모 변경 사항 {#minor_library_changes}
 
-- [`archive/tar`](/pkg/archive/tar/) 패키지의
-    구현은 파일 형식의 드문 경우에 많은 버그를 수정합니다.
-    가장 눈에 띄는 변경 사항은
-    [`Reader`](/pkg/archive/tar/#Reader) 유형의
-    [`Read`](/pkg/archive/tar/#Reader.Read) 메서드가
-    특수 파일 유형의 내용을 빈 것으로 보고, 즉시 `io.EOF`를 반환한다는 것입니다.
-  - [`archive/zip`](/pkg/archive/zip/) 패키지에서,
-    [`Reader`](/pkg/archive/zip/#Reader) 유형은 이제
-    [`RegisterDecompressor`](/pkg/archive/zip/#Reader.RegisterDecompressor) 메서드를 가지고 있으며,
-    [`Writer`](/pkg/archive/zip/#Writer) 유형은 이제
-    [`RegisterCompressor`](/pkg/archive/zip/#Writer.RegisterCompressor) 메서드를 가지고 있습니다.
-    이 기능을 통해 개별 zip 파일의 압축 옵션을 제어할 수 있습니다.
-    이 기능은 기존의 전역 [`RegisterDecompressor`](/pkg/archive/zip/#RegisterDecompressor) 및
-    [`RegisterCompressor`](/pkg/archive/zip/#RegisterCompressor) 함수보다 우선합니다.
-  - [`bufio`](/pkg/bufio/) 패키지의
-    [`Scanner`](/pkg/bufio/#Scanner) 유형은 이제
-    [`Buffer`](/pkg/bufio/#Scanner.Buffer) 메서드를 가지고 있습니다.
-    이 메서드를 사용하여 스캔 중에 사용할 초기 버퍼 및 최대 버퍼 크기를 지정할 수 있습니다.
-    필요한 경우 `MaxScanTokenSize`보다 큰 토큰을 스캔할 수 있습니다.
-    또한 `Scanner`에 대해서, 패키지는 이제
-    [`ErrFinalToken`](/pkg/bufio/#ErrFinalToken) 오류 값을 정의하여
-    [split 함수](/pkg/bufio/#SplitFunc)가 처리 중지하거나 최종 빈 토큰을 반환하는 데 사용할 수 있습니다.
-  - [`compress/flate`](/pkg/compress/flate/) 패키지는
-    [`ReadError`](/pkg/compress/flate/#ReadError) 및
-    [`WriteError`](/pkg/compress/flate/#WriteError) 오류 구현을 중단했습니다.
-    Go 1.5에서는 오류가 발생할 때 매우 드물게 반환되었습니다.
-    이제 더 이상 반환되지 않지만, 호환성을 위해 정의해 둡니다.
-  - [`compress/flate`](/pkg/compress/flate/),
-    [`compress/gzip`](/pkg/compress/gzip/), 및
-    [`compress/zlib`](/pkg/compress/zlib/) 패키지는 이제
-    [`io.ErrUnexpectedEOF`](/pkg/io/#ErrUnexpectedEOF)를 사용하여
-    잘린 입력 스트림을 보고, `/pkg/io/#EOF` 대신.
-  - [`crypto/cipher`](/pkg/crypto/cipher/) 패키지는 GCM 디코딩 실패 시 대상 버퍼를 덮어씁니다.
-    이렇게 하면 AESNI 코드가 임시 버퍼를 사용하지 않도록 할 수 있습니다.
-  - [`crypto/tls`](/pkg/crypto/tls/) 패키지에는
-    다양한 미세한 변경 사항이 있습니다.
-    이제 `Listen`가
-    [`Config`](/pkg/crypto/tls/#Config)
-    의 `Certificates`가 `nil`일 때 성공할 수 있습니다.
-    또한 RSA와 AES-GCM 암호화 방법을 지원하며,
-    `RecordHeaderError`](/pkg/crypto/tls/#RecordHeaderError)를 추가하여
-    네트워크 연결을 시도할 때 클라이언트 (특히 `net/http` 패키지)가 TLS 서버에 대한 더 나은 오류를 보고할 수 있습니다.
-  - [`crypto/x509`](/pkg/crypto/x509/) 패키지는
-    자격 증명이 음수 시리얼 번호를 포함할 수 있도록 허용합니다 (사실상 오류이지만 실제로 일반적임).
-    또한 `InsecureAlgorithmError`](/pkg/crypto/x509/#InsecureAlgorithmError)를 정의하여 MD5와 같은 안전하지 않은 알고리즘으로 서명된 자격 증명을 거부할 때 더 나은 오류 메시지를 제공합니다.
-  - [`debug/dwarf`](/pkg/debug/dwarf) 및
-    [`debug/elf`](/pkg/debug/elf/) 패키지는
-    함께 압축된 DWARF 섹션에 대한 지원을 추가합니다.
-    사용자 코드는 업데이트할 필요가 없습니다. 섹션은 읽을 때 자동으로 해제됩니다.
-  - [`debug/elf`](/pkg/debug/elf/) 패키지는
-    일반적으로 압축된 ELF 섹션에 대한 지원을 추가합니다.
-    사용자 코드는 업데이트할 필요가 없습니다. 섹션은 읽을 때 자동으로 해제됩니다.
-    그러나 압축된
-    [`Sections`](/pkg/debug/elf/#Section)는 무작위 액세스를 지원하지 않습니다.
-    그들은 `ReaderAt` 필드가 `nil`입니다.
-  - [`encoding/asn1`](/pkg/encoding/asn1/) 패키지는 이제
-    [`tag and class constants](/pkg/encoding/asn1/#pkg-constants)를 내보내어
-    ASN.1 구조의 고급 파싱에 유용합니다.
-  - 또한 [`encoding/asn1`](/pkg/encoding/asn1/) 패키지에서,
-    [`Unmarshal`](/pkg/encoding/asn1/#Unmarshal)는 이제
-    일반적으로 허용되지 않는 다양한 정수 및 길이 인코딩을 거부합니다.
-  - [`encoding/base64`](/pkg/encoding/base64) 패키지의
-    [`Decoder`](/pkg/encoding/base64/#Decoder)는 이제
-    입력의 마지막 바이트를 처리하도록 수정되었습니다. 이전에 4바이트 토큰을 최대한 처리했지만 나머지를 무시했습니다.
-    따라서 `Decoder`는 패딩되지 않은 인코딩 (예:
-    [RawURLEncoding](/pkg/encoding/base64/#RawURLEncoding))을 올바르게 처리하지만, 마지막에 공백이 있는 패딩된 인코딩 또는 유효하지 않은 바이트로 끝나는 패딩된 인코딩도 거부합니다.
-  - [`encoding/json`](/pkg/encoding/json/) 패키지는
-    [`Number`](/pkg/encoding/json/#Number)
-    의 구문을 JSON 사양에 따라 준수하는지 확인하기 전에 마셜링하기 전에 확인합니다.
-    이전 버전과 마찬가지로, 빈 `Number` (빈 문자열)는 0 (영)으로 마셜링됩니다.
-  - [`encoding/xml`](/pkg/encoding/xml/) 패키지의
-    [`Marshal`](/pkg/encoding/xml/#Marshal) 함수는 이제
-    `chardata` 속성을 지원합니다. 즉,
-    `<![CDATA[ ... ]]>` 태그 내에 인코딩합니다.
-  - 또한 [`encoding/xml`](/pkg/encoding/xml/) 패키지에서,
-    [`Decoder`](/pkg/encoding/xml/#Decoder)'s
-    [`Token`](/pkg/encoding/xml/#Decoder.Token) 메서드는 이제
-    입력에 열린 태그가 모두 보이지 않은 상태에서 EOF에 도달할 때 오류를 보고합니다.
-    이 요구 사항을 피하려면 `RawToken`을 사용하십시오.
-  - [`fmt`](/pkg/fmt/) 패키지는 이제
-    어떤 정수 유형도
-    [`Printf`](/pkg/fmt/#Printf)의 `*` 폭 및 정밀도 사양으로 전달할 수 있습니다.
-    이전 버전에서는 `*` 인수의 유형이 `int`여야 했습니다.
-  - 또한 [`fmt`](/pkg/fmt/) 패키지에서,
-    [`Scanf`](/pkg/fmt/#Scanf)는 이제 %X를 사용하여
-    16진수 문자열을 스캔할 수 있습니다.
-    두 형식 모두 대- 및 소문자 16진수 조합을 허용합니다.
-  - [`image`](/pkg/image/) 및
-    [`image/color`](/pkg/image/color/) 패키지는
-    [`NYCbCrA`](/pkg/image/#NYCbCrA) 및
-    [`NYCbCrA`](/pkg/image/color/#NYCbCrA) 유형을 추가하여
-    비-전단계 알파를 갖는 Y'CbCr 이미지를 지원합니다.
-  - [`io`](/pkg/io/) 패키지의
-    [`MultiWriter`](/pkg/io/#MultiWriter) 구현은 이제
-    [`WriteString`](/pkg/io/#WriteString)를 사용하여
-    [`WriteString`](/pkg/io/#WriteString)에 사용됩니다.
-  - [`math/big`](/pkg/math/big/) 패키지는
-    [`Int`](/pkg/math/big/#Int)에
-    [`Append`](/pkg/math/big/#Int.Append) 및
-    [`Text`](/pkg/math/big/#Int.Text) 메서드를 추가하여
-    더 많은 제어를 제공합니다.
-  - 또한 [`math/big`](/pkg/math/big/) 패키지에서,
-    [`Float`](/pkg/math/big/#Float)는 이제
-    [`encoding.TextMarshaler`](/pkg/encoding/#TextMarshaler) 및
-    [`encoding.TextUnmarshaler`](/pkg/encoding/#TextUnmarshaler)를 구현하여
-    [`encoding/json`](/pkg/encoding/json/) 및
-    [`encoding/xml`](/pkg/encoding/xml/) 패키지가 자연스러운 형식으로 시리얼화할 수 있습니다.
-  - 또한 [`math/big`](/pkg/math/big/) 패키지에서,
-    [`Float`](/pkg/math/big/#Float)'s
-    [`Append`](/pkg/math/big/#Float.Append) 메서드는 이제 -1 정밀도 인수를 지원합니다.
-    [`strconv.ParseFloat`](/pkg/strconv/#ParseFloat)와 마찬가지로,
-    정밀도 -1은 최소한의 숫자를 사용하여,
-    [`Parse`](/pkg/math/big/#Float.Parse)
-    결과를 `Float` 유형으로 읽을 때 원래 값을 생성하는 정밀도로
-    [`Parse`](/pkg/math/big/#Float.Parse)
-    함수에 전달합니다.
-  - [`math/rand`](/pkg/math/rand/) 패키지는
-    [`Read`](/pkg/math/rand/#Read) 함수를 추가하고,
-    [`Rand`](/pkg/math/rand/#Rand)는
-    [`Read`](/pkg/math/rand/#Rand.Read) 메서드를 추가합니다.
-    이러한 기능은 테스트 데이터를 생성하는 데 도움이 됩니다.
-    하지만 주의하십시오.
-    이러한 기능은 암호화 목적으로 사용해서는 안 됩니다.
-    이러한 목적으로는 [`crypto/rand`](/pkg/crypto/rand/) 패키지를 사용하십시오.
-  - [`net`](/pkg/net/) 패키지의
-    [`ParseMAC`](/pkg/net/#ParseMAC) 함수는 이제
-    20바이트 IP-over-InfiniBand (IPoIB) 링크-레이어 주소를 받습니다.
-  - 또한 [`net`](/pkg/net/) 패키지에서,
-    DNS 쿼리에 대한 몇 가지 변경 사항이 있습니다.
-    첫째, 오류 유형인
-    [`DNSError`](/pkg/net/#DNSError) 오류 구현이
-    이제 `Error`를 구현합니다 (특히, `IsTemporary` 메서드는
-    `IsTemporary`](/pkg/net/#DNSError.IsTemporary)
-    함수가 DNS 서버 오류를 반환합니다.
-    둘째, DNS 쿼리 함수인
-    [`LookupAddr`](/pkg/net/#LookupAddr)
-    이제 계획 9 및 Windows에서 루트 도메인 이름을 반환합니다 (결국 점이 포함됨).
-    이 동작은 Unix 시스템에서 Go가 따르는 동작과 일치합니다.
-  - [`net/http`](/pkg/net/http/) 패키지는 HTTP/2 지원에 더해 추가된 몇 가지 미세한 기능이 있습니다.
-    첫째, `FileServer`가 생성된 디렉토리 목록을 파일 이름별로 정렬합니다.
-    둘째, `ServeFile` 함수는 요청의 URL 경로에 “..” (점-점)를 포함하는 결과를 제공하지 않습니다.
-    이러한 경우 사용자는
-    [`FileServer`](/pkg/net/http/#FileServer) 및
-    [`Dir`](/pkg/net/http/#Dir)
-    를 호출해야 합니다.
-    점-점 경로가 필요한 경우
-    [`ServeContent`](/pkg/net/http/#ServeContent)를 호출할 수도 있습니다.
-    셋째, `Client`는
-    [`Transport.ExpectContinueTimeout`](/pkg/net/http/#Transport)를 설정할 수 있도록 합니다.
-    넷째, RFC 6585에 정의된 다섯 가지 새로운 오류 코드가 추가되었습니다.
-    `StatusPreconditionRequired` (428),
-    `StatusTooManyRequests` (429),
-    `StatusRequestHeaderFieldsTooLarge` (431), 및
-    `StatusNetworkAuthenticationRequired` (511).
-    마지막으로, `CloseNotifier`
-    의 구현 및 설명이 크게 변경되었습니다.
-    `Hijacker`
-    인터페이스는 이전에 `CloseNotifier`를 사용하여 사용된 연결에서도 제대로 작동합니다.
-    `CloseNotifier`를 사용하는 경우에 작동하는 방식에 대한 설명이 제공됩니다.
-  - [`net/http/httptest`](/pkg/net/http/httptest/) 패키지의
-    [`ResponseRecorder`](/pkg/net/http/httptest/#ResponseRecorder)는 이제
-    [`http.Server`](/pkg/net/http/#Server)의
-    [`Content-Type` 헤더를 동일한 알고리즘으로 초기화합니다.
-  - [`net/url`](/pkg/net/url/) 패키지의
-    [`Parse`](/pkg/net/url/#Parse) 함수는 이제
-    호스트 이름의 파싱에 대해 더 엄격하고, 더 엄격하게 사양 준수를 합니다.
-    예를 들어 호스트 이름에 공백이 포함되지 않습니다.
-  - 또한 [`net/url`](/pkg/net/url/) 패키지에서,
-    [`Error`](/pkg/net/url/#Error) 유형이
-    이제 `net.Error`를 구현합니다.
-  - [`os`](/pkg/os/) 패키지의
-    [`IsExist`](/pkg/os/#IsExist),
-    [`IsNotExist`](/pkg/os/#IsNotExist), 및
-    [`IsPermission`](/pkg/os/#IsPermission) 함수는 이제
-    `SyscallError`를 쿼리할 때 올바른 결과를 반환합니다.
-  - Unix 시스템에서는,
-    `os.Stdout` 또는 `os.Stderr` (더 정확하게는 파일 설명자 1 또는 2에 쓰기하는 `os.File`)에 대한 쓰기가 실패하면,
-    브이커 오류가 발생하면 프로그램이 `SIGPIPE` 신호를 발생시킵니다.
-    이 신호는 기본적으로 프로그램을 종료합니다. 하지만
-    [`os/signal`](/pkg/os/signal)
-    의 `Notify` 함수를 호출하여 이 신호를 catch할 수 있습니다.
-    파일 설명자 1 또는 2가 아닌 다른 파일에 대한 쓰기는 단순히
-    `syscall.EPIPE` (이것이 `os.PathError` 및/또는 `os.SyscallError`에 래핑될 수 있음)을 반환합니다.
-    이전 버전에서는 10번의 연속 쓰기를 통해, 닫힌 파이프에 쓰기를 시도했을 때, catch할 수 없는 `SIGPIPE` 신호가 발생했습니다.
-  - [`os/exec`](/pkg/os/exec/) 패키지에서,
-    `Cmd`의 `Output` 메서드는 여전히 명령이 실패할 때 `ExitError`를 반환합니다.
-    이 오류에는 이제 기본 및 추가 (현재 32KB) 크기의 실패한 표준 오류의 일부가 포함되어 있습니다.
-    이러한 `ExitError`의 `String` 메서드는 캡처된 표준 오류를 표시하지 않습니다.
-    이러한 데이터를 가져오려면 별도로 가져와야 합니다.
-  - Windows에서는,
-    [`path/filepath`](/pkg/path/filepath/) 패키지의
-    [`Join`](/pkg/path/filepath/#Join) 함수가 이제 올바르게 작동합니다.
-    예를 들어 `` `Join(`c:`,`` `a`) ``는 이제
-    `` `c:a` ``를 반환합니다 (이전 버전에서는 `` `c:\a` ``).
-    이 동작은 점-점 경로를 사용하여 코드를 예상하는 기존 코드에 영향을 줄 수 있습니다.
-  - [`regexp`](/pkg/regexp/) 패키지는
-    [`Regexp`](/pkg/regexp/#Regexp) 유형이
-    동시에 실행되는 goroutine에서 안전하게 사용할 수 있도록 합니다.
-    이 유형은 정규식 검색 중에 사용되는 스크래치 공간을 보호하는
-    [`sync.Mutex`](/pkg/sync/#Mutex)를 사용합니다.
-    동일한 `Regexp`를 동시에 사용하는 여러 goroutine은
-    이 뮤텍스에 대한 경쟁으로 인해 성능이 저하됩니다.
-    이러한 상황에서, `Regexp`는
-    [`Copy`](/pkg/regexp/#Regexp) 메서드를 제공합니다.
-    이 메서드를 사용하면 원래와 유사한 구조를 가진 다른 `Regexp` 인스턴스를 만들 수 있습니다.
-    이러한 두 개의 goroutine은 경쟁 없이 다른 `Regexp` 인스턴스를 사용할 수 있습니다.
-    하지만 `Copy`는 추가된 공간 오버헤드를 가지므로, 문제가 발생했음을 관찰한 경우에만 사용해야 합니다.
-  - [`encoding`](/pkg/encoding/) 패키지의
-    [`strconv`](/pkg/strconv/) 패키지는 이제
-    [`tag and class constants](/pkg/encoding/strconv/#pkg-constants)를 내보냅니다.
-    이러한 상수는 ASN.1 구조의 고급 파싱에 유용합니다.
-  - 또한 [`encoding`](/pkg/encoding/) 패키지,
-    [`Unmarshal`](/pkg/encoding/strconv/#Unmarshal)는 이제
-    일반적으로 허용되지 않는 다양한 정수 및 길이 인코딩을 거부합니다.
-  - [`encoding/base64`](/pkg/encoding/base64) 패키지의
-    [`Decoder`](/pkg/encoding/base64/#Decoder)는 이제
-    입력의 마지막 바이트를 처리하도록 수정되었습니다. 이전에 4바이트 토큰을 최대한 처리했지만 나머지를 무시했습니다.
-    따라서 `Decoder`는 패딩되지 않은 인코딩 (예:
-    [RawURLEncoding](/pkg/encoding/base64/#RawURLEncoding))을 올바르게 처리하지만, 마지막에 공백이 있는 패딩된 인코딩 또는 유효하지 않은 바이트로 끝나는 패딩된 인코딩도 거부합니다.
-  - [`encoding/json`](/pkg/encoding/json/) 패키지는
-    [`Number`](/pkg/encoding/json/#Number)
-    의 구문을 JSON 사양에 따라 준수하는지 확인하기 전에 마셜링하기 전에 확인합니다.
-    이전 버전과 마찬가지로, 빈 `Number` (빈 문자열)는 0 (영)으로 마셜링됩니다.
-  - [`encoding/xml`](/pkg/encoding/xml/) 패키지의
-    [`Marshal`](/pkg/encoding/xml/#Marshal) 함수는 이제
-    `cdata` 속성을 지원합니다. 즉,
-    `<![CDATA[ ... ]]>` 태그 내에 인코딩합니다.
-  - 또한 [`encoding/xml`](/pkg/encoding/xml/) 패키지에서,
-    [`Decoder`](/pkg/encoding/xml/#Decoder)'s
-    [`Token`](/pkg/encoding/xml/#Decoder.Token) 메서드는 이제
-    입력에 열린 태그가 모두 보이지 않은 상태에서 EOF에 도달할 때 오류를 보고합니다.
-    이 요구 사항을 피하려면 `RawToken`을 사용하십시오.
-  - [`fmt`](/pkg/fmt/) 패키지는 이제
-    어떤 정수 유형도
-    [`Printf`](/pkg/fmt/#Printf)'s `*` 폭 및 정밀도 사양으로 전달할 수 있습니다.
-    이전 버전에서는 `*` 인수의 유형이 `int`여야 했습니다.
-  - 또한 [`fmt`](/pkg/fmt/) 패키지에서,
-    [`Scanf`](/pkg/fmt/#Scanf)는 이제 %X를 사용하여
-    16진수 문자열을 스캔할 수 있습니다.
-    두 형식 모두 대- 및 소문자 16진수 조합을 허용합니다.
-  - [`image`](/pkg/image/)
-    및
-    [`image/color`](/pkg/image/color/) 패키지는
-    [`NYCbCrA`](/pkg/image/#NYCbCrA) 및
-    [`NYCbCrA`](/pkg/image/color/#NYCbCrA) 유형을 추가하여
-    비-전단계 알파를 갖는 Y'CbCr 이미지를 지원합니다.
-  - [`io`](/pkg/io/) 패키지의
-    [`MultiWriter`](/pkg/io/#MultiWriter) 구현은 이제
-    [`WriteString`](/pkg/io/#WriteString)를 사용하여
-    [`WriteString`](/pkg/io/#WriteString)에 사용됩니다.
-  - [`math/big`](/pkg/math/big/) 패키지는
-    [`Int`](/pkg/math/big/#Int)에
-    [`Append`](/pkg/math/big/#Int.Append) 및
-    [`Text`](/pkg/math/big/#Int.Text) 메서드를 추가하여 더 많은 제어를 제공합니다.
-  - 또한 [`math/big`](/pkg/math/big/) 패키지에서,
-    [`Float`](/pkg/math/big/#Float)는 이제
-    [`encoding.TextMarshaler`](/pkg/encoding/#TextMarshaler) 및
-    [`encoding.TextUnmarshaler`](/pkg/encoding/#TextUnmarshaler)를 구현하여
-    [`encoding/json`](/pkg/encoding/json/) 및
-    [`encoding/xml`](/pkg/encoding/xml/) 패키지가 자연스러운 형식으로 시리얼화할 수 있습니다.
-  - 또한 [`math/big`](/pkg/math/big/) 패키지에서,
-    [`Float`](/pkg/math/big/#Float)'s
-    [`Append`](/pkg/math/big/#Float.Append) 메서드는 이제 -1 정밀도 인수를 지원합니다.
-    [`strconv.ParseFloat`](/pkg/strconv/#ParseFloat)와 마찬가지로,
-    정밀도 -1은 최소한의 숫자를 사용하여,
-    [`Parse`](/pkg/math/big/#Float.Parse)
-    함수에 전달할 때 원래 값을 생성하는 정밀도로
-    [`Parse`](/pkg/math/big/#Float.Parse)
-    함수에 전달합니다.
-  - [`math/rand`](/pkg/math/rand/) 패키지는
-    [`Read`](/pkg/math/rand/#Read) 함수와 함께
-    [`Rand`](/pkg/math/rand/#Rand)에
-    [`Read`](/pkg/math/rand/#Rand.Read) 메서드를 추가합니다.
-    이러한 기능은 테스트 데이터를 생성하는 데 도움이 됩니다.
-    하지만 주의하십시오.
-    이러한 기능은 암호화 목적으로 사용해서는 안 됩니다.
-    이러한 목적으로는 [`crypto/rand`](/pkg/crypto/rand/) 패키지를 사용하십시오.
-  - [`net`](/pkg/net/) 패키지의
-    [`ParseMAC`](/pkg/net/#ParseMAC) 함수는 이제
-    20바이트 IP-over-InfiniBand (IPoIB) 링크-레이어 주소를 받습니다.
-  - 또한 [`net`](/pkg/net/) 패키지에서,
-    DNS 쿼리에 대한 몇 가지 변경 사항이 있습니다.
-    첫째, 오류 유형인
-    [`DNSError`](/pkg/net/#DNSError) 오류 구현이
-    이제 `Error`를 구현합니다 (특히, `IsTemporary` 메서드는
-    `IsTemporary`](/pkg/net/#DNSError.IsTemporary)
-    함수가 DNS 서버 오류를 반환합니다.
-    둘째, DNS 쿼리 함수인
-    [`LookupAddr`](/pkg/net/#LookupAddr)
-    이제 계획 9 및 Windows에서 루트 도메인 이름을 반환합니다 (결국 점이 포함됨).
-    이 동작은 Unix 시스템에서 Go가 따르는 동작과 일치합니다.
-  - [`net/http`](/pkg/net/http/) 패키지는 HTTP/2 지원에 더해 추가된 몇 가지 미세한 기능이 있습니다.
-    첫째, `FileServer`가 생성된 디렉토리 목록을 파일 이름별로 정렬합니다.
-    둘째, `ServeFile` 함수는 요청의 URL 경로에 “..” (점-점)를 포함하는 결과를 제공하지 않습니다.
-    이러한 경우 사용자는
-    [`FileServer`](/pkg/net/http/#FileServer) 및
-    [`Dir`](/pkg/net/http/#Dir)
-    를 호출해야 합니다.
-    점-점 경로가 필요한 경우
-    [`ServeContent`](/pkg/net/http/#ServeContent)를 호출할 수도 있습니다.
-    셋째, `Client`는
-    [`Transport.ExpectContinueTimeout`](/pkg/net/http/#Transport)를 설정할 수 있도록 합니다.
-    넷째, RFC 6585에 정의된 다섯 가지 새로운 오류 코드가 추가되었습니다.
-    `StatusPreconditionRequired` (428),
-    `StatusTooManyRequests` (429),
-    `StatusRequestHeaderFieldsTooLarge` (431), 및
-    `StatusNetworkAuthenticationRequired` (511).
-    마지막으로, `CloseNotifier`
-    의 구현 및 설명이 크게 변경되었습니다.
-    `Hijacker`
-    인터페이스는 이전에 `CloseNotifier`를 사용하여 사용된 연결에서도 제대로 작동합니다.
-    `CloseNotifier`를 사용하는 경우에 작동하는 방식에 대한 설명이 제공됩니다.
-  - [`net/http/httptest`](/pkg/net/http/httptest/) 패키지의
-    [`ResponseRecorder`](/pkg/net/http/httptest/#ResponseRecorder)는 이제
-    [`http.Server`](/pkg/net/http/#Server)의
-    [`Content-Type` 헤더를 동일한 알고리즘으로 초기화합니다.
-  - [`net/url`](/pkg/net/url/) 패키지의
-    [`Parse`](/pkg/net/url/#Parse) 함수는 이제
-    호스트 이름의 파싱에 대해 더 엄격하고, 더 엄격하게 사양 준수를 합니다.
-  - 또한 [`net/url`](/pkg/net/url/) 패키지에서,
-    [`Error`](/pkg/net/url/#Error) 유형이
-    이제 `net.Error`를 구현합니다.
-  - [`os`](/pkg/os/) 패키지의
-    [`IsExist`](/pkg/os/#IsExist),
-    [`IsNotExist`](/pkg/os/#IsNotExist), 및
-    [`IsPermission`](/pkg/os/#IsPermission) 함수는 이제
-    `SyscallError`를 쿼리할 때 올바른 결과를 반환합니다.
-  - Unix 시스템에서는,
-    `os.Stdout` 또는 `os.Stderr` (더 정확하게는 파일 설명자 1 또는 2에 쓰기하는 `os.File`)에 대한 쓰기가 실패하면,
-    브이커 오류가 발생하면 프로그램이 `SIGPIPE` 신호를 발생시킵니다.
-    이 신호는 기본적으로 프로그램을 종료합니다. 하지만
-    [`os/signal`](/pkg/os/signal)
-    의 `Notify` 함수를 호출하여 이 신호를 catch할 수 있습니다.
+- [`archive/tar`](/pkg/archive/tar/) 패키지의 구현체에서 파일 형식의 드문 코너 케이스에 발생하던 많은 버그가 수정되었습니다. 눈에 띄는 변경 사항 중 하나는 [`Reader`](/pkg/archive/tar/#Reader) 타입의 [`Read`](/pkg/archive/tar/#Reader.Read) 메서드가 이제 특수 파일 타입의 내용을 빈 상태로 표시하며 즉시 `io.EOF`를 반환한다는 점입니다.
+  - [`archive/zip`](/pkg/archive/zip/) 패키지에서 [`Reader`](/pkg/archive/zip/#Reader) 타입에 [`RegisterDecompressor`](/pkg/archive/zip/#Reader.RegisterDecompressor) 메서드가 추가되었고, [`Writer`](/pkg/archive/zip/#Writer) 타입에 [`RegisterCompressor`](/pkg/archive/zip/#Writer.RegisterCompressor) 메서드가 추가되어 개별 zip 파일에 대한 압축 옵션을 제어할 수 있게 되었습니다. 이들은 기존의 전역 [`RegisterDecompressor`](/pkg/archive/zip/#RegisterDecompressor) 및 [`RegisterCompressor`](/pkg/archive/zip/#RegisterCompressor) 함수보다 우선순위가 높습니다.
+  - [`bufio`](/pkg/bufio/) 패키지의 [`Scanner`](/pkg/bufio/#Scanner) 타입에 스캐닝 중에 사용할 초기 버퍼와 최대 버퍼 크기를 지정할 수 있는 [`Buffer`](/pkg/bufio/#Scanner.Buffer) 메서드가 추가되었습니다. 이를 통해 필요한 경우 `MaxScanTokenSize`보다 큰 토큰을 스캔할 수 있습니다. 또한 `Scanner`를 위해 [분할 함수](/pkg/bufio/#SplitFunc)가 처리를 중단하거나 최종 빈 토큰을 반환하는 데 사용할 수 있는 [`ErrFinalToken`](/pkg/bufio/#ErrFinalToken) 에러 값이 정의되었습니다.
+  - [`compress/flate`](/pkg/compress/flate/) 패키지에서 [`ReadError`](/pkg/compress/flate/#ReadError) 및 [`WriteError`](/pkg/compress/flate/#WriteError) 에러 구현이 deprecated 되었습니다. Go 1.5에서는 에러 발생 시 매우 드물게 반환되었으나, 이제는 반환되지 않습니다. 다만 호환성을 위해 정의는 유지됩니다.
+  - [`compress/flate`](/pkg/compress/flate/), [`compress/gzip`](/pkg/compress/gzip/), [`compress/zlib`](/pkg/compress/zlib/) 패키지가 이제 잘린 입력 스트림에 대해 [`io.EOF`](/pkg/io/#EOF) 대신 [`io.ErrUnexpectedEOF`](/pkg/io/#ErrUnexpectedEOF)를 보고합니다.
+  - [`crypto/cipher`](/pkg/crypto/cipher/) 패키지는 이제 GCM 복호화 실패 시 대상 버퍼를 덮어씁니다. 이는 AESNI 코드가 임시 버퍼를 사용하지 않도록 하기 위함입니다.
+  - [`crypto/tls`](/pkg/crypto/tls/) 패키지에 다양한 소규모 변경 사항이 있습니다. 이제 [`Config`](/pkg/crypto/tls/#Config)의 `Certificates`가 nil이더라도 `GetCertificate` 콜백이 설정되어 있다면 [`Listen`](/pkg/crypto/tls/#Listen)이 성공합니다. 또한 AES-GCM 사이퍼 스위트를 사용하는 RSA 지원이 추가되었으며, 클라이언트(특히 [`net/http`](/pkg/net/http/) 패키지)가 non-TLS 서버에 TLS 연결을 시도할 때 더 정확한 에러를 보고할 수 있도록 [`RecordHeaderError`](/pkg/crypto/tls/#RecordHeaderError)가 추가되었습니다.
+  - [`crypto/x509`](/pkg/crypto/x509/) 패키지는 이제 인증서에 음수 일련번호가 포함되는 것을 허용하며(기술적으로는 에러지만 실제로는 흔한 경우임), MD5와 같은 안전하지 않은 알고리즘으로 서명된 인증서를 거부할 때 더 나은 에러 메시지를 제공하기 위해 새로운 [`InsecureAlgorithmError`](/pkg/crypto/x509/#InsecureAlgorithmError)를 정의합니다.
+  - [`debug/dwarf`](/pkg/debug/dwarf) 및 [`debug/elf`](/pkg/debug/elf/) 패키지가 함께 압축된 DWARF 섹션 지원을 추가했습니다. 사용자 코드를 업데이트할 필요는 없으며, 섹션을 읽을 때 자동으로 압축이 해제됩니다.
+  - [`debug/elf`](/pkg/debug/elf/) 패키지가 일반적인 압축 ELF 섹션 지원을 추가했습니다. 사용자 코드를 업데이트할 필요는 없으며, 섹션을 읽을 때 자동으로 압축이 해제됩니다. 다만, 압축된 [`Sections`](/pkg/debug/elf/#Section)는 임의 접근(random access)을 지원하지 않으며, `ReaderAt` 필드가 nil입니다.
+  - [`encoding/asn1`](/pkg/encoding/asn1/) 패키지가 이제 ASN.1 구조의 고급 파싱에 유용한 [태그 및 클래스 상수](/pkg/encoding/asn1/#pkg-constants)를 export 합니다.
+  - 또한 [`encoding/asn1`](/pkg/encoding/asn1/) 패키지에서 [`Unmarshal`](/pkg/encoding/asn1/#Unmarshal)이 이제 다양한 비표준 정수 및 길이 인코딩을 거부합니다.
+  - [`encoding/base64`](/pkg/encoding/base64) 패키지의 [`Decoder`](/pkg/encoding/base64/#Decoder)가 입력의 마지막 바이트들을 처리하도록 수정되었습니다. 이전에는 가능한 한 많은 4바이트 토큰을 처리하고 최대 3바이트의 나머지는 무시했습니다. 따라서 `Decoder`는 이제 패딩이 없는 인코딩(예: [RawURLEncoding](/pkg/encoding/base64/#RawURLEncoding))의 입력을 올바르게 처리하지만, 패딩이 있는 인코딩에서 잘렸거나 후행 공백과 같은 잘못된 바이트로 끝나는 입력은 거부합니다.
+  - [`encoding/json`](/pkg/encoding/json/) 패키지는 이제 [`Number`](/pkg/encoding/json/#Number)를 마샬링하기 전에 구문을 확인하여 숫자 값에 대한 JSON 사양을 준수하는지 요구합니다. 이전 릴리스와 마찬가지로, zero `Number`(빈 문자열)는 리터럴 0(zero)으로 마샬링됩니다.
+  - [`encoding/xml`](/pkg/encoding/xml/) 패키지의 [`Marshal`](/pkg/encoding/xml/#Marshal) 함수가 이제 `chardata`와 유사하게 인수를 하나 이상의 `<![CDATA[ ... ]]>` 태그로 인코딩하는 `cdata` 속성을 지원합니다.
+  - 또한 [`encoding/xml`](/pkg/encoding/xml/) 패키지에서 [`Decoder`](/pkg/encoding/xml/#Decoder)의 [`Token`](/pkg/encoding/xml/#Decoder.Token) 메서드가 이제 모든 열린 태그가 닫히기 전에 EOF를 만나면 에러를 보고합니다. 이는 입력의 태그가 적절히 매칭되어야 한다는 일반적인 요구 사항과 일치합니다. 이 요구 사항을 피하려면 [`RawToken`](/pkg/encoding/xml/#Decoder.RawToken)을 사용하십시오.
+  - [`fmt`](/pkg/fmt/) 패키지는 이제 [`Printf`](/pkg/fmt/#Printf)의 `*` 너비 및 정밀도 지정 인수로 모든 정수 타입을 허용합니다. 이전 릴리스에서는 `*`에 대한 인수가 반드시 `int` 타입이어야 했습니다.
+  - 또한 [`fmt`](/pkg/fmt/) 패키지에서 [`Scanf`](/pkg/fmt/#Scanf)가 이제 %x의 별칭으로 %X를 사용하여 16진수 문자열을 스캔할 수 있습니다. 두 형식 모두 대소문자가 섞인 16진수를 허용합니다.
+  - [`image`](/pkg/image/) 및 [`image/color`](/pkg/image/color/) 패키지에 프리멀티플라이되지 않은 알파(non-premultiplied alpha)를 가진 Y'CbCr 이미지를 지원하기 위해 [`NYCbCrA`](/pkg/image/#NYCbCrA) 및 [`NYCbCrA`](/pkg/image/color/#NYCbCrA) 타입이 추가되었습니다.
+  - [`io`](/pkg/io/) 패키지의 [`MultiWriter`](/pkg/io/#MultiWriter) 구현체에 [`WriteString`](/pkg/io/#WriteString)에서 사용할 수 있는 `WriteString` 메서드가 구현되었습니다.
+  - [`math/big`](/pkg/math/big/) 패키지에서 [`Int`](/pkg/math/big/#Int)에 출력 제어력을 높이기 위한 [`Append`](/pkg/math/big/#Int.Append) 및 [`Text`](/pkg/math/big/#Int.Text) 메서드가 추가되었습니다.
+  - 또한 [`math/big`](/pkg/math/big/) 패키지에서 [`Float`](/pkg/math/big/#Float)가 이제 [`encoding.TextMarshaler`](/pkg/encoding/#TextMarshaler) 및 [`encoding.TextUnmarshaler`](/pkg/encoding/#TextUnmarshaler)를 구현하여 [`encoding/json`](/pkg/encoding/json/) 및 [`encoding/xml`](/pkg/encoding/xml/) 패키지에 의해 자연스러운 형태로 직렬화될 수 있습니다.
+  - 또한 [`math/big`](/pkg/math/big/) 패키지에서 [`Float`](/pkg/math/big/#Float)의 [`Append`](/pkg/math/big/#Float.Append) 메서드가 이제 특별한 정밀도 인수 -1을 지원합니다. [`strconv.ParseFloat`](/pkg/strconv/#ParseFloat)와 마찬가지로, 정밀도 -1은 결과를 동일한 정밀도의 `Float`로 [`Parse`](/pkg/math/big/#Float.Parse) 하여 읽었을 때 원래 값과 동일하게 되기 위해 필요한 최소한의 자릿수를 사용함을 의미합니다.
+  - [`math/rand`](/pkg/math/rand/) 패키지에 [`Read`](/pkg/math/rand/#Read) 함수가 추가되었고, 마찬가지로 [`Rand`](/pkg/math/rand/#Rand)에 [`Read`](/pkg/math/rand/#Rand.Read) 메서드가 추가되었습니다. 이를 통해 의사 난수 테스트 데이터를 더 쉽게 생성할 수 있습니다. 패키지의 다른 부분과 마찬가지로, 이는 암호화 설정에서 사용해서는 안 되며, 그러한 용도로는 대신 [`crypto/rand`](/pkg/crypto/rand/) 패키지를 사용하십시오.
+  - [`net`](/pkg/net/) 패키지의 [`ParseMAC`](/pkg/net/#ParseMAC) 함수가 이제 20바이트 IP-over-InfiniBand (IPoIB) 링크 계층 주소를 허용합니다.
+  - 또한 [`net`](/pkg/net/) 패키지에서 DNS 조회에 몇 가지 변경 사항이 있었습니다. 첫째, [`DNSError`](/pkg/net/#DNSError) 에러 구현체가 이제 [`Error`](/pkg/net/#Error)를 구현하며, 특히 새로운 [`IsTemporary`](/pkg/net/#DNSError.IsTemporary) 메서드는 DNS 서버 에러에 대해 true를 반환합니다. 둘째, [`LookupAddr`](/pkg/net/#LookupAddr)와 같은 DNS 조회 함수가 이제 Plan 9 및 Windows에서도 Unix 시스템의 Go 동작과 일치하도록 루트 도메인 이름(끝에 점이 붙은 형태)을 반환합니다.
+  - [`net/http`](/pkg/net/http/) 패키지에는 이미 논의된 HTTP/2 지원 외에 여러 소규모 추가 사항이 있습니다. 첫째, [`FileServer`](/pkg/net/http/#FileServer)가 이제 생성된 디렉토리 목록을 파일 이름순으로 정렬합니다. 둘째, [`ServeFile`](/pkg/net/http/#ServeFile) 함수는 이제 요청의 URL 경로에 경로 요소로 ".." (dot-dot)이 포함되어 있으면 결과를 제공하지 않습니다. 프로그램은 일반적으로 `ServeFile`을 직접 호출하는 대신 `FileServer`와 [`Dir`](/pkg/net/http/#Dir)를 사용해야 합니다. dot-dot이 포함된 URL 요청에 대해 파일 콘텐츠를 제공해야 하는 프로그램은 여전히 [`ServeContent`](/pkg/net/http/#ServeContent)를 호출할 수 있습니다. 셋째, [`Client`](/pkg/net/http/#Client)는 이제 사용자 코드가 `Expect:` `100-continue` 헤더를 설정할 수 있도록 허용합니다 ([`Transport.ExpectContinueTimeout`](/pkg/net/http/#Transport) 참조). 넷째, [다섯 가지 새로운 에러 코드](/pkg/net/http/#pkg-constants)가 추가되었습니다: RFC 6585의 `StatusPreconditionRequired` (428), `StatusTooManyRequests` (429), `StatusRequestHeaderFieldsTooLarge` (431), `StatusNetworkAuthenticationRequired` (511)와 최근 승인된 `StatusUnavailableForLegalReasons` (451)입니다. 다섯째, [`CloseNotifier`](/pkg/net/http/#CloseNotifier)의 구현과 문서가 상당히 변경되었습니다. [`Hijacker`](/pkg/net/http/#Hijacker) 인터페이스는 이제 이전에 `CloseNotifier`와 함께 사용된 연결에서도 올바르게 작동합니다. 문서에는 이제 `CloseNotifier`가 언제 작동할 것으로 기대되는지 설명되어 있습니다.
+  - 또한 [`net/http`](/pkg/net/http/) 패키지에서 `Method` 필드가 빈 문자열로 설정된 [`Request`](/pkg/net/http/#Request) 데이터 구조 처리와 관련된 몇 가지 변경 사항이 있습니다. 빈 `Method` 필드는 항상 `"GET"`의 별칭으로 문서화되어 왔으며 앞으로도 그렇습니다. 하지만 Go 1.6은 빈 `Method`를 명시적인 `"GET"`과 동일하게 처리하지 않았던 몇 가지 루틴을 수정했습니다. 특히, 이전 릴리스에서 [`Client`](/pkg/net/http/#Client)는 `Method`가 명시적으로 `"GET"`으로 설정된 경우에만 리다이렉트를 따랐으나, Go 1.6의 `Client`는 빈 `Method`에 대해서도 리다이렉트를 따릅니다. 마지막으로, [`NewRequest`](/pkg/net/http/#NewRequest)는 빈 값으로 허용된다고 문서화되지 않은 `method` 인수를 받습니다. 이전 릴리스에서는 빈 `method` 인수를 전달하면 `Method` 필드가 빈 `Request`가 생성되었습니다. Go 1.6에서 결과 `Request`는 항상 초기화된 `Method` 필드를 갖습니다. 인수가 빈 문자열인 경우, `NewRequest`는 반환된 `Request`의 `Method` 필드를 `"GET"`으로 설정합니다.
+  - [`net/http/httptest`](/pkg/net/http/httptest/) 패키지의 [`ResponseRecorder`](/pkg/net/http/httptest/#ResponseRecorder)는 이제 [`http.Server`](/pkg/net/http/#Server)와 동일한 콘텐츠 스니핑 알고리즘을 사용하여 기본 Content-Type 헤더를 초기화합니다.
+  - [`net/url`](/pkg/net/url/) 패키지의 [`Parse`](/pkg/net/url/#Parse)는 이제 호스트 이름 파싱에 대해 더 엄격하고 사양을 더 잘 준수합니다. 예를 들어, 호스트 이름에 공백이 포함되는 것은 더 이상 허용되지 않습니다.
+  - 또한 [`net/url`](/pkg/net/url/) 패키지에서 [`Error`](/pkg/net/url/#Error) 타입이 이제 [`net.Error`](/pkg/net/#Error)를 구현합니다.
+  - [`os`](/pkg/os/) 패키지의 [`IsExist`](/pkg/os/#IsExist), [`IsNotExist`](/pkg/os/#IsNotExist), [`IsPermission`](/pkg/os/#IsPermission)은 이제 [`SyscallError`](/pkg/os/#SyscallError)에 대해 문의할 때 올바른 결과를 반환합니다.
+  - Unix-like 시스템에서 [`os.Stdout` 또는 `os.Stderr`](/pkg/os/#pkg-variables) (더 정확하게는 파일 디스크립터 1 또는 2로 열린 `os.File`)에 쓰기가 broken pipe 에러로 인해 실패하면, 프로그램은 `SIGPIPE` 시그널을 발생시킵니다. 기본적으로 이는 프로그램의 종료를 유발하며, 이는 `syscall.SIGPIPE`에 대해 [`os/signal`](/pkg/os/signal) [`Notify`](/pkg/os/signal/#Notify) 함수를 호출하여 변경할 수 있습니다. 1 또는 2 이외의 파일 디스크립터에서 broken pipe에 쓰는 것은 단순히 호출자에게 `syscall.EPIPE` (아마도 [`os.PathError`](/pkg/os#PathError) 및/또는 [`os.SyscallError`](/pkg/os#SyscallError)로 래핑됨)를 반환합니다. broken pipe에 10번 연속으로 쓴 후 잡을 수 없는 `SIGPIPE` 시그널을 발생시키던 이전 동작은 더 이상 발생하지 않습니다.
+  - [`os/exec`](/pkg/os/exec/) 패키지에서 [`Cmd`](/pkg/os/exec/#Cmd)의 [`Output`](/pkg/os/exec/#Cmd.Output) 메서드는 명령어가 성공하지 못한 상태로 종료될 때 계속해서 [`ExitError`](/pkg/os/exec/#ExitError)를 반환합니다. 표준 에러가 버려졌을 경우, 반환된 `ExitError`는 이제 디버깅이나 에러 메시지 포함을 위해 실패한 명령어의 표준 에러 출력의 접두사와 접미사(현재 32kB)를 보유합니다. `ExitError`의 [`String`](/pkg/os/exec/#ExitError.String) 메서드는 캡처된 표준 에러를 표시하지 않으며, 프로그램은 데이터 구조에서 별도로 이를 가져와야 합니다.
+  - Windows에서 [`path/filepath`](/pkg/path/filepath/) 패키지의 [`Join`](/pkg/path/filepath/#Join) 함수는 이제 베이스가 상대 드라이브 경로인 경우를 올바르게 처리합니다. 예를 들어, ``Join(`c:`,`` `` `a`) ``는 이제 이전 릴리스의 `` `c:\a` `` 대신 `` `c:a` ``를 반환합니다. 이는 잘못된 결과를 예상하던 코드에 영향을 줄 수 있습니다.
+  - [`regexp`](/pkg/regexp/) 패키지에서 [`Regexp`](/pkg/regexp/#Regexp) 타입은 항상 동시성 goroutine에서 사용하기에 안전했습니다. 이는 정규 표현식 검색 중에 사용되는 스크래치 공간 캐시를 보호하기 위해 [`sync.Mutex`](/pkg/sync/#Mutex)를 사용합니다. 많은 goroutine에서 동일한 `Regexp`를 사용하는 일부 고동시성 서버에서는 해당 뮤텍스의 경합으로 인해 성능 저하가 발생했습니다. 이러한 서버를 돕기 위해 `Regexp`에 [`Copy`](/pkg/regexp/#Regexp.Copy) 메서드가 추가되었습니다. 이 메서드는 원본의 대부분의 구조를 공유하지만 자체적인 스크래치 공간 캐시를 갖는 `Regexp` 복사본을 만듭니다. 두 goroutine은 뮤텍스 경합 없이 `Regexp`의 서로 다른 복사본을 사용할 수 있습니다. 복사본은 추가적인 공간 오버헤드가 있으므로, `Copy`는 경합이 관찰되었을 때만 사용해야 합니다.
+  - [`strconv`](/pkg/strconv/) 패키지에 [`IsPrint`](/pkg/strconv/#IsPrint)와 유사한 [`IsGraphic`](/pkg/strconv/#IsGraphic)이 추가되었습니다. 또한 [`QuoteToASCII`](/pkg/strconv/#QuoteToASCII), [`QuoteRuneToASCII`](/pkg/strconv/#QuoteRuneToASCII) 등과 유사한 [`QuoteToGraphic`](/pkg/strconv/#QuoteToGraphic), [`QuoteRuneToGraphic`](/pkg/strconv/#QuoteRuneToGraphic), [`AppendQuoteToGraphic`](/pkg/strconv/#AppendQuoteToGraphic), [`AppendQuoteRuneToGraphic`](/pkg/strconv/#AppendQuoteRuneToGraphic)가 추가되었습니다. `ASCII` 제품군은 ASCII 공백(U+0020)을 제외한 모든 공백 문자를 이스케이프합니다. 반면 `Graphic` 제품군은 유니코드 공백 문자(카테고리 Zs)를 이스케이프하지 않습니다.
+  - [`testing`](/pkg/testing/) 패키지에서 테스트가 [t.Parallel](/pkg/testing/#T.Parallel)을 호출하면, 해당 테스트는 모든 비병렬 테스트가 완료될 때까지 일시 중지되었다가 다른 모든 병렬 테스트와 함께 실행을 계속합니다. Go 1.6은 이러한 테스트에 대해 보고되는 시간을 변경합니다. 이전에는 병렬 실행 시간만 계산했지만, 이제는 테스트 시작부터 `t.Parallel` 호출까지의 시간도 함께 계산합니다.
+  - [`text/template`](/pkg/text/template/) 패키지에는 위에서 설명한 [주요 변경 사항](#template) 외에 두 가지 소규모 변경 사항이 있습니다. 첫째, 기반 라이터(underlying writer)에 대한 `Write`에서 기인하지 않은 [`Execute`](/pkg/text/template/#Template.Execute) 중의 모든 에러에 대해 반환되는 새로운 [`ExecError`](/pkg/text/template/#ExecError) 타입을 추가했습니다. 호출자는 `ExecError`를 확인하여 템플릿 사용 에러와 I/O 에러를 구분할 수 있습니다. 둘째, [`Funcs`](/pkg/text/template/#Template.Funcs) 메서드가 이제 [`FuncMap`](/pkg/text/template/#FuncMap)의 키로 사용된 이름이 템플릿 함수 호출에 나타날 수 있는 식별자인지 확인합니다. 그렇지 않은 경우 `Funcs`는 패닉을 발생시킵니다.
+  - [`time`](/pkg/time/) 패키지의 [`Parse`](/pkg/time/#Parse) 함수는 항상 1월 32일과 같이 31보다 큰 월의 날짜를 거부해 왔습니다. Go 1.6에서 `Parse`는 이제 평년의 2월 29일, 2월 30일, 2월 31일, 4월 31일, 6월 31일, 9월 31일, 11월 31일도 거부합니다.

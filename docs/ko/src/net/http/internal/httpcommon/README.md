@@ -1,4 +1,4 @@
-이 두 패키지는 동일합니다:
+다음 두 패키지는 동일합니다:
 
 - net/http/internal/httpcommon
 - golang.org/x/net/internal/httpcommon
