@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package obscuretestdata contains functionality used by tests to more easily work with testdata that must be obscured primarily due to golang.org/issue/34986.
+패키지 `obscuretestdata`는 테스트가 테스트 데이터를 더 쉽게 사용하도록 설계되었으며, 특히 golang.org/issue/34986에 따라 테스트 데이터를 숨기는 데 사용되는 기능을 포함합니다.
 
 ## 원문 요약
 

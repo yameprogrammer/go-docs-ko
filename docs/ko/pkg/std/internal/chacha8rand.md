@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package chacha8rand implements a pseudorandom generator based on ChaCha8.
+패키지 `chacha8rand`은 ChaCha8을 기반으로 하는 프seudo 랜덤 생성기를 구현합니다.
 
 ## 원문 요약
 

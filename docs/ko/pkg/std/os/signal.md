@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package signal implements access to incoming signals.
+패키지 `signal`은 들어오는 신호에 대한 접근을 구현합니다.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package io provides basic interfaces to I/O primitives.
+패키지 `io`는 기본적인 I/O 원시 인터페이스를 제공합니다.
 
 ## 원문 요약
 

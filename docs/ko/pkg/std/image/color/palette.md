@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package palette provides standard color palettes.
+패키지 palette는 표준 색상 팔레트를 제공합니다.
 
 ## 원문 요약
 

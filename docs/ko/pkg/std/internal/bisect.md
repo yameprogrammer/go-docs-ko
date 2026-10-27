@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package bisect can be used by compilers and other programs to serve as a target for the bisect debugging tool.
+패키지 `bisect`는 컴파일러 및 기타 프로그램에서 `bisect` 디버깅 도구의 대상 역할을 수행하는 데 사용할 수 있습니다.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package build gathers information about Go packages.
+패키지 빌드는 Go 패키지에 대한 정보를 수집합니다.
 
 ## 원문 요약
 

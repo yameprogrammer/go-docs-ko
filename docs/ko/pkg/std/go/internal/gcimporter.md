@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package gcimporter implements Import for gc-generated object files.
+패키지 `gcimporter`는 `gc`에서 생성된 객체 파일에 대한 임포트를 구현합니다.
 
 ## 원문 요약
 

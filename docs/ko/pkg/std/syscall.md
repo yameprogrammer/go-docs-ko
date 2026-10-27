@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package syscall contains an interface to the low-level operating system primitives.
+패키지 `syscall`은 저수준 운영체제 기본 기능을 사용할 수 있는 인터페이스를 제공합니다.
 
 ## 원문 요약
 

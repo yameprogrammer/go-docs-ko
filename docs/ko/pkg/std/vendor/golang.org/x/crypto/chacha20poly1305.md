@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package chacha20poly1305 implements the ChaCha20-Poly1305 AEAD and its extended nonce variant XChaCha20-Poly1305, as specified in RFC 8439 and draft-irtf-cfrg-xchacha-01.
+패키지 `chacha20poly1305`는 RFC 8439 및 draft-irtf-cfrg-xchacha-01에 명시된 ChaCha20-Poly1305 AEAD 및 그 확장된 nonce 변형 XChaCha20-Poly1305를 구현합니다.
 
 ## 원문 요약
 

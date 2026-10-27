@@ -103,9 +103,10 @@ def main() -> int:
         "- 이 디렉터리는 `go list std` 결과를 기반으로 생성됩니다.",
         "- API 상세의 권위 있는 원문은 pkg.go.dev 및 golang/go입니다.",
         "",
-        "## 패키지 목록",
+        "## 패키지 섹션",
         "",
     ]
+    grouped: dict[str, list[tuple[str, str]]] = {}
 
     for import_path, synopsis in packages:
         translated_synopsis = synopsis
@@ -134,8 +135,16 @@ def main() -> int:
         page_path.write_text(page_content, encoding="utf-8")
 
         rel_path = page_path.relative_to(output_dir).as_posix()
-        index_lines.append(f"- [{import_path}]({rel_path})")
+        top = import_path.split("/", 1)[0]
+        grouped.setdefault(top, []).append((import_path, rel_path))
         print(f"Generated: {page_path}")
+
+    for section in sorted(grouped.keys()):
+        index_lines.append(f"### {section}")
+        index_lines.append("")
+        for import_path, rel_path in grouped[section]:
+            index_lines.append(f"- [{import_path}]({rel_path})")
+        index_lines.append("")
 
     (output_dir / "index.md").write_text("\n".join(index_lines) + "\n", encoding="utf-8")
     return 0

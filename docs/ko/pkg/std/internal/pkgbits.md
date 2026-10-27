@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package pkgbits implements low-level coding abstractions for Unified IR's (UIR) binary export data format.
+패키지 `pkgbits`는 유니파이드 IR (UIR)의 바이너리 내보내기 데이터 형식에 대한 저수준 코딩 추상화를 구현합니다.
 
 ## 원문 요약
 

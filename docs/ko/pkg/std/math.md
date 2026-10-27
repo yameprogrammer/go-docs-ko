@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package math provides basic constants and mathematical functions.
+패키지 `math`는 기본적인 상수와 수학 함수를 제공합니다.
 
 ## 원문 요약
 

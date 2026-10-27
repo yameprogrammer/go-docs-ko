@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package bidi contains functionality for bidirectional text support.
+패키지 `bidi`는 이방향 텍스트 지원 기능을 포함합니다.
 
 ## 원문 요약
 

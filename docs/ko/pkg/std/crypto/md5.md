@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package md5 implements the MD5 hash algorithm as defined in RFC 1321.
+패키지 `md5`는 RFC 1321에서 정의된 MD5 해싱 알고리즘을 구현합니다.
 
 ## 원문 요약
 

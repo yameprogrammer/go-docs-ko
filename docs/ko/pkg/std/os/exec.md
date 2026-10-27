@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package exec runs external commands.
+패키지 `exec`은 외부 명령을 실행합니다.
 
 ## 원문 요약
 

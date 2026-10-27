@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package sig holds “code signatures” that can be called and will result in certain code sequences being linked into the final binary.
+패키지 `sig`는 호출 가능한 "코드 서명"을 포함하며, 이를 통해 특정 코드 시퀀스가 최종 바이너리에 연결됩니다.
 
 ## 원문 요약
 

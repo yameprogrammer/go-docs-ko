@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package cfg holds configuration shared by the Go command and internal/testenv.
+패키지 `cfg`는 `go` 명령어와 `internal/testenv`에서 공유되는 설정을 포함합니다.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package macho implements access to Mach-O object files.
+패키지 macho는 Mach-O 객체 파일에 대한 액세스를 구현합니다.
 
 ## 원문 요약
 

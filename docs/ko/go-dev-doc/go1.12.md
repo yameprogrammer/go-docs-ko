@@ -1,194 +1,160 @@
 <!--
-NOTE: In this document and others in this directory, the convention is to
-set fixed-width phrases with non-fixed-width spaces, as in
-`hello` `world`.
-Do not send CLs removing the interior tags from such phrases.
+참고: 이 문서 및 이 디렉토리에 있는 다른 문서에서, 고정 폭 문자열과 고정 폭이 아닌 공백을 함께 사용하는 것이 관례입니다 (예: `hello world`).
+이러한 문자열에서 내부 태그를 제거하는 CL을 보내지 마세요.
 -->
 
+```markdown
 <style>
   main ul li { margin: 0.5em 0; }
 </style>
+```
 
-## Introduction to Go 1.12 {#introduction}
+## Go 1.12 소개 {#introduction}
 
-The latest Go release, version 1.12, arrives six months after [Go 1.11](go1.11).
-Most of its changes are in the implementation of the toolchain, runtime, and libraries.
-As always, the release maintains the Go 1 [promise of compatibility](/doc/go1compat).
-We expect almost all Go programs to continue to compile and run as before.
+가장 최신 Go 버전인 1.12은 [Go 1.11](go1.11) 이후 6개월 만에 출시되었습니다.
+대부분의 변경 사항은 도구 체인, 런타임 및 라이브러리의 구현에 있습니다.
+항상처럼, 이 릴리스는 Go 1의 [호환성 보장](/doc/go1compat)을 유지합니다.
+대부분의 Go 프로그램이 기존과 동일하게 컴파일 및 실행될 것으로 예상합니다.
 
-## Changes to the language {#language}
+## 언어 변경 사항 {#language}
 
-There are no changes to the language specification.
+```
+// Go package name: "example"
+// Identifier: "myVariable"
+// URL: "https://example.com"
+// Command: "go run main.go"
+// Code snippet: "fmt.Println("Hello, world!")"
+```
 
-## Ports {#ports}
+변경 사항은 없습니다.
+
+## 포트 {#ports}
 
 <!-- CL 138675 -->
-The race detector is now supported on `linux/arm64`.
+레이스 감지 기능이 `linux/arm64`에서 지원됩니다.
 
-Go 1.12 is the last release that is supported on FreeBSD 10.x, which has
-already reached end-of-life. Go 1.13 will require FreeBSD 11.2+ or FreeBSD
-12.0+.
-FreeBSD 12.0+ requires a kernel with the COMPAT\_FREEBSD11 option set (this is the default).
+Go 1.12은 이미 지원 종료된 FreeBSD 10.x에서만 지원되는 마지막 버전입니다. Go 1.13은 FreeBSD 11.2 이상 또는 FreeBSD 12.0 이상을 필요로 합니다.
+
+FreeBSD 12.0 이상은 COMPAT\_FREEBSD11 옵션이 설정된 커널을 필요로 합니다 (이는 기본 설정입니다).
 
 <!-- CL 146898 -->
-cgo is now supported on `linux/ppc64`.
+`linux/ppc64`에서 cgo가 이제 지원됩니다.
 
 <!-- CL 146023 -->
-`hurd` is now a recognized value for `GOOS`, reserved
-for the GNU/Hurd system for use with `gccgo`.
+`hurd`는 이제 `GOOS`에 대해 인식되는 값으로, `gccgo`를 사용하여 GNU/Hurd 시스템에서 사용하도록 예약되어 있습니다.
 
-### Windows {#windows}
+### Windows
 
-Go's new `windows/arm` port supports running Go on Windows 10
-IoT Core on 32-bit ARM chips such as the Raspberry Pi 3.
+Go의 새로운 `windows/arm` 포트는 Windows 10에서 Go 실행을 지원합니다.
+32비트 ARM 칩(예: Raspberry Pi 3)에서 IoT Core를 실행합니다.
 
-### AIX {#aix}
+### AIX
 
-Go now supports AIX 7.2 and later on POWER8 architectures (`aix/ppc64`). External linking, cgo, pprof and the race detector aren't yet supported.
+Go는 현재 POWER8 아키텍처(`aix/ppc64`)에서 AIX 7.2 및 이후 버전을 지원합니다. 외부 링크, cgo, pprof, 그리고 레이스 감지 기능은 아직 지원되지 않습니다.
 
-### Darwin {#darwin}
+### Darwin
+```
+# Darwin
+```
 
-Go 1.12 is the last release that will run on macOS 10.10 Yosemite.
-Go 1.13 will require macOS 10.11 El Capitan or later.
+Go 1.12은 macOS 10.10 Yosemite에서만 실행 가능한 마지막 버전입니다.
+Go 1.13은 macOS 10.11 El Capitan 또는 이후 버전에서만 실행됩니다.
 
 <!-- CL 141639 -->
-`libSystem` is now used when making syscalls on Darwin,
-ensuring forward-compatibility with future versions of macOS and iOS. <!-- CL 153338 -->
-The switch to `libSystem` triggered additional App Store
-checks for private API usage. Since it is considered private,
-`syscall.Getdirentries` now always fails with
-`ENOSYS` on iOS.
-Additionally, [`syscall.Setrlimit`](/pkg/syscall/#Setrlimit)
-reports `invalid` `argument` in places where it historically
-succeeded. These consequences are not specific to Go and users should expect
-behavioral parity with `libSystem`'s implementation going forward.
+`libSystem`은 이제 Darwin에서 시스템 호출을 수행할 때 사용되며, 향후 macOS 및 iOS의 버전과의 호환성을 보장합니다. <!-- CL 153338 -->
+`libSystem`으로의 전환은 App Store에서 개인 API 사용에 대한 추가 검사를 유발했습니다. `syscall.Getdirentries`는 개인 API로 간주되므로, iOS에서는 항상 `ENOSYS` 오류를 반환합니다.
+또한, [`syscall.Setrlimit`](/pkg/syscall/#Setrlimit)는 과거에 성공했던 위치에서 `invalid` `argument`를 보고합니다. 이러한 결과는 Go에만 국한되지 않으며, 사용자는 앞으로 `libSystem`의 구현과 동일한 동작을 예상해야 합니다.
 
-## Tools {#tools}
+## 도구 {#tools}
 
-### `go tool vet` no longer supported {#vet}
+### `go tool vet` 기능 더 이상 지원되지 않음 {#vet}
 
-The `go vet` command has been rewritten to serve as the
-base for a range of different source code analysis tools. See
-the [golang.org/x/tools/go/analysis](https://godoc.org/golang.org/x/tools/go/analysis)
-package for details. A side-effect is that `go tool vet`
-is no longer supported. External tools that use `go tool
-  vet` must be changed to use `go
-  vet`. Using `go vet` instead of `go tool
-  vet` should work with all supported versions of Go.
+명령 `go vet`가 다양한 소스 코드 분석 도구의 기반으로 재작성되었습니다. 자세한 내용은 [golang.org/x/tools/go/analysis](https://godoc.org/golang.org/x/tools/go/analysis) 패키지를 참조하십시오. 이로 인해 `go tool vet`는 더 이상 지원되지 않습니다. `go tool vet`를 사용하는 외부 도구는 `go vet`를 사용하도록 변경해야 합니다. `go vet`를 `go tool vet` 대신 사용하는 것은 지원되는 모든 Go 버전과 호환되어야 합니다.
 
-As part of this change, the experimental `-shadow` option
-is no longer available with `go vet`. Checking for
-variable shadowing may now be done using
+이 변경의 일부로, 실험적인 `-shadow` 옵션은 `go vet`에서 더 이상 사용되지 않습니다. 변수 섀도잉 검사는 이제 다음을 사용하여 수행할 수 있습니다:
 
-	go get -u golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow
+```markdown
+go get -u golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow
 	go vet -vettool=$(which shadow)
+```
 
-
-### Tour {#tour}
+### 투어 {#tour}
 
 <!-- CL 152657 -->
-The Go tour is no longer included in the main binary distribution. To
-run the tour locally, instead of running `go` `tool` `tour`,
-manually install it:
+Go 튜어는 이제 메인 바이너리 배포본에 포함되지 않습니다. 
+로컬에서 튜어를 실행하려면, `go` `tool` `tour`를 실행하는 대신, 수동으로 설치하십시오:
 
-	go get -u golang.org/x/tour
+go get -u golang.org/x/tour
 	tour
 
+### Go 캐시 요구 사항 {#gocache}
 
-### Build cache requirement {#gocache}
+```
+go get -u golang.org/x/tools/cache
+```
 
-The [build cache](/cmd/go/#hdr-Build_and_test_caching) is now
-required as a step toward eliminating
-`$GOPATH/pkg`. Setting the environment variable
-`GOCACHE=off` will cause `go` commands that write to the
-cache to fail.
+[빌드 캐시](/cmd/go/#hdr-Build_and_test_caching)는 이제
+`$GOPATH/pkg`를 제거하기 위한
+필수 단계입니다. `GOCACHE=off` 환경 변수를 설정하면
+캐시에 쓰기를 수행하는 `go` 명령이 실패합니다.
 
-### Binary-only packages {#binary-only}
+### 이진 파일만 설치 가능한 패키지 {#binary-only}
 
-Go 1.12 is the last release that will support binary-only packages.
+Go 1.12은 바이너리만 지원하는 패키지를 지원하는 마지막 릴리스입니다.
 
 ### Cgo {#cgo}
 
-Go 1.12 will translate the C type `EGLDisplay` to the Go type `uintptr`.
-This change is similar to how Go 1.10 and newer treats Darwin's CoreFoundation
-and Java's JNI types. See the
-[cgo documentation](/cmd/cgo/#hdr-Special_cases)
-for more information.
+Go 1.12에서 C 타입 `EGLDisplay`를 Go 타입 `uintptr`로 변환합니다.
+이 변경 사항은 Go 1.10 및 이후 버전에서 Darwin의 CoreFoundation 및 Java의 JNI 유형을 처리하는 방식과 유사합니다. 자세한 내용은 [cgo 설명서](/cmd/cgo/#hdr-Special_cases)를 참조하십시오.
 
 <!-- CL 152657 -->
-Mangled C names are no longer accepted in packages that use Cgo. Use the Cgo
-names instead. For example, use the documented cgo name `C.char`
-rather than the mangled name `_Ctype_char` that cgo generates.
+Cgo를 사용하는 패키지에서는 래핑된 C 이름이 더 이상 허용되지 않습니다. 대신 Cgo 이름을 사용하십시오. 예를 들어, cgo가 생성한 래핑된 이름인 `_Ctype_char` 대신 문서화된 `C.char` 이름을 사용하십시오.
 
-### Modules {#modules}
+### 모듈 {#modules}
 
 <!-- CL 148517 -->
-When `GO111MODULE` is set to `on`, the `go`
-command now supports module-aware operations outside of a module directory,
-provided that those operations do not need to resolve import paths relative to
-the current directory or explicitly edit the `go.mod` file.
-Commands such as `go`&nbsp;`get`,
-`go`&nbsp;`list`, and
-`go`&nbsp;`mod`&nbsp;`download` behave as if in a
-module with initially-empty requirements.
-In this mode, `go`&nbsp;`env`&nbsp;`GOMOD` reports
-the system's null device (`/dev/null` or `NUL`).
+`GO111MODULE`가 `on`으로 설정된 경우, `go`
+명령은 현재 모듈 디렉터리 외부에서도 모듈 인식 기능을 지원하며,
+다음 조건이 충족되는 경우에만 작동합니다. 즉, 해당 작업이 현재 디렉터리 내의 임포트 경로를 참조하거나
+`go.mod` 파일을 명시적으로 편집하지 않는 경우입니다.
+`go get`,
+`go list`, 및
+`go mod download`와 같은 명령은 초기 상태가 비어 있는 모듈과 동일하게 작동합니다.
+이 모드에서는 `go env GOMOD`가 시스템의 null 장치 (`/dev/null` 또는 `NUL`)를 보고합니다.
 
 <!-- CL 146382 -->
-`go` commands that download and extract modules are now safe to
-invoke concurrently.
-The module cache (`GOPATH/pkg/mod`) must reside in a filesystem that
-supports file locking.
+`go` 명령어를 사용하여 모듈을 다운로드하고 추출하는 것은 이제 동시 실행이 안전합니다.
+모듈 캐시 (`GOPATH/pkg/mod`)는 파일 잠금을 지원하는 파일 시스템에 있어야 합니다.
 
 <!-- CL 147282, 147281 -->
-The `go` directive in a `go.mod` file now indicates the
-version of the language used by the files within that module.
-It will be set to the current release
-(`go`&nbsp;`1.12`) if no existing version is
-present.
-If the `go` directive for a module specifies a
-version _newer_ than the toolchain in use, the `go` command
-will attempt to build the packages regardless, and will note the mismatch only if
-that build fails.
+`go.mod` 파일 내의 `go` 지시어는 해당 모듈 내의 파일에서 사용되는 언어의 버전을 나타냅니다.
+기존 버전이 없는 경우, 기본적으로 현재 릴리스(`go` `1.12`)로 설정됩니다.
+만약 모듈의 `go` 지시어가 사용 중인 도구 체인보다 _더 새로운_ 버전을 지정하는 경우, `go` 명령은 해당 패키지를 빌드하려고 시도하며, 빌드가 실패할 경우에만 불일치 사항을 기록합니다.
 
 <!-- CL 147282, 147281 -->
-This changed use of the `go` directive means that if you
-use Go 1.12 to build a module, thus recording `go 1.12`
-in the `go.mod` file, you will get an error when
-attempting to build the same module with Go 1.11 through Go 1.11.3.
-Go 1.11.4 or later will work fine, as will releases older than Go 1.11.
-If you must use Go 1.11 through 1.11.3, you can avoid the problem by
-setting the language version to 1.11, using the Go 1.12 go tool,
-via `go mod edit -go=1.11`.
+이 변경된 `go` 지시어 사용 방식은 다음과 같은 결과를 초래합니다. 만약 Go 1.12로 모듈을 빌드하고, `go.mod` 파일에 `go 1.12`를 기록한다면, Go 1.11 (Go 1.11.3 버전 포함)을 사용하여 동일한 모듈을 빌드하려고 시도하면 오류가 발생합니다. Go 1.11.4 또는 그 이후 버전은 정상적으로 작동하며, Go 1.11 이전 버전도 작동합니다.
+
+만약 Go 1.11부터 1.11.3 버전까지 사용해야 한다면, 다음과 같은 방법으로 문제를 해결할 수 있습니다:
+
+*   언어 버전을 1.11로 설정하고, `go mod edit -go=1.11` 명령어를 사용하여 Go 1.12 go tool을 사용합니다.
 
 <!-- CL 152739 -->
-When an import cannot be resolved using the active modules,
-the `go` command will now try to use the modules mentioned in the
-main module's `replace` directives before consulting the module
-cache and the usual network sources.
-If a matching replacement is found but the `replace` directive does
-not specify a version, the `go` command uses a pseudo-version
-derived from the zero `time.Time` (such
-as `v0.0.0-00010101000000-000000000000`).
+`go` 명령은 현재 모듈을 사용하여 가져오기를 해결할 수 없는 경우,
+주 모듈의 `replace` 지시문에 언급된 모듈을 먼저 사용하려고 시도합니다.
+그리고 모듈 캐시 및 일반 네트워크 소스를 참조합니다.
+일치하는 대체 항목이 발견되었지만 `replace` 지시문이 버전 정보를 지정하지 않는 경우, `go` 명령은 `time.Time`의 0 값을 기반으로 하는 가상 버전을 사용합니다 (예: `v0.0.0-00010101000000-000000000000`).
 
-### Compiler toolchain {#compiler}
+### 컴파일러 도구 체인 {#compiler}
 
 <!-- CL 134155, 134156 -->
-The compiler's live variable analysis has improved. This may mean that
-finalizers will be executed sooner in this release than in previous
-releases. If that is a problem, consider the appropriate addition of a
-[`runtime.KeepAlive`](/pkg/runtime/#KeepAlive) call.
+컴파일러의 실시간 변수 분석이 개선되었습니다. 이는 이 릴리스에서 이전 릴리스보다 종료자가 더 빨리 실행될 수 있음을 의미합니다. 만약 그렇다면, [`runtime.KeepAlive`](/pkg/runtime/#KeepAlive) 호출을 적절하게 추가하는 것을 고려하십시오.
 
 <!-- CL 147361 -->
-More functions are now eligible for inlining by default, including
-functions that do nothing but call another function.
-This extra inlining makes it additionally important to use
-[`runtime.CallersFrames`](/pkg/runtime/#CallersFrames)
-instead of iterating over the result of
-[`runtime.Callers`](/pkg/runtime/#Callers) directly.
+더 많은 함수가 기본적으로 인라인될 수 있으며, 단순히 다른 함수를 호출하는 것 외의 함수도 포함됩니다.
+이 추가적인 인라인 기능은 `runtime.CallersFrames` ( [pkg/runtime/#CallersFrames](/) ) 를 직접 사용하기보다는 `runtime.Callers` ( [pkg/runtime/#Callers](/) ) 의 결과를 반복하는 것보다 더 중요하게 만듭니다.
 
 ```
-// Old code which no longer works correctly (it will miss inlined call frames).
+// 이전 코드이며 더 이상 올바르게 작동하지 않습니다 (내장 호출 프레임을 누락합니다).
 var pcs [10]uintptr
 n := runtime.Callers(1, pcs[:])
 for _, pc := range pcs[:n] {
@@ -200,7 +166,7 @@ for _, pc := range pcs[:n] {
 ```
 
 ```
-// New code which will work correctly.
+// 새로운 코드이며 올바르게 작동합니다.
 var pcs [10]uintptr
 n := runtime.Callers(1, pcs[:])
 frames := runtime.CallersFrames(pcs[:n])
@@ -214,383 +180,280 @@ for {
 ```
 
 <!-- CL 153477 -->
-Wrappers generated by the compiler to implement method expressions
-are no longer reported
-by [`runtime.CallersFrames`](/pkg/runtime/#CallersFrames)
-and [`runtime.Stack`](/pkg/runtime/#Stack). They
-are also not printed in panic stack traces.
-This change aligns the `gc` toolchain to match
-the `gccgo` toolchain, which already elided such wrappers
-from stack traces.
-Clients of these APIs might need to adjust for the missing
-frames. For code that must interoperate between 1.11 and 1.12
-releases, you can replace the method expression `x.M`
-with the function literal ` func (...) { x.M(...) }  `.
+컴파일러가 생성한 메타 표현식을 구현하기 위한 래퍼는
+더 이상 [`runtime.CallersFrames`](/pkg/runtime/#CallersFrames) 및 [`runtime.Stack`](/pkg/runtime/#Stack)에 의해
+보고되지 않습니다. 또한, 이 래퍼는 패닉 스택 추적에도
+출력되지 않습니다.
+이 변경 사항은 `gc` 도구 체인을 `gccgo` 도구 체인과 일치하도록
+합니다. `gccgo` 도구 체인은 이미 이러한 래퍼를 스택 추적에서 제거했습니다.
+이러한 API의 클라이언트는 누락된 프레임을 고려해야 합니다. 1.11 및 1.12 릴리스 간에 상호 작용해야 하는 코드를 사용하는 경우, 메타 표현식 `x.M`을 함수 리터럴 ` func(...) { x.M(...) } `로 대체할 수 있습니다.
 
 <!-- CL 144340 -->
-The compiler now accepts a `-lang` flag to set the Go language
-version to use. For example, `-lang=go1.8` causes the compiler to
-emit an error if the program uses type aliases, which were added in Go 1.9.
-Language changes made before Go 1.12 are not consistently enforced.
+컴파일러는 이제 `-lang` 플래그를 사용하여 사용할 Go 언어 버전을 지정할 수 있습니다. 예를 들어, `-lang=go1.8`는 프로그램이 타입 별칭을 사용하는 경우 컴파일러가 오류를 발생시키도록 합니다. (타입 별칭은 Go 1.9에 추가되었습니다.)
+
+Go 1.12 이전의 언어 변경 사항은 일관되게 적용되지 않습니다.
 
 <!-- CL 147160 -->
-The compiler toolchain now uses different conventions to call Go
-functions and assembly functions. This should be invisible to users,
-except for calls that simultaneously cross between Go and
-assembly _and_ cross a package boundary. If linking results
-in an error like "relocation target not defined for ABIInternal (but
-is defined for ABI0)", please refer to the
-[compatibility section](https://github.com/golang/proposal/blob/master/design/27539-internal-abi.md#compatibility)
-of the ABI design document.
+컴파일러 도구 체인은 이제 Go 함수와 어셈블리 함수를 호출하는 데 다른 규칙을 사용합니다. 이 변경 사항은 사용자에게는 보이지 않아야 하지만, 동시에 Go와 어셈블리로 전환하고 _그리고_ 패키지 경계를 넘어가는 호출의 경우에는 보일 수 있습니다. 링크 과정에서 "relocation target not defined for ABIInternal (but is defined for ABI0)"와 같은 오류가 발생하면, [호환성 섹션](https://github.com/golang/proposal/blob/master/design/27539-internal-abi.md#compatibility)의 ABI 설계 문서 참조하십시오.
 
 <!-- CL 145179 -->
-There have been many improvements to the DWARF debug information
-produced by the compiler, including improvements to argument
-printing and variable location information.
+컴파일러가 생성하는 DWARF 디버깅 정보에 대한 여러 개선 사항이 있습니다. 여기에는 인자 출력 및 변수 위치 정보 개선이 포함됩니다.
 
 <!-- CL 61511 -->
-Go programs now also maintain stack frame pointers on `linux/arm64`
-for the benefit of profiling tools like `perf`. The frame pointer
-maintenance has a small run-time overhead that varies but averages around 3%.
-To build a toolchain that does not use frame pointers, set
-`GOEXPERIMENT=noframepointer` when running `make.bash`.
+Go 프로그램은 이제 `linux/arm64`에서 `perf`와 같은 프로파일링 도구에 유용하도록 스택 프레임 포인터를 유지합니다. 프레임 포인터 유지에는 약간의 런타임 오버헤드가 있으며, 이는 약 3% 정도의 평균값을 가집니다. 프레임 포인터를 사용하지 않는 도구 체인을 빌드하려면 `make.bash`를 실행할 때 `GOEXPERIMENT=noframepointer`를 설정하십시오.
 
 <!-- CL 142717 -->
-The obsolete "safe" compiler mode (enabled by the `-u` gcflag) has been removed.
+오래된 "안전" 컴파일러 모드 (`-u` gcflag 옵션으로 활성화됨)가 제거되었습니다.
 
-### `godoc` and `go` `doc` {#godoc}
+### `godoc` 및 `go` 문서 {#godoc}
 
-In Go 1.12, `godoc` no longer has a command-line interface and
-is only a web server. Users should use `go` `doc`
-for command-line help output instead. Go 1.12 is the last release that will
-include the `godoc` webserver; in Go 1.13 it will be available
-via `go` `get`.
+Go 1.12에서 `godoc`는 더 이상 명령줄 인터페이스를 가지고 있지 않고, 웹 서버로만 작동합니다. 사용자는 명령줄 도움말 출력을 위해 `go` `doc`를 사용해야 합니다. Go 1.12는 `godoc` 웹 서버를 포함하는 마지막 릴리스이며, Go 1.13에서는 `go` `get`을 통해 사용할 수 있습니다.
 
 <!-- CL 141977 -->
-`go` `doc` now supports the `-all` flag,
-which will cause it to print all exported APIs and their documentation,
-as the `godoc` command line used to do.
+`go doc` 명령이 이제 `-all` 플래그를 지원하며,
+이를 사용하면 모든 공개 API와 해당 문서를 출력합니다.
+`godoc` 명령줄에서 사용하던 기능과 동일합니다.
 
 <!-- CL 140959 -->
-`go` `doc` also now includes the `-src` flag,
-which will show the target's source code.
+`go` `doc`에 이제 `-src` 플래그가 추가되어, 대상의 소스 코드를 보여줍니다.
 
-### Trace {#trace}
+### 추적 {#trace}
 
 <!-- CL 60790 -->
-The trace tool now supports plotting mutator utilization curves,
-including cross-references to the execution trace. These are useful
-for analyzing the impact of the garbage collector on application
-latency and throughput.
+트레이스 도구가 이제 뮤테이터 활용 곡선을 그리는 기능을 지원하며, 여기에는 실행 트레이스와의 교차 참조가 포함됩니다. 이는 애플리케이션의 가비지 컬렉터가 처리 속도 및 처리량에 미치는 영향을 분석하는 데 유용합니다.
 
-### Assembler {#assembler}
+### 어셈블러 {#assembler}
 
 <!-- CL 147218 -->
-On `arm64`, the platform register was renamed from
-`R18` to `R18_PLATFORM` to prevent accidental
-use, as the OS could choose to reserve this register.
+`arm64` 아키텍처에서, `R18` 레지스터가 `R18_PLATFORM`으로 이름이 변경되었습니다. 이는 운영체제가 이 레지스터를 예약할 수 있으므로, 의도치 않은 사용을 방지하기 위한 조치입니다.
 
-## Runtime {#runtime}
+## 런타임 {#runtime}
 
 <!-- CL 138959 -->
-Go 1.12 significantly improves the performance of sweeping when a
-large fraction of the heap remains live. This reduces allocation
-latency immediately following a garbage collection.
+Go 1.12 버전에서 힙의 상당 부분이 살아있는 상태일 때, 스윕 작업의 성능이 크게 향상됩니다. 이는 가비지 컬렉션 후 즉시 발생하는 할당 지연 시간을 줄입니다.
 
 <!-- CL 139719 -->
-The Go runtime now releases memory back to the operating system more
-aggressively, particularly in response to large allocations that
-can't reuse existing heap space.
+Go 런타임은 이제 운영 체제에 메모를 더 적극적으로 반환하며, 특히 기존 힙 공간을 재사용할 수 없는 큰 할당에 응답합니다.
 
 <!-- CL 146342, CL 146340, CL 146345, CL 146339, CL 146343, CL 146337, CL 146341, CL 146338 -->
-The Go runtime's timer and deadline code is faster and scales better
-with higher numbers of CPUs. In particular, this improves the
-performance of manipulating network connection deadlines.
+Go 런타임의 타이머 및 데드라인 코드는 더 많은 CPU 수와 함께 더 빠르고 효율적으로 작동합니다. 특히, 이는 네트워크 연결 데드라인을 조작하는 성능을 향상시킵니다.
 
 <!-- CL 135395 -->
-On Linux, the runtime now uses `MADV_FREE` to release unused
-memory. This is more efficient but may result in higher reported
-RSS. The kernel will reclaim the unused data when it is needed.
-To revert to the Go 1.11 behavior (`MADV_DONTNEED`), set the
-environment variable `GODEBUG=madvdontneed=1`.
+리눅스에서, 런타임은 이제 사용되지 않는 메모리를 해제하기 위해 `MADV_FREE`를 사용합니다. 이는 더 효율적이지만 보고되는 RSS가 더 높아질 수 있습니다. 커널은 필요한 경우 사용되지 않는 데이터를 회수합니다.
+Go 1.11의 동작(`MADV_DONTNEED`)으로 되돌리려면, 환경 변수 `GODEBUG=madvdontneed=1`을 설정하십시오.
 
 <!-- CL 149578 -->
-Adding cpu._extension_=off to the
-[GODEBUG](/doc/diagnostics.html#godebug) environment
-variable now disables the use of optional CPU instruction
-set extensions in the standard library and runtime. This is not
-yet supported on Windows.
+`cpu._extension_=off`를 환경 변수에 추가하면
+[GODEBUG](/doc/diagnostics.html#godebug)가
+표준 라이브러리와 런타임에서 선택적인 CPU 명령어 세트 확장을 사용하지 못하게 됩니다.
+현재 Windows에서는 아직 지원되지 않습니다.
 
 <!-- CL 158337 -->
-Go 1.12 improves the accuracy of memory profiles by fixing
-overcounting of large heap allocations.
+Go 1.12은 큰 힙 할로케이션의 과도한 횟수를 수정하여 메모리 프로파일의 정확도를 향상시킵니다.
 
 <!-- CL 159717 -->
-Tracebacks, `runtime.Caller`,
-and `runtime.Callers` no longer include
-compiler-generated initialization functions. Doing a traceback
-during the initialization of a global variable will now show a
-function named `PKG.init.ializers`.
+`runtime.Caller` 및 `runtime.Callers`에서 컴파일러가 생성한 초기화 함수가 더 이상 포함되지 않습니다. 전역 변수의 초기화 중에 트레이스를 수행하면 이제 `PKG.init.ializers`라는 이름의 함수가 표시됩니다.
 
-## Standard library {#library}
+## 표준 라이브러리 {#library}
 
 ### TLS 1.3 {#tls_1_3}
 
-Go 1.12 adds opt-in support for TLS 1.3 in the `crypto/tls` package as
-specified by [RFC 8446](https://www.rfc-editor.org/info/rfc8446). It can
-be enabled by adding the value `tls13=1` to the `GODEBUG`
-environment variable. It will be enabled by default in Go 1.13.
+Go 1.12는 `crypto/tls` 패키지에 [RFC 8446](https://www.rfc-editor.org/info/rfc8446)에서 정의된 TLS 1.3의 선택적 지원을 추가합니다. 이를 활성화하려면 `GODEBUG` 환경 변수에 `tls13=1` 값을 추가할 수 있습니다. Go 1.13에서는 기본적으로 활성화됩니다.
 
-To negotiate TLS 1.3, make sure you do not set an explicit `MaxVersion` in
-[`Config`](/pkg/crypto/tls/#Config) and run your program with
-the environment variable `GODEBUG=tls13=1` set.
+TLS 1.3를 협상하려면 다음을 확인하십시오.
+[`Config`](/pkg/crypto/tls/#Config)에서 명시적인 `MaxVersion`을 설정하지 않도록 하고, 환경 변수 `GODEBUG=tls13=1`을 설정하여 프로그램을 실행하십시오.
 
-All TLS 1.2 features except `TLSUnique` in
-[`ConnectionState`](/pkg/crypto/tls/#ConnectionState)
-and renegotiation are available in TLS 1.3 and provide equivalent or
-better security and performance. Note that even though TLS 1.3 is backwards
-compatible with previous versions, certain legacy systems might not work
-correctly when attempting to negotiate it. RSA certificate keys too small
-to be secure (including 512-bit keys) will not work with TLS 1.3.
+다음 기능(`TLSUnique`)을 제외한 모든 TLS 1.2 기능은
+[`ConnectionState`](/pkg/crypto/tls/#ConnectionState)에서 TLS 1.3에서 사용 가능하며, 동등하거나 더 나은 보안 및 성능을 제공합니다. TLS 1.3은 이전 버전과 역호환되지만, 일부 구형 시스템에서 TLS 1.3을 시도할 때 제대로 작동하지 않을 수 있습니다. 안전하지 않은 RSA 인증서 키(512비트 키 포함)는 TLS 1.3과 작동하지 않습니다.
 
-TLS 1.3 cipher suites are not configurable. All supported cipher suites are
-safe, and if `PreferServerCipherSuites` is set in
-[`Config`](/pkg/crypto/tls/#Config) the preference order
-is based on the available hardware.
+TLS 1.3 암호화 모드는 구성할 수 없습니다. 지원되는 모든 암호화 모드는 안전하며, `Config`에서 `PreferServerCipherSuites`가 설정된 경우 선호 순서는 사용 가능한 하드웨어에 따라 결정됩니다.
 
-Early data (also called "0-RTT mode") is not currently supported as a
-client or server. Additionally, a Go 1.12 server does not support skipping
-unexpected early data if a client sends it. Since TLS 1.3 0-RTT mode
-involves clients keeping state regarding which servers support 0-RTT,
-a Go 1.12 server cannot be part of a load-balancing pool where some other
-servers do support 0-RTT. If switching a domain from a server that supported
-0-RTT to a Go 1.12 server, 0-RTT would have to be disabled for at least the
-lifetime of the issued session tickets before the switch to ensure
-uninterrupted operation.
+초기 데이터 (또는 "0-RTT 모드")는 현재 클라이언트 또는 서버에서 지원되지 않습니다. 또한, Go 1.12 서버는 클라이언트가 이를 전송할 경우 예상치 못한 초기 데이터를 건너뛰는 것을 지원하지 않습니다. TLS 1.3의 0-RTT 모드는 클라이언트가 어떤 서버가 0-RTT를 지원하는지 추적해야 하므로, Go 1.12 서버는 다른 서버가 0-RTT를 지원하는 로드 밸런싱 풀의 일부가 될 수 없습니다. 특정 도메인을 0-RTT를 지원하는 서버에서 Go 1.12 서버로 전환할 경우, 전환 전에 최소 발행된 세션 티켓의 수명 동안 0-RTT를 비활성화해야 원활한 작동을 보장할 수 있습니다.
 
-In TLS 1.3 the client is the last one to speak in the handshake, so if it causes
-an error to occur on the server, it will be returned on the client by the first
-[`Read`](/pkg/crypto/tls/#Conn.Read), not by
-[`Handshake`](/pkg/crypto/tls/#Conn.Handshake). For
-example, that will be the case if the server rejects the client certificate.
-Similarly, session tickets are now post-handshake messages, so are only
-received by the client upon its first
-[`Read`](/pkg/crypto/tls/#Conn.Read).
+TLS 1.3에서 클라이언트는 핸드셰이크 마지막 단계에서 메시지를 보내므로, 서버에서 오류가 발생하면 클라이언트는 `Read`(`Read`](/pkg/crypto/tls/#Conn.Read)를 통해 오류를 받게 되며, `Handshake`(`Handshake`](/pkg/crypto/tls/#Conn.Handshake)를 통해 오류를 받지는 않습니다. 예를 들어, 서버가 클라이언트 인증서를 거부하는 경우에 해당됩니다.
 
-### Minor changes to the library {#minor_library_changes}
+마찬가지로, 세션 티켓은 이제 핸드셰이크 이후 메시지이므로, 클라이언트는 처음 `Read`(`Read`](/pkg/crypto/tls/#Conn.Read)를 통해만 수신됩니다.
 
-As always, there are various minor changes and updates to the library,
-made with the Go 1 [promise of compatibility](/doc/go1compat)
-in mind.
+### 라이브러리의 미세 조정 {#minor_library_changes}
 
-<!-- TODO: CL 115677: https://golang.org/cl/115677: cmd/vet: check embedded field tags too -->
+물론, 라이브러리에는 항상 다양한 미세한 변경 사항과 업데이트가 있으며, 이는 Go 1의 [호환성 보장](/doc/go1compat)을 염두에 두고 만들어졌습니다.
 
+<!-- TODO: CL 115677: https://golang.org/cl/115677: cmd/vet: 내장 필드 태그도 확인 -->
+
+```
 #### [bufio](/pkg/bufio/)
+```
 
 <!-- CL 149297 -->
-`Reader`'s [`UnreadRune`](/pkg/bufio/#Reader.UnreadRune) and
-[`UnreadByte`](/pkg/bufio/#Reader.UnreadByte) methods will now return an error
-if they are called after [`Peek`](/pkg/bufio/#Reader.Peek).
+`Reader`의 [`UnreadRune`](/pkg/bufio/#Reader.UnreadRune) 및
+[`UnreadByte`](/pkg/bufio/#Reader.UnreadByte) 메서드는 이제 `Peek`가 호출된 후 호출될 경우 오류를 반환합니다.
 
 <!-- bufio -->
 
 #### [bytes](/pkg/bytes/)
 
 <!-- CL 137855 -->
-The new function [`ReplaceAll`](/pkg/bytes/#ReplaceAll) returns a copy of
-a byte slice with all non-overlapping instances of a value replaced by another.
+새로운 함수 [`ReplaceAll`](/pkg/bytes/#ReplaceAll)는 특정 값을 다른 값으로 대체한 후, 비중복되는 모든 인스턴스를 포함하는 바이트 슬라이스의 복사본을 반환합니다.
 
 <!-- CL 145098 -->
-A pointer to a zero-value [`Reader`](/pkg/bytes/#Reader) is now
-functionally equivalent to [`NewReader`](/pkg/bytes/#NewReader)`(nil)`.
-Prior to Go 1.12, the former could not be used as a substitute for the latter in all cases.
+`Reader`의 0값에 대한 포인터는 이제 [`NewReader`](/pkg/bytes/#NewReader)`(nil)`와 기능적으로 동일합니다.
+Go 1.12 이전에는 이전 포인터를 모든 경우에 후자의 대체로 사용할 수 없었습니다.
 
-<!-- bytes -->
+<!-- 바이트 -->
 
 #### [crypto/rand](/pkg/crypto/rand/)
 
 <!-- CL 139419 -->
-A warning will now be printed to standard error the first time
-`Reader.Read` is blocked for more than 60 seconds waiting
-to read entropy from the kernel.
+이제 `Reader.Read`가 커널로부터 엔트로피를 읽는 데 60초 이상 대기하는 경우 표준 오류에 경고가 출력됩니다.
 
 <!-- CL 120055 -->
-On FreeBSD, `Reader` now uses the `getrandom`
-system call if available, `/dev/urandom` otherwise.
+FreeBSD에서, `Reader`는 `getrandom` 시스템 호출을 사용할 수 있는 경우에 사용하고, 그렇지 않은 경우에는 `/dev/urandom`을 사용합니다.
 
 <!-- crypto/rand -->
 
 #### [crypto/rc4](/pkg/crypto/rc4/)
 
 <!-- CL 130397 -->
-This release removes the assembly implementations, leaving only
-the pure Go version. The Go compiler generates code that is
-either slightly better or slightly worse, depending on the exact
-CPU. RC4 is insecure and should only be used for compatibility
-with legacy systems.
+이 릴리스에서는 어셈블리 구현을 제거하고, 순 Go 버전만 남깁니다. Go 컴파일러는 CPU에 따라 약간 더 나거나 약간 덜 효율적인 코드를 생성합니다. RC4는 안전하지 않으므로, 기존 시스템과의 호환성을 위해만 사용해야 합니다.
 
 <!-- crypto/rc4 -->
 
 #### [crypto/tls](/pkg/crypto/tls/)
 
 <!-- CL 143177 -->
-If a client sends an initial message that does not look like TLS, the server
-will no longer reply with an alert, and it will expose the underlying
-`net.Conn` in the new field `Conn` of
-[`RecordHeaderError`](/pkg/crypto/tls/#RecordHeaderError).
+클라이언트가 TLS와 유사하지 않은 초기 메시지를 보내면, 서버는 더 이상 경고를 보내지 않고, `net.Conn`의 기본 연결을 새 필드 `Conn`의 `RecordHeaderError`에 노출합니다.
 
 <!-- crypto/tls -->
 
 #### [database/sql](/pkg/database/sql/)
 
 <!-- CL 145738 -->
-A query cursor can now be obtained by passing a
+쿼리 커서를 이제 `*Rows` 값을 `Row.Scan` 메서드에 전달하여 얻을 수 있습니다.
 [`*Rows`](/pkg/database/sql/#Rows)
-value to the [`Row.Scan`](/pkg/database/sql/#Row.Scan) method.
 
 <!-- database/sql -->
 
 #### [expvar](/pkg/expvar/)
 
 <!-- CL 139537 -->
-The new [`Delete`](/pkg/expvar/#Map.Delete) method allows
-for deletion of key/value pairs from a [`Map`](/pkg/expvar/#Map).
+새로운 `Delete` 메서드는 [`Map`](/pkg/expvar/#Map)에서 키/값 쌍을 삭제할 수 있도록 합니다.
 
 <!-- expvar -->
 
 #### [fmt](/pkg/fmt/)
 
 <!-- CL 142737 -->
-Maps are now printed in key-sorted order to ease testing. The ordering rules are:
+지도들이 키 순서대로 인쇄되도록 변경되어 테스트가 용이하도록 했습니다. 정렬 규칙은 다음과 같습니다:
 
-  - When applicable, nil compares low
-  - ints, floats, and strings order by <
-  - NaN compares less than non-NaN floats
-  - bool compares false before true
-  - Complex compares real, then imaginary
-  - Pointers compare by machine address
-  - Channel values compare by machine address
-  - Structs compare each field in turn
-  - Arrays compare each element in turn
-  - Interface values compare first by `reflect.Type` describing the concrete type
-    and then by concrete value as described in the previous rules.
-
+- 해당되는 경우, nil은 가장 낮게 비교
+  - 정수, 부동 소수점 수, 문자열은 `<`를 기준으로 비교
+  - NaN은 non-NaN 부동 소수점 수보다 작게 비교
+  - bool은 false를 true보다 먼저 비교
+  - Complex는 먼저 실수, 그 다음 허수 순으로 비교
+  - 포인터는 머신 주소로 비교
+  - 채널 값은 머신 주소로 비교
+  - 구조체는 각 필드를 순서대로 비교
+  - 배열은 각 요소를 순서대로 비교
+  - 인터페이스 값은 먼저 `reflect.Type`으로 설명된 구체적인 유형으로 비교하고, 그 다음 이전 규칙에 설명된 구체적인 값으로 비교
 
 <!-- CL 129777 -->
-When printing maps, non-reflexive key values like `NaN` were previously
-displayed as `<nil>`. As of this release, the correct values are printed.
+지도 출력을 할 때, `NaN`과 같이 반사되지 않는 키 값을 이전에 `<nil>`로 표시했습니다. 이번 릴리스부터는 올바른 값이 표시됩니다.
 
 <!-- fmt -->
 
-#### [go/doc](/pkg/go/doc/)
+#### [go/doc](pkg/go/doc/)
 
 <!-- CL 140958 -->
-To address some outstanding issues in [`cmd/doc`](/cmd/doc/),
-this package has a new [`Mode`](/pkg/go/doc/#Mode) bit,
-`PreserveAST`, which controls whether AST data is cleared.
+`cmd/doc` 내의 일부 해결되지 않은 문제를 해결하기 위해,
+이 패키지는 새로운 [`Mode`](/pkg/go/doc/#Mode) 비트, `PreserveAST`를 도입했습니다.
+이 비트는 AST 데이터가 삭제되는지 여부를 제어합니다.
 
 <!-- go/doc -->
 
-#### [go/token](/pkg/go/token/)
+#### [go/token](pkg/go/token/)
 
 <!-- CL 134075 -->
-The [`File`](/pkg/go/token#File) type has a new
-[`LineStart`](/pkg/go/token#File.LineStart) field,
-which returns the position of the start of a given line. This is especially useful
-in programs that occasionally handle non-Go files, such as assembly, but wish to use
-the `token.Pos` mechanism to identify file positions.
+`[`File`](/pkg/go/token#File) 타입에 새로운
+`[LineStart]('/',pkg/go/token#File.LineStart)` 필드가 추가되었습니다.
+이 필드는 주어진 라인의 시작 위치를 반환합니다. 이는 어셈블리와 같은 비-Go 파일도 처리하는 프로그램에서 특히 유용하며, 파일 위치를 식별하기 위해 `token.Pos` 메커니즘을 사용하고 싶을 때 활용할 수 있습니다.
 
 <!-- go/token -->
 
-#### [image](/pkg/image/)
+#### [이미지](/pkg/image/)
 
 <!-- CL 118755 -->
-The [`RegisterFormat`](/pkg/image/#RegisterFormat) function is now safe for concurrent use.
+`RegisterFormat` 함수가 이제 동시 사용이 안전합니다.
 
-<!-- image -->
+<!-- 이미지 -->
 
-#### [image/png](/pkg/image/png/)
+#### [이미지/png](/pkg/image/png/)
 
 <!-- CL 134235 -->
-Paletted images with fewer than 16 colors now encode to smaller outputs.
+색상 팔레트가 있는 이미지를 16개 이하의 색상으로 사용하면, 출력 크기가 작게 됩니다.
 
-<!-- image/png -->
+<!-- 이미지/png -->
 
+```
 #### [io](/pkg/io/)
+```
 
 <!-- CL 139457 -->
-The new [`StringWriter`](/pkg/io#StringWriter) interface wraps the
-[`WriteString`](/pkg/io/#WriteString) function.
+새로운 [`StringWriter`](/pkg/io#StringWriter) 인터페이스는 [`WriteString`](/pkg/io/#WriteString) 함수를 감쌉니다.
 
 <!-- io -->
 
 #### [math](/pkg/math/)
 
 <!-- CL 153059 -->
-The functions
+다음 함수:
 [`Sin`](/pkg/math/#Sin),
 [`Cos`](/pkg/math/#Cos),
 [`Tan`](/pkg/math/#Tan),
-and [`Sincos`](/pkg/math/#Sincos) now
-apply Payne-Hanek range reduction to huge arguments. This
-produces more accurate answers, but they will not be bit-for-bit
-identical with the results in earlier releases.
+그리고 [`Sincos`](/pkg/math/#Sincos)는 이제 매우 큰 인수에 대해 Payne-Hanek 범위 감소를 적용합니다.
+이는 더 정확한 결과를 제공하지만 이전 버전의 결과와 정확히 일치하지는 않습니다.
 
-<!-- math -->
+<!-- 수식 -->
 
-#### [math/bits](/pkg/math/bits/)
+#### [math/bits](pkg/math/bits/)
 
 <!-- CL 123157 -->
-New extended precision operations [`Add`](/pkg/math/bits/#Add), [`Sub`](/pkg/math/bits/#Sub), [`Mul`](/pkg/math/bits/#Mul), and [`Div`](/pkg/math/bits/#Div) are available in `uint`, `uint32`, and `uint64` versions.
+새로운 확장된 정밀도 연산 [`Add`](/pkg/math/bits/#Add), [`Sub`](/pkg/math/bits/#Sub), [`Mul`](/pkg/math/bits/#Mul), 및 [`Div`](/pkg/math/bits/#Div)가 `uint`, `uint32`, 및 `uint64` 버전에서 사용 가능합니다.
 
-<!-- math/bits -->
+<!-- 수학/비트 -->
 
-#### [net](/pkg/net/)
+#### [net](pkg/net/)
 
 <!-- CL 146659 -->
-The
-[`Dialer.DualStack`](/pkg/net/#Dialer.DualStack) setting is now ignored and deprecated;
-RFC 6555 Fast Fallback ("Happy Eyeballs") is now enabled by default. To disable, set
-[`Dialer.FallbackDelay`](/pkg/net/#Dialer.FallbackDelay) to a negative value.
+`Dialer.DualStack` 설정은 이제 무시되고 더 이상 사용되지 않습니다. RFC 6555의 "Fast Fallback" (Happy Eyeballs) 기능이 기본적으로 활성화되었습니다. 비활성화하려면 `Dialer.FallbackDelay`를 음수 값으로 설정하십시오.
 
 <!-- CL 107196 -->
-Similarly, TCP keep-alives are now enabled by default if
-[`Dialer.KeepAlive`](/pkg/net/#Dialer.KeepAlive) is zero.
-To disable, set it to a negative value.
+마찬가지로, `Dialer.KeepAlive`가 0이면 TCP keep-alive가 기본적으로 활성화됩니다.
+활성화하려면 음수 값으로 설정합니다.
 
 <!-- CL 113997 -->
-On Linux, the [`splice` system call](https://man7.org/linux/man-pages/man2/splice.2.html) is now used when copying from a
-[`UnixConn`](/pkg/net/#UnixConn) to a
-[`TCPConn`](/pkg/net/#TCPConn).
+Linux에서는 [`splice` 시스템 호출](https://man7.org/linux/man-pages/man2/splice.2.html)이 `UnixConn`에서 `TCPConn`으로 복사할 때 사용됩니다.
 
 <!-- net -->
 
 #### [net/http](/pkg/net/http/)
 
 <!-- CL 143177 -->
-The HTTP server now rejects misdirected HTTP requests to HTTPS servers with a plaintext "400 Bad Request" response.
+HTTP 서버는 이제 평문 "400 Bad Request" 응답으로 잘못된 HTTP 요청을 HTTPS 서버로 보내는 것을 거부합니다.
 
 <!-- CL 130115 -->
-The new [`Client.CloseIdleConnections`](/pkg/net/http/#Client.CloseIdleConnections)
-method calls the `Client`'s underlying `Transport`'s `CloseIdleConnections`
-if it has one.
+새로운 `Client.CloseIdleConnections`
+메서드는, 만약 `Client`의 기본 `Transport`에 해당 메서드가 있다면, `Transport`의 `CloseIdleConnections`
+메서드를 호출합니다.
 
 <!-- CL 145398 -->
-The [`Transport`](/pkg/net/http/#Transport) no longer rejects HTTP responses which declare
-HTTP Trailers but don't use chunked encoding. Instead, the declared trailers are now just ignored.
+`Transport`가 이제 HTTP 응답을 거부하지 않습니다. HTTP Trailers를 선언하지만 chunked encoding을 사용하지 않는 HTTP 응답도 처리합니다. 대신, 선언된 Trailers는 이제 무시됩니다.
 
 <!-- CL 152080 -->
 <!-- CL 151857 -->
-The [`Transport`](/pkg/net/http/#Transport) no longer handles `MAX_CONCURRENT_STREAMS` values
-advertised from HTTP/2 servers as strictly as it did during Go 1.10 and Go 1.11. The default behavior is now back
-to how it was in Go 1.9: each connection to a server can have up to `MAX_CONCURRENT_STREAMS` requests
-active and then new TCP connections are created as needed. In Go 1.10 and Go 1.11 the `http2` package
-would block and wait for requests to finish instead of creating new connections.
-To get the stricter behavior back, import the
-[`golang.org/x/net/http2`](https://godoc.org/golang.org/x/net/http2) package
-directly and set
-[`Transport.StrictMaxConcurrentStreams`](https://godoc.org/golang.org/x/net/http2#Transport.StrictMaxConcurrentStreams) to
-`true`.
+`[Transport](pkg/net/http/#Transport)`는 이제 Go 1.10 및 Go 1.11에서와 같이 HTTP/2 서버에서 광고하는 `MAX_CONCURRENT_STREAMS` 값을 엄격하게 처리하지 않습니다. 기본 동작은 이제 Go 1.9와 동일하게 돌아갑니다. 즉, 각 서버 연결은 최대 `MAX_CONCURRENT_STREAMS`개의 요청을 가질 수 있으며, 필요한 경우 새 TCP 연결이 생성됩니다. Go 1.10 및 Go 1.11에서는 `http2` 패키지가 요청이 완료될 때까지 대기하고 새 연결을 생성하는 대신 차단되었습니다.
+엄격한 동작을 다시 얻으려면 다음 패키지를 직접 가져오고
+[`golang.org/x/net/http2](https://godoc.org/golang.org/x/net/http2)를 가져와
+[`Transport.StrictMaxConcurrentStreams`](https://godoc.org/golang.org/x/net/http2#Transport.StrictMaxConcurrentStreams)를 `true`로 설정하십시오.
 
 <!-- net/http -->
 
@@ -599,223 +462,194 @@ directly and set
 <!-- CL 159157, CL 160178 -->
 [`Parse`](/pkg/net/url/#Parse),
 [`ParseRequestURI`](/pkg/net/url/#ParseRequestURI),
-and
+그리고
 [`URL.Parse`](/pkg/net/url/#URL.Parse)
-now return an
-error for URLs containing ASCII control characters, which includes NULL,
-tab, and newlines.
+은 이제 ASCII 제어 문자가 포함된 URL에 대해 오류를 반환합니다. 여기에는 NULL, 탭 및 줄바꿈이 포함됩니다.
 
 <!-- net/url -->
 
 #### [net/http/httputil](/pkg/net/http/httputil/)
 
 <!-- CL 146437 -->
-The [`ReverseProxy`](/pkg/net/http/httputil/#ReverseProxy) now automatically
-proxies WebSocket requests.
+`ReverseProxy`는 이제 자동으로 WebSocket 요청을 프록시합니다.
 
 <!-- net/http/httputil -->
 
-#### [os](/pkg/os/)
+```
+#### [os](pkg/os/)
+```
 
 <!-- CL 125443 -->
-The new [`ProcessState.ExitCode`](/pkg/os/#ProcessState.ExitCode) method
-returns the process's exit code.
+새로운 `ProcessState.ExitCode` 메서드는 프로세스의 종료 코드를 반환합니다.
 
 <!-- CL 135075 -->
-`ModeCharDevice` has been added to the `ModeType` bitmask, allowing for
-`ModeDevice | ModeCharDevice` to be recovered when masking a
-[`FileMode`](/pkg/os/#FileMode) with `ModeType`.
+`ModeCharDevice`가 `ModeType` 비트 마스크에 추가되어, `ModeDevice | ModeCharDevice`를 `ModeType`를 사용하여 마스킹할 때 `FileMode`를 처리할 수 있습니다.
 
 <!-- CL 139418 -->
-The new function [`UserHomeDir`](/pkg/os/#UserHomeDir) returns the
-current user's home directory.
+새로운 함수 [`UserHomeDir`](/pkg/os/#UserHomeDir)는 현재 사용자의 홈 디렉토리를 반환합니다.
 
 <!-- CL 146020 -->
-[`RemoveAll`](/pkg/os/#RemoveAll) now supports paths longer than 4096 characters
-on most Unix systems.
+[`RemoveAll`](/pkg/os/#RemoveAll) 이제 대부분의 유닉스 시스템에서 4096자보다 긴 경로도 지원합니다.
 
 <!-- CL 130676 -->
-[`File.Sync`](/pkg/os/#File.Sync) now uses `F_FULLFSYNC` on macOS
-to correctly flush the file contents to permanent storage.
-This may cause the method to run more slowly than in previous releases.
+[`File.Sync`](/pkg/os/#File.Sync)는 이제 macOS에서 `F_FULLFSYNC`를 사용하여 파일 내용을 영구 저장소에 올바르게 플래시합니다.
+이로 인해 메서드가 이전 버전보다 더 느리게 실행될 수 있습니다.
 
 <!--CL 155517 -->
-[`File`](/pkg/os/#File) now supports
-a [`SyscallConn`](/pkg/os/#File.SyscallConn)
-method returning
-a [`syscall.RawConn`](/pkg/syscall/#RawConn)
-interface value. This may be used to invoke system-specific
-operations on the underlying file descriptor.
+[`File`](/pkg/os/#File)가 이제
+`SyscallConn`](/pkg/os/#File.SyscallConn) 메서드를 지원하며,
+이는
+`syscall.RawConn`](/pkg/syscall/#RawConn) 인터페이스 값을 반환합니다.
+이를 통해 파일 디스크립터에 대한 시스템별 작업을 호출할 수 있습니다.
 
 <!-- os -->
 
 #### [path/filepath](/pkg/path/filepath/)
 
 <!-- CL 145220 -->
-The [`IsAbs`](/pkg/path/filepath/#IsAbs) function now returns true when passed
-a reserved filename on Windows such as `NUL`.
-[List of reserved names.](https://docs.microsoft.com/en-us/windows/desktop/fileio/naming-a-file#naming-conventions)
+`IsAbs` 함수가 이제 Windows에서 예약된 파일 이름(`NUL`과 같은)을 전달받을 때 `true`를 반환합니다.
+[예약된 이름 목록.](https://docs.microsoft.com/en-us/windows/desktop/fileio/naming-a-file#naming-conventions)
 
-<!-- path/filepath -->
+<!-- path/경로 -->
 
 #### [reflect](/pkg/reflect/)
 
 <!-- CL 33572 -->
-A new [`MapIter`](/pkg/reflect#MapIter) type is
-an iterator for ranging over a map. This type is exposed through the
-[`Value`](/pkg/reflect#Value) type's new
-[`MapRange`](/pkg/reflect#Value.MapRange) method.
-This follows the same iteration semantics as a range statement, with `Next`
-to advance the iterator, and `Key`/`Value` to access each entry.
+새로운 [`MapIter`](/pkg/reflect#MapIter) 타입은 맵을 순회하기 위한 반복자입니다. 이 타입은 `Value` 타입의 새로운 `MapRange` 메서드를 통해 노출됩니다.
+이는 `range` 문과 동일한 반복 메커니즘을 사용하며, `Next`를 사용하여 반복자를 진행하고, `Key`/`Value`를 사용하여 각 항목에 접근합니다.
 
-<!-- reflect -->
+<!-- 반영 -->
 
 #### [regexp](/pkg/regexp/)
 
 <!-- CL 139784 -->
-[`Copy`](/pkg/regexp/#Regexp.Copy) is no longer necessary
-to avoid lock contention, so it has been given a partial deprecation comment.
+[`Copy`](/pkg/regexp/#Regexp.Copy)는 더 이상 필요하지 않으며,
+잠금 경쟁을 피하기 위해 부분적으로 비활성화됩니다.
 [`Copy`](/pkg/regexp/#Regexp.Copy)
-may still be appropriate if the reason for its use is to make two copies with
-different [`Longest`](/pkg/regexp/#Regexp.Longest) settings.
+두 개의 다른 [`Longest`](/pkg/regexp/#Regexp.Longest) 설정을 가진 복사본을 만드는 것이 그 이유라면 여전히 적절할 수 있습니다.
 
-<!-- regexp -->
+<!-- 정규 표현식 -->
 
 #### [runtime/debug](/pkg/runtime/debug/)
 
 <!-- CL 144220 -->
-A new [`BuildInfo`](/pkg/runtime/debug/#BuildInfo) type
-exposes the build information read from the running binary, available only in
-binaries built with module support. This includes the main package path, main
-module information, and the module dependencies. This type is given through the
-[`ReadBuildInfo`](/pkg/runtime/debug/#ReadBuildInfo) function
-on [`BuildInfo`](/pkg/runtime/debug/#BuildInfo).
+새로운 `BuildInfo` 타입이
+실행 중인 바이너리에서 읽어온 빌드 정보를 노출합니다. 이 정보는 모듈 지원으로 빌드된 바이너리에만 사용할 수 있습니다. 여기에는 메인 패키지 경로, 메인 모듈 정보 및 모듈 종속성이 포함됩니다. 이 타입은 `ReadBuildInfo` 함수를 통해 `BuildInfo`에서 가져올 수 있습니다.
 
-<!-- runtime/debug -->
+<!-- 실행/디버깅 -->
 
 #### [strings](/pkg/strings/)
 
 <!-- CL 137855 -->
-The new function [`ReplaceAll`](/pkg/strings/#ReplaceAll) returns a copy of
-a string with all non-overlapping instances of a value replaced by another.
+새로운 함수 [`ReplaceAll`](/pkg/strings/#ReplaceAll)는 특정 값의 모든 비겹치는 인스턴스를 다른 값으로 대체한 문자열의 복사본을 반환합니다.
 
 <!-- CL 145098 -->
-A pointer to a zero-value [`Reader`](/pkg/strings/#Reader) is now
-functionally equivalent to [`NewReader`](/pkg/strings/#NewReader)`(nil)`.
-Prior to Go 1.12, the former could not be used as a substitute for the latter in all cases.
+`Reader`의 제로값에 대한 포인터는 이제 기능적으로 `NewReader`(/pkg/strings/#NewReader)(`nil`)와 동일합니다.
+Go 1.12 이전에는 이전 포인터를 후자의 모든 경우에 대체로 사용할 수 없었습니다.
 
 <!-- CL 122835 -->
-The new [`Builder.Cap`](/pkg/strings/#Builder.Cap) method returns the capacity of the builder's underlying byte slice.
+새로운 `Builder.Cap` 메서드는 빌더의 내부 바이트 슬라이스의 용량을 반환합니다.
 
 <!-- CL 131495 -->
-The character mapping functions [`Map`](/pkg/strings/#Map),
-[`Title`](/pkg/strings/#Title),
-[`ToLower`](/pkg/strings/#ToLower),
-[`ToLowerSpecial`](/pkg/strings/#ToLowerSpecial),
-[`ToTitle`](/pkg/strings/#ToTitle),
-[`ToTitleSpecial`](/pkg/strings/#ToTitleSpecial),
-[`ToUpper`](/pkg/strings/#ToUpper), and
-[`ToUpperSpecial`](/pkg/strings/#ToUpperSpecial)
-now always guarantee to return valid UTF-8. In earlier releases, if the input was invalid UTF-8 but no character replacements
-needed to be applied, these routines incorrectly returned the invalid UTF-8 unmodified.
+`Map` ([]pkg/strings/#Map),
+`Title` ([]pkg/strings/#Title),
+`ToLower` ([]pkg/strings/#ToLower),
+`ToLowerSpecial` ([]pkg/strings/#ToLowerSpecial),
+`ToTitle` ([]pkg/strings/#ToTitle),
+`ToTitleSpecial` ([]pkg/strings/#ToTitleSpecial),
+`ToUpper` ([]pkg/strings/#ToUpper), 및
+`ToUpperSpecial` ([]pkg/strings/#ToUpperSpecial)
+기능은 이제 항상 유효한 UTF-8을 반환합니다. 이전 버전에서는 입력이 유효하지 않은 UTF-8이었지만, 문자를 대체할 필요가 없는 경우, 이러한 함수는 잘못된 UTF-8을 수정하지 않고 그대로 반환했습니다.
 
-<!-- strings -->
+<!-- 문자열 -->
 
 #### [syscall](/pkg/syscall/)
 
 <!-- CL 138595 -->
-64-bit inodes are now supported on FreeBSD 12. Some types have been adjusted accordingly.
+64비트 inode가 FreeBSD 12에서 지원됩니다. 일부 유형은 이에 따라 조정되었습니다.
 
 <!-- CL 125456 -->
-The Unix socket
+유닉스 소켓
 ([`AF_UNIX`](https://blogs.msdn.microsoft.com/commandline/2017/12/19/af_unix-comes-to-windows/))
-address family is now supported for compatible versions of Windows.
+주소 패밀리가 호환되는 Windows 버전에서 지원됩니다.
 
 <!-- CL 147117 -->
-The new function [`Syscall18`](/pkg/syscall/?GOOS=windows&GOARCH=amd64#Syscall18)
-has been introduced for Windows, allowing for calls with up to 18 arguments.
+새로운 함수 [`Syscall18`](/pkg/syscall/?GOOS=windows&GOARCH=amd64#Syscall18)가 Windows용으로 도입되었으며, 최대 18개의 인자를 전달할 수 있도록 합니다.
 
 <!-- syscall -->
 
+```
 #### [syscall/js](/pkg/syscall/js/)
+```
 
 <!-- CL 153559 -->
 
-The `Callback` type and `NewCallback` function have been renamed;
-they are now called
-[`Func`](/pkg/syscall/js/?GOOS=js&GOARCH=wasm#Func) and
-[`FuncOf`](/pkg/syscall/js/?GOOS=js&GOARCH=wasm#FuncOf), respectively.
-This is a breaking change, but WebAssembly support is still experimental
-and not yet subject to the
-[Go 1 compatibility promise](/doc/go1compat). Any code using the
-old names will need to be updated.
+`Callback` 타입과 `NewCallback` 함수는 이름이 변경되었습니다.
+이제 `Func` 및 `FuncOf`로 불립니다.
+(`/pkg/syscall/js/?GOOS=js&GOARCH=wasm#Func`) 및
+(`/pkg/syscall/js/?GOOS=js&GOARCH=wasm#FuncOf`) 각각.
+이것은 호환성을 해치는 변경 사항이지만, WebAssembly 지원은 여전히 실험적이며
+[Go 1 호환성 약속](/doc/go1compat)을 아직 준수하지 않습니다. 이전 이름으로 사용하는 코드는 업데이트해야 합니다.
 
 <!-- CL 141644 -->
-If a type implements the new
+만약 타입이 새로운
 [`Wrapper`](/pkg/syscall/js/?GOOS=js&GOARCH=wasm#Wrapper)
-interface,
+인터페이스를 구현하면,
 [`ValueOf`](/pkg/syscall/js/?GOOS=js&GOARCH=wasm#ValueOf)
-will use it to return the JavaScript value for that type.
+는 해당 타입에 대한 JavaScript 값을 반환하는 데 사용됩니다.
 
 <!-- CL 143137 -->
-The meaning of the zero
+"0"의 의미
 [`Value`](/pkg/syscall/js/?GOOS=js&GOARCH=wasm#Value)
-has changed. It now represents the JavaScript `undefined` value
-instead of the number zero.
-This is a breaking change, but WebAssembly support is still experimental
-and not yet subject to the
-[Go 1 compatibility promise](/doc/go1compat). Any code relying on
-the zero [`Value`](/pkg/syscall/js/?GOOS=js&GOARCH=wasm#Value)
-to mean the number zero will need to be updated.
+가 변경되었습니다. 이제는 숫자 0 대신 JavaScript의 `undefined` 값을 나타냅니다.
+이것은 호환성 문제가 있는 변경 사항이지만, WebAssembly 지원은 여전히 실험적이며 [Go 1 호환성 약속](/doc/go1compat)에 아직 적용되지 않습니다. "0"을 숫자 0으로 해석하는 코드는 업데이트해야 합니다.
 
 <!-- CL 144384 -->
-The new
+새로운
 [`Value.Truthy`](/pkg/syscall/js/?GOOS=js&GOARCH=wasm#Value.Truthy)
-method reports the
+메서드는 주어진 값의
 [JavaScript "truthiness"](https://developer.mozilla.org/en-US/docs/Glossary/Truthy)
-of a given value.
+을 보고합니다.
 
 <!-- syscall/js -->
 
-#### [testing](/pkg/testing/)
+#### [테스팅](/pkg/testing/)
 
 <!-- CL 139258 -->
-The [`-benchtime`](/cmd/go/#hdr-Testing_flags) flag now supports setting an explicit iteration count instead of a time when the value ends with an "`x`". For example, `-benchtime=100x` runs the benchmark 100 times.
+`[-benchtime](cmd/go/#hdr-Testing_flags)` 플래그는 이제 값이 "`x`"로 끝날 때 시간 대신 명시적인 반복 횟수를 설정할 수 있습니다. 예를 들어, `-benchtime=100x`는 벤치마크를 100번 실행합니다.
 
-<!-- testing -->
+<!-- 테스트 -->
 
-#### [text/template](/pkg/text/template/)
+#### [text/template](pkg/text/template/)
 
 <!-- CL 142217 -->
-When executing a template, long context values are no longer truncated in errors.
+템플릿을 실행할 때, 긴 컨텍스트 값은 더 이상 오류 메시지에 잘리거나 표시되지 않습니다.
 
-`executing "tmpl" at <.very.deep.context.v...>: map has no entry for key "notpresent"`
+`"tmpl" 실행 중 (<.very.deep.context.v...>: 맵에 "notpresent" 키가 없음`
 
-is now
+현재
 
-`executing "tmpl" at <.very.deep.context.value.notpresent>: map has no entry for key "notpresent"`
+`"tmpl" 실행 중 <.very.deep.context.value.notpresent>에서: map에 "notpresent" 키가 없음`
 
 <!-- CL 143097 -->
-If a user-defined function called by a template panics, the
-panic is now caught and returned as an error by
-the `Execute` or `ExecuteTemplate` method.
+템플릿에서 호출되는 사용자 정의 함수가 패닉을 발생시키면,
+패닉이 이제 `Execute` 또는 `ExecuteTemplate` 메서드에 의해 
+포착되어 오류로 반환됩니다.
 
-<!-- text/template -->
+```markdown
+<!-- 템플릿 -->
 
 #### [time](/pkg/time/)
 
 <!-- CL 151299 -->
-The time zone database in `$GOROOT/lib/time/zoneinfo.zip`
-has been updated to version 2018i. Note that this ZIP file is
-only used if a time zone database is not provided by the operating
-system.
+`$GOROOT/lib/time/zoneinfo.zip`에 있는 시간대 데이터베이스가 2018i 버전으로 업데이트되었습니다. 이 ZIP 파일은 운영체제에서 시간대 데이터베이스를 제공하지 않을 경우에만 사용됩니다.
 
-<!-- time -->
+<!-- 시간 -->
 
 #### [unsafe](/pkg/unsafe/)
 
 <!-- CL 146058 -->
-It is invalid to convert a nil `unsafe.Pointer` to `uintptr` and back with arithmetic.
-(This was already invalid, but will now cause the compiler to misbehave.)
+`unsafe.Pointer`가 nil인 경우, 이를 `uintptr`로 변환한 다음 산술 연산을 수행하고 다시 `uintptr`로 변환하는 것은 유효하지 않습니다.
+(이것은 이미 유효하지 않았지만, 이제는 컴파일러가 잘못 동작하게 됩니다.)
 
 <!-- unsafe -->

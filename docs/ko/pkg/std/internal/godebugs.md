@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package godebugs provides a table of known GODEBUG settings, for use by a variety of other packages, including internal/godebug, runtime, runtime/metrics, and cmd/go/internal/load.
+패키지 `godebugs`는 `GODEBUG` 설정에 대한 테이블을 제공하며, 이는 `internal/godebug`, `runtime`, `runtime/metrics`, `cmd/go/internal/load` 등 다양한 패키지에서 사용될 수 있습니다.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package tzdata provides an embedded copy of the timezone database.
+패키지 `tzdata`는 시간대 데이터베이스의 내장된 복사본을 제공합니다.
 
 ## 원문 요약
 

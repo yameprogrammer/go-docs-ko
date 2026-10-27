@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package godebug makes the settings in the $GODEBUG environment variable available to other packages.
+패키지 `godebug`은 `$GODEBUG` 환경 변수에 정의된 설정을 다른 패키지에 사용할 수 있도록 합니다.
 
 ## 원문 요약
 

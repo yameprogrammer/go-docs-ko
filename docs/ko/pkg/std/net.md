@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package net provides a portable interface for network I/O, including TCP/IP, UDP, domain name resolution, and Unix domain sockets.
+패키지 `net`은 TCP/IP, UDP, 도메인 이름 해싱, Unix 도메인 소켓을 포함한 네트워크 I/O에 대한 이식 가능한 인터페이스를 제공합니다.
 
 ## 원문 요약
 

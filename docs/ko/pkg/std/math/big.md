@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package big implements arbitrary-precision arithmetic (big numbers).
+패키지 big는 임의 정밀도의 산술 연산을 (큰 숫자) 구현합니다.
 
 ## 원문 요약
 

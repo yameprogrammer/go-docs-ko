@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package rsa implements RSA encryption as specified in PKCS #1 and RFC 8017.
+패키지 rsa는 PKCS #1 및 RFC 8017에서 지정된 대로 RSA 암호화를 구현합니다.
 
 ## 원문 요약
 

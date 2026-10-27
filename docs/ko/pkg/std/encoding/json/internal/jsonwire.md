@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package jsonwire implements stateless functionality for handling JSON text.
+패키지 `jsonwire`는 JSON 텍스트를 처리하기 위한 상태 없는 기능을 구현합니다.
 
 ## 원문 요약
 

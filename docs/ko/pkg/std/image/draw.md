@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package draw provides image composition functions.
+패키지 `draw`는 이미지 조작 기능들을 제공합니다.
 
 ## 원문 요약
 

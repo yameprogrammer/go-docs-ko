@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package strings implements simple functions to manipulate UTF-8 encoded strings.
+패키지 `strings`는 UTF-8 인코딩된 문자열을 조작하기 위한 간단한 함수를 구현합니다.
 
 ## 원문 요약
 

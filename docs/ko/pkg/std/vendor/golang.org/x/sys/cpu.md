@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package cpu implements processor feature detection for various CPU architectures.
+패키지 `cpu`는 다양한 CPU 아키텍처에 대한 프로세서 기능 감지 기능을 구현합니다.
 
 ## 원문 요약
 

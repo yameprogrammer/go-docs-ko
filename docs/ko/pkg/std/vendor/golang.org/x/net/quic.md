@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package quic implements the QUIC protocol.
+패키지 `quic`는 QUIC 프로토콜을 구현합니다.
 
 ## 원문 요약
 

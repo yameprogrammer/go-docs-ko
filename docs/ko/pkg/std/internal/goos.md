@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-package goos contains GOOS-specific constants.
+패키지 `goos`는 `GOOS`-특이한 상수들을 포함합니다.
 
 ## 원문 요약
 

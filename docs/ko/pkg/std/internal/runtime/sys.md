@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-package sys contains system- and configuration- and architecture-specific constants used by the runtime.
+패키지 `sys`는 런타임에서 사용되는 시스템-, 구성-, 아키텍처-특이 상수들을 포함합니다.
 
 ## 원문 요약
 

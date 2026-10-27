@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package utf8 implements functions and constants to support text encoded in UTF-8.
+패키지 utf8은 UTF-8로 인코딩된 텍스트를 지원하기 위한 함수 및 상수를 구현합니다.
 
 ## 원문 요약
 

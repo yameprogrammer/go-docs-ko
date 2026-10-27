@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package asn1 contains supporting types for parsing and building ASN.1 messages with the cryptobyte package.
+패키지 asn1은 cryptobyte 패키지와 함께 ASN.1 메시지를 파싱하고 생성하기 위한 지원 유형을 포함합니다.
 
 ## 원문 요약
 

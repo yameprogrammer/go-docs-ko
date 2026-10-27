@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package printer implements printing of AST nodes.
+패키지 `printer`는 AST 노드의 인쇄를 구현합니다.
 
 ## 원문 요약
 

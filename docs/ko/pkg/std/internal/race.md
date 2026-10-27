@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package race contains helper functions for manually instrumenting code for the race detector.
+패키지 `race`는 race 감지기를 위한 코드를 수동으로 측정하는 데 사용되는 유틸리티 함수를 포함합니다.
 
 ## 원문 요약
 

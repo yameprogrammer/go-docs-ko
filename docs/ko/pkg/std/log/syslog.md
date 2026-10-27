@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package syslog provides a simple interface to the system log service.
+패키지 `syslog`는 시스템 로그 서비스에 대한 간단한 인터페이스를 제공합니다.
 
 ## 원문 요약
 

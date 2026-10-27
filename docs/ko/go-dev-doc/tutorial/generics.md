@@ -1,102 +1,91 @@
 <!--{
-  "Title": "Tutorial: Getting started with generics",
-  "Breadcrumb": true
+  "제목": "가이드: 제네릭 사용법",
+  "브레드크럼": true
 }-->
 
-This tutorial introduces the basics of generics in Go. With generics, you can
-declare and use functions or types that are written to work with any of a set
-of types provided by calling code.
+이 튜토리얼은 Go의 제네릭에 대한 기본 사항을 소개합니다. 제네릭을 사용하면 호출 코드에서 제공하는 여러 유형 중 하나와 함께 작동하도록 작성된 함수 또는 유형을 선언하고 사용할 수 있습니다.
 
-In this tutorial, you'll declare two simple non-generic functions, then capture
-the same logic in a single generic function.
+이 튜토리얼에서는 두 개의 간단한 비-일반화된 함수를 선언한 다음, 동일한 로직을 단일 일반화된 함수에 캡처합니다.
 
-You'll progress through the following sections:
+다음 섹션을 통해 진행하게 됩니다:
 
-1. Create a folder for your code.
-2. Add non-generic functions.
-3. Add a generic function to handle multiple types.
-4. Remove type arguments when calling the generic function.
-5. Declare a type constraint.
+1. 코드를 위한 폴더를 만듭니다.
+2. 제네릭 함수를 추가합니다.
+3. 여러 유형을 처리하는 제네릭 함수를 추가합니다.
+4. 제네릭 함수를 호출할 때 타입 인수를 제거합니다.
+5. 타입 제약 조건을 선언합니다.
 
-**Note:** For other tutorials, see [Tutorials](/doc/tutorial/index.html).
+**참고:** 다른 튜토리얼은 [튜토리얼](/doc/tutorial/index.html)에서 확인하세요.
 
-## Prerequisites
+## 필수 조건
 
-*   **Go.** We recommend using the latest version of Go to follow this tutorial.
-    For installation instructions, see [Installing Go](/doc/install).
-*   **A tool to edit your code.** Any text editor you have will work fine.
-*   **A command terminal.** Go works well using any terminal on Linux and Mac,
-    and on PowerShell or cmd in Windows.
+*   **Go.** 이 튜토리얼을 따르기 위해 최신 버전의 Go를 사용하는 것을 권장합니다.
+    설치 지침은 [Installing Go](/doc/install)를 참조하십시오.
+*   **코드 편집 도구.** 사용 중인 모든 텍스트 편집기가 잘 작동합니다.
+*   **명령 터미널.** Go는 Linux 및 Mac의 모든 터미널, PowerShell 또는 cmd (Windows)에서 잘 작동합니다.
 
-## Create a folder for your code {#create_folder}
+## 코드용 폴더 생성 {#create_folder}
 
-To begin, create a folder for the code you’ll write.
+시작하려면, 코드를 작성할 폴더를 만드세요.
 
-1. Open a command prompt and change to your home directory.
+1. 명령 프롬프트를 열고 홈 디렉토리로 이동합니다.
 
-    On Linux or Mac:
+리눅스 또는 맥에서:
 
-    ```
+```
     $ cd
-    ```
+```
 
-    On Windows:
+**Windows에서:**
 
-    ```
+```
     C:\> cd %HOMEPATH%
-    ```
+```
 
-    The rest of the tutorial will show a $ as the prompt. The commands you use
-    will work on Windows too.
+나머지 튜토리얼에서는 프롬프트로 `$`를 사용하도록 안내합니다. 사용하시는 명령어는 Windows에서도 작동합니다.
 
-2. From the command prompt, create a directory for your code called generics.
+2. 명령 프롬프트에서 코드를 위한 디렉토리를 생성합니다. 디렉토리 이름은 `generics`로 지정합니다.
 
-    ```
+```
     $ mkdir generics
     $ cd generics
     ```
 
-3. Create a module to hold your code.
+3. 코드를 담을 모듈을 만드세요.
 
-    Run the `go mod init` command, giving it your new code’s module path.
+`go mod init` 명령을 실행하고, 새 코드의 모듈 경로를 지정합니다.
 
+```
+    go mod init example/generics
+    go: 생성 중: go.mod
     ```
-    $ go mod init example/generics
-    go: creating new go.mod: module example/generics
-    ```
 
-    **Note:** For production code, you’d specify a module path that’s more specific
-    to your own needs. For more, be sure to see
-    [Managing dependencies](/doc/modules/managing-dependencies).
+**참고:** 실제 코드에서는 더 구체적인 모듈 경로를 지정해야 합니다. 자세한 내용은 [의존성 관리](/doc/modules/managing-dependencies)를 참조하세요.
 
-Next, you'll add some simple code to work with maps.
+다음으로, 맵을 다루기 위한 간단한 코드를 추가합니다.
 
-## Add non-generic functions {#non_generic_functions}
+## 비 일반화 함수 추가하기 {#non_generic_functions}
 
-In this step, you'll add two functions that each add together the values of a
-map and return the total.
+이 단계에서는 각 함수가 맵의 값을 모두 더하여 총합을 반환하는 두 개의 함수를 추가합니다.
 
-You're declaring two functions instead of one because you're working with two
-different types of maps: one that stores `int64` values, and one that stores `float64` values.
+두 개의 함수를 선언하는 이유는, `int64` 값을 저장하는 맵과 `float64` 값을 저장하는 맵을 다루고 있기 때문입니다.
 
-#### Write the code
+```markdown
+#### 코드를 작성하세요
 
-1. Using your text editor, create a file called main.go in the generics
-    directory. You’ll write your Go code in this file.
-2. Into main.go, at the top of the file, paste the following package
-    declaration.
+1. 텍스트 편집기를 사용하여 `generics` 디렉토리에 `main.go`라는 파일을 만듭니다. Go 코드는 이 파일에 작성합니다.
+2. `main.go` 파일의 맨 위에 다음 패키지 선언을 붙여넣습니다.
 
-    ```
+```
     package main
-    ```
+```
 
-    A standalone program (as opposed to a library) is always in package `main`.
+독립 실행형 프로그램 (라이브러리가 아닌 경우)은 항상 `main` 패키지에 있습니다.
 
-3. Beneath the package declaration, paste the following two function
-    declarations.
+3. 패키지 선언 아래에 다음 두 개의 함수 선언을 붙여넣으십시오.
 
-    ```
-    // SumInts adds together the values of m.
+```
+    // SumInts는 m의 값들을 더합니다.
     func SumInts(m map[string]int64) int64 {
     	var s int64
     	for _, v := range m {
@@ -104,8 +93,10 @@ different types of maps: one that stores `int64` values, and one that stores `fl
     	}
     	return s
     }
+```
 
-    // SumFloats adds together the values of m.
+```
+// SumFloats는 m의 값들을 더합니다.
     func SumFloats(m map[string]float64) float64 {
     	var s float64
     	for _, v := range m {
@@ -113,112 +104,125 @@ different types of maps: one that stores `int64` values, and one that stores `fl
     	}
     	return s
     }
-    ```
+```
 
-    In this code, you:
+이 코드에서, 다음을 수행합니다:
 
-    *   Declare two functions to add together the values of a map and return
-        the sum.
-        *   `SumFloats` takes a map of `string` to `float64` values.
-        *   `SumInts` takes a map of `string` to `int64` values.
+*   `string` 값에서 `float64` 값으로 이루어진 맵의 값을 더하고 합계를 반환하는 두 개의 함수를 선언합니다.
+    *   `SumFloats`는 `string`에서 `float64` 값으로 이루어진 맵을 받습니다.
+    *   `SumInts`는 `string`에서 `int64` 값으로 이루어진 맵을 받습니다.
 
-4. At the top of main.go, beneath the package declaration, paste the following
-    `main` function to initialize the two maps and use them as arguments when
-    calling the functions you declared in the preceding step.
+4. `main.go` 파일의 맨 위에, 패키지 선언 아래에 다음 `main` 함수를 붙여넣고, 이전 단계에서 선언한 함수를 호출할 때 두 개의 맵을 인수로 사용합니다.
 
-    ```
+```
     func main() {
-    	// Initialize a map for the integer values
+    	// 정수 값에 대한 맵 초기화
     	ints := map[string]int64{
     		"first":  34,
     		"second": 12,
     	}
+```
 
-    	// Initialize a map for the float values
+// float 값에 대한 맵 초기화
     	floats := map[string]float64{
     		"first":  35.98,
     		"second": 26.99,
     	}
 
-    	fmt.Printf("Non-Generic Sums: %v and %v\n",
+```
+fmt.Printf("일반적인 합: %v 및 %v\n",
     		SumInts(ints),
     		SumFloats(floats))
     }
-    ```
+```
 
-    In this code, you:
+이 코드에서, 다음을 수행합니다:
 
-    *   Initialize a map of `float64` values and a map of `int64` values, each
-        with two entries.
-    *   Call the two functions you declared earlier to find the sum of each
-        map's values.
-    *   Print the result.
+*   `float64` 값과 `int64` 값의 두 개의 엔트리를 갖는 맵을 초기화합니다.
+    *   이전에 선언한 두 개의 함수를 호출하여 각 맵의 값의 합을 찾습니다.
+    *   결과를 출력합니다.
 
-5. Near the top of main.go, just beneath the package declaration, import the
-    package you’ll need to support the code you’ve just written.
+5. `main.go` 파일의 상단, 패키지 선언 바로 아래에, 새롭게 작성한 코드를 지원하기 위해 필요한 패키지를 가져옵니다.
 
-    The first lines of code should look like this:
+```go
+package main
 
-    ```
-    package main
+import "fmt"
 
-    import "fmt"
-    ```
+func main() {
+    fmt.Println("Hello, world!")
+}
+```
 
-6. Save main.go.
+```
+    패키지 main
+```
 
-#### Run the code
+```
+import "fmt"
+```
 
-From the command line in the directory containing main.go, run the code.
+6. main.go 저장.
+
+#### 코드를 실행하세요
+
+명령줄에서 `main.go` 파일이 있는 디렉토리에서 코드를 실행합니다.
 
 ```
 $ go run .
-Non-Generic Sums: 46 and 62.97
+일반적인 타입이 아닌 합: 46 및 62.97
 ```
 
-With generics, you can write one function here instead of two. Next, you’ll
-add a single generic function for maps containing either integer or float values.
+제네릭을 사용하면, 두 개의 함수 대신 하나의 함수만 작성할 수 있습니다. 다음으로, 정수 또는 부동 소수점 값을 포함하는 맵에 대한 단일 제네릭 함수를 추가합니다.
 
-## Add a generic function to handle multiple types {#add_generic_function}
+## 여러 유형을 처리하는 일반 함수 추가 {#add_generic_function}
 
-In this section, you'll add a single generic function that can receive a map
-containing either integer or float values, effectively replacing the two
-functions you just wrote with a single function.
+```go
+func processData(data interface{}) {
+    // 데이터 처리 로직
+}
+```
 
-To support values of either type, that single function will need a way to
-declare what types it supports. Calling code, on the other hand, will need a
-way to specify whether it is calling with an integer or float map.
+이 함수는 `interface{}` 유형을 사용하여 모든 유형의 데이터를 처리할 수 있습니다.
 
-To support this, you'll write a function that declares _type parameters_ in
-addition to its ordinary function parameters. These type parameters make the
-function generic, enabling it to work with arguments of different types. You'll
-call the function with _type arguments_ and ordinary function arguments.
+예시:
 
-Each type parameter has a _type constraint_ that acts as a kind of meta-type
-for the type parameter. Each type constraint specifies the permissible type
-arguments that calling code can use for the respective type parameter.
+```go
+var data string = "Hello"
+processData(data) // "Hello" 처리
 
-While a type parameter's constraint typically represents a set of types, at
-compile time the type parameter stands for a single type – the type provided
-as a type argument by the calling code. If the type argument's type isn't
-allowed by the type parameter's constraint, the code won't compile.
+var data int = 123
+processData(data) // 123 처리
+```
 
-Keep in mind that a type parameter must support all the operations the generic
-code is performing on it. For example, if your function's code were to try to
-perform `string` operations (such as indexing) on a type parameter whose
-constraint included numeric types, the code wouldn't compile.
+이 함수는 다음과 같은 기능을 제공합니다.
 
-In the code you're about to write, you'll use a constraint that allows either
-integer or float types.
+*   다양한 데이터 유형을 처리할 수 있습니다.
+*   코드 재사용성을 향상시킵니다.
+*   유지 관리를 용이하게 합니다.
 
-#### Write the code
+이 섹션에서는 하나의 일반적인 함수를 추가하여 정수 또는 부동 소수점 값을 포함하는 맵을 받을 수 있습니다. 이를 통해, 이전에 작성한 두 함수를 하나의 함수로 대체할 수 있습니다.
 
-1. Beneath the two functions you added previously, paste the following generic
-    function.
+이러한 값의 양쪽 유형을 지원하려면, 해당 함수는 지원하는 유형을 선언하는 방법을 필요로 합니다. 반면, 호출하는 코드는 정수 또는 부동 소수점 맵을 호출하는지 명시하는 방법을 필요로 합니다.
 
-    ```
-    // SumIntsOrFloats sums the values of map m. It supports both int64 and float64
-    // as types for map values.
+이를 지원하기 위해, 함수 내에 _형식 매개변수_를 선언하는 함수를 작성해야 합니다. 이 형식 매개변수는 함수를 일반화하여 다양한 유형의 인수를 처리할 수 있도록 합니다. 함수를 _형식 인자_와 일반 함수 인수로 호출합니다.
+
+각 타입 매개변수는 _타입 제약 조건_을 가지며, 이는 타입 매개변수에 대한 메타 타입 역할을 합니다. 각 타입 제약 조건은 해당 타입 매개변수에 대해 호출 코드가 사용할 수 있는 허용 가능한 타입 인수를 지정합니다.
+
+"유형 매개변수의 제약은 일반적으로 유형 집합을 나타내지만, 컴파일 시간에 유형 매개변수는 단일 유형을 나타냅니다. 즉, 호출 코드에서 제공된 유형 인수를 나타냅니다. 유형 인수의 유형이 유형 매개변수의 제약에 허용되지 않으면 코드는 컴파일되지 않습니다."
+
+컴파일러는 다음과 같은 규칙을 적용합니다. 타입 매개변수는 일반 코드에서 수행하는 모든 작업에 대해 지원해야 합니다. 예를 들어, 함수 코드에서 숫자 유형을 포함하는 타입 매개변수에 대한 문자열 작업(예: 인덱싱)을 수행하려고 하면 코드가 컴파일되지 않습니다.
+
+코드를 작성할 때, 사용할 제약 조건은 정수 또는 부동 소수점 유형 중 하나를 허용합니다.
+
+```markdown
+#### 코드를 작성하세요
+```
+
+1. 이전 추가하신 두 함수 아래에 다음 일반 함수를 붙여넣으세요.
+
+```
+    // SumIntsOrFloats는 맵 m의 값을 더합니다. 맵 값의 유형으로 int64 및 float64를 모두 지원합니다.
     func SumIntsOrFloats[K comparable, V int64 | float64](m map[K]V) V {
         var s V
         for _, v := range m {
@@ -226,154 +230,153 @@ integer or float types.
         }
         return s
     }
-    ```
+```
 
-    In this code, you:
+이 코드에서는 다음과 같은 작업을 수행합니다:
 
-    *   Declare a `SumIntsOrFloats` function with two type parameters (inside
-        the square brackets), `K` and `V`, and one argument that uses the type
-        parameters, `m` of type `map[K]V`. The function returns a value of
-        type `V`.
-    *   Specify for the `K` type parameter the type constraint `comparable`.
-        Intended specifically for cases like these, the `comparable` constraint
-        is predeclared in Go. It allows any type whose values may be used as an
-        operand of the comparison operators `==` and `!=`. Go requires that map
-        keys be comparable. So declaring `K` as `comparable` is necessary so you
-        can use `K` as the key in the map variable. It also ensures that calling
-        code uses an allowable type for map keys.
-    *   Specify for the `V` type parameter a constraint that is a union of two
-        types: `int64` and `float64`. Using `|` specifies a union of the two
-        types, meaning that this constraint allows either type. Either type
-        will be permitted by the compiler as an argument in the calling code.
-    *   Specify that the `m` argument is of type `map[K]V`, where `K` and `V`
-        are the types already specified for the type parameters. Note that we
-        know `map[K]V` is a valid map type because `K` is a comparable type. If
-        we hadn’t declared `K` comparable, the compiler would reject the
-        reference to `map[K]V`.
+*   `SumIntsOrFloats`라는 함수를 선언하고, 이 함수는 두 개의 타입 파라미터(`K`와 `V`)와 하나의 인수를 사용하며, 인수의 타입은 `map[K]V`입니다. 이 함수는 `V` 타입의 값을 반환합니다.
+    *   `K` 타입 파라미터에 대해 `comparable` 타입 제약을 지정합니다. 이 제약은 특정 상황(예: 위와 같은 경우)에 맞춰 Go에서 미리 정의되어 있습니다. 이는 `==` 및 `!=` 비교 연산자의 피연산자로 사용될 수 있는 모든 타입에 적용됩니다. Go에서는 맵 키가 Comparable해야 합니다. 따라서 `K`를 `comparable`로 선언하는 것은 맵 변수의 키로 `K`를 사용할 수 있도록 하는 데 필수적입니다. 또한, 이 선언은 호출 코드가 맵 키로 사용할 수 있는 적절한 타입임을 보장합니다.
+    *   `V` 타입 파라미터에 대해 `int64` 및 `float64` 두 개의 타입의 합집합을 나타내는 제약을 지정합니다. `|`를 사용하면 두 타입의 합집합을 나타내므로, 이 제약은 두 타입 중 하나를 허용합니다. 컴파일러는 호출 코드에서 인수로 사용될 수 있는 두 타입 모두를 허용합니다.
+    *   `m` 인수가 `map[K]V` 타입임을 지정하며, 여기서 `K`와 `V`는 이미 타입 파라미터로 지정된 타입입니다. `K`가 Comparable 타입이므로 `map[K]V`가 유효한 맵 타입임을 알 수 있습니다. 만약 `K`를 Comparable으로 선언하지 않았다면 컴파일러는 `map[K]V`에 대한 참조를 거부했을 것입니다.
 
-2. In main.go, beneath the code you already have, paste the following code.
+2. `main.go` 파일에서, 기존 코드 아래에 다음 코드를 붙여넣으십시오.
 
-    ```
-    fmt.Printf("Generic Sums: %v and %v\n",
+```
+    fmt.Printf("일반적인 합: %v 및 %v\n",
     	SumIntsOrFloats[string, int64](ints),
     	SumIntsOrFloats[string, float64](floats))
     ```
 
-    In this code, you:
+이 코드에서, 다음을 수행합니다:
 
-    *   Call the generic function you just declared, passing each of the maps
-        you created.
-    *   Specify type arguments – the type names in square brackets – to be
-        clear about the types that should replace type parameters in the
-        function you're calling.
+*   정의한 일반 함수를 호출하고, 생성한 각 맵을 인수로 전달합니다.
+    *   함수를 호출할 때, 사용자가 명확하게 지정할 수 있도록 괄호 안에 타입 이름 ([])을 사용하여 타입 매개변수를 대체할 타입을 명시합니다.
 
-        As you'll see in the next section, you can often omit the type
-        arguments in the function call. Go can often infer them from your code.
-    *   Print the sums returned by the function.
+다음 섹션에서 보시겠지만, 함수 호출에서 종종 타입
+인수를 생략할 수 있습니다. Go는 종종 코드를 기반으로 이를 추론할 수 있습니다.
+*   함수에서 반환된 합계를 출력합니다.
 
-#### Run the code
+#### 코드를 실행
 
-From the command line in the directory containing main.go, run the code.
+명령줄에서 `main.go` 파일이 있는 디렉토리에서 코드를 실행합니다.
 
 ```
 $ go run .
-Non-Generic Sums: 46 and 62.97
-Generic Sums: 46 and 62.97
+일반적인 타입이 아닌 합: 46 및 62.97
+일반적인 타입의 합: 46 및 62.97
 ```
 
-To run your code, in each call the compiler replaced the type parameters with
-the concrete types specified in that call.
+코드를 실행하려면, 각 호출 시 컴파일러는 해당 호출에 명시된 구체적인 타입으로 타입 매개변수를 대체합니다.
 
-In calling the generic function you wrote, you specified type arguments that
-told the compiler what types to use in place of the function's type parameters.
-As you'll see in the next section, in many cases you can omit these type
-arguments because the compiler can infer them.
+제 코드로 작성된 일반 함수를 호출할 때, 함수 매개변수의 유형 대신 사용할 유형을 컴파일러에게 알려주는 유형 인수를 지정했습니다. 다음 섹션에서 볼 수 있듯이, 많은 경우에 이러한 유형 인수를 생략할 수 있으며, 컴파일러는 이를 추론할 수 있습니다.
 
-## Remove type arguments when calling the generic function {#remove_type_arguments}
+## 일반 함수 호출 시 타입 인자 제거 {#remove_type_arguments}
 
-In this section, you'll add a modified version of the generic function call,
-making a small change to simplify the calling code. You'll remove the type
-arguments, which aren't needed in this case.
+```go
+func genericFunction[T any](data T) {
+  // ...
+}
 
-You can omit type arguments in calling code when the Go compiler can infer the
-types you want to use. The compiler infers type arguments from the types of
-function arguments.
+// Example:
+result := genericFunction(10) // This is valid
+```
 
-Note that this isn't always possible. For example, if you needed to call a
-generic function that had no arguments, you would need to include the type
-arguments in the function call.
+이 섹션에서는 일반 함수 호출의 수정된 버전을 추가합니다. 호출 코드를 단순화하기 위해 약간의 변경을 수행합니다. 이 경우 타입 인수를 제거합니다.
 
-#### Write the code
+코드를 호출할 때, Go 컴파일러가 사용할 타입을 추론할 수 있는 경우 타입 인수를 생략할 수 있습니다. 컴파일러는 함수 인수의 타입에서 타입 인수를 추론합니다.
 
-*   In main.go, beneath the code you already have, paste the following code.
+참고: 항상 가능한 것은 아닙니다. 예를 들어, 인수가 없는 일반 함수를 호출해야 하는 경우, 함수 호출에 타입 인수를 포함해야 합니다.
 
-    ```
-    fmt.Printf("Generic Sums, type parameters inferred: %v and %v\n",
+```markdown
+#### 코드를 작성하세요
+
+*   `main.go` 파일, 기존 코드 아래에 다음 코드를 붙여넣으세요.
+
+```
+    fmt.Printf("일반적인 합, 타입 매개변수는 추론됨: %v 및 %v\n",
     	SumIntsOrFloats(ints),
     	SumIntsOrFloats(floats))
     ```
 
-    In this code, you:
+이 코드에서, 다음을 수행합니다:
 
-    *   Call the generic function, omitting the type arguments.
+*   일반 함수를 호출하고, 타입 인수를 생략합니다.
 
-#### Run the code
+#### 코드를 실행하세요
 
-From the command line in the directory containing main.go, run the code.
+명령 프롬프트에서 `main.go` 파일이 있는 디렉토리에서 코드를 실행합니다.
 
 ```
 $ go run .
-Non-Generic Sums: 46 and 62.97
-Generic Sums: 46 and 62.97
-Generic Sums, type parameters inferred: 46 and 62.97
+일반적인 타입이 아닌 합계: 46 및 62.97
+일반적인 타입의 합계: 46 및 62.97
+일반적인 타입, 타입 매개변수 추론: 46 및 62.97
 ```
 
-Next, you'll further simplify the function by capturing the union of integers
-and floats into a type constraint you can reuse, such as from other code.
+다음으로, 함수를 더욱 단순화하기 위해 정수와 부동 소수점 숫자를 모두 포함하는 타입 제약 조건을 정의하여 재사용할 수 있습니다.
 
-## Declare a type constraint {#declare_type_constraint}
+## 타입 제약 선언하기 {#declare_type_constraint}
 
-In this last section, you'll move the constraint you defined earlier into its
-own interface so that you can reuse it in multiple places. Declaring
-constraints in this way helps streamline code, such as when a constraint is
-more complex.
+```
+type MyType[T < T >] = ...
+```
 
-You declare a _type constraint_ as an interface. The constraint allows any
-type implementing the interface. For example, if you declare a type constraint
-interface with three methods, then use it with a type parameter in a generic
-function, type arguments used to call the function must have all of those
-methods.
+이 예제에서는 `MyType`이라는 새로운 타입을 정의합니다. 이 타입은 타입 `T`를 받습니다. `T < T >`는 타입 `T`가 자신보다 크거나 같다는 제약 조건을 나타냅니다.
 
-Constraint interfaces can also refer to specific types, as you'll see in this
-section.
+이 제약 조건을 사용하여, 특정 타입에 대한 추가적인 검사를 수행할 수 있습니다. 예를 들어, 다음과 같이 사용할 수 있습니다.
 
-#### Write the code
+```
+type MyType[T < T >] = ...
+if (T > T) {
+  // ...
+}
+```
 
-1. Just above `main`, immediately after the import statements, paste the
-    following code to declare a type constraint.
+이 코드는 `T`가 자신보다 크거나 같지 않은 경우에만 실행됩니다.
 
-    ```
-    type Number interface {
+또 다른 예제는 다음과 같습니다.
+
+```
+type MyType[T < T >] = ...
+if (T == T) {
+  // ...
+}
+```
+
+이 코드는 `T`가 자신과 같은 경우에만 실행됩니다.
+
+이러한 타입 제약 조건을 사용하여, 코드의 안전성을 높이고, 잠재적인 오류를 방지할 수 있습니다.
+
+이 마지막 섹션에서는, 이전에 정의한 제약 조건을 별도의 인터페이스로 이동하여 여러 곳에서 재사용할 수 있도록 합니다. 제약 조건을 이 방식으로 선언하면 코드를 간소화하는 데 도움이 됩니다. 예를 들어, 제약 조건이 복잡한 경우에 유용합니다.
+
+`_type constraint`을 인터페이스로 선언합니다. 이 제약은 인터페이스를 구현하는 모든 유형을 허용합니다. 예를 들어, 세 개의 메서드를 가진 유형 제약 인터페이스를 선언하면, 해당 인터페이스를 일반 함수에서 유형 매개변수로 사용하면, 함수를 호출하는 유형에 해당 메서드 모두가 있어야 합니다.
+
+제약 인터페이스는 또한 특정 유형을 참조할 수도 있습니다. 자세한 내용은 다음 섹션에서 확인하십시오.
+
+```markdown
+#### 코드를 작성하세요
+```
+
+1. `main` 바로 위, import 문 뒤에 다음 코드를 붙여서 타입 제약을 선언합니다.
+
+```
+    type Number 인터페이스 {
         int64 | float64
     }
-    ```
+```
 
-    In this code, you:
+이 코드에서, 다음과 같은 작업을 수행합니다:
 
-    *   Declare the `Number` interface type to use as a type constraint.
-    *   Declare a union of `int64` and `float64` inside the interface.
+*   `Number` 인터페이스 유형을 제약 조건으로 선언합니다.
+    *   인터페이스 내부에 `int64` 및 `float64`의 유니온을 선언합니다.
 
-        Essentially, you're moving the union from the function declaration
-        into a new type constraint. That way, when you want to constrain a type
-        parameter to either `int64` or `float64`, you can use this `Number`
-        type constraint instead of writing out `int64 | float64`.
+핵심적으로, 이 연산자를 함수 선언에서 새로운 타입 제약 조건으로 이동합니다. 이렇게 하면, `int64` 또는 `float64` 중 하나로 타입 매개변수를 제한하고 싶을 때, `int64 | float64`를 작성하는 대신 이 `Number` 타입 제약 조건을 사용할 수 있습니다.
 
-2. Beneath the functions you already have, paste the following generic
-    `SumNumbers` function.
+2. 기존에 정의한 함수 아래에 다음의 일반적인
+    `SumNumbers` 함수를 붙여넣으세요.
 
-    ```
-    // SumNumbers sums the values of map m. It supports both integers
-    // and floats as map values.
+```
+    // SumNumbers는 맵 m의 값을 더합니다. 이 함수는 맵 값으로 정수와 부동 소수점 숫자를 모두 지원합니다.
     func SumNumbers[K comparable, V Number](m map[K]V) V {
         var s V
         for _, v := range m {
@@ -381,102 +384,91 @@ section.
         }
         return s
     }
-    ```
+```
 
-    In this code, you:
+이 코드에서, 다음을 수행합니다:
 
-    *   Declare a generic function with the same logic as the generic function
-        you declared previously, but with the new interface type instead of the
-        union as the type constraint. As before, you use the type parameters
-        for the argument and return types.
+*   이전에 선언한 일반 함수와 동일한 로직을 가진 일반 함수를 선언합니다. 단, 새로운 인터페이스 유형을 유니온 대신 타입 제약 조건으로 사용합니다. 이전과 같이, 함수 인자와 반환 유형에 대한 타입 매개변수를 사용합니다.
 
-3. In main.go, beneath the code you already have, paste the following code.
+3. main.go 파일 내, 기존 코드 아래에 다음 코드를 붙여넣으세요.
 
-    ```
-    fmt.Printf("Generic Sums with Constraint: %v and %v\n",
+```
+    fmt.Printf("제약 조건이 있는 일반적인 합: %v 및 %v\n",
     	SumNumbers(ints),
     	SumNumbers(floats))
-    ```
+```
 
-    In this code, you:
+이 코드에서, 당신은:
 
-    *   Call `SumNumbers` with each map, printing the sum from the values of
-        each.
+*   각 맵에 대해 `SumNumbers` 함수를 호출하여 각 맵의 값들의 합을 출력합니다.
 
-        As in the preceding section, you omit the type arguments (the type
-        names in square brackets) in calls to the generic function. The Go
-        compiler can infer the type argument from other arguments.
+과거 섹션과 마찬가지로, 일반 함수 호출에서 타입 인수를 생략합니다. Go 컴파일러는 다른 인수를 사용하여 타입 인수를 추론할 수 있습니다.
 
-#### Run the code
+#### 코드를 실행합니다
 
-From the command line in the directory containing main.go, run the code.
+명령줄에서 `main.go` 파일이 있는 디렉토리에서 코드를 실행합니다.
 
 ```
 $ go run .
-Non-Generic Sums: 46 and 62.97
-Generic Sums: 46 and 62.97
-Generic Sums, type parameters inferred: 46 and 62.97
-Generic Sums with Constraint: 46 and 62.97
+일반적이지 않은 합: 46 및 62.97
+일반적 합: 46 및 62.97
+일반적 합, 타입 매개변수 추론: 46 및 62.97
+제약 조건과 함께 일반적 합: 46 및 62.97
 ```
 
-## Conclusion {#conclusion}
+## 결론 {#conclusion}
 
-Nicely done! You've just introduced yourself to generics in Go.
+훌륭합니다! 이제 Go에서 제네릭을 소개했습니다.
 
-Suggested next topics:
+다음으로 다루는 주제:
 
-*   The [Go Tour](/tour/) is a great step-by-step
-    introduction to Go fundamentals.
-*   You'll find useful Go best practices described in
-    [Effective Go](/doc/effective_go) and
-    [How to write Go code](/doc/code).
+*   [Go Tour](tour/)는 Go의 기본 개념을 단계별로 설명하는 훌륭한 자료입니다.
+*   [Effective Go](effective_go) 및 [How to write Go code](code)에서 Go의 유용한 사용법을 찾을 수 있습니다.
 
-## Completed code {#completed_code}
+## 완성된 코드 {#completed_code}
 
-You can run this program in the
-[Go playground](/play/p/apNmfVwogK0). On the
-playground simply click the **Run** button.
+이 프로그램을 다음 [Go playground](https://play.golang.org/p/apNmfVwogK0)에서 실행할 수 있습니다.
+playground에서 **Run** 버튼을 클릭하기만 하면 됩니다.
 
-```
-package main
+```markdown
+패키지 main
 
 import "fmt"
 
-type Number interface {
+타입 Number
 	int64 | float64
-}
 
-func main() {
-	// Initialize a map for the integer values
+함수 main()
+	// 정수 값에 대한 맵 초기화
 	ints := map[string]int64{
 		"first": 34,
 		"second": 12,
 	}
 
-	// Initialize a map for the float values
+	// 부동 소수점 값에 대한 맵 초기화
 	floats := map[string]float64{
 		"first": 35.98,
 		"second": 26.99,
 	}
 
-	fmt.Printf("Non-Generic Sums: %v and %v\n",
+	fmt.Printf("일반적인 맵을 사용하지 않는 합: %v 및 %v\n",
 		SumInts(ints),
 		SumFloats(floats))
 
-	fmt.Printf("Generic Sums: %v and %v\n",
+	fmt.Printf("일반적인 맵을 사용하는 합: %v 및 %v\n",
 		SumIntsOrFloats[string, int64](ints),
 		SumIntsOrFloats[string, float64](floats))
 
-	fmt.Printf("Generic Sums, type parameters inferred: %v and %v\n",
+	fmt.Printf("일반적인 맵을 사용하는 합, 타입 매개변수 추론: %v 및 %v\n",
 		SumIntsOrFloats(ints),
 		SumIntsOrFloats(floats))
 
-	fmt.Printf("Generic Sums with Constraint: %v and %v\n",
+	fmt.Printf("제약 조건과 함께 일반적인 맵을 사용하는 합: %v 및 %v\n",
 		SumNumbers(ints),
 		SumNumbers(floats))
 }
 
-// SumInts adds together the values of m.
+// SumInts는 m의 값을 더합니다.
 func SumInts(m map[string]int64) int64 {
 	var s int64
 	for _, v := range m {
@@ -485,7 +477,7 @@ func SumInts(m map[string]int64) int64 {
 	return s
 }
 
-// SumFloats adds together the values of m.
+// SumFloats는 m의 값을 더합니다.
 func SumFloats(m map[string]float64) float64 {
 	var s float64
 	for _, v := range m {
@@ -494,8 +486,7 @@ func SumFloats(m map[string]float64) float64 {
 	return s
 }
 
-// SumIntsOrFloats sums the values of map m. It supports both floats and integers
-// as map values.
+// SumIntsOrFloats는 맵 m의 값을 더합니다. float 및 정수를 맵 값으로 지원합니다.
 func SumIntsOrFloats[K comparable, V int64 | float64](m map[K]V) V {
 	var s V
 	for _, v := range m {
@@ -504,8 +495,7 @@ func SumIntsOrFloats[K comparable, V int64 | float64](m map[K]V) V {
 	return s
 }
 
-// SumNumbers sums the values of map m. It supports both integers
-// and floats as map values.
+// SumNumbers는 맵 m의 값을 더합니다. 정수 및 float를 맵 값으로 지원합니다.
 func SumNumbers[K comparable, V Number](m map[K]V) V {
 	var s V
 	for _, v := range m {
@@ -513,3 +503,4 @@ func SumNumbers[K comparable, V Number](m map[K]V) V {
 	}
 	return s
 }
+```

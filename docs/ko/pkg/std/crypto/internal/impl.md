@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package impl is a registry of alternative implementations of cryptographic primitives, to allow selecting them for testing.
+패키지 `impl`은 암호화 기본 구성 요소의 대안 구현을 등록하는 레지스트리입니다. 이를 통해 테스트 시 선택할 수 있습니다.
 
 ## 원문 요약
 

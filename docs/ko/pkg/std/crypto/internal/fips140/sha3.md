@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package sha3 implements the SHA-3 fixed-output-length hash functions and the SHAKE variable-output-length functions defined by [FIPS 202], as well as the cSHAKE extendable-output-length functions defined by [SP 800-185].
+패키지 sha3는 [FIPS 202]에서 정의된 고정 길이 출력 길이 해싱 함수와, 그리고 [SP 800-185]에서 정의된 cSHAKE 확장 길이 출력 길이 함수를 구현합니다.
 
 ## 원문 요약
 

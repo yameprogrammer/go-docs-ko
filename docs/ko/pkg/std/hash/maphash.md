@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package maphash provides hash functions on byte sequences and comparable values.
+패키지 `maphash`는 바이트 시퀀스와 비교 가능한 값에 대한 해시 함수를 제공합니다.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package gate contains an alternative condition variable.
+패키지 `gate`는 대안적인 조건 변수를 포함합니다.
 
 ## 원문 요약
 

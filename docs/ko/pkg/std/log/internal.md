@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package internal contains definitions used by both log and log/slog.
+패키지 `internal`은 `log` 및 `log/slog` 모두에서 사용되는 정의를 포함합니다.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package path implements utility routines for manipulating slash-separated paths.
+패키지 `path`는 슬래시로 구분된 경로를 조작하기 위한 유틸리티 루틴을 구현합니다.
 
 ## 원문 요약
 

@@ -1,99 +1,82 @@
 <!--{
-  "Title": "Managing connections"
+  "제목": "연결 관리"
 }-->
 
-For the vast majority of programs, you needn't adjust the `sql.DB` connection
-pool defaults. But for some advanced programs, you might need to tune the
-connection pool parameters or work with connections explicitly. This topic
-explains how.
+대부분의 프로그램에서는 `sql.DB` 연결 풀의 기본 설정을 조정할 필요가 없습니다. 하지만 일부 고급 프로그램에서는 연결 풀 매개변수를 조정하거나 연결을 명시적으로 처리해야 할 수도 있습니다. 이 주제에서는 어떻게 해야 하는지 설명합니다.
 
-The [`sql.DB`](https://pkg.go.dev/database/sql#DB) database handle is safe for
-concurrent use by multiple goroutines
-(meaning the handle is what other languages might call “thread-safe”). Some
-other database access libraries are based on connections that can only be used
-for one operation at a time. To bridge that gap, each `sql.DB` manages a pool
-of active connections to the underlying database, creating new ones as needed
-for parallelism in your Go program. 
+`sql.DB` 데이터베이스 핸들은 여러 고루틴에서 동시 사용하기에 안전합니다 (즉, 핸들은 다른 언어에서 "스레드 안전"이라고 부르는 것과 같습니다). 다른 일부 데이터베이스 액세스 라이브러리는 단 한 번만 사용할 수 있는 연결을 기반으로 합니다. 이러한 격차를 메우기 위해, 각 `sql.DB`는 기본 데이터베이스에 대한 활성 연결 풀을 관리하며, Go 프로그램의 병렬성을 위해 필요한 경우 새로운 연결을 생성합니다.
 
-The connection pool is suitable for most data access needs. When you call an
-`sql.DB` `Query` or `Exec` method, the `sql.DB` implementation retrieves an
-available connection from the pool or, if needed, creates one. The package
-returns the connection to the pool when it's no longer needed. This supports a
-high level of parallelism for database access.
+연결 풀은 대부분의 데이터 액세스 요구 사항에 적합합니다. `sql.DB`의 `Query` 또는 `Exec` 메서드를 호출할 때, `sql.DB` 구현은 풀에서 사용 가능한 연결을 가져오거나, 필요한 경우 새 연결을 생성합니다. 패키지는 더 이상 필요하지 않은 연결을 풀로 반환합니다. 이를 통해 데이터베이스 액세스에 높은 수준의 병렬성을 지원합니다.
 
-### Setting connection pool properties {#connection_pool_properties}
+### 연결 풀 속성 설정 {#connection_pool_속성}
 
-You can set properties that guide how the `sql` package manages a connection
-pool. To get statistics about the effects of these properties, use
-[`DB.Stats`](https://pkg.go.dev/database/sql#DB.Stats).
+```
+# 연결 풀 속성 설정
 
-#### Setting the maximum number of open connections {#max_open_connections}
+다음은 연결 풀 속성을 설정하는 방법입니다.
 
-[`DB.SetMaxOpenConns`](https://pkg.go.dev/database/sql#DB.SetMaxOpenConns)
-imposes a limit on the number of open connections. Past this limit, new
-database operations will wait for an existing operation to finish, at which
-time `sql.DB` will create another connection. By default, `sql.DB` creates a
-new connection any time all the existing connections are in use when a
-connection is needed.
+## 연결 풀 크기 설정
 
-Keep in mind that setting a limit makes database usage similar to acquiring a
-lock or semaphore, with the result that your application can deadlock waiting
-for a new database connection.
+연결 풀 크기는 연결 풀에 유지할 연결의 최대 개수를 지정합니다.
 
-#### Setting the maximum number of idle connections {#max_idle_connections}
+*   `max_connections`: 연결 풀에 유지할 최대 연결 수.
+*   `min_connections`: 연결 풀에 유지할 최소 연결 수.
+
+## 연결 시간 초 설정
+
+연결 시간 초는 연결이 유효하지 않다고 판단되면 연결을 닫는 시간을 지정합니다.
+
+*   `idle_timeout`: 유휴 연결이 닫히는 시간 (초).
+*   `connection_timeout`: 새로운 연결이 설정되는 데 걸리는 시간 (초).
+
+## 연결 큐 설정
+
+연결 큐는 사용 가능한 연결을 저장하는 데 사용됩니다.
+
+*   `queue_size`: 연결 큐에 저장할 최대 연결 수.
+
+## 기타 설정
+
+다음은 연결 풀 속성에 사용할 수 있는 기타 설정입니다.
+
+*   `connection_url`: 연결 풀 설정을 위한 연결 URL.
+*   `connection_factory`: 연결 풀에 연결을 생성하는 데 사용되는 연결 팩토리.
+
+다음 속성을 설정하여 `sql` 패키지가 연결 풀을 관리하는 방식을 제어할 수 있습니다. 이러한 속성의 효과에 대한 통계를 얻으려면 [`DB.Stats`](https://pkg.go.dev/database/sql#DB.Stats)를 사용하세요.
+
+#### 최대 동시 연결 수 설정 {#max_open_connections}
+
+[`DB.SetMaxOpenConns`](https://pkg.go.dev/database/sql#DB.SetMaxOpenConns)는 열려 있는 연결 수를 제한합니다. 이 제한을 초과하면 새로운 데이터베이스 작업은 기존 작업이 완료될 때까지 대기합니다. 이 때 `sql.DB`는 새로운 연결을 생성합니다. 기본적으로 `sql.DB`는 모든 기존 연결이 사용 중일 때 연결이 필요할 때마다 새로운 연결을 생성합니다.
+
+지정된 제한을 설정하면 데이터베이스 사용이 잠금 또는 세마포를 획득하는 것과 유사해집니다. 따라서 애플리케이션이 새 데이터베이스 연결을 기다리는 동안 멈추는 상황이 발생할 수 있습니다.
+
+#### 최대 유휴 연결 수 설정 {#max_idle_connections}
 
 [`DB.SetMaxIdleConns`](https://pkg.go.dev/database/sql#DB.SetMaxIdleConns)
-changes the limit on the maximum number of idle connections `sql.DB`
-maintains.
+는 `sql.DB`에서 유지하는 최대 유휴 연결 수를 변경합니다.
 
-When an SQL operation finishes on a given database connection, it is not
-typically shut down immediately: the application may need one again soon, and
-keeping the open connection around avoids having to reconnect to the database
-for the next operation. By default an `sql.DB` keeps two idle connections at
-any given moment. Raising the limit can avoid frequent reconnects in programs
-with significant parallelism.
+SQL 작업이 특정 데이터베이스 연결에서 완료되면, 일반적으로 즉시 닫히지는 않습니다. 애플리케이션은 곧 다시 연결을 필요로 할 수 있으며, 열린 연결을 유지하면 다음 작업에 대해 데이터베이스에 다시 연결할 필요가 없어집니다. 기본적으로 `sql.DB`는 주어진 시점에 두 개의 비활성 연결을 유지합니다. 이러한 연결 수를 늘리면, 상당한 병렬성을 가진 프로그램에서 빈번한 재연결을 방지할 수 있습니다.
 
-#### Setting the maximum amount a time a connection can be idle {#max_idle_time}
+#### 연결이 유휴 상태로 유지될 수 있는 최대 시간을 설정합니다 {#max_idle_time}
 
 [`DB.SetConnMaxIdleTime`](https://pkg.go.dev/database/sql#DB.SetConnMaxIdleTime)
-sets the maximum length of time a connection can be idle before it is closed.
-This causes the `sql.DB` to close connections that have been idle for longer
-than the given duration.
+는 연결이 닫히기 전에 비활 상태로 유지될 수 있는 최대 시간을 설정합니다.
+이 기능은 `sql.DB`가 지정된 기간 이상 비활 상태인 연결을 닫도록 합니다.
 
-By default, when an idle connection is added to the connection pool, it
-remains there until it is needed again. When using `DB.SetMaxIdleConns` to
-increase the number of allowed idle connections during bursts of parallel
-activity, also using `DB.SetConnMaxIdleTime` can arrange to release those
-connections later when the system is quiet.
+기본적으로, 비활성 연결이 연결 풀에 추가되면, 사용될 때까지 거기에 남아 있습니다. `DB.SetMaxIdleConns`를 사용하여 병렬 활동의 급증 시 허용되는 비활성 연결 수를 늘릴 때, `DB.SetConnMaxIdleTime`를 사용하여 시스템이 조용해졌을 때 해당 연결을 나중에 해제하도록 구성할 수 있습니다.
 
-#### Setting the maximum lifetime of connections {#max_connection_lifetime}
+#### 연결의 최대 수명을 설정 {#max_connection_lifetime}
 
-Using [`DB.SetConnMaxLifetime`](https://pkg.go.dev/database/sql#DB.SetConnMaxLifetime)
-sets the maximum length of time a connection can be held open before it is
-closed.
+`DB.SetConnMaxLifetime` (https://pkg.go.dev/database/sql#DB.SetConnMaxLifetime)를 사용하여 연결이 닫되기 전에 열려 있는 시간을 설정합니다.
 
-By default, a connection can be used and reused for an arbitrarily long amount
-of time, subject to the limits described above. In some systems, such as those
-using a load-balanced database server, it can be helpful to ensure that the
-application never uses a particular connection for too long without reconnecting.
+기본적으로, 연결은 위에서 설명된 제한 사항 내에서 아무리 오래 사용해도 되며, 재사용할 수 있습니다. 예를 들어 로드 밸런싱된 데이터베이스 서버를 사용하는 시스템에서는 애플리케이션이 특정 연결을 재연결하지 않고 너무 오랫동안 사용하지 않도록 하는 것이 유용할 수 있습니다.
 
-### Using dedicated connections {#dedicated_connections}
+### 전용 연결 사용하기 {#dedicated_connections}
 
-The `database/sql` package includes functions you can use when a database may
-assign implicit meaning to a sequence of operations executed on a particular
-connection. 
+`database/sql` 패키지는 특정 연결에서 실행되는 작업의 시퀀스에 대해 데이터베이스가 암시적인 의미를 부여할 수 있는 경우에 사용할 수 있는 함수를 포함합니다.
 
-The most common example is transactions, which typically start with a `BEGIN`
-command, end with a `COMMIT` or `ROLLBACK` command, and include all the
-commands issued on the connection between those commands in the overall
-transaction. For this use case, use the `sql` package’s transaction support.
-See [Executing transactions](/doc/database/execute-transactions).
+가장 일반적인 예는 트랜잭션이며, 일반적으로 `BEGIN` 명령으로 시작하고, `COMMIT` 또는 `ROLLBACK` 명령으로 끝납니다. 또한, 이 두 명령 사이의 모든 명령을 트랜잭션의 전체 내용으로 포함합니다. 이 사용 사례의 경우, `sql` 패키지의 트랜잭션 지원을 사용하십시오.
+자세한 내용은 [트랜잭션 실행](/doc/database/execute-transactions)를 참조하십시오.
 
-For other use cases where a sequence of individual operations must all execute
-on the same connection, the `sql` package provides dedicated connections.
-[`DB.Conn`](https://pkg.go.dev/database/sql#DB.Conn) obtains a dedicated
-connection, an [`sql.Conn`](https://pkg.go.dev/database/sql#Conn). The
-`sql.Conn` has methods `BeginTx`, `ExecContext`, `PingContext`,
-`PrepareContext`, `QueryContext`, and `QueryRowContext` that behave like the
-equivalent methods on DB but only use the dedicated connection. When finished
-with the dedicated connection, your code must release it using `Conn.Close`.
+다른 사용 사례에서는 개별 작업의 일련이 모두 동일한 연결에서 실행되어야 하는 경우, `sql` 패키지는 전용 연결을 제공합니다.
+[`DB.Conn`](https://pkg.go.dev/database/sql#DB.Conn)는 전용 연결을 가져오고, 해당 [`sql.Conn`](https://pkg.go.dev/database/sql#Conn)를 사용합니다. `sql.Conn`은 `BeginTx`, `ExecContext`, `PingContext`, `PrepareContext`, `QueryContext`, `QueryRowContext` 등의 메서드를 가지고 있으며, 이는 `DB`에 있는 해당 메서드와 동일하게 동작하지만, 전용 연결만 사용합니다. 전용 연결을 사용한 후에는 `Conn.Close`를 사용하여 연결을 닫아야 합니다.

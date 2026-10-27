@@ -1,8 +1,9 @@
+```markdown
 {{/*
-	This is a placeholder template that makes it possible to preview
-	Go 1.28 release notes draft at https://tip.golang.org/doc/go1.28.
-	Eventually the release note fragments in doc/next will be merged
-	and added here, replacing the "docNext" function call.
+	이것은 Go 1.28 출시 노트 초안을 미리 보기할 수 있도록 하는 자리 표시 템플릿입니다.
+	자세한 내용은 https://tip.golang.org/doc/go1.28 에서 확인할 수 있습니다.
+	결국 doc/next에 있는 출시 노트 조각들이 병합되어 여기에 추가되며, "docNext" 함수 호출을 대체합니다.
 */}}
+```
 
-{{with docNext}}{{.}}{{else}}No next release note fragments available.{{end}}
+{{with docNext}}{{.}}{{else}}다음 버전의 출시 노트 정보가 없습니다.{{end}}

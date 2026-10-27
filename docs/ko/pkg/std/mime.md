@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package mime implements parts of the MIME spec.
+패키지 `mime`는 MIME 사양의 일부를 구현합니다.
 
 ## 원문 요약
 

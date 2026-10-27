@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package alias implements memory aliasing tests.
+패키지 별칭은 메모리 별칭 테스트를 구현합니다.
 
 ## 원문 요약
 

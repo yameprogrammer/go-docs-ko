@@ -22,6 +22,11 @@ def sanitize_for_mkdocs(markdown: str) -> str:
 
 def build_index(output_dir: Path, translated_files: list[Path]) -> None:
     rel_paths = sorted([p.relative_to(output_dir) for p in translated_files if p.name != "index.md"])
+    grouped: dict[str, list[Path]] = {}
+    for rel in rel_paths:
+        top = rel.parts[0] if len(rel.parts) > 1 else "top-level"
+        grouped.setdefault(top, []).append(rel)
+
     lines = [
         "# go.dev/doc 미러 문서",
         "",
@@ -30,11 +35,19 @@ def build_index(output_dir: Path, translated_files: list[Path]) -> None:
         "- 원문 권위: <https://go.dev/doc>",
         "- 이 저장소는 비공식 한국어 번역 미러입니다.",
         "",
-        "## 문서 목록",
+        "## 문서 섹션",
+        "",
+        "> 전체 페이지는 사이트 검색으로도 빠르게 찾을 수 있습니다.",
         "",
     ]
-    for rel in rel_paths:
-        lines.append(f"- [{rel.as_posix()}]({rel.as_posix()})")
+    for section in sorted(grouped.keys()):
+        title = "Top-level" if section == "top-level" else section
+        lines.append(f"### {title}")
+        lines.append("")
+        for rel in grouped[section]:
+            label = rel.name if section != "top-level" else rel.as_posix()
+            lines.append(f"- [{label}]({rel.as_posix()})")
+        lines.append("")
     lines.append("")
     (output_dir / "index.md").write_text("\n".join(lines), encoding="utf-8")
 
@@ -45,11 +58,17 @@ def main() -> int:
     parser.add_argument("--source-branch", default="master")
     parser.add_argument("--output-dir", default="docs/ko/go-dev-doc")
     parser.add_argument("--translate", action="store_true")
+    parser.add_argument("--index-only", action="store_true")
     args = parser.parse_args()
 
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     provider = os.getenv("TRANSLATION_PROVIDER", "ollama").lower()
+    if args.index_only:
+        existing = [p for p in output_dir.rglob("*.md") if p.name != "index.md"]
+        build_index(output_dir, existing)
+        print(f"Rebuilt index from existing files: {output_dir / 'index.md'}")
+        return 0
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         workdir = Path(tmp_dir)

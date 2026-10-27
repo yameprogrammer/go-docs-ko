@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package sysinfo implements high level hardware information gathering that can be used for debugging or information purposes.
+패키지 `sysinfo`는 디버깅 또는 정보 목적으로 사용할 수 있는 고수준 하드웨어 정보 수집을 구현합니다.
 
 ## 원문 요약
 

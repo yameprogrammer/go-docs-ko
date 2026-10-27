@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package bufio implements buffered I/O. It wraps an io.Reader or io.Writer object, creating another object (Reader or Writer) that also implements the interface but provides buffering and some help for textual I/O.
+패키지 `bufio`는 버퍼드 I/O를 구현합니다. `io.Reader` 또는 `io.Writer` 객체를 감싸서, 새로운 객체 (Reader 또는 Writer)를 생성합니다. 이 객체는 인터페이스를 구현하지만, 버퍼링과 텍스트 I/O에 유용한 기능을 제공합니다.
 
 ## 원문 요약
 

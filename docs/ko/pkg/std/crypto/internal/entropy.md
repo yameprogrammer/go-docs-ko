@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package entropy provides the passive entropy source for the FIPS 140-3 module.
+패키지 entropy는 FIPS 140-3 모듈에 필요한 수동 엔트로피 소스를 제공합니다.
 
 ## 원문 요약
 

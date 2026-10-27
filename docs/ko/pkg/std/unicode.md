@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package unicode provides data and functions to test some properties of Unicode code points.
+패키지 `unicode`는 유니코드 코드 포인트의 특정 속성을 테스트하기 위한 데이터와 함수를 제공합니다.
 
 ## 원문 요약
 

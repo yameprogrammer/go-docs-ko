@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package gover implements support for Go toolchain versions like 1.21.0 and 1.21rc1.
+패키지 `gover`는 Go 툴체인 버전 1.21.0 및 1.21rc1과 같은 버전을 지원합니다.
 
 ## 원문 요약
 

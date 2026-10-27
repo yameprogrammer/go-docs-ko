@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package list implements a doubly linked list.
+패키지 목록은 이중 연결 목록을 구현합니다.
 
 ## 원문 요약
 

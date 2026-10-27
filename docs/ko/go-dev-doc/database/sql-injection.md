@@ -1,47 +1,27 @@
 <!--{
-  "Title": "Avoiding SQL injection risk"
+  "제목": "SQL 삽입 위험 방지"
 }-->
 
-You can avoid an SQL injection risk by providing SQL parameter values as `sql`
-package function arguments. Many functions in the `sql` package provide
-parameters for the SQL statement and for values to be used in that statement's
-parameters (others provide a parameter for a prepared statement and parameters).
+다음과 같이 SQL 매개 변수 값을 `sql` 패키지의 함수 인수에 제공하여 SQL 삽입 위험을 피할 수 있습니다. `sql` 패키지의 많은 함수는 SQL 문에 대한 매개 변수와 해당 문의 매개 변수에 사용될 값(다른 함수는 준비된 문과 매개 변수를 제공)을 제공합니다.
 
-Code in the following example uses the `?` symbol as a placeholder for the
-`id` parameter, which is provided as a function argument:
+다음 예제에서 코드는 `?` 기호를 `id` 매개변수의 대체로 사용합니다. 이 `id`는 함수 인수로 제공됩니다.
 
-```
-// Correct format for executing an SQL statement with parameters.
+// 파라미터와 함께 SQL 문을 실행하는 올바른 형식입니다.
 rows, err := db.Query("SELECT * FROM user WHERE id = ?", id)
-```
 
-`sql` package functions that perform database operations create prepared
-statements from the arguments you supply. At run time, the `sql` package turns
-the SQL statement into a prepared statement and sends it along with the
-parameter, which is separate.
+`sql` 패키지의 함수는 제공된 인수를 사용하여 데이터베이스 작업을 수행하는 준비된
+문(prepared statements)을 생성합니다. 실행 시간에, `sql` 패키지는 SQL 문을 준비된 문으로 변환하고, 별도로 전달되는 매개변수와 함께 전송합니다.
 
-**Note:** Parameter placeholders vary depending on the DBMS and driver
-you're using. For example, [pq driver](https://pkg.go.dev/github.com/lib/pq)
-for Postgres accepts a placeholder form such as `$1` instead of `?`.
+**참고:** 매개변수 대체자는 사용하는 DBMS 및 드라이버에 따라 다릅니다. 예를 들어, [pq 드라이버](https://pkg.go.dev/github.com/lib/pq)는 Postgres의 경우 `$1`과 같은 대체 형식을 사용합니다.
 
-You might be tempted to use a function from the `fmt` package to assemble the
-SQL statement as a string with parameters included – like this:
+당신은 `fmt` 패키지의 함수를 사용하여 매개변수를 포함한 SQL 문을 문자열로 구성하는 데 유혹을 받을 수 있습니다 – 예를 들어 다음과 같이:
 
-```
-// SECURITY RISK!
+// 보안 위험!
 rows, err := db.Query(fmt.Sprintf("SELECT * FROM user WHERE id = %s", id))
-```
 
-This is not secure! When you do this, Go assembles the entire SQL statement,
-replacing the `%s` format verb with the parameter value, before sending the
-full statement to the DBMS. This poses an
-[SQL injection](https://en.wikipedia.org/wiki/SQL_injection) risk because the
-code's caller could send an unexpected SQL snippet as the `id` argument. That
-snippet could complete the SQL statement in unpredictable ways that are
-dangerous to your application.
+이것은 안전하지 않습니다! 이렇게 하면 Go는 전체 SQL 문을 구성하고, `%s` 형식 변수를 파라미터 값으로 대체한 다음, 전체 문을 DBMS에 전송합니다. 이는 [SQL 삽입](https://en.wikipedia.org/wiki/SQL_injection) 위험을 초래합니다. 코드의 호출자가 `id` 인수로 예상치 못한 SQL 조각을 보낼 수 있습니다. 이러한 조각은 예측할 수 없는 방식으로 SQL 문을 완성하여 애플리케이션에 위험을 초래할 수 있습니다.
 
-For example, by passing a certain `%s` value, you might end up with something
-like the following, which could return all user records in your database:
+예를 들어, 특정 `%s` 값을 전달하면 다음과 같은 결과를 얻을 수 있습니다. 이 경우, 데이터베이스의 모든 사용자 레코드를 반환할 수 있습니다:
 
 ```
 SELECT * FROM user WHERE id = 1 OR 1=1;

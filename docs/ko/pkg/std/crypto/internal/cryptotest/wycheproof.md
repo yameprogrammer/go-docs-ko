@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package wycheproof provides helper utilities for writing tests that rely on Wycheproof test vector schemas and JSON vector data.
+패키지 `wycheproof`는 Wycheproof 테스트 벡터 스키마 및 JSON 벡터 데이터를 기반으로 테스트를 작성하는 데 필요한 유틸리티를 제공합니다.
 
 ## 원문 요약
 

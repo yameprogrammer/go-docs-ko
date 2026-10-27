@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package constant implements Values representing untyped Go constants and their corresponding operations.
+패키지 상수는 Go의 정적 변수(constants)와 그에 따른 연산을 나타내는 값(Values)을 구현합니다.
 
 ## 원문 요약
 

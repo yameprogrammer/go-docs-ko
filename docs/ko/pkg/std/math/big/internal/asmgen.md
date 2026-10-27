@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Asmgen generates math/big assembly.
+Asmgen은 수학/빅 어셈블리 코드를 생성합니다.
 
 ## 원문 요약
 

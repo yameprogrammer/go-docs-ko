@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package check implements the FIPS 140 load-time code+data verification.
+패키지 `check`는 FIPS 140 규정에 따른 로드 타임 코드+데이터 검증을 구현합니다.
 
 ## 원문 요약
 

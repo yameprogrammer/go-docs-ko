@@ -19,7 +19,7 @@ jobs:
       WEBSITE_SOURCE_REPO: ${{ secrets.WEBSITE_SOURCE_REPO || 'https://github.com/golang/website.git' }}
       WEBSITE_SOURCE_BRANCH: ${{ secrets.WEBSITE_SOURCE_BRANCH || 'master' }}
       OUTPUT_DIR: ${{ secrets.OUTPUT_DIR || 'docs/ko' }}
-      TRANSLATE_STD_SYNOPSIS: ${{ secrets.TRANSLATE_STD_SYNOPSIS || 'false' }}
+      TRANSLATE_STD_SYNOPSIS: ${{ secrets.TRANSLATE_STD_SYNOPSIS || 'true' }}
       INCLUDE_STD_GO_DOC_ALL: ${{ secrets.INCLUDE_STD_GO_DOC_ALL || 'true' }}
 
       OLLAMA_BASE_URL: ${{ secrets.OLLAMA_BASE_URL || 'http://127.0.0.1:11434' }}

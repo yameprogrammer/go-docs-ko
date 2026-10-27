@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package http3 implements the HTTP/3 protocol.
+패키지 `http3`는 HTTP/3 프로토콜을 구현합니다.
 
 ## 원문 요약
 

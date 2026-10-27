@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package race implements data race detection logic.
+패키지 `race`는 데이터 경쟁 감지 로직을 구현합니다.
 
 ## 원문 요약
 

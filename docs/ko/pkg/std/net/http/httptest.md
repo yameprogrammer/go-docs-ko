@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package httptest provides utilities for HTTP testing.
+패키지 `httptest`는 HTTP 테스트를 위한 유틸리티를 제공합니다.
 
 ## 원문 요약
 

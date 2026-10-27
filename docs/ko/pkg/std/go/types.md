@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package types declares the data types and implements the algorithms for type-checking of Go packages.
+패키지 타입은 Go 패키지의 타입 검사에 필요한 데이터 타입과 알고리즘을 정의합니다.
 
 ## 원문 요약
 

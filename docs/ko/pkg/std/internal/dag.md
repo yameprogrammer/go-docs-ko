@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package dag implements a language for expressing directed acyclic graphs.
+패키지 dag은 방향성 사이클 그래프를 표현하는 언어를 구현합니다.
 
 ## 원문 요약
 

@@ -1,234 +1,188 @@
 <!--{
-  "Title": "Module version numbering"
+  "제목": "모듈 버전 번호화"
 }-->
 
-A module's developer uses each part of a module's version number to signal the
-version’s  stability and backward compatibility. For each new release, a
-module's release version number specifically reflects the nature of the module's
-changes since the preceding release.
+모듈의 개발자는 모듈의 버전 번드의 각 부분을 사용하여 버전의 안정성과 이전 버전과의 호환성을 나타냅니다. 각 새로운 릴리스에서 모듈의 릴리스 버전 번호는 이전 릴리스 이후 모듈의 변경 사항의 특성을 특히 반영합니다.
 
-When you're developing code that uses external modules, you can use the version
-numbers to understand an external module's stability when you're considering an
-upgrade. When you're developing your own modules, your version numbers will
-signal your modules' stability and backward compatibility to other developers.
+외부 모듈을 사용하는 코드를 개발할 때, 업그레이드를 고려할 때 외부 모듈의 안정성을 파악하는 데 버전 번호를 사용할 수 있습니다. 또한, 자체 모듈을 개발할 때, 버전 번호는 다른 개발자에게 모듈의 안정성과 이전 버전과의 호환성을 알립니다.
 
-This topic describes what module version numbers mean.
+이 주제는 모듈 버전 번호가 무엇을 의미하는지 설명합니다.
 
-**See also**
+**참고:**
 
-* When you're using external packages in your code, you can manage those
-  dependencies with Go tools. For more, see [Managing dependencies](managing-dependencies).
-* If you're developing modules for others to use, you apply a version number
-  when you publish the module, tagging the module in its repository. For more,
-  see [Publishing a module](publishing).
+* 외부 패키지를 사용하는 코드에서, Go 도구를 사용하여 해당 의존성을 관리할 수 있습니다. 자세한 내용은 [의존성 관리](managing-dependencies)를 참조하십시오.
+* 다른 사람이 사용할 모듈을 개발하는 경우, 모듈을 게시할 때 버전 번호를 지정하고, 해당 저장소에 모듈을 태깅합니다. 자세한 내용은 [모듈 게시](publishing)를 참조하십시오.
 
-A released module is published with a version number in the semantic versioning
-model, as in the following illustration:
+릴리즈된 모듈은 의미론적 버전 모델에 따라 버전 번호와 함께 게시됩니다. 아래 예시를 참조하세요:
 
 <img src="images/version-number.png"
-     alt="Diagram illustrating a semantic version number showing major version 1, minor version 4, patch version 0, and pre-release version beta 2"
+     alt="세ман틱 버전 번호가 있는 다이어그램, 주요 버전 1, 미니 버전 4, 패치 버전 0, 그리고 사전 릴리즈 버전 베타 2를 보여줍니다."
      style="width: 300px;" />
 
-The following table describes how the parts of a version number signify a
-module's stability and backward compatibility.
+다음 표는 버전 번드의 구성 요소가 모듈의 안정성과 후방 호환성을 어떻게 나타내는지 설명합니다.
 
+```markdown
 <table class="DocTable">
   <thead>
     <tr class="DocTable-head">
-      <th class="DocTable-cell" width="20%">Version stage</th>
-      <th class="DocTable-cell">Example</th>
-      <th class="DocTable-cell">Message to developers</th>
+      <th class="DocTable-cell" width="20%">버전 단계</th>
+      <th class="DocTable-cell">예시</th>
+      <th class="DocTable-cell">개발자에게 보내는 메시지</th>
     </tr>
   </thead>
   <tbody>
     <tr class="DocTable-row">
-      <td class="DocTable-cell"><a href="#in-development">In development</a></td>
-      <td class="DocTable-cell">Automatic pseudo-version number
-      <p>v<strong>0</strong>.x.x</td>
-      <td class="DocTable-cell">Signals that the module is still <strong>in
-        development and unstable</strong>. This release carries no backward
-        compatibility or stability guarantees.</td>
+      <td class="DocTable-cell"><a href="#in-development">개발 중</th>
+      <td class="DocTable-cell">자동 생성된 가상 버전 번호
+      <p>v<strong>0</strong>.x.x</p>
+      <td class="DocTable-cell">모듈이 여전히 <strong title="개발 중">개발 중이며 불안정함</strong>을 나타냅니다. 이 릴리스는 이전 버전과의 호환성 또는 안정성에 대한 보장은 제공하지 않습니다.</td>
     </tr>
     <tr class="DocTable-row">
-      <td class="DocTable-cell"><a href="#major">Major version</a></td>
-      <td class="DocTable-cell">v<strong>1</strong>.x.x</td>
-      <td class="DocTable-cell">Signals <strong>backward-incompatible public API
-        changes</strong>. This release carries no guarantee that it will be
-        backward compatible with preceding major versions.</td>
+      <td class="DocTable-cell"><a href="#major">메인 버전</th>
+      <td class="DocTable-cell">v<strong title="1">1</strong>.x.x</td>
+      <td class="DocTable-cell"><strong title="이전 버전과의 호환되지 않는 공개 API 변경 사항">이전 버전과의 호환되지 않는 공개 API 변경 사항을 나타냅니다.</strong> 이 릴리스는 이전 메인 버전과의 호환성을 보장하지 않습니다.</td>
     </tr>
     <tr class="DocTable-row">
-      <td class="DocTable-cell"><a href="#minor">Minor version</a></td>
-      <td class="DocTable-cell">vx.<strong>4</strong>.x</td>
-      <td class="DocTable-cell">Signals <strong>backward-compatible public API
-        changes</strong>. This release guarantees backward compatibility and
-        stability.</td>
+      <td class="DocTable-cell"><a href="#minor">미니 버전</th>
+      <td class="DocTable-cell">vx.<strong title="4">4</strong>.x</td>
+      <td class="DocTable-cell"><strong title="이전 버전과의 호환되는 공개 API 변경 사항">이전 버전과의 호환되는 공개 API 변경 사항을 나타냅니다.</strong> 이 릴리스는 호환성과 안정성을 보장합니다.</td>
     </tr>
     <tr class="DocTable-row">
-      <td class="DocTable-cell"><a href="#patch">Patch version</a></td>
-      <td class="DocTable-cell">vx.x.<strong>1</strong></td>
-      <td class="DocTable-cell">Signals <strong>changes that don't affect the
-        module's public API</strong> or its dependencies. This release
-        guarantees backward compatibility and stability.</td>
+      <td class="DocTable-cell"><a href="#patch">패치 버전</th>
+      <td class="DocTable-cell">vx.x.<strong title="1">1</strong></td>
+      <td class="DocTable-cell"><strong title="모듈의 공개 API 또는 종속성에 영향을 미치지 않는 변경 사항">모듈의 공개 API 또는 종속성에 영향을 미치지 않는 변경 사항을 나타냅니다.</strong> 이 릴리스는 호환성과 안정성을 보장합니다.</td>
     </tr>
     <tr class="DocTable-row">
-      <td class="DocTable-cell"><a href="#pre-release">Pre-release version</a></td>
-      <td class="DocTable-cell">vx.x.x-<strong>beta.2</strong></td>
-      <td class="DocTable-cell">Signals that this is a <strong>pre-release
-        milestone, such as an alpha or beta</strong>. This release carries no
-        stability guarantees.</td>
+      <td class="DocTable-cell"><a href="#pre-release">사전 릴리스 버전</th>
+      <td class="DocTable-cell">vx.x.x-<strong title="beta.2">beta.2</strong></td>
+      <td class="DocTable-cell">이것이 <strong title="사전 릴리스 단계, 예를 들어 알파 또는 베타">사전 릴리스 단계(예: 알파 또는 베타)</strong>임을 나타냅니다. 이 릴리스는 안정성에 대한 보장은 제공하지 않습니다.</td>
     </tr>
   </tbody>
 </table>
+```
 
-<a id="in-development" ></a>
-## In development
+<a id="in-development" ></a >
+## 개발 중
 
-Signals that the module is still in development and **unstable**. This release
-carries no backward compatibility or stability guarantees.
+이 모듈은 여전히 개발 중이며 **불안정**하다는 신호를 나타냅니다. 이 릴리스는 이전 버전과의 호환성 또는 안정성 보장을 제공하지 않습니다.
 
-The version number can take one of the following forms:
+버전 번호는 다음 형식 중 하나를 가질 수 있습니다:
 
-**Pseudo-version number**
+**가상 버전 번호**
 
 > v0.0.0-20170915032832-14c0d48ead0c
 
-**v0 number**
+**v0 버전**
 
 > v0.x.x
 
-<a id="pseudo" ></a>
-### Pseudo-version number
+<a id="pseudo" ></a >
+### 가상 버전 번호
 
-When a module has not been tagged in its repository, Go tools will generate a
-pseudo-version number for use in the go.mod file of code that calls functions in
-the module.
+모듈이 저장소에서 태그되지 않은 경우, Go 도구는 해당 모듈 내의 함수를 호출하는 코드의 `go.mod` 파일에 사용할 가상 버전 번호를 생성합니다.
 
-**Note:** As a best practice, always allow Go tools to generate the
-pseudo-version number rather than creating your own.
+**참고:** Go 도구를 사용하여 가상 버전 번호를 생성하도록 하는 것이 좋습니다.
 
-Pseudo-versions are useful when a developer of code consuming the module's
-functions needs to develop against a commit that hasn't been tagged with a
-semantic version tag yet.
+가상 버전은 개발자가 모듈의 함수를 사용하는 코드를 개발할 때, 아직 의미 있는 버전 태그로 지정되지 않은 커밋에 대해 개발해야 할 때 유용합니다.
 
-A pseudo-version number has three parts separated by dashes, as shown in the
-following form:
+가상 버전 번호는 다음과 같은 형식으로 세 부분으로 구분됩니다:
 
-#### Syntax
+#### 문법
 
-_baseVersionPrefix_-_timestamp_-_revisionIdentifier_
+_baseVersionPrefix_ - _timestamp_ - _revisionIdentifier_
 
-#### Parts
+#### 부품
 
-* **baseVersionPrefix** (vX.0.0 or vX.Y.Z-0) is a value derived either from a
-  semantic version tag that precedes the revision or from vX.0.0 if there is no
-  such tag.
+* **baseVersionPrefix** (예: vX.0.0 또는 vX.Y.Z-0)는 다음 중 하나로 결정된 값입니다.
+  - revision을 기준으로 하는 의미론적 버전 태그
+  - 만약 해당 태그가 없는 경우, vX.0.0
 
-* **timestamp** (yymmddhhmmss) is the UTC time the revision was created. In Git,
-  this is the commit time, not the author time.
+* **timestamp** (yyyymmddhhmmss)은 해당 변경 사항이 생성된 UTC 시간입니다. Git에서는
+  이것은 커밋 시간이며, 작성 시간과는 다릅니다.
 
-* **revisionIdentifier** (abcdefabcdef) is a 12-character prefix of the commit
-  hash, or in Subversion, a zero-padded revision number.
+* **revisionIdentifier** (abcdefabcdef)는 커밋의 12자 접두사 또는, Subversion의 경우 0으로 채워진 버전 번호입니다.
 
 <a id="v0" ></a>
-### v0 number
+### v0 버전
 
-A module published with a v0 number will have a formal semantic version number
-with a major, minor, and patch part, as well as an optional pre-release
-identifier.
+v0 숫자로 게시된 모듈은 주요, 부, 패치 부분으로 구성된 공식적인 의미론적 버전 번호를 가집니다. 또한, 선택적으로 사전 릴리스 식별자를 포함할 수 있습니다.
 
-Though a v0 version can be used in production, it makes no stability or backward
-compatibility guarantees. In addition, versions v1 and later are allowed to
-break backward compatibility for code using the v0 versions. For this reason, a
-developer with code consuming functions in a v0 module is responsible for
-adapting to incompatible changes until v1 is released.
+물론 v0 버전은 프로덕션 환경에서 사용할 수 있지만, 안정성이나 이전 버전과의 호환성을 보장하지 않습니다. 또한 v1 버전부터 이전 버전에서 사용되는 코드는 호환성을 깨는 변경 사항을 적용할 수 있습니다. 따라서 v0 모듈에서 함수를 사용하는 개발자는 v1이 출시될 때까지 호환되지 않는 변경 사항에 적응할 책임이 있습니다.
 
 <a id="pre-release" ></a>
-## Pre-release version
+## 사전 릴리즈 버전
 
-Signals that this is a pre-release milestone, such as an alpha or beta. This
-release carries no stability guarantees.
+다음과 같은 미리 릴리즈 마일스톤임을 나타내는 신호를 제공합니다. 예를 들어 알파 또는 베타.
+이 릴리즈에는 안정성에 대한 어떠한 보장도 제공되지 않습니다.
 
-#### Example
+```markdown
+#### 예시
+```
 
 ```
 vx.x.x-beta.2
 ```
 
-A module's developer can use a pre-release identifier with any major.minor.patch
-combination by appending a hyphen and the pre-release identifier.
+모듈 개발자는 하이픈과 사전 릴리스 식별자를 추가하여 모든 주요.세부버전.패치 조합과 함께 사전 릴리스 식별자를 사용할 수 있습니다.
 
 <a id="minor" ></a>
-## Minor version
+## 마이너 버전
 
-Signals backward-compatible changes to the module’s public API. This release
-guarantees backward compatibility and stability.
+시그널은 모듈의 공용 API에 대한 후방 호환성을 유지하는 변경 사항을 제공합니다. 이 릴리스는 후방 호환성 및 안정성을 보장합니다.
 
-#### Example
+```markdown
+#### 예시
+```
 
 ```
 vx.4.x
 ```
 
-This version changes the module's public API, but not in a way that breaks
-calling code. This might include changes to a module’s own dependencies or the
-addition of new functions, methods, struct fields, or types.
+이 버전은 모듈의 공개 API를 변경하지만, 호출 코드를 깨뜨리지 않는 방식으로 변경됩니다. 여기에는 모듈 자체의 종속성 변경 또는 새로운 함수, 메서드, 구조체 필드 또는 유형의 추가 등이 포함될 수 있습니다.
 
-In other words, this version might include enhancements through new functions
-that another developer might want to use. However, a developer using previous
-minor versions needn’t change their code otherwise.
+즉, 이 버전에는 다른 개발자가 사용할 수 있는 새로운 함수를 통해 기능 개선이 포함될 수 있습니다. 그러나 이전의 마이너 버전을 사용하는 개발자는 코드를 변경할 필요가 없습니다.
 
-<a id="patch" ></a>
-## Patch version
+## 패치 버전
 
-Signals changes that don't affect the module's public API or its dependencies.
-This release guarantees backward compatibility and stability.
+이 변경 사항은 모듈의 공용 API 또는 종속성에 영향을 미치지 않습니다.
+이 릴리스는 이전 버전과의 호환성과 안정성을 보장합니다.
 
-#### Example
+```markdown
+#### 예시
 
 ```
 vx.x.1
 ```
 
-An update that increments this number is only for minor changes such as bug
-fixes. Developers of consuming code can upgrade to this version safely without
-needing to change their code.
+이 번호를 증가시키는 업데이트는 주로 버그 수정과 같은 사소한 변경 사항에만 적용됩니다. 소비 코드 개발자는 이 버전을 안전하게 업그레이드할 수 있으며, 코드 변경 없이도 가능합니다.
 
 <a id="major" ></a>
-## Major version
+## 주요 버전
 
-Signals backward-incompatible changes in a module’s public API. This release
-carries no guarantee that it will be backward compatible with preceding major
-versions.
+Signals는 모듈의 공개 API에서 후방 호환되지 않는 변경 사항을 포함합니다. 이 릴리스는 이전 주요 버전과의 후방 호환성을 보장하지 않습니다.
 
-#### Example
+```markdown
+#### 예시
+```
 
 v1.x.x
 
-A v1 or above version number signals that the module is stable for use (with
-exceptions for its pre-release versions).
+`v1` 이상의 버전 번호는 모듈이 사용 가능함을 나타냅니다 (사전 릴리스 버전의 예외는 적용되지 않음).
 
-Note that because a version 0 makes no stability or backward compatibility
-guarantees, a developer upgrading a module from v0 to v1 is responsible for
-adapting to changes that break backward compatibility.
+참고: 버전 0은 안정성 또는 이전 버전과의 호환성을 보장하지 않으므로, v0에서 v1로 모듈을 업그레이드하는 개발자는 이전 버전과의 호환성을 깨는 변경 사항에 적응해야 합니다.
 
-A module developer should increment this number past v1 only when necessary
-because the version upgrade represents significant disruption for developers
-whose code uses function in the upgraded module. This disruption includes
-backward-incompatible changes to the public API, as well as the need for
-developers using the module to update the package path wherever they import
-packages from the module.
+모듈 개발자는 이 숫자를 v1 다음 값으로만 증가시켜야 합니다.
+버전 업그레이드는 코드를 사용하는 개발자에게 상당한 혼란을 야기하기 때문입니다.
+업그레이드된 모듈에서 함수를 사용하는 경우, 다음과 같은 문제가 발생할 수 있습니다.
+* 업그레이드된 모듈의 공개 API에 대한 역호환성 변경 사항
+* 모듈에서 패키지를 가져오는 개발자가 해당 패키지의 패키지 경로를 업데이트해야 하는 경우
 
-A major version update to a number higher than v1 will also have a new module
-path. That's because the module path will have the major version number
-appended, as in the following example:
+주요 버전 업데이트 (v1보다 큰 숫자로)는 새로운 모듈 경로도 포함합니다. 그 이유는 모듈 경로에 주요 버전 번호가 추가되기 때문입니다. 다음 예제를 참조하세요:
 
 ```
-module example.com/mymodule/v2 v2.0.0
+모듈 example.com/mymodule/v2 버전 2.0.0
 ```
 
-A major version update makes this a new module with a separate history from the
-module's previous version. If you're developing modules to publish for others,
-see "Publishing breaking API changes" in [Module release and versioning
-workflow](release-workflow).
+주요 버전 업데이트로 인해 이 모듈은 이전 버전과 별도의 히스토리를 가진 새로운 모듈이 됩니다. 다른 사람들을 위해 모듈을 개발하는 경우, "[모듈 릴리스 및 버전 관리 워크플로우](release-workflow)"의 "파괴적인 API 변경 사항 게시" 섹션을 참조하세요.
 
-For more on the module directive, see [go.mod reference](gomod-ref).
+자세한 내용은 [go.mod 참조](gomod-ref)를 참고하세요.

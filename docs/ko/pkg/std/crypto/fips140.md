@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package fips140 provides information about the FIPS 140-3 Go Cryptographic Module and FIPS 140-3 mode.
+패키지 `fips140`는 FIPS 140-3 Go 암호화 모듈 및 FIPS 140-3 모드에 대한 정보를 제공합니다.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package mldsa implements the post-quantum ML-DSA signature scheme specified in [FIPS 204].
+패키지 `mldsa`는 [FIPS 204]에 명시된 포스트 양자 ML-DSA 서명 스킴을 구현합니다.
 
 ## 원문 요약
 

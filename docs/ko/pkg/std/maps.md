@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package maps defines various functions useful with maps of any type.
+패키지 `maps`는 모든 유형의 맵과 함께 사용할 수 있는 다양한 함수를 정의합니다.
 
 ## 원문 요약
 

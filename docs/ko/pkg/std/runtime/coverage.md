@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package coverage contains APIs for writing coverage profile data at runtime from long-running and/or server programs that do not terminate via os.Exit.
+패키지 커버지는 런타임에 장시간 실행되거나 `os.Exit`를 통해 종료되지 않는 프로그램 (예: 서버 프로그램)의 커버리지 프로필 데이터를 작성하기 위한 API를 제공합니다.
 
 ## 원문 요약
 

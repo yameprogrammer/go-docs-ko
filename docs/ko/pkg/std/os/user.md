@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package user allows user account lookups by name or id.
+패키지 `user`는 이름 또는 ID를 기준으로 사용자 계정을 검색할 수 있습니다.
 
 ## 원문 요약
 

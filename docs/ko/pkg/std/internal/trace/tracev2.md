@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package tracev2 contains definitions for the v2 execution trace wire format.
+패키지 `tracev2`는 v2 실행 추적 와이어 형식에 대한 정의를 포함합니다.
 
 ## 원문 요약
 

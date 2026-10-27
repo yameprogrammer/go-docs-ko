@@ -1,293 +1,238 @@
 <!--{
-  "Title": "Module release and versioning workflow"
+  "제목": "모듈 출시 및 버전 관리 워크플로우"
 }-->
 
-When you develop modules for use by other developers, you can follow a workflow
-that helps ensure a reliable, consistent experience for developers using the
-module. This topic describes the high-level steps in that workflow.
+다른 개발자가 사용할 모듈을 개발할 때, 개발자가 모듈을 사용하는 데 있어 안정적이고 일관된 경험을 보장하는 워크플로우를 따를 수 있습니다. 이 주제에서는 해당 워크플로우의 고수준 단계를 설명합니다.
 
-For an overview of module development, see [Developing and publishing
-modules](developing).
+모듈 개발에 대한 개요는 [모듈 개발 및 배포](developing)를 참조하십시오.
 
-**See also**
+**참고**
 
-* If you're merely wanting to use external packages in your code, be sure to
-  see [Managing dependencies](/doc/modules/managing-dependencies).
-* With each new version, you signal the changes to your module with its
-  version number. For more, see [Module version numbering](/doc/modules/version-numbers).
+* 만약 외부 패키지를 코드에 사용하는 것만 원한다면, [의존성 관리](/doc/modules/managing-dependencies)를 참조하십시오.
+* 각 새로운 버전마다, 모듈의 변경 사항을 버전 번호로 알려주십시오. 자세한 내용은 [모듈 버전 번호 지정](/doc/modules/version-numbers)를 참조하십시오.
 
-## Common workflow steps {#common-steps}
+## 일반적인 워크플로우 단계 {#common-steps}
 
-The following sequence illustrates release and versioning workflow steps for an
-example new module. For more about each step, see the sections in this topic.
+다음 시퀀스는 새로운 모듈의 릴리스 및 버전 관리 워크플로우 단계를 보여줍니다. 각 단계에 대한 자세한 내용은 이 주제의 해당 섹션을 참조하십시오.
 
-1.  **Begin a module** and organize its sources to make it easier for developers
-    to use and for you to maintain.
+1.  **모듈 시작**하고, 소스 코드를 체계적으로 구성하여 개발자가 쉽게 사용하고, 유지 보수하기 편리하도록 만듭니다.
 
-    If you're brand new to developing modules, check out [Tutorial: Create a Go
-    module](/doc/tutorial/create-module).
+만약 모듈 개발에 처음이시라면, [튜토리얼: Go 모듈 생성](/doc/tutorial/create-module)를 참고하세요.
 
-    In Go's decentralized module publishing system, how you organize your code
-    matters. For more, see [Managing module source](/doc/modules/managing-source).
+Go의 분산 모듈 배포 시스템에서 코드를 어떻게 구성하는지는 중요합니다. 자세한 내용은 [모듈 소스 관리](/doc/modules/managing-source)를 참조하십시오.
 
-1.  Set up to **write local client code** that calls functions in the
-    unpublished module.
+1.  **로컬 클라이언트 코드 작성**을 위한 설정: 이 코드는 게시되지 않은 모듈의 함수를 호출합니다.
 
-    Before you publish a module, it's unavailable for the typical dependency
-    management workflow using commands such as `go get`. A good way to test your
-    module code at this stage is to try it while it is in a directory local to
-    your calling code.
+모듈을 게시하기 전에, `go get`과 같은 명령어를 사용하여 일반적인 의존성 관리 워크플로우에서 사용할 수 없습니다. 이 단계에서 모듈 코드를 테스트하는 좋은 방법은 호출 코드의 로컬 디렉터리에 있는 상태로 테스트를 시도하는 것입니다.
 
-    See [Coding against an unpublished module](#unpublished) for more about
-    local development.
+자세한 내용은 [로컬 개발에 대한 정보](#unpublished)를 참조하세요.
 
-1.  When the module's code is ready for other developers to try it out,
-    **begin publishing v0 pre-releases** such as alphas and betas. See
-    [Publishing pre-release versions](#pre-release) for more.
+1. 모듈의 코드가 다른 개발자에게 테스트할 준비가 되면,
+    **v0 프리릴리즈를 시작하여** 알파 버전 및 베타 버전을 게시합니다. 자세한 내용은 [프리릴리즈 버전 게시](#pre-release)를 참조하세요.
 
-1.  **Release a v0** that's not guaranteed to be stable, but which users can try
-    out. For more, see [Publishing the first (unstable) version](#first-unstable).
+1.  **v0 출시:** 안정성을 보장하지 않지만, 사용자가 테스트해 볼 수 있는 버전을 출시합니다. 자세한 내용은 [첫 번째 (안정되지 않은) 버전 게시](#first-unstable)를 참조하세요.
 
-1.  After your v0 version is published, you can (and should!) continue to
-    **release new versions** of it.
+1.  v0 버전을 게시한 후, (그리고 반드시!) 계속해서
+    **새로운 버전을 출시**해야 합니다.
 
-    These new versions might include bug fixes (patch releases), additions to
-    the module's public API (minor releases), and even breaking changes. Because
-    a v0 release makes no guarantees of stability or backward compatibility, you
-    can make breaking changes in its versions.
+이 새로운 버전에는 버그 수정 (패치 릴리스), 모듈의 공개 API에 대한 추가 기능 (마이너 릴리스), 심지어 호환되지 않는 변경 사항도 포함될 수 있습니다. v0 릴리스는 안정성 또는 이전 버전과의 호환성에 대한 보장을 하지 않으므로, 해당 버전에서 호환되지 않는 변경 사항을 적용할 수 있습니다.
 
-    For more, see [Publishing bug fixes](#bug-fixes) and [Publishing
-    non-breaking API changes](#non-breaking).
+자세한 내용은 [버그 수정 사항 게시](#bug-fixes) 및 [비파괴 API 변경 사항 게시](#non-breaking)를 참조하세요.
 
-1.  When you're getting a stable version ready for release, you **publish
-    pre-releases as alphas and betas**. For more, see [Publishing pre-release
-    versions](#pre-release).
+1. 안정적인 버전을 출시할 때, **알파 버전과 베타 버전을 미리 공개합니다**. 자세한 내용은 [사전 릴리스 버전 공개](#pre-release)를 참조하세요.
 
-1.  Release a v1 as the **first stable release**.
+1. 첫 번째 안정적인 릴리스로 v1을 출시합니다.
 
-    This is the first release that makes commitments about the module's
-    stability. For more, see [Publishing the first stable
-    version](#first-stable).
+이것은 모듈의 안정성에 대한 약속을 담은 첫 번째 릴리스입니다. 자세한 내용은 [첫 번째 안정 버전 게시하기](#first-stable)를 참조하세요.
 
-1.  In the v1 version, **continue to fix bugs** and, where necessary, make
-    additions to the module's public API.
+1. v1 버전에서는 **버그를 지속적으로 수정**하고, 필요한 경우 모듈의 공개 API에 추가 기능을 구현합니다.
 
-    For more, see [Publishing bug fixes](#bug-fixes) and [Publishing
-    non-breaking API changes](#non-breaking).
+자세한 내용은 [버그 수정 사항 게시](#bug-fixes) 및 [비파괴 API 변경 사항 게시](#non-breaking)를 참조하십시오.
 
-1.  When it can't be avoided, publish breaking changes in a **new major version**.
+1. 불가피한 경우, 주요 변경 사항은 **새로운 주요 버전**으로 게시해야 합니다.
 
-    A major version update -- such as from v1.x.x to v2.x.x -- can be a very
-    disruptive upgrade for your module's users. It should be a last resort. For
-    more, see [Publishing breaking API changes](#breaking).
+주요 버전 업데이트 (예: v1.x.x에서 v2.x.x로)는 모듈의 사용자에게 매우 혼란스러운 업데이트가 될 수 있습니다. 이는 최후의 수단으로 사용해야 합니다. 자세한 내용은 [파괴적인 API 변경 사항 게시](#breaking)를 참조하세요.
 
-## Coding against an unpublished module {#unpublished}
+## 게시되지 않은 모듈에 대한 코딩 {#unpublished}
 
-When you begin developing a module or a new version of a module, you won't yet
-have published it. Before you publish a module, you won't be able to use Go
-commands to add the module as a dependency. Instead, at first, when writing
-client code in a different module that calls functions in the unpublished
-module, you'll need to reference a copy of the module on the local file system.
+모듈 또는 모듈의 새 버전을 개발을 시작할 때, 아직 배포하지 않았을 것입니다. 모듈을 배포하기 전에, Go 명령을 사용하여 모듈을 종속성으로 추가할 수 없습니다. 대신, 클라이언트 코드를 다른 모듈에서 작성하고, 배포되지 않은 모듈의 함수를 호출할 때, 먼저 로컬 파일 시스템에 있는 모듈의 사본을 참조해야 합니다.
 
-You can reference a module locally from the client module's go.mod file by using
-the `replace` directive in the client module's go.mod file. For more
-information, see in [Requiring module code in a local
-directory](managing-dependencies#local_directory).
+클라이언트 모듈의 `go.mod` 파일에 `replace` 지시어를 사용하여 로컬 모듈을 참조할 수 있습니다. 자세한 내용은 "[로컬 디렉토리에서 모듈 코드 요구](managing-dependencies#local_directory)"를 참조하십시오.
 
-## Publishing pre-release versions {#pre-release}
+## 사전 릴리스 버전 게시 {#pre-release}
 
-You can publish pre-release versions to make a module available for others to
-try it out and give you feedback. A pre-release version includes no guarantee of
-stability.
+يمكنك 게시하기 전에 미리 릴리스 버전을 공개하여 다른 사용자가 테스트하고 피드백을 제공할 수 있도록 모듈을 사용할 수 있도록 할 수 있습니다. 미리 릴리스 버전은 안정성에 대한 보장을 제공하지 않습니다.
 
-Pre-release version numbers are appended with a pre-release identifier. For more
-on version numbers, see [Module version numbering](/doc/modules/version-numbers).
+릴리즈 전 버전 번호에는 릴리즈 전 식별자가 추가됩니다. 버전 번호에 대한 자세한 내용은 [모듈 버전 번호](/doc/modules/version-numbers)를 참조하십시오.
 
-Here are two examples:
+```markdown
+## This is a heading
+
+This is some text.
+
+*   This is a list item
+*   This is another list item
 
 ```
-v0.2.1-beta.1
-v1.2.3-alpha
+
+```markdown
+## Table
+
+| Header 1 | Header 2 |
+| -------- | -------- |
+| Cell 1   | Cell 2   |
+| Cell 3   | Cell 4   |
+
 ```
 
-When making a pre-release available, keep in mind that developers using the
-pre-release will need to explicitly specify it by version with the `go get`
-command. That's because, by default, the `go` command prefers release versions
-over pre-release versions when locating the module you're asking for. So
-developers must get the pre-release by specifying it explicitly, as in the
-following example:
+```markdown
+## Code
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+  fmt.Println("Hello, world!")
+}
+```
+
+```
+
+```markdown
+## Links
+
+[Example](https://www.example.com)
+```
+```
+
+```
+v0.2.1-베타.1
+v1.2.3-알파
+```
+
+사전 릴리스를 배포할 때, 사전 릴리스를 사용하는 개발자는 `go get` 명령을 사용하여 명시적으로 버전 정보를 지정해야 합니다. 그 이유는, 기본적으로 `go` 명령은 요청하는 모듈을 찾을 때 릴리스 버전을 사전 릴리스 버전보다 우선합니다. 따라서 개발자는 다음과 같은 예시와 같이 명시적으로 사전 릴리스 버전을 가져야 합니다:
 
 ```
 go get example.com/theirmodule@v1.2.3-alpha
 ```
 
-You publish a pre-release by tagging the module code in your repository,
-specifying the pre-release identifier in the tag. For more, see [Publishing a
-module](publishing).
+리포지토리에 모듈 코드를 태그하여 사전 릴리스를 게시합니다. 태그에 사전 릴리스 식별자를 지정합니다. 자세한 내용은 [모듈 게시](publishing)를 참조하세요.
 
-## Publishing the first (unstable) version {#first-unstable}
+## 첫 번째 (불안정) 버전 게시 {#first-unstable}
 
-As when you publish a pre-release version, you can publish release versions that
-don't guarantee stability or backward compatibility, but give your users an
-opportunity to try out the module and give you feedback.
+예를 들어, 미리 릴리스 버전을 게시할 때, 안정성이나 이전 버전과의 호환성을 보장하지 않지만 사용자가 모듈을 사용해보고 피드백을 제공할 수 있도록 릴리스 버전을 게시할 수 있습니다.
 
-Unstable releases are those whose version numbers are in the v0.x.x range. A v0
-version makes no stability or backward compatibility guarantees. But it gives
-you a way to get feedback and refine your API before making stability
-commitments with v1 and later. For more see, [Module version
-numbering](version-numbers).
+불안정한 릴리스는 버전 번호가 v0.x.x 범위에 속하는 릴리스입니다. v0 버전은 안정성 또는 이전 호환성에 대한 어떠한 보장도 제공하지 않습니다. 하지만 v1 및 이후 버전과 안정성 관련 커밋을 하기 전에 API에 대한 피드백을 얻고 개선할 수 있는 방법을 제공합니다. 자세한 내용은 [모듈 버전 번호](version-numbers)를 참조하십시오.
 
-As with other published versions, you can increment the minor and patch parts of
-the v0 version number as you make changes toward releasing a stable v1 version.
-For example, after releasing a v.0.0.0, you might release a v0.0.1 with the
-first set of bug fixes.
+다른 버전과 마찬가지로, 안정적인 v1 버전을 출시하기 위해 변경 사항을 적용할 때, v0 버전 번호의 마이너 및 패치 부분을 늘릴 수 있습니다. 예를 들어, v.0.0.0을 출시한 후, 첫 번째 버그 수정 세트로 v0.0.1을 출시할 수 있습니다.
 
-Here's an example version number:
+다음은 버전 번호 예시입니다:
 
 ```
 v0.1.3
 ```
 
-You publish an unstable release by tagging the module code in your repository,
-specifying a v0 version number in the tag. For more, see [Publishing a
-module](publishing).
+저희는 저장소에 모듈 코드를 태깅하여 불안정한 릴리스를 게시합니다. 태그에 v0 버전 번호를 지정합니다. 자세한 내용은 [모듈 게시](publishing)를 참조하세요.
 
+## 첫 번째 안정 버전 배포하기 {#first-stable}
+
+```
 ## Publishing the first stable version {#first-stable}
+```
 
-Your first stable release will have a v1.x.x version number. The first stable
-release follows pre-release and v0 releases through which you got feedback,
-fixed bugs, and stabilized the module for users.
+첫 번째 안정 릴리스는 v1.x.x 버전 번호를 갖습니다. 첫 번째 안정 릴리스는 사전 릴리스와 v0 릴리스를 거쳐 진행되었으며, 이를 통해 사용자의 피드백을 받고, 버그를 수정하고, 모듈을 안정화했습니다.
 
-With a v1 release, you're making the following commitments to developers using
-your module:
+v1 릴리즈를 통해, 다음 사항을 모듈을 사용하는 개발자에게 약속합니다:
 
-* They can upgrade to the major version's subsequent minor and patch releases
-  without breaking their own code.
-* You won't be making further changes to the module's public API -- including
-  its function and method signatures -- that break backward compatibility.
-* You won't be removing any exported types, which would break backward
-  compatibility.
-* Future changes to your API (such as adding a new field to a struct) will be
-  backward compatible and will be included in a new minor release.
-* Bug fixes (such as a security fix) will be included in a patch release or as
-  part of a minor release.
+* 그들은 자체 코드를 손상시키지 않고 메이저 버전의 다음 마이너 및 패치 릴리스로 업그레이드할 수 있습니다.
+* 모듈의 공용 API (함수 및 메서드 시그니처를 포함하여)에 대해 추가 변경을 수행하지 않아 후방 호환성을 유지합니다.
+* 내보낸 유형을 제거하지 않아 후방 호환성을 유지합니다.
+* API(예: 구조체에 새 필드를 추가)에 대한 향후 변경 사항은 후방 호환성을 유지하고 새 마이너 릴리스에 포함됩니다.
+* 버그 수정(예: 보안 수정)은 패치 릴리스 또는 마이너 릴리스의 일부로 포함됩니다.
 
-**Note:** While your first major version might be a v0 release, a v0 version
-does not signal stability or backward compatibility guarantees. As a result,
-when you increment from v0 to v1, you needn't be mindful of breaking backward
-compatibility because the v0 release was not considered stable.
+**참고:** 첫 번째 주요 버전이 v0 릴리즈일 수 있지만, v0 릴리즈는 안정성이나 이전 버전과의 호환성을 보장하지 않습니다. 결과적으로, v0에서 v1로 업그레이드할 때, 이전 버전과의 호환성을 고려할 필요가 없습니다. 왜냐하면 v0 릴리즈는 안정적인 버전으로 간주되지 않았기 때문입니다.
 
-For more about version numbers, see [Module version numbering](/doc/modules/version-numbers).
+더 자세한 내용은 [모듈 버전 번호 지정]( /doc/modules/version-numbers)를 참조하세요.
 
-Here's an example of a stable version number:
+다음은 안정 버전 번호의 예입니다:
 
 ```
 v1.0.0
 ```
 
-You publish a first stable release by tagging the module code in your
-repository, specifying a v1 version number in the tag. For more, see [Publishing
-a module](publishing).
+다음과 같이 저장소에 모듈 코드를 태그하여 첫 번째 안정 릴리스를 게시합니다. 태그에 `v1` 버전 번호를 지정합니다. 자세한 내용은 [모듈 게시](publishing)을 참조하세요.
 
-## Publishing bug fixes {#bug-fixes}
+## 버그 수정 사항 게시 {#버그-수정}
 
-You can publish a release in which the changes are limited to bug fixes. This is
-known as a patch release.
+변경 사항이 버그 수정에만 국한된 릴리스를 게시할 수 있습니다. 이를 패치 릴리스라고 합니다.
 
-A _patch release_ includes only minor changes. In particular, it includes no
-changes to the module's public API. Developers of consuming code can upgrade to
-this version safely and without needing to change their code.
+패치 릴리스는 **미세한 변경 사항**만 포함합니다. 특히, 이 릴리스는 모듈의 **공개 API에 대한 변경 사항이 없습니다**. 소비 코드를 개발하는 개발자는 이 버전을 안전하게 업그레이드하고, 코드를 변경할 필요 없이 사용할 수 있습니다.
 
-**Note:** Your patch release should try not to upgrade any of that module's own
-transitive dependencies by more than a patch release. Otherwise, someone
-upgrading to the patch of your module could wind up accidentally pulling in a
-more invasive change to a transitive dependency that they use.
+**참고:** 패치 릴리스에서는 해당 모듈 자체의 트랜지티브 의존성 중 패치 릴리스 이상으로 업그레이드하지 않도록 해야 합니다. 그렇지 않으면, 사용자가 패치된 모듈로 업그레이드할 때, 해당 모듈의 트랜지티브 의존성에 더 심각한 변경 사항을 실수로 포함하게 될 수 있습니다.
 
-A patch release increments the patch part of the module's version number. For
-more see, [Module version numbering](/doc/modules/version-numbers).
+패치 릴리스는 모듈의 버전 번호의 패치 부분을 증가시킵니다.
+자세한 내용은 [모듈 버전 번호](/doc/modules/version-numbers)를 참조하세요.
 
-In the following example, v1.0.1 is a patch release.
+다음 예시에서, v1.0.1은 패치 릴리스입니다.
 
-Old version: `v1.0.0`
+```markdown
+## v1.0.0
+```
 
-New version: `v1.0.1`
+새 버전: `v1.0.1`
 
-You publish a patch release by tagging the module code in your repository,
-incrementing the patch version number in the tag. For more, see [Publishing a
-module](publishing).
+버전 업데이트를 게시하려면, 저장소의 모듈 코드를 태그로 지정하고, 태그에 패치 버전 번호를 증가시킵니다. 자세한 내용은 [모듈 게시](publishing)를 참조하세요.
 
-## Publishing non-breaking API changes {#non-breaking}
+## 비파괴 API 변경 게시 {#non-breaking}
 
-You can make non-breaking changes to your module's public API and publish those
-changes in a _minor_ version release.
+이 섹션에서는 비파괴 방식으로 API 변경을 게시하는 방법을 설명합니다.
 
-This version changes the API, but not in a way that breaks calling code. This
-might include changes to a module’s own dependencies or the addition of new
-functions, methods, struct fields, or types. Even with the changes it includes,
-this kind of release guarantees backward compatibility and stability for
-existing code that calls the module's functions.
+다음과 같은 방식으로 모듈의 공개 API에 변경 사항을 적용하고, 해당 변경 사항을 _미니멀_ 버전 릴리스로 게시할 수 있습니다.
 
-A minor release increments the minor part of the module's version number. For
-more, see [Module version numbering](/doc/modules/version-numbers).
+이 버전은 API를 변경하지만, 기존 호출 코드를 깨뜨리지 않는 방식으로 변경합니다. 여기에는 모듈 자체의 종속성 변경 또는 새로운 함수, 메서드, struct 필드 또는 유형의 추가가 포함될 수 있습니다. 이러한 변경 사항을 포함하고 있음에도 불구하고, 이러한 유형의 릴리스는 기존 코드가 모듈의 함수를 호출할 때의 백워드 호환성과 안정성을 보장합니다.
 
-In the following example, v1.1.0 is a minor release.
+소규모 릴리스는 모듈의 버전 번호의 소부분을 증가시킵니다. 자세한 내용은 [모듈 버전 번호 지정](/doc/modules/version-numbers)를 참조하세요.
 
-Old version: `v1.0.1`
+다음 예시에서 v1.1.0은 미니 릴리스입니다.
 
-New version: `v1.1.0`
+```markdown
+## v1.0.1
+```
 
-You publish a minor release by tagging the module code in your repository,
-incrementing the minor version number in the tag. For more, see [Publishing a
-module](publishing).
+새 버전: `v1.1.0`
 
-## Publishing breaking API changes {#breaking}
+작업 저장소에 모듈 코드를 태그하여 미니 릴리스를 게시합니다. 태그에 미니 버전 번호를 증가시킵니다. 자세한 내용은 [모듈 게시](publishing)를 참조하세요.
 
-You can publish a version that breaks backward compatibility by publishing a
-_major_ version release.
+## 주요 API 변경 사항 게시 {#breaking}
 
-A major version release doesn't guarantee backward compatibility, typically
-because it includes changes to the module's public API that would break code
-using the module's previous versions.
+다음과 같이 주요 버전(major version)을 출시하여 이전 버전과의 호환성을 깨는 버전을 게시할 수 있습니다.
 
-Given the disruptive effect a major version upgrade can have on code relying on
-the module, you should avoid a major version update if you can. For more about
-major version updates, see [Developing a major version update](/doc/modules/major-version).
-For strategies to avoid making breaking changes, see the blog post [Keeping your
-modules compatible](/blog/module-compatibility).
+주요 버전 릴리스는 이전 버전의 코드가 해당 모듈의 이전 버전을 사용하는 경우 작동하지 않을 수 있는 모듈의 공용 API에 대한 변경 사항을 포함하므로, 반드시 이전 버전과의 호환성을 보장하지 않습니다.
 
-Where publishing other kinds of versions requires essentially tagging the module
-code with the version number, publishing a major version update requires more
-steps.
+주요 버전 업그레이드가 모듈에 의존하는 코드에 미치는 파괴적인 영향을 고려할 때, 가능한 경우 주요 버전 업데이트를 피하는 것이 좋습니다. 주요 버전 업데이트에 대한 자세한 내용은 [주요 버전 업데이트 개발](/doc/modules/major-version)을 참조하십시오. 변경 사항을 도입하지 않고 모듈을 호환 가능하게 유지하는 전략에 대한 자세한 내용은 블로그 게시물 [모듈 호환성 유지](/blog/module-compatibility)를 참조하십시오.
 
-1.  Before beginning development of the new major version, in your repository
-    create a place for the new version's source.
+다른 종류의 버전을 게시하려면 기본적으로 모듈 코드를 버전 번호로 태깅해야 합니다. 주요 버전 업데이트를 게시하는 데는 더 많은 단계가 필요합니다.
 
-    One way to do this is to create a new branch in your repository that is
-    specifically for the new major version and its subsequent minor and patch
-    versions. For more, see [Managing module source](/doc/modules/managing-source).
+1. 새로운 주요 버전을 개발을 시작하기 전에, 저장소에 새 버전을 위한 소스 위치를 만드세요.
 
-1.  In the module's go.mod file, revise the module path to append the new major
-    version number, as in the following example:
+한 가지 방법은 저장소에서 새로운 주요 버전과 그 이후의 미세 및 패치 버전을 위한 새 브랜치를 만드는 것입니다. 자세한 내용은 [모듈 소스 관리](/doc/modules/managing-source)를 참조하세요.
 
-    ```
+1. 모듈의 `go.mod` 파일에서 모듈 경로를 수정하여 새로운 주요 버전 번호를 추가합니다. 다음 예제를 참조하세요:
+
+```
     example.com/mymodule/v2
-    ```
+```
 
-    Given that the module path is the module's identifier, this change
-    effectively creates a new module. It also changes the package path, ensuring
-    that developers won't unintentionally import a version that breaks their
-    code. Instead, those wanting to upgrade will explicitly replace occurrences
-    of the old path with the new one.
+이 모듈 경로가 모듈의 식별자인 점을 고려할 때, 이 변경은
+    실제로 새로운 모듈을 생성합니다. 또한 패키지 경로도 변경하여, 개발자가 의도치 않게 자신들의 코드를 파괴하는 버전을 가져오지 않도록 합니다. 대신, 업그레이드를 원하는 경우, 기존 경로를 새로운 경로로 명시적으로 대체할 수 있습니다.
 
-1.  In your code, change any package paths where you're importing packages in
-    the module you're updating, including packages in the module you're updating.
-    You need to do this because you changed your module path.
+1.  코드에서, 업데이트하는 모듈 내에서 가져오는 패키지 경로를 변경하십시오. 여기에는 업데이트하는 모듈 내의 패키지도 포함됩니다.
+    이렇게 해야 하는 이유는 모듈 경로가 변경되었기 때문입니다.
 
-1.  As with any new release, you should publish pre-release versions to get
-    feedback and bug reports before publishing an official release.
+1.  다른 새로운 릴리즈와 마찬가지로, 공식 릴리즈를 발표하기 전에 피드백과 버그 보고를 얻기 위해 사전 릴리즈 버전을 게시해야 합니다.
 
-1.  Publish the new major version by tagging the module code in your repository,
-    incrementing the major version number in the tag -- such as from v1.5.2 to
-    v2.0.0.
+1. 저장소의 모듈 코드를 태그하여 새 주요 버전을 게시합니다. 태그에 주요 버전 번호를 증가시킵니다. 예를 들어 `v1.5.2`에서 `v2.0.0`으로.
 
-    For more, see [Publishing a module](/doc/modules/publishing).
+자세한 내용은 [모듈 게시](/doc/modules/publishing)를 참조하십시오.

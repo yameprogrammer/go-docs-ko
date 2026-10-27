@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package testdeps provides access to dependencies needed by test execution.
+패키지 `testdeps`는 테스트 실행에 필요한 의존성에 접근하는 기능을 제공합니다.
 
 ## 원문 요약
 

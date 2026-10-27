@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package filepath implements utility routines for manipulating filename paths in a way compatible with the target operating system-defined file paths.
+패키지 `filepath`는 대상 운영 체제가 정의한 파일 경로와 호환되는 방식으로 파일 이름 경로를 조작하기 위한 유틸리티 루틴을 구현합니다.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package rc4 implements RC4 encryption, as defined in Bruce Schneier's Applied Cryptography.
+패키지 rc4는 브루스 쉴너의 "애플리드 크립토그래피"에 정의된 RC4 암호화를 구현합니다.
 
 ## 원문 요약
 

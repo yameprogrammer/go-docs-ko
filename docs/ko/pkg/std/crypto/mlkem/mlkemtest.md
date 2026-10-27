@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package mlkemtest provides testing functions for the ML-KEM algorithm.
+패키지 `mlkemtest`는 ML-KEM 알고리즘에 대한 테스트 함수를 제공합니다.
 
 ## 원문 요약
 

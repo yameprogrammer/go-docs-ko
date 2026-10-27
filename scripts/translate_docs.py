@@ -84,6 +84,20 @@ def translate_with_ollama(text: str) -> str:
     model = os.getenv("OLLAMA_MODEL", "llama3.1")
     api_key = os.getenv("OLLAMA_API_KEY")
 
+    try:
+        tags_response = requests.get(base_url.rstrip("/") + "/api/tags", timeout=10)
+        if tags_response.status_code == 200:
+            models = [m.get("name", "") for m in tags_response.json().get("models", []) if m.get("name")]
+            if models and model not in models:
+                preferred = "translategemma:4b"
+                model = preferred if preferred in models else models[0]
+                print(
+                    f"Requested OLLAMA_MODEL not found. Falling back to available model: {model}",
+                    file=sys.stderr,
+                )
+    except requests.RequestException:
+        pass
+
     endpoint = base_url.rstrip("/") + "/api/chat"
     headers = {"Content-Type": "application/json"}
     if api_key:

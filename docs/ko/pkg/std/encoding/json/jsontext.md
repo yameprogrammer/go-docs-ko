@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package jsontext implements syntactic processing of JSON as specified in RFC 4627, RFC 7159, RFC 7493, RFC 8259, and RFC 8785.
+패키지 `jsontext`는 RFC 4627, RFC 7159, RFC 7493, RFC 8259, 그리고 RFC 8785에 정의된 대로 JSON의 구문 처리를 구현합니다.
 
 ## 원문 요약
 

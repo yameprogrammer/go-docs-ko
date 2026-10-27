@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package atomic provides low-level atomic memory primitives useful for implementing synchronization algorithms.
+패키지 `atomic`은 동기화 알고리즘을 구현하는 데 유용한 저수준 원자적 메모리 자료 구조를 제공합니다.
 
 ## 원문 요약
 

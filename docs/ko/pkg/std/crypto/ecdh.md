@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package ecdh implements Elliptic Curve Diffie-Hellman over NIST curves and Curve25519.
+패키지 `ecdh`는 NIST 곡선 및 Curve25519를 사용하여  elliptic curve Diffie-Hellman을 구현합니다.
 
 ## 원문 요약
 

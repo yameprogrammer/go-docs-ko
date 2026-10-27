@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package syntax parses regular expressions into parse trees and compiles parse trees into programs.
+패키지 문법은 정규 표현식을 파싱 트리로 변환하고, 파싱 트리를 프로그램으로 컴파일합니다.
 
 ## 원문 요약
 

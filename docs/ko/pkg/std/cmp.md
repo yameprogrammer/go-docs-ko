@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package cmp provides types and functions related to comparing ordered values.
+패키지 cmp는 정렬된 값 비교와 관련된 유형과 함수를 제공합니다.
 
 ## 원문 요약
 

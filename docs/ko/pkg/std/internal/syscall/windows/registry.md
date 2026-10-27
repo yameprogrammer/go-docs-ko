@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package registry provides access to the Windows registry.
+패키지 레지스트리는 Windows 레지스트리에 접근하는 기능을 제공합니다.
 
 ## 원문 요약
 

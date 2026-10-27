@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package zip provides support for reading and writing ZIP archives.
+패키지 `zip`은 ZIP 아카이브를 읽고 쓰는 기능을 제공합니다.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package context defines the Context type, which carries deadlines, cancellation signals, and other request-scoped values across API boundaries and between processes.
+패키지 `context`는 `Context` 유형을 정의하며, 이는 API 경계 내와 프로세스 간에 타임아웃, 취소 신호, 그리고 기타 요청 범위에 속하는 값을 전달합니다.
 
 ## 원문 요약
 

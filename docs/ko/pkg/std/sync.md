@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package sync provides basic synchronization primitives such as mutual exclusion locks.
+패키지 `sync`는 기본적인 동기화 원리를 제공합니다. 예를 들어, 뮤추얼 익스클루전 락 등이 있습니다.
 
 ## 원문 요약
 

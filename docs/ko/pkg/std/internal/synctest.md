@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package synctest provides support for testing concurrent code.
+패키지 `synctest`는 동시성 코드 테스트를 위한 지원을 제공합니다.
 
 ## 원문 요약
 

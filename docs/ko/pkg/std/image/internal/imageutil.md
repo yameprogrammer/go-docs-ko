@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package imageutil contains code shared by image-related packages.
+패키지 `imageutil`은 이미지 관련 패키지에서 공유되는 코드를 포함합니다.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-The unique package provides facilities for canonicalizing ("interning") comparable values.
+이 고유 패키지는 비교 가능한 값을 "표준화"(내장)하는 기능을 제공합니다.
 
 ## 원문 요약
 

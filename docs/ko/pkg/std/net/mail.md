@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package mail implements parsing of mail messages.
+패키지 `mail`은 이메일 메시지의 파싱을 구현합니다.
 
 ## 원문 요약
 

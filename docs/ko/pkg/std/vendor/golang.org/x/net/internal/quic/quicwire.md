@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package quicwire encodes and decode QUIC/HTTP3 wire encoding types, particularly variable-length integers.
+패키지 `quicwire`는 QUIC/HTTP3 와이어 인코딩 유형을 인코딩하고 디코딩하며, 특히 가변 길이 정수를 처리합니다.
 
 ## 원문 요약
 

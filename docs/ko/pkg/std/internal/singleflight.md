@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package singleflight provides a duplicate function call suppression mechanism.
+`singleflight` 패키지는 중복 호출을 억제하는 메커니즘을 제공합니다.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package pkix contains shared, low level structures used for ASN.1 parsing and serialization of X.509 certificates, CRL and OCSP.
+패키지 `pkix`는 ASN.1 파싱 및 X.509 인증서, CRL 및 OCSP의 직렬화를 위한 공유, 저수준 구조를 포함합니다.
 
 ## 원문 요약
 

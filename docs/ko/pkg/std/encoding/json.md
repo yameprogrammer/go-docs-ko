@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package json implements encoding and decoding of JSON as defined in RFC 7159.
+패키지 `json`은 RFC 7159에 정의된 JSON의 인코딩 및 디코딩을 구현합니다.
 
 ## 원문 요약
 

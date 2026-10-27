@@ -1,311 +1,296 @@
-Table of Contents:
+목차:
 
- [Packages](#package)\
- [Commands](#cmd)\
- [Types](#type)\
- [Funcs](#func)\
- [Consts](#const)\
- [Vars](#var)\
- [Syntax](#syntax)\
- [Common mistakes and pitfalls](#mistakes)
+[패키지](#package)\
+ [명령](#cmd)\
+ [타입](#type)\
+ [함수](#func)\
+ [상수](#const)\
+ [변수](#var)\
+ [구문](#syntax)\
+ [흔한 실수 및 함정](#mistakes)
 
-“Doc comments” are comments that appear immediately before top-level package,
-const, func, type, and var declarations with no intervening newlines.
-Every exported (capitalized) name should have a doc comment.
+"Doc 주석"은 상위 레벨 패키지,
+`const`, `func`, `type`, 및 `var` 선언 바로 앞에 나타나는 주석입니다.
+여기에는 중간에 새 줄이 포함되지 않습니다.
+모든 내보낸 (대문자로 된) 이름에는 Doc 주석이 있어야 합니다.
 
-The [go/doc](/pkg/go/doc) and [go/doc/comment](/pkg/go/doc/comment) packages
-provide the ability to extract documentation from Go source code,
-and a variety of tools make use of this functionality.
-The [`go` `doc`](/cmd/go#hdr-Show_documentation_for_package_or_symbol)
-command looks up and prints the doc comment for a given package or symbol.
-(A symbol is a top-level const, func, type, or var.)
-The web server [pkg.go.dev](https://pkg.go.dev/) shows the documentation
-for public Go packages (when their licenses permit that use).
-The program serving that site is
-[golang.org/x/pkgsite/cmd/pkgsite](https://pkg.go.dev/golang.org/x/pkgsite/cmd/pkgsite),
-which can also be run locally to view documentation for private modules
-or without an internet connection.
-The language server [gopls](https://pkg.go.dev/golang.org/x/tools/gopls)
-provides documentation when editing Go source files in IDEs.
+[go/doc](/pkg/go/doc) 및 [go/doc/comment](/pkg/go/doc/comment) 패키지는 Go 소스 코드에서 문서를 추출하는 기능을 제공하며, 다양한 도구가 이러한 기능을 활용합니다.
+`go` `doc` 명령은 주어진 패키지 또는 심볼에 대한 문서 주석을 검색하고 표시합니다.
+(심볼은 최상위 레벨의 `const`, `func`, `type`, 또는 `var`입니다.)
+웹 서버 [pkg.go.dev](https://pkg.go.dev/)는 공개 Go 패키지에 대한 문서를 표시합니다 (라이선스가 해당 사용을 허용하는 경우).
+이 사이트를 제공하는 프로그램은
+[golang.org/x/pkgsite/cmd/pkgsite](https://pkg.go.dev/golang.org/x/pkgsite/cmd/pkgsite)이며, 이는 프라이빗 모듈에 대한 문서 또는 인터넷 연결 없이도 문서를 보려면 로컬에서 실행할 수도 있습니다.
+언어 서버 [gopls](https://pkg.go.dev/golang.org/x/tools/gopls)는 IDE에서 Go 소스 파일을 편집할 때 문서를 제공합니다.
 
-The rest of this page documents how to write Go doc comments.
+이 페이지의 나머지 부분은 Go 문서 주석을 작성하는 방법을 설명합니다.
 
-## Packages {#package}
+## 패키지 {#package}
 
-Every package should have a package comment introducing the package.
-It provides information relevant to the package as a whole
-and generally sets expectations for the package.
-Especially in large packages, it can be helpful for the package comment
-to give a brief overview of the most important parts of the API,
-linking to other doc comments as needed.
+모든 패키지는 패키지에 대한 설명을 포함해야 합니다.
+이는 패키지에 대한 관련 정보를 제공하며, 일반적으로 패키지에 대한 기대치를 설정합니다.
+특히 대규모 패키지의 경우, 패키지 설명에 API의 가장 중요한 부분에 대한 간략한 개요를 포함하고, 필요한 경우 다른 문서 설명을 참조하는 것이 도움이 될 수 있습니다.
 
-If the package is simple, the package comment can be brief.
-For example:
+만약 패키지가 간단하다면, 패키지 주석은 간결할 수 있습니다.
+예를 들어:
 
-	// Package path implements utility routines for manipulating slash-separated
-	// paths.
-	//
-	// The path package should only be used for paths separated by forward
-	// slashes, such as the paths in URLs. This package does not deal with
-	// Windows paths with drive letters or backslashes; to manipulate
-	// operating system paths, use the [path/filepath] package.
-	package path
+```markdown
+// 패키지 path는 슬래시로 구분된 경로를 조작하기 위한 유틸리티 루틴을 구현합니다.
+//
+// path 패키지는 URL 경로와 같이, 앞으로 슬래시로 구분된 경로만 사용해야 합니다. 이 패키지는 드라이브 문자나 백슬래시를 사용하는 Windows 경로를 처리하지 않습니다. 운영 체제 경로를 조작하려면 [path/filepath] 패키지를 사용하십시오.
+// 패키지 path
+```
 
-The square brackets in `[path/filepath]` create a [documentation link](#links).
+`[path/filepath]` 내에 있는 대괄호는 [문서 링크](#links)를 생성합니다.
 
-As can be seen in this example, Go doc comments use complete sentences.
-For a package comment, that means the [first sentence](/pkg/go/doc/#Package.Synopsis)
-begins with “Package <name>”.
+다음 예시에서 볼 수 있듯이, Go 문서 주석은 완전한 문장을 사용합니다.
+패키지 주석의 경우, 이는 [첫 번째 문장](/pkg/go/doc/#Package.Synopsis)이 "Package <name>"으로 시작해야 함을 의미합니다.
 
-For multi-file packages, the package comment should only be in one source file.
-If multiple files have package comments, they are concatenated to form one
-large comment for the entire package.
+다중 파일 패키지의 경우, 패키지 주석은 하나의 소스 파일에만 포함되어야 합니다.
+여러 파일에 패키지 주석이 포함된 경우, 이 주석들은 하나의 큰 주석으로 결합되어 전체 패키지를 위한 주석으로 사용됩니다.
 
-## Commands {#cmd}
+## 명령어 {#cmd}
 
-A package comment for a command is similar, but it describes the behavior
-of the program rather than the Go symbols in the package.
-The first sentence conventionally begins with the name of the program itself,
-capitalized because it is at the start of a sentence.
-For example, here is an abridged version of the package comment for [gofmt](/cmd/gofmt):
+명령어에 대한 패키지 주석은 유사하지만, 패키지에 있는 Go 심볼 대신 프로그램의 동작을 설명합니다.
+첫 번째 문장은 일반적으로 프로그램 자체의 이름으로 시작하며, 이는 문장의 시작 부분에 있기 때문에 대문자로 작성됩니다.
+예를 들어, [gofmt](/cmd/gofmt)의 패키지 주석의 축약된 버전은 다음과 같습니다:
 
-	/*
-	Gofmt formats Go programs.
-	It uses tabs for indentation and blanks for alignment.
-	Alignment assumes that an editor is using a fixed-width font.
+```go
+/*
+	Gofmt는 Go 프로그램을 포맷합니다.
+	들여쓰기에는 탭을 사용하고, 정렬에는 공백을 사용합니다.
+	정렬은 편집기가 고정 폭 글꼴을 사용한다는 것을 가정합니다.
+*/
+```
 
-	Without an explicit path, it processes the standard input. Given a file,
-	it operates on that file; given a directory, it operates on all .go files in
-	that directory, recursively. (Files starting with a period are ignored.)
-	By default, gofmt prints the reformatted sources to standard output.
+명시적인 경로가 제공되지 않으면, 기본 입력을 처리합니다. 파일을 지정하면, 해당 파일을 처리합니다. 디렉토리를 지정하면, 해당 디렉토리 내의 모든 `.go` 파일을 재귀적으로 처리합니다. (점(.)으로 시작하는 파일은 무시됩니다.)
+기본적으로 `gofmt`는 재정리된 소스를 표준 출력으로 출력합니다.
 
-	Usage:
+사용법:
 
-		gofmt [flags] [path ...]
+gofmt [플래그] [경로 ...]
 
-	The flags are:
+다음은 플래그입니다:
 
-		-d
-			Do not print reformatted sources to standard output.
-			If a file's formatting is different than gofmt's, print diffs
-			to standard output.
+-d
+			표준 출력에 리포맷된 소스를 출력하지 마십시오.
+			파일의 형식이 gofmt와 다르면, diff를 표준 출력에 출력합니다.
 		-w
-			Do not print reformatted sources to standard output.
-			If a file's formatting is different from gofmt's, overwrite it
-			with gofmt's version. If an error occurred during overwriting,
-			the original file is restored from an automatic backup.
+			표준 출력에 리포맷된 소스를 출력하지 마십시오.
+			파일의 형식이 gofmt와 다르면, gofmt 버전으로 덮어씁니다. 덮어쓰는 동안 오류가 발생하면, 원래 파일은 자동 백업에서 복원됩니다.
 
-	When gofmt reads from standard input, it accepts either a full Go program
-	or a program fragment. A program fragment must be a syntactically
-	valid declaration list, statement list, or expression. When formatting
-	such a fragment, gofmt preserves leading indentation as well as leading
-	and trailing spaces, so that individual sections of a Go program can be
-	formatted by piping them through gofmt.
+`gofmt`가 표준 입력에서 읽을 때, 전체 Go 프로그램
+    또는 프로그램 조각을 받아들입니다. 프로그램 조각은 구문적으로 유효한 선언 목록, 문 목록, 또는 표현식이어야 합니다.
+    이러한 조각을 포맷할 때, `gofmt`는 선행 들여쓰기뿐만 아니라 선행 및 후행 공백도 유지하여, Go 프로그램의 개별 섹션을 `gofmt`를 통해 파이프하여 포맷할 수 있습니다.
 	*/
 	package main
 
-The beginning of the comment is written using
-[semantic linefeeds](https://rhodesmill.org/brandon/2012/one-sentence-per-line/),
-in which each new sentence or long phrase is on a line by itself,
-which can make diffs easier to read as code and comments evolve.
-The later paragraphs happen not to follow this convention
-and have been wrapped by hand.
-Whatever is best for your code base is fine.
-Either way, `go` `doc` and `pkgsite` rewrap doc comment text when printing it.
-For example:
+다음은 다음과 같은 형식을 사용하여 주석을 작성합니다.
+[의미론적 줄 바꿈](https://rhodesmill.org/brandon/2012/one-sentence-per-line/),
+각 새로운 문장이나 긴 구는 자체 줄에 나타나도록 합니다.
+이렇게 하면 코드가 진화함에 따라 diff를 읽기가 더 쉬워집니다.
+나중에 나오는 단락은 이러한 규칙을 따르지 않으며 수동으로 포맷되었습니다.
+본인의 코드 베이스에 가장 적합한 방법을 사용하시면 됩니다.
+어떤 방법을 사용하든, `go` `doc` 및 `pkgsite`는 출력을 인쇄할 때 `doc` 주석 텍스트를 다시 포맷합니다.
+예를 들어:
 
-	$ go doc gofmt
-	Gofmt formats Go programs. It uses tabs for indentation and blanks for
-	alignment. Alignment assumes that an editor is using a fixed-width font.
+```go
+$ go doc gofmt
+	`gofmt`는 Go 프로그램의 형식을 지정합니다. 들여쓰기에는 공백을 사용하고, 정렬에는 공백을 사용합니다. 정렬은 편집기가 고정폭 글꼴을 사용한다는 것을 가정합니다.
+```
 
-	Without an explicit path, it processes the standard input. Given a file, it
-	operates on that file; given a directory, it operates on all .go files in that
-	directory, recursively. (Files starting with a period are ignored.) By default,
-	gofmt prints the reformatted sources to standard output.
+명시적인 경로가 제공되지 않으면, 표준 입력을 처리합니다. 파일을 지정하면 해당 파일을 처리하고, 디렉토리를 지정하면 해당 디렉토리 내의 모든 `.go` 파일을 재귀적으로 처리합니다. (점(.)으로 시작하는 파일은 무시됩니다.) 기본적으로 `gofmt`는 재정리된 소스 코드를 표준 출력에 출력합니다.
 
-	Usage:
+사용법:
 
-		gofmt [flags] [path ...]
+gofmt [플래그] [경로 ...]
 
-	The flags are:
+다음은 플래그입니다:
 
-		-d
-			Do not print reformatted sources to standard output.
-			If a file's formatting is different than gofmt's, print diffs
-			to standard output.
+-d
+			표준 출력으로 재포맷된 소스 코드를 출력하지 않습니다.
+			파일의 형식이 `gofmt`와 다르면, 표준 출력으로 변경 사항을 출력합니다.
 	...
 
-The indented lines are treated as preformatted text:
-they are not rewrapped and are printed in code font
-in HTML and Markdown presentations.
-(The [Syntax](#syntax) section below gives the details.)
+들여쓰기가 있는 줄은 미리 정의된 텍스트로 처리됩니다:
+이 줄은 재정렬되지 않고 코드 폰트로 표시됩니다.
+HTML 및 Markdown 표현에서.
+(아래의 "[구문](#syntax) 섹션에서 자세한 내용을 확인하세요.)
 
-## Types {#type}
+## 유형 {#type}
 
-A type's doc comment should explain what each instance of that type represents or provides.
-If the API is simple, the doc comment can be quite short.
-For example:
+특정 유형의 문서 주석은 해당 유형의 각 인스턴스가 무엇을 나타내거나 제공하는지 설명해야 합니다.
+API가 간단한 경우 문서 주석은 상당히 짧을 수 있습니다.
+예를 들어:
 
-	package zip
+```
+package zip
+```
 
-	// A Reader serves content from a ZIP archive.
+// Reader는 ZIP 아카이브에서 콘텐츠를 제공합니다.
+```go
 	type Reader struct {
 		...
 	}
+```
 
-By default, programmers should expect that a type is safe for use only by
-a single goroutine at a time.
-If a type provides stronger guarantees, the doc comment should state them.
-For example:
+기본적으로, 프로그래머는 특정 타입이 한 번에 하나의 goroutine에서만 안전하게 사용될 것으로 예상해야 합니다.
+만약 타입이 더 강력한 보장을 제공한다면, 해당 내용은 문서 주석에 명시해야 합니다.
+예를 들어:
 
-	package regexp
+```go
+package regexp
+```
 
-	// Regexp is the representation of a compiled regular expression.
-	// A Regexp is safe for concurrent use by multiple goroutines,
-	// except for configuration methods, such as Longest.
+// Regexp은 컴파일된 정규 표현식을 나타냅니다.
+// Regexp은 여러 고루틴에서 안전하게 사용할 수 있으며,
+// 구성 메서드(예: Longest)는 예외입니다.
 	type Regexp struct {
 		...
 	}
 
-Go types should also aim to make the zero value have a useful meaning.
-If it isn't obvious, that meaning should be documented. For example:
+Go 타입은 또한 0 값에 유용한 의미를 갖도록 설계해야 합니다.
+만약 명확하지 않다면, 그 의미는 문서화해야 합니다. 예를 들어:
 
-	package bytes
+패키지: bytes
 
-	// A Buffer is a variable-sized buffer of bytes with Read and Write methods.
-	// The zero value for Buffer is an empty buffer ready to use.
-	type Buffer struct {
-		...
-	}
+// 버퍼는 바이트로 구성된 가변 크기의 버퍼이며, Read 및 Write 메서드를 제공합니다.
+// 버퍼의 기본값은 사용 가능한 빈 버퍼입니다.
+```go
+type Buffer struct {
+	...
+}
+```
 
-For a struct with exported fields, either the doc comment or per-field comments
-should explain the meaning of each exported field.
-For example, this type's doc comment explains the fields:
+구조체에 내보낸 필드가 있는 경우, 문서 주석 또는 필드별 주석 중 하나가 각 내보낸 필드의 의미를 설명해야 합니다.
+예를 들어, 이 유형의 문서 주석은 다음과 같이 필드를 설명합니다:
 
-{{raw `
-	package io
+```
+	패키지 io
+```
 
-	// A LimitedReader reads from R but limits the amount of
-	// data returned to just N bytes. Each call to Read
-	// updates N to reflect the new amount remaining.
-	// Read returns EOF when N <= 0.
+```markdown
+// LimitedReader는 R에서 읽지만 반환되는 데이터의 양을 N 바이트로 제한합니다.
+// Read 함수는 각 호출마다 N을 업데이트하여 남은 양을 반영합니다.
+// N이 0보다 작거나 같으면 EOF를 반환합니다.
 	type LimitedReader struct {
-		R   Reader // underlying reader
-		N   int64  // max bytes remaining
+		R   Reader // 기본 Reader
+		N   int64  // 남은 최대 바이트 수
 	}
-`}}
+```
 
-In contrast, this type's doc comment leaves the explanations to per-field comments:
+반면에, 이 유형의 문서 주석은 각 필드에 대한 설명은 해당 필드 주석에 맡깁니다:
 
-{{raw `
-	package comment
+```markdown
+	패키지 주석
+```
 
-	// A Printer is a doc comment printer.
-	// The fields in the struct can be filled in before calling
-	// any of the printing methods
-	// in order to customize the details of the printing process.
+// Printer는 문서 주석 인쇄기입니다.
+// 구조체의 필드는 호출하기 전에 채울 수 있습니다.
+// 이를 통해 인쇄 프로세스의 세부 사항을 사용자 지정할 수 있습니다.
 	type Printer struct {
-		// HeadingLevel is the nesting level used for
-		// HTML and Markdown headings.
-		// If HeadingLevel is zero, it defaults to level 3,
-		// meaning to use <h3> and ###.
+		// HeadingLevel은 HTML 및 Markdown 헤더에 사용되는 중첩 수준입니다.
+		// HeadingLevel이 0이면 기본적으로 3단계로 설정되며, <h3> 및 ###을 사용합니다.
 		HeadingLevel int
 		...
 	}
-`}}
 
-As with packages (above) and funcs (below), doc comments for types
-start with complete sentences naming the declared symbol.
-An explicit subject often makes the wording clearer,
-and it makes the text easier to search, whether on a web page
-or a command line.
-For example:
+과 같이, 타입에 대한 문서 주석은 다음과 같이 시작합니다.
+선언된 기호를 명시하는 완전한 문장으로.
+명확한 주제를 사용하면 문구를 더 쉽게 이해할 수 있고, 웹 페이지 또는 명령줄에서 검색하기 더 쉽습니다.
+예를 들어:
 
-	$ go doc -all regexp | grep pairs
-	pairs within the input string: result[2*n:2*n+2] identifies the indexes
-	    FindReaderSubmatchIndex returns a slice holding the index pairs identifying
-	    FindStringSubmatchIndex returns a slice holding the index pairs identifying
-	    FindSubmatchIndex returns a slice holding the index pairs identifying the
+```markdown
+$ go doc -all regexp | grep pairs
+	입력 문자열 내의 쌍: result[2*n:2*n+2]는 인덱스를 식별
+	    FindReaderSubmatchIndex는 인덱스 쌍을 담은 슬라이스를 반환하며, 이를 사용하여 식별
+	    FindStringSubmatchIndex는 인덱스 쌍을 담은 슬라이스를 반환하며, 이를 사용하여 식별
+	    FindSubmatchIndex는 인덱스 쌍을 담은 슬라이스를 반환하며, 이를 사용하여 식별
 	$
+```
 
-## Funcs {#func}
+## 함수 {#func}
 
-A function's doc comment should explain what the function returns
-or, for functions called for side effects, what it does.
-Named parameters and results can be referred to directly in
-the comment, without any special syntax like backquotes.
-(A consequence of this convention is that names like `a`,
-which might be mistaken for ordinary words, are typically avoided.)
-For example:
+함수의 설명 주석은 함수가 반환하는 값을 설명하거나, 부작용으로 호출되는 경우 함수가 수행하는 작업을 설명해야 합니다.
+이름으로 지정된 매개변수와 결과를 주석에서 직접 참조할 수 있으며, 별도의 구문(예: 백틱)이 필요하지 않습니다.
+(이 규칙에 따라 `a`와 같이 일반적인 단어로 오인될 수 있는 이름은 일반적으로 피하는 것이 좋습니다.)
+예를 들어:
 
-	package strconv
+패키지: strconv
 
-	// Quote returns a double-quoted Go string literal representing s.
-	// The returned string uses Go escape sequences (\t, \n, \xFF, \u0100)
-	// for control characters and non-printable characters as defined by IsPrint.
+// Quote는 s를 나타내는 따옴표로 묶인 Go 문자열 리터럴을 반환합니다.
+// 반환된 문자열은 IsPrint에 의해 정의된 제어 문자 및 출력 불가능한 문자를 나타내는 Go 이스케이프 시퀀스(\t, \n, \xFF, \u0100)를 사용합니다.
 	func Quote(s string) string {
 		...
 	}
 
-And:
+그리고:
 
-	package os
+```go
+패키지 os
+```
 
-	// Exit causes the current program to exit with the given status code.
-	// Conventionally, code zero indicates success, non-zero an error.
-	// The program terminates immediately; deferred functions are not run.
+// Exit는 주어진 상태 코드로 현재 프로그램을 종료합니다.
+	// 일반적으로, 코드 0은 성공을 나타내고, 0이 아닌 값은 오류를 나타냅니다.
+	// 프로그램은 즉시 종료되며, 딜레이 함수는 실행되지 않습니다.
 	//
-	// For portability, the status code should be in the range [0, 125].
+	// 호환성을 위해, 상태 코드는 [0, 125] 범위 내에 있어야 합니다.
 	func Exit(code int) {
 		...
 	}
 
-Doc comments typically use the phrase “reports whether”
-to describe functions that return a boolean.
-The phrase “or not” is unnecessary.
-For example:
+Doc 주석에서는 일반적으로 "보고한다"라는 구를 사용하여 boolean 값을 반환하는 함수를 설명합니다.
+"또는 그렇지 않다"라는 구는 불필요합니다.
+예를 들어:
 
-	package strings
+```markdown
+패키지: strings
+```
 
-	// HasPrefix reports whether the string s begins with prefix.
+// HasPrefix는 문자열 s가 지정된 접두사로 시작하는지 여부를 보고합니다.
 	func HasPrefix(s, prefix string) bool
 
-If a doc comment needs to explain multiple results,
-naming the results can make the doc comment more understandable,
-even if the names are not used in the body of the function.
-For example:
+만약 문서 주석이 여러 결과를 설명해야 하는 경우,
+결과를 명명하면 주석이 더 이해하기 쉬워집니다.
+이름이 함수 본문에서 사용되지 않더라도 마찬가지입니다.
+예를 들어:
 
-	package io
+```
+패키지 io
+```
 
-	// Copy copies from src to dst until either EOF is reached
-	// on src or an error occurs. It returns the total number of bytes
-	// written and the first error encountered while copying, if any.
-	//
-	// A successful Copy returns err == nil, not err == EOF.
-	// Because Copy is defined to read from src until EOF, it does
-	// not treat an EOF from Read as an error to be reported.
+// src에서 dst로 복사하여, src의 EOF에 도달하거나 오류가 발생할 때까지 복사합니다.
+// 이 함수는 복사된 총 바이트 수를 반환하고, 발생한 첫 번째 오류를 반환합니다.
+//
+// 성공적인 Copy는 err == nil을 반환하며, err == EOF가 아닙니다.
+// Copy는 Read에서 EOF를 읽도록 정의되어 있기 때문에, Read에서 발생하는 EOF를 오류로 보고하지 않습니다.
 	func Copy(dst Writer, src Reader) (n int64, err error) {
 		...
 	}
 
-Conversely, when the results don't need to be named in the doc comment,
-they are usually omitted in the code as well, like in the `Quote` example above,
-to avoid cluttering the presentation.
+반대로, 문서 주석에서 결과 이름이 필요하지 않을 때, 코드에서도 일반적으로 생략합니다. 예를 들어, `Quote` 예제와 같이, 불필요한 정보를 제거하여 가독성을 높입니다.
 
-These rules all apply both to plain functions and to methods.
-For methods, using the same receiver name avoids needless
-variation when listing all the methods of a type:
+이 규칙은 일반 함수와 메서드 모두에 적용됩니다.
+메서드의 경우, 동일한 수신자 이름을 사용하면, 해당 유형의 모든 메서드를 나열할 때 불필요한 변형을 피할 수 있습니다:
 
-	$ go doc bytes.Buffer
-	package bytes // import "bytes"
+```markdown
+$ go doc bytes.Buffer
+	패키지 bytes // import "bytes"
+```
 
-	type Buffer struct {
-		// Has unexported fields.
-	}
-	    A Buffer is a variable-sized buffer of bytes with Read and Write methods.
-	    The zero value for Buffer is an empty buffer ready to use.
+```markdown
+```go
+type Buffer struct {
+	// Contains unexported fields.
+}
 
-	func NewBuffer(buf []byte) *Buffer
+A Buffer는 바이트로 구성된 가변 크기의 버퍼이며, Read 및 Write 메서드를 제공합니다.
+Buffer의 기본값은 사용 가능한 빈 버퍼입니다.
+```
+
+```markdown
+```
+```go
+func NewBuffer(buf []byte) *Buffer
 	func NewBufferString(s string) *Buffer
 	func (b *Buffer) Bytes() []byte
 	func (b *Buffer) Cap() int
@@ -315,87 +300,85 @@ variation when listing all the methods of a type:
 	func (b *Buffer) Read(p []byte) (n int, err error)
 	func (b *Buffer) ReadByte() (byte, error)
 	...
+```
 
-This example also shows that top-level functions returning a type `T` or pointer `*T`,
-perhaps with an additional error result,
-are shown alongside the type `T` and its methods,
-under the assumption that they are `T`'s constructors.
+이 예제에서는 상위 레벨 함수가 타입 `T` 또는 포인터 `*T`를 반환하고,
+추가적으로 오류 결과를 반환하는 경우도 보여줍니다.
+이 경우, `T`의 생성자와 함께 타입 `T`와 그 메서드가 함께 표시됩니다.
 
-By default, programmers can assume that a top-level function
-is safe to call from multiple goroutines;
-this fact need not be stated explicitly.
+기본적으로, 프로그래머는 상위 레벨 함수가 여러 고루틴에서 안전하게 호출될 수 있다고 가정할 수 있습니다. 이 사실은 명시적으로 언급할 필요가 없습니다.
 
-On the other hand, as noted in the previous section,
-using an instance of a type in any way,
-including calling a method, is typically assumed
-to be restricted to a single goroutine at a time.
-If the methods that are safe for concurrent use
-are not documented in the type's doc comment,
-they should be documented in per-method comments.
-For example:
+한편, 앞 절에서 언급했듯이,
+어떤 유형의 인스턴스를 사용하는 경우,
+방법을 호출하는 것 포함하여,
+일반적으로 단일 goroutine에서만 사용하도록 간주됩니다.
+동시 사용이 안전한 방법이
+유형의 doc comment에 문서화되지 않은 경우,
+각 방법의 주석에 문서화해야 합니다.
+예를 들어:
 
-	package sql
+```markdown
+패키지 sql
+```
 
-	// Close returns the connection to the connection pool.
-	// All operations after a Close will return with ErrConnDone.
-	// Close is safe to call concurrently with other operations and will
-	// block until all other operations finish. It may be useful to first
-	// cancel any used context and then call Close directly after.
+// Close는 연결 풀의 연결을 닫습니다.
+// Close를 호출한 후에는 모든 작업에서 ErrConnDone 오류가 반환됩니다.
+// Close는 다른 작업과 동시에 호출할 수 있으며, 다른 모든 작업이 완료될 때까지 대기합니다.
+// 먼저 사용 중인 컨텍스트를 취소한 다음, 직접 Close를 호출하는 것이 유용할 수 있습니다.
 	func (c *Conn) Close() error {
 		...
 	}
 
-Note that function and method doc comments focus on
-what the operation returns or does,
-detailing what the caller needs to know.
-Special cases can be particularly important to document.
-For example:
+참고: 함수 및 메서드 문서 주석은 다음을 중점적으로 다룹니다.
+* 운영이 어떤 값을 반환하거나 수행하는지
+* 호출자가 알아야 할 내용을 상세히 설명합니다.
+* 특별한 경우를 특히 문서화하는 것이 중요합니다.
+예를 들어:
 
-{{raw `
-	package math
+```
+	패키지 math
+```
 
-	// Sqrt returns the square root of x.
-	//
-	// Special cases are:
-	//
-	//	Sqrt(+Inf) = +Inf
-	//	Sqrt(±0) = ±0
-	//	Sqrt(x < 0) = NaN
-	//	Sqrt(NaN) = NaN
-	func Sqrt(x float64) float64 {
+// Sqrt는 x의 제곱근을 반환합니다.
+//
+// 특별한 경우:
+//
+// 	Sqrt(+Inf) = +Inf
+// 	Sqrt(±0) = ±0
+// 	Sqrt(x < 0) = NaN
+// 	Sqrt(NaN) = NaN
+func Sqrt(x float64) float64 {
 		...
-	}
-`}}
+}
 
-Doc comments should not explain internal details
-such as the algorithm used in the current implementation.
-Those are best left to comments inside the function body.
-It may be appropriate to give asymptotic time or space bounds
-when that detail is particularly important to callers.
-For example:
+문서 주석은 현재 구현에서 사용된 알고리즘과 같은 내부 세부 사항을 설명하는 데 사용해서는 안 됩니다.
+이러한 내용은 함수 본문의 주석에 남겨두는 것이 좋습니다.
+호출자가 특히 중요하게 생각하는 경우, 시간 또는 공간 복잡도와 같은 대수적인 경계를 제공하는 것이 적절할 수 있습니다.
+예를 들어:
 
-	package sort
+```go
+package sort
+```
 
-	// Sort sorts data in ascending order as determined by the Less method.
-	// It makes one call to data.Len to determine n and O(n*log(n)) calls to
-	// data.Less and data.Swap. The sort is not guaranteed to be stable.
+// Sort는 Less 메서드를 기준으로 데이터를 오름차순으로 정렬합니다.
+// Sort는 data.Len을 한 번 호출하여 n을 결정하고, data.Less 및 data.Swap을 O(n*log(n))번 호출합니다. Sort는 안정적인 정렬을 보장하지 않습니다.
 	func Sort(data Interface) {
 		...
 	}
 
-Because this doc comment makes no mention of which sorting algorithm is used,
-it is easier to change the implementation to use a different algorithm in the future.
+이 문서 주석이 어떤 정렬 알고리즘을 사용하는지 언급하지 않기 때문에,
+향후 다른 알고리즘으로 구현을 변경하는 것이 더 쉬워집니다.
 
-## Consts {#const}
+## 상수 {#const}
 
-Go's declaration syntax allows grouping of declarations,
-in which case a single doc comment can introduce a group of related constants,
-with individual constants only documented by short end-of-line comments.
-For example:
+Go의 선언 구문은 선언들을 그룹화할 수 있도록 허용하며, 이 경우 단일 문서 주석은 관련 상수 그룹을 소개할 수 있습니다. 개별 상수는 짧은 줄 끝 주석으로만 문서화됩니다. 예를 들어:
 
-	package scanner // import "text/scanner"
+```markdown
+패키지 scanner
+// import "text/scanner"
+```
 
-	// The result of Scan is one of these tokens or a Unicode character.
+// Scan의 결과는 다음 토큰 중 하나이거나 유니코드 문자가 됩니다.
 	const (
 		EOF = -(iota + 1)
 		Ident
@@ -405,69 +388,79 @@ For example:
 		...
 	)
 
-Sometimes the group needs no doc comment at all. For example:
+때로는 그룹에 별도의 설명 주석이 필요하지 않을 수도 있습니다. 예를 들어:
 
-	package unicode // import "unicode"
+패키지 unicode // import "unicode"
 
-	const (
-		MaxRune         = '\U0010FFFF' // maximum valid Unicode code point.
-		ReplacementChar = '\uFFFD'     // represents invalid code points.
-		MaxASCII        = '\u007F'     // maximum ASCII value.
-		MaxLatin1       = '\u00FF'     // maximum Latin-1 value.
+```markdown
+const (
+		MaxRune         = '\U0010FFFF' // 최대 유효한 유니코드 코드 포인트.
+		ReplacementChar = '\uFFFD'     // 유효하지 않은 코드 포인트를 나타냄.
+		MaxASCII        = '\u007F'     // 최대 ASCII 값.
+		MaxLatin1       = '\u00FF'     // 최대 Latin-1 값.
 	)
+```
 
-On the other hand, ungrouped constants typically warrant a full
-doc comment starting with a complete sentence. For example:
+한편, 단일로 정의된 상수에는 일반적으로 완전한 문장으로 시작하는 완전한 문서 주석이 필요합니다. 예를 들어:
 
-	package unicode
+```markdown
+패키지: unicode
+```
 
-	// Version is the Unicode edition from which the tables are derived.
+// Version은 테이블이 파생된 유니코드 에디션입니다.
 	const Version = "13.0.0"
 
-Typed constants are displayed next to the declaration of their type
-and as a result often omit a const group doc comment in favor of
-the type's doc comment.
-For example:
+정적 상수는 선언과 함께 표시되며, 결과적으로 종종 유형의 문서 주석 대신 `const` 그룹 문서 주석을 생략하는 경우가 많습니다.
+예를 들어:
 
-	package syntax
+```
+패키지 문법
+```
 
-	// An Op is a single regular expression operator.
+```markdown
+// Op는 단일 정규 표현식 연산자입니다.
 	type Op uint8
+```
 
-	const (
-		OpNoMatch        Op = 1 + iota // matches no strings
-		OpEmptyMatch                   // matches empty string
-		OpLiteral                      // matches Runes sequence
-		OpCharClass                    // matches Runes interpreted as range pair list
-		OpAnyCharNotNL                 // matches any character except newline
-		...
-	)
+```
+const (
+  OpNoMatch        = Op(1 + iota) // 일치하는 경우: 문자열이 없음
+  OpEmptyMatch                   // 일치하는 경우: 빈 문자열
+  OpLiteral                      // 일치하는 경우: Runes 시퀀스
+  OpCharClass                    // 일치하는 경우: Runes를 범위 쌍 목록으로 해석
+  OpAnyCharNotNL                 // 일치하는 경우: 줄 바꿈 문자가 아닌 모든 문자
+  ...
+)
+```
 
-(See [pkg.go.dev/regexp/syntax#Op](https://pkg.go.dev/regexp/syntax#Op) for the HTML presentation.)
+(HTML 표현은 [pkg.go.dev/regexp/syntax#Op](https://pkg.go.dev/regexp/syntax#Op) 참조)
 
-## Vars {#var}
+## 변수 {#var}
 
-The conventions for variables are the same as those for constants.
-For example, here is a set of grouped variables:
+변수의 규칙은 상수의 규칙과 동일합니다.
+예를 들어, 다음과 같은 그룹화된 변수가 있습니다:
 
-	package fs
+```go
+package fs
+```
 
-	// Generic file system errors.
-	// Errors returned by file systems can be tested against these errors
-	// using errors.Is.
+// 일반적인 파일 시스템 오류.
+	// 파일 시스템에서 반환되는 오류는 `errors.Is`를 사용하여 이러한 오류와 비교할 수 있습니다.
 	var (
-		ErrInvalid    = errInvalid()    // "invalid argument"
-		ErrPermission = errPermission() // "permission denied"
-		ErrExist      = errExist()      // "file already exists"
-		ErrNotExist   = errNotExist()   // "file does not exist"
-		ErrClosed     = errClosed()     // "file already closed"
+		ErrInvalid    = errInvalid()    // "잘못된 인자"
+		ErrPermission = errPermission() // "권한 거부"
+		ErrExist      = errExist()      // "파일이 이미 존재"
+		ErrNotExist   = errNotExist()   // "파일이 존재하지 않음"
+		ErrClosed     = errClosed()     // "파일이 이미 닫힘"
 	)
 
-And a single variable:
+그리고 하나의 변수:
 
-	package unicode
+```go
+package unicode
+```
 
-	// Scripts is the set of Unicode script tables.
+// Scripts는 유니코드 스크립트 테이블 집합입니다.
 	var Scripts = map[string]*RangeTable{
 		"Adlam":                  Adlam,
 		"Ahom":                   Ahom,
@@ -477,462 +470,477 @@ And a single variable:
 		...
 	}
 
-## Syntax {#syntax}
+## 문법 {#syntax}
 
-Go doc comments are written in a simple syntax that supports
-paragraphs, headings, links, lists, and preformatted code blocks.
-To keep comments lightweight and readable in source files,
-there is no support for complex features like font changes or raw HTML.
-Markdown aficionados can view the syntax as a simplified subset of Markdown.
+Go 문서 주석은 간단한 구문을 사용하여 다음과 같은 기능을 지원합니다:
+문단, 제목, 링크, 목록 및 미리 정의된 코드 블록.
+소스 파일에서 주석을 가볍고 읽기 쉽게 유지하기 위해, 글꼴 변경이나 Raw HTML과 같은 복잡한 기능은 지원되지 않습니다.
+Markdown 전문가들은 이 구문을 Markdown의 단순화된 하위 집합으로 볼 수 있습니다.
 
-The standard formatter [gofmt](/cmd/gofmt) reformats doc comments
-to use a canonical formatting for each of these features.
-Gofmt aims for readability and user control over how comments
-are written in source code but will adjust presentation to make
-the semantic meaning of a particular comment clearer,
-analogous to reformatting `1+2 * 3` to `1 + 2*3` in ordinary source code.
+표준 포맷터 [gofmt](/cmd/gofmt)는 문서 주석을 표준 형식을 사용하여 다시 포맷합니다.
+Gofmt는 소스 코드에 주석이 작성되는 방식에 대한 가독성과 사용자 제어를 목표로 하지만, 특정 주석의 의미를 더 명확하게 만들기 위해 표시 방식을 조정합니다.
+이는 일상적인 소스 코드에서 `1+2 * 3`을 `1 + 2*3`으로 다시 포맷하는 것과 유사합니다.
 
-Gofmt removes leading and trailing blank lines in doc comments.
-If all lines in a doc comment begin with the same sequence of
-spaces and tabs, gofmt removes that prefix.
+`Gofmt`는 문서 주석에서 앞뒤의 공백 줄을 제거합니다.
+만약 문서 주석의 모든 줄이 동일한 공백 및 탭 시퀀스로 시작하면, `gofmt`는 해당 프리픽스를 제거합니다.
 
-### Paragraphs {#paragraphs}
+### 단락 {#paragraphs}
 
-A paragraph is a span of unindented non-blank lines.
-We've already seen many examples of paragraphs.
+단락은 들여쓰기나 공백이 없는, 띄어쓰기만으로 이루어진 텍스트 영역입니다.
+이미 많은 단락의 예제를 살펴보았습니다.
 
-A pair of consecutive backticks (\` U+0060)
-is interpreted as a Unicode left quote (“ U+201C),
-and a pair of consecutive single quotes (\' U+0027)
-is interpreted as a Unicode right quote (” U+201D).
+두 개의 연속된 백틱 (` U+0060)은 유니코드 왼쪽 따옴표 (“ U+201C)로 해석되고,
+두 개의 연속된 작은 따옴표 (\' U+0027)는 유니코드 오른쪽 따옴표 (” U+201D)로 해석됩니다.
 
-Gofmt preserves line breaks in paragraph text: it does not rewrap the text.
-This allows the use of [semantic linefeeds](https://rhodesmill.org/brandon/2012/one-sentence-per-line/),
-as seen earlier.
-Gofmt replaces duplicated blank lines between paragraphs
-with a single blank line.
-Gofmt also reformats consecutive backticks or single quotes
-to their Unicode interpretations.
+`Gofmt`은 단락 텍스트의 줄 바꿈을 보존합니다: 텍스트를 다시 포맷하지 않습니다.
+이를 통해 [의미 있는 줄 바꿈](https://rhodesmill.org/brandon/2012/one-sentence-per-line/)을 사용할 수 있습니다.
+이전에 언급한 바와 같이.
+`Gofmt`은 단락 간의 중복된 빈 줄을 단일 빈 줄로 대체합니다.
+`Gofmt`은 또한 연속된 백틱 또는 따옴표를 Unicode 해석으로 재포맷합니다.
 
-#### Notes {#notes}
+#### 참고 사항 {#notes}
 
-Notes are special comments of the form `MARKER(uid): body`.
-MARKER should consist of 2 or more upper case `[A-Z]` letters,
-identifying the type of note, while uid is at least 1 character,
-usually a username of someone who can provide more information.
-The `:` following the uid is optional.
+노트는 `MARKER(uid): body` 형식의 특별한 주석입니다.
+`MARKER`는 2개 이상의 대문자 `[A-Z]` 문자로 구성되어야 하며, 이는 노트의 유형을 식별합니다. `uid`는 최소 1자 이상의 문자여야 하며, 일반적으로 더 많은 정보를 제공할 수 있는 사용자의 사용자 이름입니다.
+`uid` 뒤에 오는 `:`는 선택 사항입니다.
 
-Notes are collected and rendered in their own section on pkg.go.dev.
+다음은 pkg.go.dev에서 별도의 섹션에 수집되고 렌더링된 노트입니다.
 
-For example:
+예시:
 
-	// TODO(user1): refactor to use standard library context
-	// BUG(user2): not cleaned up
+// TODO(사용자1): 표준 라이브러리 컨텍스트 사용으로 리팩터링
+	// BUG(사용자2): 정리되지 않음
 	var ctx context.Context
 
-#### Deprecations {#deprecations}
+#### 사용 중단 예정 기능 {#deprecations}
 
-Paragraphs starting with `Deprecated: ` are treated as deprecation notices.
-Some tools will warn when deprecated identifiers are used.
-[pkg.go.dev](https://pkg.go.dev) will hide their docs by default.
+문장이 `Deprecated: `로 시작하는 경우, 해당 부분을 사용 중단 알림으로 처리합니다.
+일부 도구는 사용 중단된 식별자를 사용할 때 경고를 표시합니다.
+[pkg.go.dev](https://pkg.go.dev)는 기본적으로 해당 문서들을 숨깁니다.
 
-Deprecation notices are followed by some information about the deprecation,
-and a recommendation on what to use instead, if applicable.
-The paragraph does not have to be the last paragraph in the doc comment.
+사용 중단 알림은 사용 중단에 대한 정보와, 해당되는 경우 대체할 방법을 제안합니다.
+이 단락은 문서 주석의 마지막 단락일 필요는 없습니다.
 
-For example:
+예시:
+```markdown
+# Heading 1
 
-	// Package rc4 implements the RC4 stream cipher.
+This is a paragraph.
+
+## Heading 2
+
+*   Item 1
+*   Item 2
+
+| Header 1 | Header 2 |
+|---|---|
+| Data 1 | Data 2 |
+
+```
+
+```markdown
+# Heading 1
+
+This is a paragraph.
+
+## Heading 2
+
+*   Item 1
+*   Item 2
+
+| Header 1 | Header 2 |
+|---|---|
+| Data 1 | Data 2 |
+```
+
+```markdown
+// 패키지 rc4는 RC4 스트림 암호 알고리즘을 구현합니다.
 	//
-	// Deprecated: RC4 is cryptographically broken and should not be used
-	// except for compatibility with legacy systems.
+	// 경고: RC4는 암호학적으로 취약하며, 호환성을 위해 기존 시스템과의 사용만 권장됩니다.
 	//
-	// This package is frozen and no new functionality will be added.
+	// 이 패키지는 래핑되어 있으며, 새로운 기능은 추가되지 않습니다.
 	package rc4
+```
 
-	// Reset zeros the key data and makes the Cipher unusable.
-	//
-	// Deprecated: Reset can't guarantee that the key will be entirely removed from
-	// the process's memory.
+// Reset은 키 데이터를 초기화하고 암호화 기능을 사용할 수 없게 만듭니다.
+//
+// Deprecated: Reset은 키가 프로세스의 메모리에서 완전히 제거된다는 것을 보장하지 않습니다.
 	func (c *Cipher) Reset()
 
-### Headings {#headings}
+### 제목 {#headings}
 
-A heading is a line beginning with a number sign (U+0023) and then a space and the heading text.
-To be recognized as a heading, the line must be unindented and set off from adjacent paragraph text
-by blank lines.
+제목은 숫자 기호(U+0023)로 시작하는 줄, 그 뒤에 공백, 그리고 제목 텍스트로 구성됩니다.
 
-For example:
+제목으로 인식되려면, 해당 줄은 들여쓰기가 되어 있지 않고, 인접한 단락 텍스트와 공백으로 구분되어야 합니다.
 
-	// Package strconv implements conversions to and from string representations
-	// of basic data types.
+예시:
+
+// 패키지 strconv은 기본 데이터 유형의 문자열 표현에서 양방향 변환을 구현합니다.
 	//
-	// # Numeric Conversions
+	// # 숫자 변환
 	//
-	// The most common numeric conversions are [Atoi] (string to int) and [Itoa] (int to string).
+	// 가장 일반적인 숫자 변환은 [Atoi] (문자열에서 정수로) 및 [Itoa] (정수에서 문자열로)입니다.
 	...
 	package strconv
 
-On the other hand:
+반면에:
 
-	// #This is not a heading, because there is no space.
-	//
-	// # This is not a heading,
-	// # because it is multiple lines.
-	//
-	// # This is not a heading,
-	// because it is also multiple lines.
-	//
-	// The next paragraph is not a heading, because there is no additional text:
-	//
-	// #
-	//
-	// In the middle of a span of non-blank lines,
-	// # this is not a heading either.
-	//
-	//     # This is not a heading, because it is indented.
+```markdown
+// # 이것은 제목이 아닙니다, 왜냐하면 공백이 없습니다.
+//
+// # 이것은 제목이 아닙니다,
+// # 왜냐하면 여러 줄입니다.
+//
+// # 이것은 제목이 아닙니다,
+// 왜냐하면 또한 여러 줄입니다.
+//
+// 다음 단락은 제목이 아닙니다, 왜냐하면 추가 텍스트가 없습니다:
+//
+// #
+//
+// 비어 있는 줄의 범위 중간에,
+// # 이것도 제목이 아닙니다.
+//
+//     # 이것은 제목이 아닙니다, 왜냐하면 들여 쓰기가 있습니다.
 
-The # syntax was added in Go 1.19.
-Before Go 1.19, headings were identified implicitly by single-line paragraphs
-satisfying certain conditions, most notably the lack of any terminating punctuation.
+`#` 문법은 Go 1.19에 추가되었습니다.
+Go 1.19 이전에는 제목은 단일 줄의 단락이 특정 조건(특히, 종료 구두점이 없는 경우)을 만족하는 방식으로 암시적으로 식별되었습니다.
 
-Gofmt reformats [lines treated as implicit headings](https://github.com/golang/proposal/blob/master/design/51082-godocfmt.md#headings)
-by earlier versions of Go to use # headings instead.
-If the reformatting is not appropriate—that is, if the line was not meant to be a heading—the easiest
-way to make it a paragraph is to introduce terminating punctuation
-such as a period or colon, or to break it into two lines.
+`Gofmt`는 이전 버전의 Go에서 사용하는 `#` 헤더를 사용하는 방식으로 [임의로 처리되는 줄](https://github.com/golang/proposal/blob/master/design/51082-godocfmt.md#headings)을 재정리합니다.
+만약 재정리가 적절하지 않은 경우—즉, 해당 줄이 헤더로 의도되지 않았을 경우—문단을 만드는 가장 쉬운 방법은 종결 구두점(예: 마침표 또는 콜론)을 추가하거나 줄을 두 개로 나누는 것입니다.
 
-### Links {#links}
+### 링크 {#links}
 
-A span of unindented non-blank lines defines link targets
-when every line is of the form “[Text]: URL”.
-In other text in the same doc comment,
-“[Text]” represents a link to URL using the given text—in HTML,
-\<a href="URL">Text\</a>.
-For example:
+빈칸이 없는, 들여쓰기되지 않은 줄의 연속은 링크 대상(link target)을 정의합니다.
+각 줄이 "[텍스트]: URL" 형식이어야 합니다.
+동일한 문서 주석 내의 다른 텍스트에서,
+"[텍스트]"는 주어진 텍스트를 사용하여 URL로 링크를 나타냅니다(예: HTML에서 \<a href="URL">텍스트\</a>).
+예를 들어:
 
-	// Package json implements encoding and decoding of JSON as defined in
-	// [RFC 7159]. The mapping between JSON and Go values is described
-	// in the documentation for the Marshal and Unmarshal functions.
+// 패키지 json은 [RFC 7159]에서 정의된 JSON의 인코딩 및 디코딩을 구현합니다.
+	// JSON과 Go 값 간의 매핑은 Marshal 및 Unmarshal 함수에 대한 설명서에서 설명되어 있습니다.
 	//
-	// For an introduction to this package, see the article
-	// “[JSON and Go].”
+	// 이 패키지에 대한 소개는 “[JSON과 Go]” 기사를 참조하십시오.
 	//
 	// [RFC 7159]: https://tools.ietf.org/html/rfc7159
-	// [JSON and Go]: https://golang.org/doc/articles/json_and_go.html
+	// [JSON과 Go]: https://golang.org/doc/articles/json_and_go.html
 	package json
 
-By keeping URLs in a separate section,
-this format only minimally interrupts the flow of the actual text.
-It also roughly matches the Markdown
-[shortcut reference link format](https://spec.commonmark.org/0.30/#shortcut-reference-link),
-without the optional title text.
+URL을 별도의 섹션에 두어,
+이 형식은 실제 텍스트의 흐름을 최소한으로 방해합니다.
+또한,
+[단축키 참조 링크 형식](https://spec.commonmark.org/0.30/#shortcut-reference-link)과 대략적으로 일치하며,
+선택적 제목 텍스트는 포함하지 않습니다.
 
-If there is no corresponding URL declaration,
-then (except for doc links, described in the next section)
-“[Text]” is not a hyperlink, and the square brackets are preserved
-when displayed.
-Each doc comment is considered independently:
-link target definitions in one comment do not affect other comments.
+만약 해당 URL 선언이 없다면,
+그러므로 (다음 섹션에 설명된 문서 링크를 제외하고)
+“[텍스트]”는 하이퍼링크가 아니며, 괄호 표시는 표시될 때 그대로 유지됩니다.
+각 문서 주석은 독립적으로 처리됩니다.
+한 주석에 정의된 링크 대상은 다른 주석에 영향을 미치지 않습니다.
 
-Although link target definition blocks may be interleaved with
-ordinary paragraphs, gofmt moves all link target definitions to
-the end of the doc comment,
-in up to two blocks: first a block containing all the link targets
-that are referenced in the comment, and then a block
-containing all the targets _not_ referenced in the comment.
-The separate block makes unused targets easy
-to notice and fix (in case the links or the definitions have typos)
-or to delete (in case the definitions are no longer needed).
+물론, 링크 대상 정의 블록이 일반 단락과 섞여 있을 수 있지만, `gofmt`는 모든 링크 대상 정의를 문서 주석의 끝으로 이동합니다.
+이는 최대 두 개의 블록으로 이루어집니다: 첫 번째 블록은 주석에서 참조되는 모든 링크 대상이 포함된 블록, 그리고 두 번째 블록은 주석에서 참조되지 않는 모든 대상이 포함된 블록입니다.
 
-Plain text that is recognized as a URL is automatically linked in HTML renderings.
+이렇게 분리된 블록을 사용하면 사용되지 않는 대상이 쉽게 식별하고 수정하거나 삭제할 수 있습니다(링크 또는 정의에 오타가 있는 경우) 또는 더 이상 필요하지 않은 경우에 삭제할 수 있습니다.
 
-### Doc links {#doclinks}
+평가된 텍스트(URL로 인식되는 텍스트)는 HTML 렌더링 시 자동으로 링크로 연결됩니다.
 
-Doc links are links of the form “[Name1]” or “[Name1.Name2]” to refer
-to exported identifiers in the current package, or “[pkg]”,
-“[pkg.Name1]”, or “[pkg.Name1.Name2]” to refer to identifiers in other
-packages.
+### 문서 링크 {#doclinks}
 
-For example:
+Doc 링크는 현재 패키지의 내보낸 식별자를 참조하기 위한 "[Name1]" 또는 "[Name1.Name2]" 형식의 링크입니다. 다른 패키지의 식별자를 참조하기 위한 "[pkg]", "[pkg.Name1]", 또는 "[pkg.Name1.Name2]" 형식의 링크입니다.
 
-	package bytes
+예시:
+```markdown
+# Heading 1
 
-	// ReadFrom reads data from r until EOF and appends it to the buffer, growing
-	// the buffer as needed. The return value n is the number of bytes read. Any
-	// error except [io.EOF] encountered during the read is also returned. If the
-	// buffer becomes too large, ReadFrom will panic with [ErrTooLarge].
+This is a paragraph.
+
+## Heading 2
+
+Here is a table:
+
+| Header 1 | Header 2 |
+|---|---|
+| Cell 1 | Cell 2 |
+| Cell 3 | Cell 4 |
+
+*   List item 1
+*   List item 2
+
+```
+
+```markdown
+# Heading 1
+
+This is a paragraph.
+
+## Heading 2
+
+Here is a table:
+
+| Header 1 | Header 2 |
+|---|---|
+| Cell 1 | Cell 2 |
+| Cell 3 | Cell 4 |
+
+*   List item 1
+*   List item 2
+
+```
+
+```go
+package bytes
+```
+
+// ReadFrom는 r에서 EOF까지 데이터를 읽어와 버퍼에 추가하고, 필요한 경우 버퍼 크기를 조정합니다. 반환 값 n은 읽은 바이트 수를 나타냅니다. io.EOF가 아닌 다른 모든 오류는 또한 반환됩니다.
+	// 버퍼가 너무 커지면 ReadFrom는 ErrTooLarge를 사용하여 panic합니다.
 	func (b *Buffer) ReadFrom(r io.Reader) (n int64, err error) {
 		...
 	}
 
-The bracketed text for a symbol link
-can include an optional leading star, making it easy to refer to
-pointer types, such as \[\*bytes.Buffer\].
+대괄호 안에 있는 심볼 링크의 텍스트는 선택적으로 선행하는 별표를 포함할 수 있으며, 이를 통해 포인터 타입, 예를 들어 `[*bytes.Buffer]`을 쉽게 참조할 수 있습니다.
 
-When referring to other packages, “pkg” can be either a full import path
-or the assumed package name of an existing import. The assumed package
-name is either the identifier in a renamed import or else
-[the name assumed by
-goimports](https://pkg.go.dev/golang.org/x/tools/internal/imports#ImportPathToAssumedName).
-(Goimports inserts renamings when that assumption is not correct, so
-this rule should work for essentially all Go code.)
-For example, if the current package imports encoding/json,
-then “[json.Decoder]” can be written in place of “[encoding/json.Decoder]”
-to link to the docs for encoding/json's Decoder.
-If different source files in a package import different packages using the same name,
-then the shorthand is ambiguous and cannot be used.
+다른 패키지를 참조할 때, "pkg"는 전체 임포트 경로일 수도 있고, 기존 임포트의 예상 패키지 이름일 수도 있습니다. 예상 패키지 이름은 다음과 같을 수 있습니다.
+*   임포트 이름을 변경한 후의 식별자
+*   `goimports`가 예상하는 이름 ([https://pkg.go.dev/golang.org/x/tools/internal/imports#ImportPathToAssumedName](https://pkg.go.dev/golang.org/x/tools/internal/imports#ImportPathToAssumedName))
 
-A “pkg” is only
-assumed to be a full import path if it starts with a domain name (a
-path element with a dot) or is one of the packages from the standard
-library (“[os]”, “[encoding/json]”, and so on).
-For example, `[os.File]` and `[example.com/sys.File]` are documentation links
-(the latter will be a broken link),
-but `[os/sys.File]` is not, because there is no os/sys package in the standard library.
+(`goimports`가 이러한 가정이 틀렸을 때 이름을 다시 삽입하므로, 이 규칙은 거의 모든 Go 코드에 적용될 수 있습니다.)
+예를 들어, 현재 패키지가 `encoding/json`을 임포트하는 경우, `[json.Decoder]`를 사용하여 `[encoding/json.Decoder]` 대신 사용하면 `encoding/json`의 `Decoder`에 대한 문서로 연결할 수 있습니다.
 
-To avoid problems with
-maps, generics, and array types, doc links must be both preceded and
-followed by punctuation, spaces, tabs, or the start or end of a line.
-For example, the text “map[ast.Expr]TypeAndValue” does not contain
-a doc link.
+패키지 내의 다른 소스 파일이 동일한 이름을 사용하여 다른 패키지를 임포트하는 경우, 이 약어는 모호하므로 사용할 수 없습니다.
 
-### Lists {#lists}
+"pkg"는 다음과 같은 경우에만 전체 import 경로로 간주됩니다.
+* 도메인 이름으로 시작하는 경우 (즉, 점으로 구분된 경로 요소)
+* 표준 라이브러리의 패키지 중 하나인 경우 ("[os]", "[encoding/json]", 등)
 
-A list is a span of indented or blank lines
-(which would otherwise be a code block,
-as described in the next section)
-in which the first indented line begins with
-a bullet list marker or a numbered list marker.
+예를 들어, `[os.File]` 및 `[example.com/sys.File]`는 문서 링크입니다 (후자는 작동하지 않는 링크가 됩니다).
+그러나 `[os/sys.File]`은 작동하지 않습니다. 왜냐하면 표준 라이브러리에 "os/sys" 패키지가 없기 때문입니다.
 
-A bullet list marker is a star, plus, dash, or Unicode bullet
-(*, +, -, •; U+002A, U+002B, U+002D, U+2022)
-followed by a space or tab and then text.
-In a bullet list, each line beginning with a bullet list
-marker starts a new list item.
+`maps`, `generics`, 및 `array` 타입과 관련된 문제를 피하기 위해, doc 링크는 반드시 기호, 공백, 탭, 또는 줄의 시작 또는 끝으로 둘러싸여 있어야 합니다.
+예를 들어, "map[ast.Expr]TypeAndValue"는 doc 링크를 포함하고 있지 않습니다.
 
-For example:
+### 목록 {#lists}
 
-	package url
+리스트는 들여쓰기된 또는 빈 줄로 이루어진 범위(
+이것은 다음 섹션에서 설명된 대로,
+코드 블록이 될 수 있음)
+이며, 첫 번째 들여쓰기된 줄은
+불릿 목록 표시기 또는 번호 목록 표시기로 시작합니다.
 
-	// PublicSuffixList provides the public suffix of a domain. For example:
-	//   - the public suffix of "example.com" is "com",
-	//   - the public suffix of "foo1.foo2.foo3.co.uk" is "co.uk", and
-	//   - the public suffix of "bar.pvt.k12.ma.us" is "pvt.k12.ma.us".
-	//
-	// Implementations of PublicSuffixList must be safe for concurrent use by
-	// multiple goroutines.
-	//
-	// An implementation that always returns "" is valid and may be useful for
-	// testing but it is not secure: it means that the HTTP server for foo.com can
-	// set a cookie for bar.com.
-	//
-	// A public suffix list implementation is in the package
-	// golang.org/x/net/publicsuffix.
-	type PublicSuffixList interface {
-		...
-	}
+*   별, 플러스, 하이픈, 또는 유니코드 스타일의 목록 기호 (*, +, -, •; U+002A, U+002B, U+002D, U+2022)
+*   이후에는 공백 또는 탭과 텍스트가 이어집니다.
+*   목록 기호로 시작하는 각 줄은 새로운 목록 항목을 시작합니다.
 
-A numbered list marker is a decimal number of any length
-followed by a period or right parenthesis, then a space or tab, and then text.
-In a numbered list, each line beginning with a number list marker starts a new list item.
-Item numbers are left as is, never renumbered.
+예시:
 
-For example:
+```markdown
+패키지: url
+```
 
-	package path
+// PublicSuffixList는 도메인의 공용 접미사를 제공합니다. 예를 들어:
+//   - "example.com"의 공용 접미사는 "com"입니다.
+//   - "foo1.foo2.foo3.co.uk"의 공용 접미사는 "co.uk"입니다.
+//   - "bar.pvt.k12.ma.us"의 공용 접미사는 "pvt.k12.ma.us"입니다.
+//
+// PublicSuffixList의 구현은 여러 고루틴에서 동시 사용하기에 안전해야 합니다.
+//
+// 항상 ""을 반환하는 구현은 유효하며 테스트에 유용할 수 있지만 안전하지 않습니다. 즉, foo.com의 HTTP 서버가 bar.com에 쿠키를 설정할 수 있습니다.
+//
+// 공용 접미사 목록의 구현은 golang.org/x/net/publicsuffix 패키지에 있습니다.
+type PublicSuffixList interface {
+	...
+}
 
-	// Clean returns the shortest path name equivalent to path
-	// by purely lexical processing. It applies the following rules
-	// iteratively until no further processing can be done:
-	//
-	//  1. Replace multiple slashes with a single slash.
-	//  2. Eliminate each . path name element (the current directory).
-	//  3. Eliminate each inner .. path name element (the parent directory)
-	//     along with the non-.. element that precedes it.
-	//  4. Eliminate .. elements that begin a rooted path:
-	//     that is, replace "/.." by "/" at the beginning of a path.
-	//
-	// The returned path ends in a slash only if it is the root "/".
-	//
-	// If the result of this process is an empty string, Clean
-	// returns the string ".".
-	//
-	// See also Rob Pike, “[Lexical File Names in Plan 9].”
-	//
-	// [Lexical File Names in Plan 9]: https://9p.io/sys/doc/lexnames.html
+* 순서 있는 목록의 구분 기호는 0부터 시작하는 어떤 길이의 소수를 나타내는 숫자, 그 뒤에 점(.) 또는 괄호( )를, 그리고 공백 또는 탭을, 마지막으로 텍스트를 붙이는 형태입니다.
+* 순서 있는 목록에서, 숫자로 시작하는 각 줄은 새로운 목록 항목을 시작합니다.
+* 항목 번호는 그대로 유지하며, 다시 번호를 매기지 않습니다.
+
+예시:
+
+```
+패키지: path
+```
+
+// Clean은 경로를 순전히 어휘적 처리를 통해 가장 짧은 경로 이름에 해당하는 경로를 반환합니다.
+// 다음 규칙을 반복적으로 적용합니다.
+//
+//  1. 여러 슬래시를 단 하나의 슬래시로 대체합니다.
+//  2. 각 "." 경로 이름 요소를 제거합니다 (현재 디렉토리).
+//  3. 각 내부 ".." 경로 이름 요소를 제거합니다 (상위 디렉토리)
+//     그리고 이전의 ".." 요소와 함께.
+//  4. 루트 경로를 시작하는 ".." 요소를 제거합니다.
+//     즉, 경로의 시작 부분에서 "/"로 "/.."를 대체합니다.
+//
+// 반환된 경로는 루트 경로인 "/"인 경우에만 슬래시로 끝납니다.
+//
+// 이 프로세스의 결과가 빈 문자열인 경우 Clean은 "." 문자열을 반환합니다.
+//
+// Rob Pike, "[Lexical File Names in Plan 9]." 참조.
+//
+// [Lexical File Names in Plan 9]: https://9p.io/sys/doc/lexnames.html
 	func Clean(path string) string {
 		...
 	}
 
-List items only contain paragraphs, not code blocks or nested lists.
-This avoids any space-counting subtlety as well as questions about
-how many spaces a tab counts for in inconsistent indentation.
+* 항목 목록에는 코드 블록이나 중첩된 목록이 포함되지 않습니다.
+이는 공백 개수를 세는 데 대한 모든 미묘함을 피하고, 불일치하는 들여쓰기에서 탭이 몇 개를 차지하는지에 대한 질문을 방지합니다.
 
-Gofmt reformats bullet lists to use a dash as the bullet marker,
-two spaces of indentation before the dash,
-and four spaces of indentation for continuation lines.
+Gofmt는 부울 리스트를 점(⋅) 대신 하이픈(-)을 사용하여 포맷하고, 하이픈 앞에 2개의 공백을 들여쓰기하고, 다음 줄에는 4개의 공백을 들여쓰기합니다.
 
-Gofmt reformats numbered lists to use a single space before the number,
-a period after the number, and again
-four spaces of indentation for continuation lines.
+`Gofmt`는 번호 매기기 목록을 재정렬하여 각 숫자 앞에 공백, 숫자 뒤에 점, 그리고 연속 줄에 대해 4개의 공백의 들여쓰기를 사용합니다.
 
-Gofmt preserves but does not require a blank line between a list and the preceding paragraph.
-It inserts a blank line between a list and the following paragraph or heading.
+`Gofmt`은 목록과 이전 단락 사이의 공백을 보존하지만, 반드시 필요하지는 않습니다.
+`Gofmt`은 목록과 다음 단락 또는 제목 사이의 공백을 삽입합니다.
 
-### Code blocks {#code}
+### 코드 블록 {#code}
 
-A code block is a span of indented or blank lines
-not starting with a bullet list marker or numbered list marker.
-It is rendered as preformatted text (a \<pre> block in HTML).
+코드 블록은 들여쓰기 또는 공백으로 이루어진 줄들의 연속으로,
+별표 또는 숫자로 시작하는 목록으로 시작하지 않는 것입니다.
+이는 미리 정의된 텍스트(HTML의 `<pre>` 블록)로 렌더링됩니다.
 
-Code blocks often contain Go code. For example:
+코드 블록에는 종종 Go 코드가 포함됩니다. 예를 들어:
 
-{{raw `
-	package sort
+```go
+	패키지 정렬
+```
 
-	// Search uses binary search...
+// Search는 이진 탐색을 사용합니다...
 	//
-	// As a more whimsical example, this program guesses your number:
+	// 좀 더 재미있는 예제로, 이 프로그램은 숫자를 추측합니다:
 	//
 	//	func GuessingGame() {
 	//		var s string
-	//		fmt.Printf("Pick an integer from 0 to 100.\n")
+	//		fmt.Printf("0부터 100 사이의 정수를 선택하세요.\n")
 	//		answer := sort.Search(100, func(i int) bool {
-	//			fmt.Printf("Is your number <= %d? ", i)
+	//			fmt.Printf("숫자가 %d 이하인가요? ", i)
 	//			fmt.Scanf("%s", &s)
 	//			return s != "" && s[0] == 'y'
 	//		})
-	//		fmt.Printf("Your number is %d.\n", answer)
+	//		fmt.Printf("숫자는 %d입니다.\n", answer)
 	//	}
 	func Search(n int, f func(int) bool) int {
 		...
 	}
-`}}
 
-Of course, code blocks also often contain preformatted text besides code. For example:
+물론, 코드 블록은 코드 외에도 미리 정의된 텍스트를 포함하는 경우가 많습니다. 예를 들어:
 
-{{raw `
-	package path
+```go
+package path
+```
 
-	// Match reports whether name matches the shell pattern.
-	// The pattern syntax is:
-	//
-	//	pattern:
-	//		{ term }
-	//	term:
-	//		'*'         matches any sequence of non-/ characters
-	//		'?'         matches any single non-/ character
-	//		'[' [ '^' ] { character-range } ']'
-	//		            character class (must be non-empty)
-	//		c           matches character c (c != '*', '?', '\\', '[')
-	//		'\\' c      matches character c
-	//
-	//	character-range:
-	//		c           matches character c (c != '\\', '-', ']')
-	//		'\\' c      matches character c
-	//		lo '-' hi   matches character c for lo <= c <= hi
-	//
-	// Match requires pattern to match all of name, not just a substring.
-	// The only possible returned error is [ErrBadPattern], when pattern
-	// is malformed.
+// Match는 이름이 셸 패턴과 일치하는지 확인합니다.
+// 패턴 구문은 다음과 같습니다:
+//
+//	패턴:
+//		{ term }
+//	term:
+//		'*'         어떤 문자열이 아닌 문자열과 일치
+//		'?'         어떤 단일 문자열이 아닌 문자와 일치
+//		'[' [ '^' ] { character-range } ']'
+//		            문자 클래스 (비어있지 않아야 함)
+//		c           문자 c와 일치 (c != '*', '?', '\\', '[')
+//		'\\' c      문자 c와 일치
+//
+//	character-range:
+//		c           문자 c와 일치 (c != '\\', '-', ']')
+//		'\\' c      문자 c와 일치
+//		lo '-' hi   문자 c를 lo <= c <= hi 범위 내에서 일치
+//
+// Match는 패턴이 이름의 모든 부분과 일치해야 합니다.
+// 발생 가능한 유일한 오류는 [ErrBadPattern]이며, 패턴이 잘못된 경우 발생합니다.
 	func Match(pattern, name string) (matched bool, err error) {
 		...
 	}
-`}}
 
-Gofmt indents all lines in a code block by a single tab,
-replacing any other indentation the non-blank lines have in common.
-Gofmt also inserts a blank line before and after each code block,
-distinguishing the code block clearly from the surrounding paragraph text.
+`Gofmt`는 코드 블록 내의 모든 줄을 단일 탭으로 들여쓰기하고, 비어 있지 않은 줄에서 공통적으로 사용되는 다른 모든 들여쓰기를 제거합니다.
+`Gofmt`는 각 코드 블록 앞뒤에 빈 줄을 추가하여, 코드 블록을 주변의 단락 텍스트와 명확하게 구분합니다.
 
-### Directives {#directives}
+### 지시문 {#directives}
 
-Directive comments such as `//go:generate` are not
-considered part of a doc comment and are omitted from
-rendered documentation.
-Gofmt moves directive comments to the end of the doc comment,
-preceded by a blank line.
-For example:
+`//go:generate`와 같은 지시문 주석은 문서 주석의 일부로 간주되지 않으며 렌더링된 문서에서 제외됩니다.
+Gofmt는 지시문 주석을 문서 주석의 끝으로 이동시키고, 공백 줄을 앞에 둡니다.
+예를 들어:
 
-	package regexp
+패키지: regexp
 
-	// An Op is a single regular expression operator.
-	//
-	//go:generate stringer -type Op -trimprefix Op
-	type Op uint8
+```markdown
+// Op는 단일 정규 표현식 연산자입니다.
+//
+//go:generate stringer -type Op -trimprefix Op
+type Op uint8
+```
 
-A directive comment is a line starting with the regular expression
-`//(line |extern |export |[a-z0-9]+:[a-z0-9])`.
+지시 주석은 정규 표현으로 시작하는 줄입니다:
+`//(line |extern |export |[a-z0-9]+:[a-z0-9])`
 
-Tools may define their own directive comments using the form
+도구는 다음과 같은 형식으로 자체 지시어 주석을 정의할 수 있습니다.
 `//toolname:directive arguments`.
-Tool directives match the regular expression
-`//([a-z0-9]+):([a-z0-9]\PZ*)($|\pZ+)(.*)`, where the first group
-is the tool name and the second group is the directive name.
-Optional arguments are separated from the directive name by
-one or more Unicode whitespace characters.
-Each tool may define its own argument syntax, but a common convention is a
-sequence of space-separated arguments, where an argument may be
-a bare word, or a double-quoted or backtick-quoted Go string.
-The tool name `go` is reserved for use by the Go toolchain.
+도구 지시어는 정규 표현식
+`//([a-z0-9]+):([a-z0-9]\PZ*)(($|\pZ+)(.*)`와 일치합니다. 여기서 첫 번째 그룹은 도구 이름이고, 두 번째 그룹은 지시어 이름입니다.
+선택적 인수는 지시어 이름과 하나 이상의 유니코드 공백 문자를 사용하여 구분됩니다.
+각 도구는 자체 인수 구문을 정의할 수 있지만, 일반적인 관례는 공백으로 구분된 인수 시퀀스이며, 인수는 다음과 같을 수 있습니다.
+- 빈 단어
+- 따옴표가 있는 또는 백틱이 있는 Go 문자열
+도구 이름 `go`는 Go 도구 체인에서 사용하도록 예약되어 있습니다.
 
-The [`go/ast.ParseDirective`](/pkg/go/ast#ParseDirective) function and its
-related types parse the tool directive syntax.
+[`go/ast.ParseDirective`](/pkg/go/ast#ParseDirective) 함수 및 관련 유형은 툴 지침 구문 구문을 파싱합니다.
 
-## Common mistakes and pitfalls {#mistakes}
+## 흔한 실수 및 함정 {#mistakes}
 
-The rule that any span of indented or blank lines
-in a doc comment is rendered as a code block
-dates to the earliest days of Go.
-Unfortunately, the lack of support for doc comments in gofmt
-has led to many existing comments that use indentation
-without meaning to create a code block.
+어떤 들여쓰기 또는 빈 줄의 범위가 문서 주석 내에 있는 경우, 이는 코드 블록으로 렌더링되는 규칙은 Go의 초기 시절부터 존재했습니다.
+불행하게도, `gofmt`에서 문서 주석을 지원하지 않아, 들여쓰기를 사용하여 주석을 작성하는 기존 주석들이 많습니다.
 
-For example, this unindented list has always been interpreted
-by godoc as a three-line paragraph followed by a one-line code block:
+예를 들어, 다음과 같은 들여쓰기 없는 목록은 항상 godoc에서 세 줄의 단락으로 해석됩니다. 뒤에 한 줄의 코드 블록이 이어집니다:
 
-	package http
+```markdown
+패키지: http
 
-	// cancelTimerBody is an io.ReadCloser that wraps rc with two features:
-	// 1) On Read error or close, the stop func is called.
-	// 2) On Read failure, if reqDidTimeout is true, the error is wrapped and
-	//    marked as net.Error that hit its timeout.
+```
+
+// cancelTimerBody는 rc를 감싸는 io.ReadCloser이며, 다음 두 가지 기능을 제공합니다.
+	// 1) Read 오류 또는 닫기 시 stop 함수가 호출됩니다.
+	// 2) Read 실패 시, reqDidTimeout가 true인 경우, 오류가 감싸여 net.Error로 표시되어 타임아웃에 걸린 것으로 간주됩니다.
 	type cancelTimerBody struct {
 		...
 	}
 
-This always rendered in `go` `doc` as:
+이것은 항상 `go` `doc`에서 다음과 같이 렌더링됩니다:
 
-	cancelTimerBody is an io.ReadCloser that wraps rc with two features:
-	1) On Read error or close, the stop func is called. 2) On Read failure,
-	if reqDidTimeout is true, the error is wrapped and
+`cancelTimerBody`는 `rc`를 감싸고 두 가지 기능을 제공하는 `io.ReadCloser`입니다:
+	1) 읽기 오류 또는 닫기 시, `stop` 함수가 호출됩니다.
+	2) 읽기 실패 시,
+	`reqDidTimeout`이 `true`인 경우, 오류가 래핑됩니다.
 
-	    marked as net.Error that hit its timeout.
+`net.Error`로 표시되어 타임아웃이 발생했습니다.
 
-Similarly, the command in this comment is a one-line paragraph
-followed by a one-line code block:
+마찬가지로, 이 주석에 있는 명령어는 다음과 같은 한 줄의 단락과 코드 블록으로 구성됩니다:
 
-	package smtp
+```go
+package smtp
+```
 
-	// localhostCert is a PEM-encoded TLS cert generated from src/crypto/tls:
-	//
-	// go run generate_cert.go --rsa-bits 1024 --host 127.0.0.1,::1,example.com \
-	//     --ca --start-date "Jan 1 00:00:00 1970" --duration=1000000h
-	var localhostCert = []byte(`...`)
+```markdown
+// localhostCert는 src/crypto/tls에서 생성된 PEM 인코딩된 TLS 인증서입니다:
+//
+// go run generate_cert.go --rsa-bits 1024 --host 127.0.0.1,::1,example.com \
+//     --ca --start-date "Jan 1 00:00:00 1970" --duration=1000000h
+// var localhostCert = []byte(`...`)
+```
 
-This rendered in `go` `doc` as:
+다음은 Go 패키지 문서(`go doc`)에서 생성된 형태입니다:
 
-	localhostCert is a PEM-encoded TLS cert generated from src/crypto/tls:
+`localhostCert`는 `src/crypto/tls`에서 생성된 PEM 인코딩된 TLS 인증서입니다:
 
-	go run generate_cert.go --rsa-bits 1024 --host 127.0.0.1,::1,example.com \
+```
+go run generate_cert.go --rsa-bits 1024 --host 127.0.0.1,::1,example.com
+```
 
-	    --ca --start-date "Jan 1 00:00:00 1970" --duration=1000000h
+--ca --시작일자 "1970년 1월 1일 00:00:00" --기간=1000000h
 
-And this comment is a two-line paragraph (the second line is “{”),
-followed by a six-line indented code block and a one-line paragraph (“}”).
+그리고 이 주석은 두 줄로 이루어진 문단 (두 번째 줄은 “{”)이며,
+그 뒤에는 여섯 줄의 들여쓰기된 코드 블록과 한 줄의 문단 (“}”)이 있습니다.
 
-	// On the wire, the JSON will look something like this:
+// 전송되는 JSON은 다음과 같은 형태일 것입니다:
 	// {
 	//	"kind":"MyAPIObject",
 	//	"apiVersion":"v1",
@@ -942,129 +950,119 @@ followed by a six-line indented code block and a one-line paragraph (“}”).
 	//	},
 	// }
 
-And this rendered in `go` `doc` as:
+그리고 다음과 같이 `go` 문서에서 렌더링됩니다:
 
-	On the wire, the JSON will look something like this: {
+전송 시, JSON 데이터는 다음과 유사하게 나타날 것입니다: {
 
-	    "kind":"MyAPIObject",
-	    "apiVersion":"v1",
-	    "myPlugin": {
-	    	"kind":"PluginA",
-	    	"aOption":"foo",
-	    },
+"kind":"MyAPIObject",
+    "apiVersion":"v1",
+    "myPlugin": {
+    	"kind":"PluginA",
+    	"aOption":"foo",
+    },
 
-	}
+```
+}
+```
 
-Another common mistake was an unindented Go function definition
-or block statement, similarly bracketed by “{” and “}”.
+또 다른 흔한 실수는 들여쓰기되지 않은 Go 함수 정의
+또는 블록 문장, 괄호로 묶인 "{"와 "}"으로 동일하게 표현하는 경우입니다.
 
-The introduction of doc comment reformatting in Go 1.19's gofmt makes mistakes
-like these more visible by adding blank lines around the code blocks.
+Go 1.19의 `gofmt`에 도입된 문서 주석 재정렬 기능은 다음과 같은 오류를 더 눈에 띄게 만들어, 코드 블록 주변에 빈 줄을 추가합니다.
 
-Analysis in 2022 found that only 3% of doc comments in public Go modules
-were reformatted at all by the draft Go 1.19 gofmt.
-Limiting ourselves to those comments, about 87% of gofmt's reformattings
-preserved the structure that a person would infer from reading the comment;
-about 6% were tripped up by these kinds of unindented lists,
-unindented multiline shell commands, and unindented brace-delimited code blocks.
+2022년 분석 결과, 공개 Go 모듈의 문서 주석 중 3%만이 draft Go 1.19의 gofmt에 의해 재정 형식화되었습니다.
 
-Based on this analysis, the Go 1.19 gofmt applies a few heuristics to merge
-unindented lines into an adjacent indented list or code block.
-With those adjustments, the Go 1.19 gofmt reformats the above examples to:
+이러한 주석에 국한하여, gofmt의 재정 형식화 중 약 87%는 사람이 주석을 읽고 유추할 수 있는 구조를 유지했습니다. 약 6%는 이러한 방법으로 인해, 들여쓰기되지 않은 목록, 들여쓰기되지 않은 다중 줄 셸 명령, 들여쓰기되지 않은 중괄호로 구분된 코드 블록에 혼란을 겪었습니다.
 
-	// cancelTimerBody is an io.ReadCloser that wraps rc with two features:
-	//  1. On Read error or close, the stop func is called.
-	//  2. On Read failure, if reqDidTimeout is true, the error is wrapped and
-	//     marked as net.Error that hit its timeout.
+이 분석을 바탕으로, Go 1.19의 `gofmt`는 다음과 같은 규칙을 적용하여
+인덴트되지 않은 줄을 인덴트된 목록 또는 코드 블록으로 병합합니다.
+이러한 조정 사항을 적용하면, Go 1.19의 `gofmt`는 다음 예제를 다음과 같이 재정렬합니다:
 
-	// localhostCert is a PEM-encoded TLS cert generated from src/crypto/tls:
+```markdown
+// cancelTimerBody는 rc를 감싸는 io.ReadCloser이며, 다음과 같은 두 가지 기능을 제공합니다.
+//  1. `Read` 오류 또는 닫기 시 `stop` 함수가 호출됩니다.
+//  2. `Read` 실패 시, `reqDidTimeout`가 `true`이면, 오류가 감싸지고 `net.Error`로 표시되어 타임아웃에 걸린 것으로 나타납니다.
+```
+
+// localhostCert는 src/crypto/tls에서 생성된 PEM 인코딩된 TLS 인증서입니다:
+//
+//	go run generate_cert.go --rsa-bits 1024 --host 127.0.0.1,::1,example.com \
+//	    --ca --start-date "Jan 1 00:00:00 1970" --duration=1000000h
+
+// 전송 시 JSON은 다음과 유사하게 나타날 것입니다:
+//
+//	{
+//		"kind":"MyAPIObject",
+//		"apiVersion":"v1",
+//		"myPlugin": {
+//			"kind":"PluginA",
+//			"aOption":"foo",
+//		},
+//	}
+
+이 재정렬은 문맥을 더욱 명확하게 만들 뿐만 아니라, Go의 이전 버전에서 문서 주석이 올바르게 렌더링되도록 합니다.
+만약 휴리스틱이 잘못된 결정을 내릴 경우, 단락 텍스트와 텍스트가 아닌 텍스트를 명확하게 분리하기 위해 빈 줄을 삽입하여 이를 덮어쓸 수 있습니다.
+
+이러한 규칙을 사용하더라도, 기존의 다른 주석들은 수동으로 수정하여 올바르게 표시해야 합니다.
+가장 흔한 실수는 묶여 있는 텍스트 줄을 렌더링할 때 들여쓰기를 하지 않는 경우입니다.
+예를 들어:
+
+// TODO 이 디자인을 다시 검토합니다. 노드를 한 번만 순회하는 것이 더 합리적일 수 있습니다.
+
+```markdown
+// 문서에 따르면:
+// "이미지 파일 내의 섹션의 원시 데이터를 정렬하는 데 사용되는 정렬 요소 (바이트 단위). 값은 512바이트에서 64KB 사이의 2의 거듭제곱이어야 합니다."
+```
+
+이 두 경우 모두, 마지막 줄이 들여 쓰여 있어 코드 블록으로 인식됩니다.
+해결 방법은 줄을 들여 쓰지 않는 것입니다.
+
+또 다른 흔한 실수는 목록 또는 코드 블록 내의 중첩된 줄을 올바르게 들여쓰지 않는 경우입니다.
+예를 들어:
+
+// 이 오류 모델의 사용 예시는 다음과 같습니다:
+//
+//   - 부분 오류. 서비스가 클라이언트에 부분 오류를 반환해야 하는 경우,
+//     일반 응답에 `Status`를 포함시켜 부분 오류를 나타낼 수 있습니다.
+//
+//   - 워크플로우 오류. 일반적인 워크플로우는 여러 단계를 가집니다. 각 단계는
+//     오류 보고를 위한 `Status` 메시지를 가질 수 있습니다.
+
+해결책은 묶인 줄을 들여쓰기하는 것입니다.
+
+Go 문서는 중첩된 목록을 지원하지 않으므로, gofmt가 재정렬합니다.
+
+// 다음은 목록입니다:
 	//
-	//	go run generate_cert.go --rsa-bits 1024 --host 127.0.0.1,::1,example.com \
-	//	    --ca --start-date "Jan 1 00:00:00 1970" --duration=1000000h
-
-	// On the wire, the JSON will look something like this:
-	//
-	//	{
-	//		"kind":"MyAPIObject",
-	//		"apiVersion":"v1",
-	//		"myPlugin": {
-	//			"kind":"PluginA",
-	//			"aOption":"foo",
-	//		},
-	//	}
-
-This reformatting makes the meaning clearer as well as making the doc comments
-render correctly in earlier versions of Go.
-If the heuristic ever makes a bad decision, it can be overridden by inserting
-a blank line to clearly separate the paragraph text from non-paragraph text.
-
-Even with these heuristics, other existing comments will need manual
-adjustment to correct their rendering.
-The most common mistake is indenting a wrapped unindented line of text.
-For example:
-
-	// TODO Revisit this design. It may make sense to walk those nodes
-	//      only once.
-
-	// According to the document:
-	// "The alignment factor (in bytes) that is used to align the raw data of sections in
-	//  the image file. The value should be a power of 2 between 512 and 64 K, inclusive."
-
-In both of these, the last line is indented, making it a code block.
-The fix is to unindent the lines.
-
-Another common mistake is not indenting a wrapped indented line of a list or code block.
-For example:
-
-	// Uses of this error model include:
-	//
-	//   - Partial errors. If a service needs to return partial errors to the
-	// client,
-	//     it may embed the `Status` in the normal response to indicate the
-	// partial
-	//     errors.
-	//
-	//   - Workflow errors. A typical workflow has multiple steps. Each step
-	// may
-	//     have a `Status` message for error reporting.
-
-The fix is to indent the wrapped lines.
-
-Go doc comments do not support nested lists, so gofmt reformats
-
-	// Here is a list:
-	//
-	//  - Item 1.
-	//    * Subitem 1.
-	//    * Subitem 2.
-	//  - Item 2.
-	//  - Item 3.
+	//  - 항목 1.
+	//    * 하위 항목 1.
+	//    * 하위 항목 2.
+	//  - 항목 2.
+	//  - 항목 3.
 
 to
 
-	// Here is a list:
+// 다음은 목록입니다:
 	//
-	//  - Item 1.
-	//  - Subitem 1.
-	//  - Subitem 2.
-	//  - Item 2.
-	//  - Item 3.
+	//  - 항목 1.
+	//  - 하위 항목 1.
+	//  - 하위 항목 2.
+	//  - 항목 2.
+	//  - 항목 3.
 
-Rewriting the text to avoid nested lists usually
-improves the documentation and is the best solution.
-Another potential workaround is to mix list markers,
-since bullet markers do not introduce list items in a numbered list,
-nor vice versa.
-For example:
+텍스트를 재구성하여 중첩된 목록을 피하는 것은 일반적으로 문서를 개선하고 가장 좋은 해결책입니다.
+또 다른 잠재적인 해결책은 목록 기호를 혼용하는 것입니다.
+왜냐하면, 숫자 목록에서 마커 기호는 목록 항목을 추가하지 않으며, 그 반대도 마찬가지이기 때문입니다.
+예를 들어:
 
-	// Here is a list:
+// 다음은 목록입니다:
 	//
-	//  1. Item 1.
+	//  1. 아이템 1.
 	//
-	//     - Subitem 1.
+	//     - 하위 아이템 1.
 	//
-	//     - Subitem 2.
+	//     - 하위 아이템 2.
 	//
-	//  2. Item 2.
+	//  2. 아이템 2.
 	//
-	//  3. Item 3.
+	//  3. 아이템 3.

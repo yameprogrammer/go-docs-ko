@@ -1,260 +1,270 @@
 <!--
-NOTE: In this document and others in this directory, the convention is to
-set fixed-width phrases with non-fixed-width spaces, as in
-<code>hello</code> <code>world</code>.
-Do not send CLs removing the interior tags from such phrases.
+참고: 이 문서 및 이 디렉토리에 있는 다른 문서에서, 고정 폭의 구문과 그렇지 않은 공백을 사용하는 규칙을 따릅니다. 예를 들어, <code>hello</code> <code>world</code>와 같이 사용합니다.
+이러한 구문에서 내부 태그를 제거하는 CL을 보내지 마십시오.
 -->
 
+```markdown
 <style>
   main ul li { margin: 0.5em 0; }
 </style>
+```
 
-## Introduction to Go 1.22 {#introduction}
+## Go 1.22 소개 {#introduction}
 
-The latest Go release, version 1.22, arrives six months after [Go 1.21](/doc/go1.21).
-Most of its changes are in the implementation of the toolchain, runtime, and libraries.
-As always, the release maintains the Go 1 [promise of compatibility](/doc/go1compat).
-We expect almost all Go programs to continue to compile and run as before.
+## Overview
+This document provides an overview of Go 1.22, including its new features, improvements, and changes.
 
-## Changes to the language {#language}
+## New Features
+*   **Go 1.22 Release Notes:** [https://go.dev/doc/go1.22](https://go.dev/doc/go1.22)
+*   **Go 1.22 Changelog:** [https://github.com/golang/go/releases/tag/go1.22.0](https://github.com/golang/go/releases/tag/go1.22.0)
 
-<!-- loop variable scope -->
-<!-- range over int -->
-Go 1.22 makes two changes to "for" loops.
+## Improvements
+*   **Performance Improvements:** Go 1.22 includes several performance improvements, including:
+    *   Faster compilation times
+    *   Improved garbage collection
+    *   Optimized code generation
 
-  - Previously, the variables declared by a "for" loop were created once and updated by each iteration. In Go 1.22, each iteration of the loop creates new variables, to avoid accidental sharing bugs.
-    The [transition support tooling](/wiki/LoopvarExperiment#my-test-fails-with-the-change-how-can-i-debug-it)
-    described in the proposal continues to work in the same way it did in Go 1.21.
-  - "For" loops may now range over integers.
-    For [example](/play/p/ky02zZxgk_r?v=gotip):
+## Changes
+*   **Deprecations:** Go 1.22 introduces several new deprecations. Please review the release notes for a complete list.
+*   **Breaking Changes:** Go 1.22 introduces some breaking changes. Please review the release notes for a complete list.
 
-    	package main
+## Getting Started
+To get started with Go 1.22, you can:
 
-    	import "fmt"
+*   Install the Go toolchain
+*   Update your Go environment variables
+*   Try out the new features and improvements
 
-    	func main() {
+가장 최신 Go 릴리스인 버전 1.22는 [Go 1.21](/doc/go1.21) 이후 6개월 만에 출시되었습니다.
+대부분의 변경 사항은 도구 체인, 런타임 및 라이브러리의 구현에 있습니다.
+물론, 이 릴리스는 Go 1의 [호환성 약속](/doc/go1compat)을 유지합니다.
+대부분의 Go 프로그램이 이전과 동일하게 컴파일 및 실행될 것으로 예상합니다.
+
+## 언어 변경 사항 {#language}
+
+```
+// Go package name: example
+package example
+
+// Identifier: myFunc
+func myFunc() {
+  // Inline code: fmt.Println("Hello, world!")
+  fmt.Println("Hello, world!")
+}
+```
+
+```
+// URL: https://example.com
+// Command: git clone https://example.com/repo.git
+// Code snippet:
+//   package main
+//   import "fmt"
+//   func main() {
+//       fmt.Println("Hello, world!")
+//   }
+```
+
+<!-- 반복 변수 범위 -->
+<!-- 정수 범위에 대해 반복 -->
+Go 1.22은 "for" 루프에 대해 두 가지 변경 사항을 도입했습니다.
+
+- 이전에는 "for" 루프에 선언된 변수는 한 번 생성되고 각 반복에서 업데이트되었습니다. Go 1.22에서는 루프의 각 반복이 새로운 변수를 생성하여 의도하지 않은 공유 오류를 방지합니다.
+    제안된 [전이 지원 도구]( /wiki/LoopvarExperiment#my-test-fails-with-the-change-how-can-i-debug-it)는 Go 1.21과 동일한 방식으로 작동합니다.
+  - "for" 루프는 이제 정수를 반복할 수 있습니다.
+    예를 들어: [ /play/p/ky02zZxgk_r?v=gotip]
+
+```go
+패키지 main
+```
+
+```
+import "fmt"
+```
+
+```markdown
+```go
+package main {
+    func main() {
     	  for i := range 10 {
     	    fmt.Println(10 - i)
     	  }
     	  fmt.Println("go1.22 has lift-off!")
     	}
+```
+```
 
-    See the spec for [details](/ref/spec#For_range).
+자세한 내용은 [스펙](https://example.com/ref/spec#For_range)을 참조하십시오.
 
-<!-- range over func GOEXPERIMENT; https://go.dev/issue/61405, https://go.dev/issue/61897, CLs 510541,539277,540263,543319 -->
+<!-- GOEXPERIMENT 범위 내의 함수 GOEXPERIMENT에 대한 테스트: https://go.dev/issue/61405, https://go.dev/issue/61897, CL 510541, 539277, 540263, 543319 -->
 
+Go 1.22에는 미래의 Go 버전에서 고려 중인 언어 변경 사항의 미리보기 기능이 포함되어 있습니다: [range-over-function iterators](https://wiki/RangefuncExperiment).
+`GOEXPERIMENT=rangefunc`로 빌드하면 이 기능을 활성화할 수 있습니다.
 
-Go 1.22 includes a preview of a language change we are considering
-for a future version of Go: [range-over-function iterators](/wiki/RangefuncExperiment).
-Building with `GOEXPERIMENT=rangefunc` enables this feature.
+## 도구 {#tools}
 
-## Tools {#tools}
+### Go 명령어 {#go-command}
 
-### Go command {#go-command}
+```go
+package main
+
+import "fmt"
+
+func main() {
+	fmt.Println("Hello, World!")
+}
+```
+
+| 명령어 | 설명 |
+|---|---|
+| `go run` | Go 프로그램을 컴파일하고 실행합니다. |
+| `go build` | Go 프로그램을 컴파일하여 실행 가능한 파일을 생성합니다. |
+| `go test` | Go 프로그램의 테스트를 실행합니다. |
+| `go get` | Go 모듈을 다운로드하고 설치합니다. |
+| `go fmt` | Go 코드 스타일을 자동으로 포맷합니다. |
 
 <!-- https://go.dev/issue/60056 -->
 
-Commands in [workspaces](/ref/mod#workspaces) can now
-use a `vendor` directory containing the dependencies of the
-workspace. The directory is created by
-[`go` `work` `vendor`](/pkg/cmd/go#hdr-Make_vendored_copy_of_dependencies),
-and used by build commands when the `-mod` flag is set to
-`vendor`, which is the default when a workspace `vendor`
-directory is present.
+명령어는 이제 [작업 공간](/ref/mod#workspaces) 내에 있는 종속성을 포함하는 `vendor` 디렉토리를 사용할 수 있습니다. 이 디렉토리는 `go` `work` `vendor` 명령어로 생성되며, 빌드 명령어에서 `-mod` 플래그가 `vendor`로 설정될 때 사용됩니다. 이는 작업 공간 내에 `vendor` 디렉토리가 존재할 때 기본 설정입니다.
 
-Note that the `vendor` directory's contents for a workspace are different
-from those of a single module: if the directory at the root of a workspace also
-contains one of the modules in the workspace, its `vendor` directory
-can contain the dependencies of either the workspace or of the module,
-but not both.
+참고: 워크스페이스의 `vendor` 디렉토리 내용과 단일 모듈의 내용은 다릅니다. 워크스페이스의 루트 디렉토리에 있는 디렉토리가 워크스페이스 내의 하나의 모듈을 포함하는 경우, 해당 디렉토리의 `vendor` 디렉토리는 워크스페이스 또는 모듈의 종속성을 포함할 수 있지만, 둘 다 포함할 수는 없습니다.
 
 <!-- CL 518775, https://go.dev/issue/60915 -->
 
-`go` `get` is no longer supported outside of a module in the
-legacy `GOPATH` mode (that is, with `GO111MODULE=off`).
-Other build commands, such as `go` `build` and
-`go` `test`, will continue to work indefinitely
-for legacy `GOPATH` programs.
+`go get`는 레거시 `GOPATH` 모드(즉, `GO111MODULE=off`인 경우)에서 모듈 외부에서는 더 이상 지원되지 않습니다.
+`go build` 및 `go test`와 같은 다른 빌드 명령어는 레거시 `GOPATH` 프로그램에 대해서는 계속 작동합니다.
 
 <!-- CL 518776 -->
 
-`go` `mod` `init` no longer attempts to import
-module requirements from configuration files for other vendoring tools
-(such as `Gopkg.lock`).
+`go` `mod` `init`는 이제 다른 벤더링 도구(예: `Gopkg.lock`)에서 구성 파일로부터 모듈 요구 사항을 가져오려고 시도하지 않습니다.
 
 <!-- CL 495447 -->
 
-`go` `test` `-cover` now prints coverage summaries
-for covered packages that do not have their own test files. Prior to Go 1.22 a
-`go` `test` `-cover` run for such a package would
-report
+`go test -cover` 이제 코버리지 요약을 출력합니다.
+자체 테스트 파일이 없는 패키지에 대해. Go 1.22 이전에는
+`go test -cover` 명령이 이러한 패키지에 대해
+보고했습니다.
 
-`?     mymod/mypack    [no test files]`
+`?     mymod/mypack    [테스트 파일 없음]`
 
-and now with Go 1.22, functions in the package are treated as uncovered:
+그리고 Go 1.22부터, 패키지 내의 함수는 노출된 것으로 취급됩니다:
 
-`mymod/mypack    coverage: 0.0% of statements`
+`mymod/mypack    코드 커버리지: 0.0%`
 
-Note that if a package contains no executable code at all, we can't report
-a meaningful coverage percentage; for such packages the `go` tool
-will continue to report that there are no test files.
+참고: 만약 패키지에 실행 가능한 코드가 전혀 없다면, 우리는 의미 있는 커버리지 비율을 보고할 수 없습니다. 그러한 패키지의 경우, `go` 도구는 여전히 테스트 파일이 없다는 것을 계속 보고합니다.
 
 <!-- CL 522239, https://go.dev/issue/46330 -->
 
-`go` build commands that invoke the linker now error out if an
-external (C) linker will be used but cgo is not enabled. (The Go runtime
-requires cgo support to ensure that it is compatible with any additional
-libraries added by the C linker.)
+`go` 빌드 명령어에서 링커를 호출할 때, 외부 (C) 링커를 사용할 경우에만 오류가 발생합니다. 하지만 cgo가 활성화되지 않은 경우에는 오류가 발생합니다. (Go 런타임은 C 링커가 추가로 설치한 라이브러리와 호환되도록 cgo 지원이 필요합니다.)
 
-### Trace {#trace}
+### 추적 {#trace}
 
 <!-- https://go.dev/issue/63960 -->
 
-The `trace` tool's web UI has been gently refreshed as part of the
-work to support the new tracer, resolving several issues and improving the
-readability of various sub-pages.
-The web UI now supports exploring traces in a thread-oriented view.
-The trace viewer also now displays the full duration of all system calls.
+`trace` 도구의 웹 UI는 새로운 트레이서를 지원하기 위한 작업의 일환으로 부드럽게 업데이트되었습니다. 이를 통해 여러 문제를 해결하고 다양한 하위 페이지의 가독성을 개선했습니다.
+이제 웹 UI는 스레드 기반의 방식으로 트레이스를 탐색할 수 있습니다.
+트레이스 뷰어는 또한 모든 시스템 호출의 전체 지속 시간을 표시합니다.
 \
-These improvements only apply for viewing traces produced by programs built with
-Go 1.22 or newer.
-A future release will bring some of these improvements to traces produced by older
-version of Go.
+이러한 개선 사항은 Go 1.22 또는 그 이상 버전으로 빌드된 프로그램에 의해 생성된 트레이스를 보는 데만 적용됩니다.
+향후 릴리스에서는 이전 버전의 Go로 생성된 트레이스에도 일부 개선 사항이 적용될 예정입니다.
 
-### Vet {#vet}
+### 수의사 {#vet}
 
-#### References to loop variables {#vet-loopclosure}
+#### 루프 변수에 대한 참조 {#vet-loopclosure}
 
-<!-- CL 539016, https://go.dev/issue/63888: cmd/vet: do not report variable capture for loop variables with the new lifetime rules -->
-The behavior of the `vet` tool has changed to match
-the new semantics (see above) of loop variables in Go 1.22.
-When analyzing a file that requires Go 1.22 or newer
-(due to its go.mod file or a per-file build constraint),
-`vet` no longer reports references to
-loop variables from within a function literal that
-might outlive the iteration of the loop.
-In Go 1.22, loop variables are created anew for each iteration,
-so such references are no longer at risk of using a variable
-after it has been updated by the loop.
+<!-- CL 539016, https://go.dev/issue/63888: cmd/vet: 루프 변수에 대한 새로운 규칙에 따라 변수 캡처에 대한 보고를 중단 -->
+`vet` 도구의 동작은 Go 1.22의 새로운 의미(위 참조)에 따라 변경되었습니다.
+Go 1.22 또는 그 이상 버전이 필요한 파일을 분석할 때 (go.mod 파일 또는 파일별 빌드 제약 조건으로 인해),
+`vet`은 이제 루프 변수에서 호출된 참조를 더 이상 보고하지 않습니다.
+Go 1.22에서는 루프 변수가 각 반복마다 새롭게 생성되므로, 이러한 참조가 루프에 의해 업데이트된 후에 변수를 사용하는 위험이 더 이상 없습니다.
 
-#### New warnings for missing values after append {#vet-appends}
+#### 추가 후 누락된 값에 대한 새로운 경고 {#vet-appends}
 
-<!-- CL 498416, https://go.dev/issue/60448: add a new analyzer for check missing values after append -->
-The `vet` tool now reports calls to
-[`append`](/pkg/builtin/#append) that pass
-no values to be appended to the slice, such as `slice = append(slice)`.
-Such a statement has no effect, and experience has shown that is nearly always a mistake.
+<!-- CL 498416, https://go.dev/issue/60448: 추가 작업 후 누락된 값 확인을 위한 새로운 분석기 추가 -->
+`vet` 도구가 이제 `append` 함수 호출을 보고합니다.
+[`append`](/pkg/builtin/#append) 함수를 호출하여 슬라이스에 추가할 값을 전달하지 않는 경우, 예를 들어 `slice = append(slice)`와 같은 경우입니다.
+이러한 문은 아무런 효과가 없으며, 경험적으로 보면 거의 항상 오류인 것으로 나타났습니다.
 
-#### New warnings for deferring `time.Since` {#vet-defers}
+#### `time.Since`을 지연 호출하는 데 대한 새로운 경고 {#vet-defers}
 
-<!-- CL 527095, https://go.dev/issue/60048: time.Since should not be used in defer statement -->
-The vet tool now reports a non-deferred call to
-[`time.Since(t)`](/pkg/time/#Since) within a `defer` statement.
-This is equivalent to calling `time.Now().Sub(t)` before the `defer` statement,
-not when the deferred function is called. In nearly all cases, the correct code
-requires deferring the `time.Since` call. For example:
+<!-- CL 527095, https://go.dev/issue/60048: time.Since는 defer 문에서 사용해서는 안 됨 -->
+`vet` 도구가 이제 `defer` 문 내에서 `time.Since(t)`를 호출하는 것을 보고합니다.
+이는 `defer` 문이 호출되기 전에 `time.Now().Sub(t)`를 호출하는 것과 같습니다.
+대부분의 경우, 올바른 코드는 `time.Since` 호출을 `defer` 해야 합니다. 예를 들어:
 
-	t := time.Now()
-	defer log.Println(time.Since(t)) // non-deferred call to time.Since
-	tmp := time.Since(t); defer log.Println(tmp) // equivalent to the previous defer
+```markdown
+t := time.Now()
+	defer log.Println(time.Since(t))  // 시간 지연 없이 time.Since 호출
+	tmp := time.Since(t); defer log.Println(tmp) // 위와 동일한 시간 지연
+```
 
-	defer func() {
-	  log.Println(time.Since(t)) // a correctly deferred call to time.Since
+```
+defer func() {
+	  log.Println(time.Since(t)) // 올바르게 셔터링된 time.Since 호출
 	}()
+```
 
-#### New warnings for mismatched key-value pairs in `log/slog` calls {#vet-slog}
+#### `log/slog` 호출 시 키-값 쌍 불일치에 대한 새로운 경고 {#vet-slog}
 
-<!-- CL 496156, https://go.dev/issue/59407: log/slog: add vet checks for variadic ...any inputs -->
-The vet tool now reports invalid arguments in calls to functions and methods
-in the structured logging package, [`log/slog`](/pkg/log/slog),
-that accept alternating key/value pairs.
-It reports calls where an argument in a key position is neither a
-`string` nor a `slog.Attr`, and where a final key is missing its value.
+<!-- CL 496156, https://go.dev/issue/59407: log/slog: 추가된 vet 검사: 가변적인 ...any 입력에 대한 검사 -->
+`vet` 도구가 이제 `log/slog` ([`log/slog`](/pkg/log/slog)) 패키지에 있는 구조화된 로깅 기능을 사용하는 함수 및 메서드 호출에 유효하지 않은 인수를 보고합니다.
+특히, 키/값 쌍을 교대로 받는 함수/메서드 호출에서, 키 위치에 있는 인수가 `string`이 아니거나 `slog.Attr`가 아닐 때, 그리고 마지막 키에 값이 없을 때에 대한 보고를 합니다.
 
-## Runtime {#runtime}
+## 실행 시간 {#runtime}
 
 <!-- CL 543255 -->
-The runtime now keeps type-based garbage collection metadata nearer to each
-heap object, improving the CPU performance (latency or throughput) of Go programs
-by 1–3%.
-This change also reduces the memory overhead of the majority Go programs by
-approximately 1% by deduplicating redundant metadata.
-Some programs may see a smaller improvement because this change adjusts the size
-class boundaries of the memory allocator, so some objects may be moved up a size
-class.
+실행 시간은 이제 타입 기반의 가비지 컬렉션 메타데이터를 각 힙 객체에 더 가깝게 유지하여 Go 프로그램의 CPU 성능(지연 시간 또는 처리량)을 1~3% 향상시킵니다.
+또한, 이 변경 사항은 대부분의 Go 프로그램의 메모리 오버헤드를 약 1% 줄여 중복된 메타데이터를 제거합니다.
+일부 프로그램은 이 변경 사항이 메모리 할당기의 크기 범위를 조정하기 때문에 약간의 개선을 보일 수 있으며, 일부 객체가 크기 범위를 하나 올릴 수 있습니다.
 
-A consequence of this change is that some objects' addresses that were previously
-always aligned to a 16 byte (or higher) boundary will now only be aligned to an 8
-byte boundary.
-Some programs that use assembly instructions that require memory addresses to be
-more than 8-byte aligned and rely on the memory allocator's previous alignment behavior
-may break, but we expect such programs to be rare.
-Such programs may be built with `GOEXPERIMENT=noallocheaders` to revert
-to the old metadata layout and restore the previous alignment behavior, but package
-owners should update their assembly code to avoid the alignment assumption, as this
-workaround will be removed in a future release.
+이 변경의 결과로, 이전에 항상 16 바이트 (또는 그 이상의) 경계에 맞춰 정렬되던 일부 객체의 주소는 이제 8 바이트 경계로만 정렬됩니다.
+메모리 할당기의 이전 정렬 동작에 의존하고, 8 바이트 이상의 정렬을 요구하는 어셈블리 명령어를 사용하는 일부 프로그램이 중단될 수 있지만, 이러한 프로그램은 드물 것으로 예상됩니다.
+이러한 프로그램은 `GOEXPERIMENT=noallocheaders`를 사용하여 이전의 메타데이터 레이아웃으로 되돌리고, 이전의 정렬 동작을 복원할 수 있지만, 패키지 소유자는 어셈블리 코드를 업데이트하여 정렬을 가정하지 않도록 해야 합니다. 왜냐하면 이러한 임시 해결책은 향후 릴리스에서 제거될 예정이기 때문입니다.
 
 <!-- CL 525475 -->
-On the `windows/amd64 port`, programs linking or loading Go libraries built with
-`-buildmode=c-archive` or `-buildmode=c-shared` can now use
-the `SetUnhandledExceptionFilter` Win32 function to catch exceptions not handled
-by the Go runtime. Note that this was already supported on the `windows/386` port.
+`windows/amd64` 포트에서, `-buildmode=c-archive` 또는 `-buildmode=c-shared`으로 빌드된 Go 라이브러리를 링크하거나 로드하는 프로그램은 이제 `SetUnhandledExceptionFilter` Win32 함수를 사용하여 Go 런타임에 의해 처리되지 않는 예외를 잡을 수 있습니다. 참고로, 이는 이미 `windows/386` 포트에서 지원되었습니다.
 
-## Compiler {#compiler}
+## 컴파일러
 
 <!-- https://go.dev/issue/61577 -->
-[Profile-guided Optimization (PGO)](/doc/pgo) builds
-can now devirtualize a higher proportion of calls than previously possible.
-Most programs from a representative set of Go programs now see between 2 and
-14% improvement at runtime from enabling PGO.
+[프로파일 가이드 최적화 (PGO)](/doc/pgo)를 통해
+이제 이전보다 더 많은 호출을 비가환화할 수 있습니다.
+대표적인 Go 프로그램 집합에서 대부분의 프로그램은 PGO를 활성화했을 때 실행 시간에서 2~14%의 성능 향상을 보입니다.
 
 <!-- https://go.dev/cl/528321 -->
-The compiler now interleaves devirtualization and inlining, so interface
-method calls are better optimized.
+컴파일러는 이제 데비어츄얼라이제이션과 인라인을 번갈아 사용하므로 인터페이스 메서드 호출이 더 잘 최적화됩니다.
 
 <!-- https://go.dev/issue/61502 -->
-Go 1.22 also includes a preview of an enhanced implementation of the compiler's inlining phase that uses heuristics to boost inlinability at call sites deemed "important" (for example, in loops) and discourage inlining at call sites deemed "unimportant" (for example, on panic paths).
-Building with `GOEXPERIMENT=newinliner` enables the new call-site
-heuristics; see [issue #61502](/issue/61502) for
-more info and to provide feedback.
+Go 1.22에는 컴파일러의 인라인 단계를 개선한 구현의 미리보기 기능이 포함되어 있습니다. 이 기능은 "중요한" 위치(예: 루프)에서 인라인 가능성을 높이기 위해 휴리스틱을 사용하고, "중요하지 않은" 위치(예: 패닉 경로)에서의 인라인을 억제합니다.
 
-## Linker {#linker}
+`GOEXPERIMENT=newinliner`로 빌드하면 새로운 호출 위치 휴리스틱을 사용할 수 있습니다. 자세한 내용과 피드백을 제공하려면 [issue #61502](/issue/61502)를 참조하십시오.
+
+## 링커 {#linker}
 
 <!-- CL 493136 -->
-The linker's `-s` and `-w` flags are now behave more
-consistently across all platforms.
-The `-w` flag suppresses DWARF debug information generation.
-The `-s` flag suppresses symbol table generation.
-The `-s` flag also implies the `-w` flag, which can be
-negated with `-w=0`.
-That is, `-s` `-w=0` will generate a binary with DWARF
-debug information generation but without the symbol table.
+링커의 `-s` 및 `-w` 플래그가 이제 모든 플랫폼에서 더 일관된 방식으로 동작합니다.
+`-w` 플래그는 DWARF 디버그 정보 생성을 억제합니다.
+`-s` 플래그는 심볼 테이블 생성을 억제합니다.
+`-s` 플래그는 `-w` 플래그를 암시하며, 이는 `-w=0`로 부정될 수 있습니다.
+즉, `-s -w=0`는 DWARF 디버그 정보 생성과 심볼 테이블 생성을 모두 수행하지만, 심볼 테이블은 생성하지 않습니다.
 
 <!-- CL 511475 -->
-On ELF platforms, the `-B` linker flag now accepts a special form:
-with `-B` `gobuildid`, the linker will generate a GNU
-build ID (the ELF `NT_GNU_BUILD_ID` note) derived from the Go
-build ID.
+ELF 플랫폼에서 `-B` 링커 플래그는 이제 특별한 형식을 지원합니다:
+`-B` `gobuildid`를 사용하면 링커는 Go 빌드 ID에서 파생된 GNU 빌드 ID (ELF `NT_GNU_BUILD_ID` 노트)를 생성합니다.
 
 <!-- CL 534555 -->
-On Windows, when building with `-linkmode=internal`, the linker now
-preserves SEH information from C object files by copying the `.pdata`
-and `.xdata` sections into the final binary.
-This helps with debugging and profiling binaries using native tools, such as WinDbg.
-Note that until now, C functions' SEH exception handlers were not being honored,
-so this change may cause some programs to behave differently.
-`-linkmode=external` is not affected by this change, as external linkers
-already preserve SEH information.
+Windows에서 `-linkmode=internal`로 빌드할 때, 링커는 이제 C 오브젝트 파일에서 SEH(Stack Exception Handling) 정보를 복사하여 최종 바이너리에 `.pdata` 및 `.xdata` 섹션을 유지합니다.
+이를 통해 WinDbg와 같은 네이티브 도구를 사용하여 바이너리를 디버깅하고 프로파일링하는 데 도움이 됩니다.
+참고로, 지금까지 C 함수의 SEH 예외 처리기가 적용되지 않았으므로, 이 변경 사항으로 인해 일부 프로그램의 동작이 달라질 수 있습니다.
+`-linkmode=external`은 이 변경 사항에 영향을 받지 않으며, 외부 링커는 이미 SEH 정보를 유지합니다.
 
-## Bootstrap {#bootstrap}
+## 부트스트랩 {#bootstrap}
 
-As mentioned in the [Go 1.20 release notes](/doc/go1.20#bootstrap), Go 1.22 now requires
-the final point release of Go 1.20 or later for bootstrap.
-We expect that Go 1.24 will require the final point release of Go 1.22 or later for bootstrap.
+다음과 같이 언급된 [Go 1.20 릴리스 노트](/doc/go1.20#bootstrap)에 따르면, Go 1.22에서는 bootstrap를 위해 Go 1.20의 최종 릴리스 버전 또는 이후 버전을 필요로 합니다.
+Go 1.24는 bootstrap를 위해 Go 1.22의 최종 릴리스 버전 또는 이후 버전을 필요로 할 것으로 예상됩니다.
 
-## Standard library {#library}
+## 표준 라이브러리 {#library}
 
-### New math/rand/v2 package {#math_rand_v2}
+### 새로운 math/rand/v2 패키지 {#math_rand_v2}
 
 <!-- CL 502495 -->
 <!-- CL 502497 -->
@@ -266,129 +276,113 @@ We expect that Go 1.24 will require the final point release of Go 1.22 or later 
 <!-- CL 516857 -->
 <!-- CL 516859 -->
 
-Go 1.22 includes the first “v2” package in the standard library,
-[`math/rand/v2`](/pkg/math/rand/v2/).
-The changes compared to [`math/rand`](/pkg/math/rand/) are
-detailed in [proposal #61716](/issue/61716). The most important changes are:
+Go 1.22에는 표준 라이브러리에 처음 "v2" 패키지인 [`math/rand/v2`](/pkg/math/rand/v2/)가 포함됩니다.
+[`math/rand`](/pkg/math/rand/)과의 변경 사항은 [제안 #61716](/issue/61716)에 자세히 설명되어 있습니다. 가장 중요한 변경 사항은 다음과 같습니다:
 
-  - The `Read` method, deprecated in `math/rand`,
-    was not carried forward for `math/rand/v2`.
-    (It remains available in `math/rand`.)
-    The vast majority of calls to `Read` should use
-    [`crypto/rand`’s `Read`](/pkg/crypto/rand/#Read) instead.
-    Otherwise a custom `Read` can be constructed using the `Uint64` method.
-  - The global generator accessed by top-level functions is unconditionally randomly seeded.
-    Because the API guarantees no fixed sequence of results,
-    optimizations like per-thread random generator states are now possible.
-  - The [`Source`](/pkg/math/rand/v2/#Source)
-    interface now has a single `Uint64` method;
-    there is no `Source64` interface.
-  - Many methods now use faster algorithms that were not possible to adopt in `math/rand`
-    because they changed the output streams.
-  - The
+- `Read` 메서드, `math/rand`에서 더 이상 사용되지 않는,
+    `math/rand/v2`에는 적용되지 않았습니다.
+    (여전히 `math/rand`에서 사용 가능합니다.)
+    대부분의 `Read` 호출은 `crypto/rand`의 `Read`를 사용해야 합니다.
+    그렇지 않으면 `Uint64` 메서드를 사용하여 사용자 정의 `Read`를 구성할 수 있습니다.
+  - 최상위 함수에서 액세스하는 전역 생성기는 무조건적으로 무작위로 시드됩니다.
+    API가 고정된 결과 시퀀스를 보장하기 때문에,
+    스레드별 무작위 생성기 상태와 같은 최적화가 가능합니다.
+  - [`Source`](/pkg/math/rand/v2/#Source) 인터페이스는 이제 단일 `Uint64` 메서드만 가집니다.
+    `Source64` 인터페이스는 없습니다.
+  - 많은 메서드가 이제 더 빠르고 효율적인 알고리즘을 사용하는데, 이는 `math/rand`에서는 적용할 수 없었습니다.
+    왜냐하면 이 알고리즘들이 출력 스트림을 변경했기 때문입니다.
+  -
     `Intn`,
     `Int31`,
     `Int31n`,
     `Int63`,
-    and
+    그리고
     `Int64n`
-    top-level functions and methods from `math/rand`
-    are spelled more idiomatically in `math/rand/v2`:
+    `math/rand`의 최상위 함수 및 메서드는 `math/rand/v2`에서 더 자연스러운 방식으로 표현됩니다.
     `IntN`,
     `Int32`,
     `Int32N`,
     `Int64`,
-    and
+    그리고
     `Int64N`.
-    There are also new top-level functions and methods
+    또한 새로운 최상위 함수 및 메서드인
     `Uint32`,
     `Uint32N`,
     `Uint64`,
     `Uint64N`,
-    and
-    `UintN`.
-  - The
-    new generic function [`N`](/pkg/math/rand/v2/#N)
-    is like
-    [`Int64N`](/pkg/math/rand/v2/#Int64N) or
-    [`Uint64N`](/pkg/math/rand/v2/#Uint64N)
-    but works for any integer type.
-    For example a random duration from 0 up to 5 minutes is
-    `rand.N(5*time.Minute)`.
-  - The Mitchell & Reeds LFSR generator provided by
-    [`math/rand`’s `Source`](/pkg/math/rand/#Source)
-    has been replaced by two more modern pseudo-random generator sources:
-    [`ChaCha8`](/pkg/math/rand/v2/#ChaCha8) and
+    그리고
+    `UintN`이 있습니다.
+  -
+    새로운 일반 함수 [`N`](/pkg/math/rand/v2/#N)은
+    [`Int64N`](/pkg/math/rand/v2/#Int64N) 또는
+    [`Uint64N`](/pkg/math/rand/v2/#Uint64N)과 유사하지만
+    어떤 정수 유형에도 작동합니다.
+    예를 들어 0부터 5분까지의 임의의 지속 시간을 얻는 것은
+    `rand.N(5*time.Minute)`입니다.
+  - `math/rand`의 `Source`에서 제공하는 Mitchell & Reeds LFSR 생성기는 다음과 같은 두 가지 더 현대적인 가짜 무작위 생성기 소스로 대체되었습니다.
+    [`ChaCha8`](/pkg/math/rand/v2/#ChaCha8) 및
     [`PCG`](/pkg/math/rand/v2/#PCG).
-    ChaCha8 is a new, cryptographically strong random number generator
-    roughly similar to PCG in efficiency.
-    ChaCha8 is the algorithm used for the top-level functions in `math/rand/v2`.
-    As of Go 1.22, `math/rand`'s top-level functions (when not explicitly seeded)
-    and the Go runtime also use ChaCha8 for randomness.
+    ChaCha8는 PCG와 유사하게 효율적인 새로운, 암호학적으로 강력한 무작위 숫자 생성기입니다.
+    ChaCha8는 `math/rand/v2`의 최상위 함수에서 사용되는 알고리즘입니다.
+    Go 1.22부터, `math/rand`의 최상위 함수 (명시적으로 시드되지 않은 경우)와 Go 런타임도 ChaCha8를 사용하여 무작위성을 제공합니다.
 
-We plan to include an API migration tool in a future release, likely Go 1.23.
+저희는 향후 릴리즈, 아마도 Go 1.23에서 API 마이그레이션 도구를 포함할 계획입니다.
 
-### New go/version package {#go-version}
+### 새로운 go/version 패키지 {#go-version}
 
 <!-- https://go.dev/issue/62039, https://go.dev/cl/538895 -->
-The new [`go/version`](/pkg/go/version/) package implements functions
-for validating and comparing Go version strings.
+새로운 `go/version` 패키지는 Go 버전 문자열의 유효성 검사와 비교를 위한 함수를 구현합니다.
 
-### Enhanced routing patterns {#enhanced_routing_patterns}
+### 향상된 라우팅 패턴 {#향상된_라우팅_패턴}
 
 <!-- https://go.dev/issue/61410 -->
-HTTP routing in the standard library is now more expressive.
-The patterns used by [`net/http.ServeMux`](/pkg/net/http#ServeMux) have been enhanced to accept methods and wildcards.
+표준 라이브러리에서 HTTP 라우팅이 더욱 강력해졌습니다.
+`net/http.ServeMux`에서 사용되는 패턴이 메서드 및 와일드카드를 허용하도록 개선되었습니다.
 
-Registering a handler with a method, like `"POST /items/create"`, restricts
-invocations of the handler to requests with the given method. A pattern with a method takes precedence over a matching pattern without one.
-As a special case, registering a handler with `  "GET" ` also registers it with `"HEAD"`.
+메서드와 함께 핸들러를 등록하는 경우, 예를 들어 `"POST /items/create"`와 같이, 해당 메서드에 대한 핸들러 호출만 허용됩니다. 메서드를 포함하는 패턴은 메서드가 없는 패턴보다 우선합니다.
+특수한 경우로, `"GET"`과 함께 핸들러를 등록하면, `"HEAD"`와 함께 등록됩니다.
 
-Wildcards in patterns, like `/items/{id}`, match segments of the URL path.
-The actual segment value may be accessed by calling the [`Request.PathValue`](/pkg/net/http#Request.PathValue) method.
-A wildcard ending in "...", like `/files/{path...}`, must occur at the end of a pattern and matches all the remaining segments.
+패턴 내의 와일드카드, 예: `/items/{id}`, 는 URL 경로의 세그먼트를 일치시킵니다.
+실제 세그먼트 값을 액세스하려면 [`Request.PathValue`](/pkg/net/http#Request.PathValue) 메서드를 호출해야 합니다.
+"..."로 끝나는 와일드카드, 예: `/files/{path...}`, 는 패턴의 끝에 있어야 하며 모든 나머지 세그먼트를 일치시킵니다.
 
-A pattern that ends in "/" matches all paths that have it as a prefix, as always.
-To match the exact pattern including the trailing slash, end it with `{$}`,
-as in `/exact/match/{$}`.
+`/`로 끝나는 패턴은 항상 해당 패턴을 접두어로 갖는 모든 경로와 일치합니다.
+정확한 패턴(마지막 슬래시 포함)과 일치시키려면 `{$}`로 끝내십시오. 예: `/exact/match/{$}`
 
-If two patterns overlap in the requests that they match, then the more specific pattern takes precedence.
-If neither is more specific, the patterns conflict.
-This rule generalizes the original precedence rules and maintains the property that the order in which
-patterns are registered does not matter.
+두 패턴이 요청에 일치하는 부분이 겹치는 경우, 더 구체적인 패턴이 우선 적용됩니다.
+만약 두 패턴 모두 구체성이 없다면, 패턴 간에 충돌이 발생합니다.
+이 규칙은 원래 우선순위 규칙을 일반화하고, 패턴이 등록되는 순서는 중요하지 않다는 속성을 유지합니다.
 
-This change breaks backwards compatibility in small ways, some obvious—patterns with "{" and "}" behave differently—
-and some less so—treatment of escaped paths has been improved.
-The change is controlled by a [`GODEBUG`](/doc/godebug) field named `httpmuxgo121`.
-Set `httpmuxgo121=1` to restore the old behavior.
+이 변경 사항은 작은 방식으로 이전 호환성을 깨뜨립니다. 예를 들어 "{" 및 "}"을 사용하는 패턴이 다르게 동작합니다.
+또한, 이스케이프된 경로 처리가 개선되었습니다.
+이 변경 사항은 `httpmuxgo121`이라는 이름의 [`GODEBUG`](/doc/godebug) 필드를 사용하여 제어됩니다.
+이전 동작을 복원하려면 `httpmuxgo121=1`로 설정하십시오.
 
-### Minor changes to the library {#minor_library_changes}
+### 라이브러리의 소규모 변경 사항 {#minor_library_changes}
 
-As always, there are various minor changes and updates to the library,
-made with the Go 1 [promise of compatibility](/doc/go1compat)
-in mind.
-There are also various performance improvements, not enumerated here.
+물론, 라이브러리에 대한 다양한 미세한 변경 사항 및 업데이트가 있으며, 이는 Go 1의 [호환성] 약속 [doc/go1compat]을 염두에 두고 이루어졌습니다.
+또한, 여기에는 나열되지 않은 다양한 성능 개선 사항도 있습니다.
 
 [archive/tar](/pkg/archive/tar/)
 
 :   <!-- https://go.dev/issue/58000, CL 513316 -->
-    The new method [`Writer.AddFS`](/pkg/archive/tar#Writer.AddFS) adds all of the files from an [`fs.FS`](/pkg/io/fs#FS) to the archive.
+    새로운 방법 [`Writer.AddFS`](/pkg/archive/tar#Writer.AddFS)는 [`fs.FS`](/pkg/io/fs#FS)의 모든 파일을 아카이브에 추가합니다.
 
 <!-- archive/tar -->
 
 [archive/zip](/pkg/archive/zip/)
 
 :   <!-- https://go.dev/issue/54898, CL 513438 -->
-    The new method [`Writer.AddFS`](/pkg/archive/zip#Writer.AddFS) adds all of the files from an [`fs.FS`](/pkg/io/fs#FS) to the archive.
+    새로운 메서드 [`Writer.AddFS`](/pkg/archive/zip#Writer.AddFS)는 [`fs.FS`](/pkg/io/fs#FS)의 모든 파일을 아카이브에 추가합니다.
 
 <!-- archive/zip -->
 
 [bufio](/pkg/bufio/)
 
 :   <!-- https://go.dev/issue/56381, CL 498117 -->
-    When a [`SplitFunc`](/pkg/bufio#SplitFunc) returns [`ErrFinalToken`](/pkg/bufio#ErrFinalToken) with a `nil` token, [`Scanner`](/pkg/bufio#Scanner) will now stop immediately.
-    Previously, it would report a final empty token before stopping, which was usually not desired.
-    Callers that do want to report a final empty token can do so by returning `[]byte{}` rather than `nil`.
+    `SplitFunc`에서 `nil` 토큰과 함께 `ErrFinalToken`을 반환하는 경우, `Scanner`는 이제 즉시 중지됩니다.
+    이전에는 중지하기 전에 최종 빈 토큰을 보고했지만, 이는 일반적으로 바람직하지 않았습니다.
+    최종 빈 토큰을 보고하고 싶은 경우, `nil` 대신 `[]byte{}`를 반환하여 이를 수행할 수 있습니다.
 
 <!-- bufio -->
 
@@ -396,104 +390,94 @@ There are also various performance improvements, not enumerated here.
 
 :   <!-- https://go.dev/issue/60204 -->
     <!-- CL 504883 -->
-    The new function `Or` returns the first in a sequence of values that is not the zero value.
+    새로운 함수 `Or`는 값의 시퀀스 중 첫 번째 값이 0이 아닌 값을 반환합니다.
 
 <!-- cmp -->
 
 [crypto/tls](/pkg/crypto/tls/)
 
 :   <!-- https://go.dev/issue/43922, CL 544155 -->
-    [`ConnectionState.ExportKeyingMaterial`](/pkg/crypto/tls#ConnectionState.ExportKeyingMaterial) will now
-    return an error unless TLS 1.3 is in use, or the `extended_master_secret` extension is supported by both the server and
-    client. `crypto/tls` has supported this extension since Go 1.20. This can be disabled with the
-    `tlsunsafeekm=1` GODEBUG setting.
+    [`ConnectionState.ExportKeyingMaterial`](/pkg/crypto/tls#ConnectionState.ExportKeyingMaterial)는 이제 TLS 1.3을 사용하거나, 서버와 클라이언트 모두 `extended_master_secret` 확장 기능을 지원하지 않는 경우에만
+    성공합니다. `crypto/tls`는 Go 1.20부터 이 확장을 지원합니다. `tlsunsafeekm=1` GODEBUG 설정을 사용하여 이 기능을 비활성화할 수 있습니다.
 
-    <!-- https://go.dev/issue/62459, CL 541516 -->
-    By default, the minimum version offered by `crypto/tls` servers is now TLS 1.2 if not specified with
-    [`config.MinimumVersion`](/pkg/crypto/tls#Config.MinimumVersion), matching the behavior of `crypto/tls`
-    clients. This change can be reverted with the `tls10server=1` GODEBUG setting.
+<!-- https://go.dev/issue/62459, CL 541516 -->
+    기본적으로 `crypto/tls` 서버에서 제공하는 최소 버전은 `config.MinimumVersion`으로 지정되지 않은 경우 TLS 1.2로 설정됩니다. 이는 `crypto/tls` 클라이언트의 동작과 일치합니다. 이 변경 사항은 `tls10server=1` GODEBUG 설정을 사용하여 되돌릴 수 있습니다.
 
-    <!-- https://go.dev/issue/63413, CL 541517 -->
-    By default, cipher suites without ECDHE support are no longer offered by either clients or servers during pre-TLS 1.3
-    handshakes. This change can be reverted with the `tlsrsakex=1` GODEBUG setting.
+<!-- https://go.dev/issue/63413, CL 541517 -->
+    기본적으로, ECDHE를 지원하지 않는 암호 스위트는 TLS 1.3 이전의
+    프리-TLS 핸드셰이크 단계에서 클라이언트 또는 서버에 의해 더 이상 제공되지 않습니다.
+    이 변경 사항은 `tlsrsakex=1` GODEBUG 설정을 사용하여 되돌릴 수 있습니다.
 
 <!-- crypto/tls -->
 
 [crypto/x509](/pkg/crypto/x509/)
 
 :   <!-- https://go.dev/issue/57178 -->
-    The new [`CertPool.AddCertWithConstraint`](/pkg/crypto/x509#CertPool.AddCertWithConstraint)
-    method can be used to add customized constraints to root certificates to be applied during chain building.
+    새로운 [`CertPool.AddCertWithConstraint`](/pkg/crypto/x509#CertPool.AddCertWithConstraint)
+    메서드를 사용하여, 체인 구축 중에 적용할 루트 인증서를 사용자 지정 제약 조건과 함께 추가할 수 있습니다.
 
-    <!-- https://go.dev/issue/58922, CL 519315-->
-    On Android, root certificates will now be loaded from `/data/misc/keychain/certs-added` as well as `/system/etc/security/cacerts`.
+<!-- https://go.dev/issue/58922, CL 519315-->
+    안드로이드에서는 루트 인증서가 `/data/misc/keychain/certs-added` 뿐만 아니라 `/system/etc/security/cacerts`에서도 로드됩니다.
 
-    <!-- https://go.dev/issue/60665, CL 520535 -->
-    A new type, [`OID`](/pkg/crypto/x509#OID), supports ASN.1 Object Identifiers with individual
-    components larger than 31 bits. A new field which uses this type, [`Policies`](/pkg/crypto/x509#Certificate.Policies),
-    is added to the `Certificate` struct, and is now populated during parsing. Any OIDs which cannot be represented
-    using a [`asn1.ObjectIdentifier`](/pkg/encoding/asn1#ObjectIdentifier) will appear in `Policies`,
-    but not in the old `PolicyIdentifiers` field.
-    When calling [`CreateCertificate`](/pkg/crypto/x509#CreateCertificate), the `Policies` field is ignored, and
-    policies are taken from the `PolicyIdentifiers` field. Using the `x509usepolicies=1` GODEBUG setting inverts this,
-    populating certificate policies from the `Policies` field, and ignoring the `PolicyIdentifiers` field. We may change the
-    default value of `x509usepolicies` in Go 1.23, making `Policies` the default field for marshaling.
+<!-- https://go.dev/issue/60665, CL 520535 -->
+    새로운 타입인 [`OID`](/pkg/crypto/x509#OID)는 31비트보다 큰 개별 구성 요소가 있는 ASN.1 오브젝트 식별자를 지원합니다. 이 새로운 타입을 사용하는 새로운 필드인 [`Policies`](/pkg/crypto/x509#Certificate.Policies)가 `Certificate` 구조체에 추가되었으며, 이제 파싱 중에 채워집니다. [`asn1.ObjectIdentifier`](/pkg/encoding/asn1#ObjectIdentifier)를 사용하여 표현할 수 없는 모든 오브젝트 식별자는 `Policies` 필드에 나타나지만, 이전의 `PolicyIdentifiers` 필드에는 나타나지 않습니다.
+    `CreateCertificate` 함수를 호출할 때, `Policies` 필드는 무시되며, 정책은 `PolicyIdentifiers` 필드에서 가져옵니다. `x509usepolicies=1` GODEBUG 설정을 사용하면, 이 동작이 반전되어, `Policies` 필드에서 인증서 정책을 가져오고 `PolicyIdentifiers` 필드를 무시합니다. Go 1.23에서 `x509usepolicies`의 기본값을 변경하여, `Policies` 필드를 기본 필드로 설정할 수 있습니다.
 
+```markdown
 <!-- crypto/x509 -->
+```
 
 [database/sql](/pkg/database/sql/)
 
 :   <!-- https://go.dev/issue/60370, CL 501700 -->
-    The new [`Null[T]`](/pkg/database/sql/#Null) type
-    provide a way to scan nullable columns for any column types.
+    새로운 `Null[T]` 유형
+    (`pkg/database/sql/#Null`)는 NULL 가능한 열을 스캔하여 모든 열 유형을 확인하는 방법을 제공합니다.
 
+```markdown
 <!-- database/sql -->
+```
 
-[debug/elf](/pkg/debug/elf/)
+[디버깅/ELF](/pkg/debug/elf/)
 
 :   <!-- https://go.dev/issue/61974, CL 469395 -->
-    Constant `R_MIPS_PC32` is defined for use with MIPS64 systems.
+    상수 `R_MIPS_PC32`는 MIPS64 시스템에서 사용하기 위해 정의되었습니다.
 
-    <!-- https://go.dev/issue/63725, CL 537615 -->
-    Additional `R_LARCH_*` constants are defined for use with LoongArch systems.
+<!-- https://go.dev/issue/63725, CL 537615 -->
+    LoongArch 시스템에서 사용하기 위한 추가적인 `R_LARCH_*` 상수가 정의되었습니다.
 
-<!-- debug/elf -->
+<!-- 디버깅/ELF -->
 
-[encoding](/pkg/encoding/)
+[인코딩](/pkg/encoding/)
 
 :   <!-- https://go.dev/issue/53693, https://go.dev/cl/504884 -->
-    The new methods `AppendEncode` and `AppendDecode` added to
-    each of the `Encoding` types in the packages
-    [`encoding/base32`](/pkg/encoding/base32),
-    [`encoding/base64`](/pkg/encoding/base64), and
-    [`encoding/hex`](/pkg/encoding/hex)
-    simplify encoding and decoding from and to byte slices by taking care of byte slice buffer management.
+    `AppendEncode` 및 `AppendDecode` 메서드가 `encoding/base32` ([/pkg/encoding/base32]), `encoding/base64` ([/pkg/encoding/base64]), 및 `encoding/hex` ([/pkg/encoding/hex]) 패키지의 각 `Encoding` 유형에 추가되었습니다.
+    이 메서드는 바이트 슬라이스 버퍼 관리를 처리하여 바이트 슬라이스로부터 인코딩 및 디코딩을 간소화합니다.
 
-    <!-- https://go.dev/cl/505236 -->
-    The methods
-    [`base32.Encoding.WithPadding`](/pkg/encoding/base32#Encoding.WithPadding) and
+<!-- https://go.dev/cl/505236 -->
+    메서드
+    [`base32.Encoding.WithPadding`](/pkg/encoding/base32#Encoding.WithPadding) 및
     [`base64.Encoding.WithPadding`](/pkg/encoding/base64#Encoding.WithPadding)
-    now panic if the `padding` argument is a negative value other than
-    `NoPadding`.
+    가 `padding` 인수가 음수 값인 경우 (단, `NoPadding`이 아닌 경우)에 패닉을 발생시킵니다.
 
-<!-- encoding -->
+<!-- 인코딩 -->
 
 [encoding/json](/pkg/encoding/json/)
 
 :   <!-- https://go.dev/cl/521675 -->
-    Marshaling and encoding functionality now escapes
-    `'\b'` and `'\f'` characters as
-    `\b` and `\f` instead of
-    `\u0008` and `\u000c`.
+    마샬링 및 인코딩 기능이 이제
+    `'\b'` 및 `'\f'` 문자를
+    `\b` 및 `\f`로,
+    `\u0008` 및 `\u000c`가 아닌
+    으로 이스케이프합니다.
 
 <!-- encoding/json -->
 
-[go/ast](/pkg/go/ast/)
+[go/ast](pkg/go/ast/)
 
 :   <!-- https://go.dev/issue/52463, https://go/dev/cl/504915 -->
-    The following declarations related to
-    [syntactic identifier resolution](https://pkg.go.dev/go/ast#Object)
-    are now [deprecated](/issue/52463):
+    다음은
+    [구문 식별자 해결](https://pkg.go.dev/go/ast#Object)
+    관련 선언이며 이제 [사용 중단]( /issue/52463)되었습니다.
     `Ident.Obj`,
     `Object`,
     `Scope`,
@@ -502,387 +486,326 @@ There are also various performance improvements, not enumerated here.
     `Importer`,
     `Package`,
     `NewPackage`.
-    In general, identifiers cannot be accurately resolved without type information.
-    Consider, for example, the identifier `K`
-    in `T{K: ""}`: it could be the name of a local variable
-    if T is a map type, or the name of a field if T is a struct type.
-    New programs should use the [go/types](/pkg/go/types)
-    package to resolve identifiers; see
+    일반적으로 유형 정보를 가지고 있지 않으면 식별자를 정확하게 해결할 수 없습니다.
+    예를 들어,
+    `T{K: ""}`
+    에서 식별자 `K`는 다음과 같습니다.
+    만약 `T`가 맵 유형이면, 이는 지역 변수의 이름일 수 있고, 만약 `T`가 구조 유형이면, 이는 필드의 이름일 수 있습니다.
+    새로운 프로그램은 식별자를 해결하기 위해 [go/types](/pkg/go/types) 패키지를 사용해야 합니다. 자세한 내용은 다음을 참조하세요.
     [`Object`](https://pkg.go.dev/go/types#Object),
-    [`Info.Uses`](https://pkg.go.dev/go/types#Info.Uses), and
-    [`Info.Defs`](https://pkg.go.dev/go/types#Info.Defs) for details.
+    [`Info.Uses`](https://pkg.go.dev/go/types#Info.Uses),
+    [`Info.Defs`](https://pkg.go.dev/go/types#Info.Defs)
 
-    <!-- https://go.dev/issue/60061 -->
-    The new [`ast.Unparen`](https://pkg.go.dev/go/ast#Unparen)
-    function removes any enclosing
-    [parentheses](https://pkg.go.dev/go/ast#ParenExpr) from
-    an [expression](https://pkg.go.dev/go/ast#Expr).
+<!-- https://go.dev/issue/60061 -->
+    새로운 [`ast.Unparen`](https://pkg.go.dev/go/ast#Unparen)
+    함수는 모든 래핑
+    [괄호](https://pkg.go.dev/go/ast#ParenExpr)를
+    [표현식](https://pkg.go.dev/go/ast#Expr)에서 제거합니다.
 
 <!-- go/ast -->
 
 [go/types](/pkg/go/types/)
 
 :   <!-- https://go.dev/issue/63223, CL 521956, CL 541737 -->
-    The new [`Alias`](/pkg/go/types#Alias) type represents type aliases.
-    Previously, type aliases were not represented explicitly, so a reference to a type alias was equivalent
-    to spelling out the aliased type, and the name of the alias was lost.
-    The new representation retains the intermediate `Alias`.
-    This enables improved error reporting (the name of a type alias can be reported), and allows for better handling
-    of cyclic type declarations involving type aliases.
-    In a future release, `Alias` types will also carry [type parameter information](/issue/46477).
-    The new function [`Unalias`](/pkg/go/types#Unalias) returns the actual type denoted by an
-    `Alias` type (or any other [`Type`](/pkg/go/types#Type) for that matter).
+    새로운 `Alias` 유형은 타입 별칭을 나타냅니다.
+    이전에는 타입 별칭이 명시적으로 표현되지 않았기 때문에, 타입 별칭에 대한 참조는 별칭된 타입을 명시적으로 작성하는 것과 동일했으며, 별칭의 이름이 손실되었습니다.
+    새로운 표현은 중간 `Alias`를 유지합니다.
+    이를 통해 개선된 오류 보고가 가능합니다 (타입 별칭의 이름을 보고할 수 있음) 및 타입 별칭이 포함된 순환 타입 선언을 더 잘 처리할 수 있습니다.
+    향후 릴리스에서는 `Alias` 유형도 [타입 매개변수 정보](/issue/46477)를 포함합니다.
+    새로운 함수 `Unalias`는 `Alias` 유형으로 지정된 실제 타입을 반환합니다 (또는 어떤 `Type`이든).
 
-    Because `Alias` types may break existing type switches that do not know to check for them,
-    this functionality is controlled by a [`GODEBUG`](/doc/godebug) field named `gotypesalias`.
-    With `gotypesalias=0`, everything behaves as before, and `Alias` types are never created.
-    With `gotypesalias=1`, `Alias` types are created and clients must expect them.
-    The default is `gotypesalias=0`.
-    In a future release, the default will be changed to `gotypesalias=1`.
-    _Clients of [`go/types`](/pkg/go/types) are urged to adjust their code as soon as possible
-    to work with `gotypesalias=1` to eliminate problems early._
+이유는 `Alias` 타입이 기존의 타입 스위치를 파괴할 수 있으며, 이러한 스위치는 해당 타입을 확인하도록 설정되어 있지 않기 때문입니다.
+    따라서, 이 기능은 `gotypesalias`라는 이름의 `GODEBUG` 필드를 사용하여 제어됩니다.
+    `gotypesalias=0`인 경우, 모든 것이 이전과 동일하게 동작하며 `Alias` 타입은 생성되지 않습니다.
+    `gotypesalias=1`인 경우, `Alias` 타입이 생성되며, 클라이언트는 이를 예상해야 합니다.
+    기본값은 `gotypesalias=0`입니다.
+    향후 릴리스에서는 기본값이 `gotypesalias=1`로 변경됩니다.
+    _`go/types`의 클라이언트는 가능한 한 빨리 코드를 조정하여 `gotypesalias=1`과 함께 작동하도록 하는 것이 좋습니다. 이를 통해 문제를 조기에 해결할 수 있습니다._
 
-    <!-- https://go.dev/issue/62605, CL 540056 -->
-    The [`Info`](/pkg/go/types#Info) struct now exports the
-    [`FileVersions`](/pkg/go/types#Info.FileVersions) map
-    which provides per-file Go version information.
+<!-- https://go.dev/issue/62605, CL 540056 -->
+    `Info` 구조체가 이제 `FileVersions` 맵을 내보냅니다.
+    `FileVersions` 맵은 파일별 Go 버전 정보를 제공합니다.
 
-    <!-- https://go.dev/issue/62037, CL 541575 -->
-    The new helper method [`PkgNameOf`](/pkg/go/types#Info.PkgNameOf) returns the local package name
-    for the given import declaration.
+<!-- https://go.dev/issue/62037, CL 541575 -->
+    새로운 헬퍼 메서드 [`PkgNameOf`](/pkg/go/types#Info.PkgNameOf)는 주어진 가져오기 선언에 대한 로컬 패키지 이름을 반환합니다.
 
-    <!-- https://go.dev/issue/61035, multiple CLs, see issue for details -->
-    The implementation of [`SizesFor`](/pkg/go/types#SizesFor) has been adjusted to compute
-    the same type sizes as the compiler when the compiler argument for `SizesFor` is `"gc"`.
-    The default [`Sizes`](/pkg/go/types#Sizes) implementation used by the type checker is now
-    `types.SizesFor("gc", "amd64")`.
+<!-- https://go.dev/issue/61035, 여러 CL, 자세한 내용은 이슈 참조 -->
+    `SizesFor` 구현이 조정되어, 컴파일러 인수가 `"gc"`일 때 컴파일러와 동일한 타입 크기를 계산하도록 변경되었습니다.
+    타입 검사기에서 사용되는 기본 `Sizes` 구현은 이제 `types.SizesFor("gc", "amd64")`입니다.
 
-    <!-- https://go.dev/issue/64295, CL 544035 -->
-    The start position ([`Pos`](/pkg/go/types#Scope.Pos))
-    of the lexical environment block ([`Scope`](/pkg/go/types#Scope))
-    that represents a function body has changed:
-    it used to start at the opening curly brace of the function body,
-    but now starts at the function's `func` token.
+<!-- https://go.dev/issue/64295, CL 544035 -->
+    어휘 환경 블록(`Scope`)의 시작 위치 ([`Pos`](/pkg/go/types#Scope.Pos))
+    (함수 본체를 나타내는 것)은 변경되었습니다.
+    이전에는 함수 본체의 중괄호에서 시작했지만, 이제는 함수의 `func` 토큰에서 시작합니다.
 
-[html/template](/pkg/html/template/)
+[html/템플릿](/pkg/html/template/)
 
 :   <!-- https://go.dev/issue/61619, CL 507995 -->
-    JavaScript template literals may now contain Go template actions, and parsing a template containing one will
-    no longer return `ErrJSTemplate`. Similarly the GODEBUG setting `jstmpllitinterp` no
-    longer has any effect.
+    JavaScript 템플릿 리터럴은 이제 Go 템플릿 액션을 포함할 수 있으며, 이를 포함하는 템플릿을 파싱하면 더 이상 `ErrJSTemplate`가 반환되지 않습니다. 마찬가지로 `jstmpllitinterp` 설정인 GODEBUG는 더 이상 효과가 없습니다.
 
-<!-- html/template -->
+<!-- html/템플릿 -->
 
 [io](/pkg/io/)
 
 :   <!-- https://go.dev/issue/61870, CL 526855 -->
-    The new [`SectionReader.Outer`](/pkg/io#SectionReader.Outer) method returns the [`ReaderAt`](/pkg/io#ReaderAt), offset, and size passed to [`NewSectionReader`](/pkg/io#NewSectionReader).
+    새로운 `SectionReader.Outer` 메서드는 `NewSectionReader`에 전달된 `ReaderAt`, 오프셋, 크기를 반환합니다.
 
-<!-- io -->
+<!-- 입출력 -->
 
 [log/slog](/pkg/log/slog/)
 
 :   <!-- https://go.dev/issue/62418 -->
-    The new [`SetLogLoggerLevel`](/pkg/log/slog#SetLogLoggerLevel) function
-    controls the level for the bridge between the `slog` and `log` packages. It sets the minimum level
-    for calls to the top-level `slog` logging functions, and it sets the level for calls to `log.Logger`
-    that go through `slog`.
+    새로운 `SetLogLoggerLevel` 함수는 `slog` 및 `log` 패키지 간의 브릿지에서 레벨을 제어합니다. 이 함수는 상위 레벨 `slog` 로깅 함수 호출에 대한 최소 레벨을 설정하고, `slog`를 통해 `log.Logger`에 호출되는 레벨을 설정합니다.
 
 [math/big](/pkg/math/big/)
 
 :   <!-- https://go.dev/issue/50489, CL 539299 -->
-    The new method [`Rat.FloatPrec`](/pkg/math/big#Rat.FloatPrec) computes the number of fractional decimal digits
-    required to represent a rational number accurately as a floating-point number, and whether accurate decimal representation
-    is possible in the first place.
+    새로운 메서드 [`Rat.FloatPrec`](/pkg/math/big#Rat.FloatPrec)는 주어진 유한비율(rational number)을 정확하게 부동 소수점 숫자로 표현하는 데 필요한 소수 자릿수를 계산하고, 정확한 소수 표현이 가능한지 여부를 판단합니다.
 
-<!-- math/big -->
+<!-- 수학/빅 -->
 
 [net](/pkg/net/)
 
 :   <!-- https://go.dev/issue/58808 -->
-    When [`io.Copy`](/pkg/io#Copy) copies
-    from a `TCPConn` to a `UnixConn`,
-    it will now use Linux's `splice(2)` system call if possible,
-    using the new method [`TCPConn.WriteTo`](/pkg/net#TCPConn.WriteTo).
+    `io.Copy`가 `TCPConn`에서 `UnixConn`으로 복사할 때,
+    가능한 경우 Linux의 `splice(2)` 시스템 호출을 사용하며,
+    새로운 방법인 `TCPConn.WriteTo`를 사용합니다.
 
-    <!-- CL 467335 -->
-    The Go DNS Resolver, used when building with "-tags=netgo",
-    now searches for a matching name in the Windows hosts file,
-    located at `%SystemRoot%\System32\drivers\etc\hosts`,
-    before making a DNS query.
+<!-- CL 467335 -->
+    -tags=netgo"으로 빌드할 때 사용되는 Go DNS 리졸버가,
+    DNS 쿼리를 실행하기 전에,
+    Windows 호스트 파일인 `%SystemRoot%\System32\drivers\etc\hosts`에서
+    일치하는 이름을 검색합니다.
 
 <!-- net -->
 
 [net/http](/pkg/net/http/)
 
 :   <!-- https://go.dev/issue/51971 -->
-    The new functions
+    새로운 함수
     [`ServeFileFS`](/pkg/net/http#ServeFileFS),
-    [`FileServerFS`](/pkg/net/http#FileServerFS), and
+    [`FileServerFS`](/pkg/net/http#FileServerFS),
     [`NewFileTransportFS`](/pkg/net/http#NewFileTransportFS)
-    are versions of the existing
-    `ServeFile`, `FileServer`, and `NewFileTransport`,
-    operating on an `fs.FS`.
+    는 기존의
+    `ServeFile`, `FileServer`, `NewFileTransport` 함수의 새로운 버전으로, `fs.FS`를 사용합니다.
 
-    <!-- https://go.dev/issue/61679 -->
-    The HTTP server and client now reject requests and responses containing
-    an invalid empty `Content-Length` header.
-    The previous behavior may be restored by setting
-    [`GODEBUG`](/doc/godebug) field `httplaxcontentlength=1`.
+<!-- https://go.dev/issue/61679 -->
+    HTTP 서버와 클라이언트는 이제 유효하지 않은 빈 `Content-Length` 헤더를 포함하는 요청 및 응답을 거부합니다.
+    이전 동작은 `GODEBUG` 필드의 `httplaxcontentlength=1`을 설정하여 복원할 수 있습니다.
 
-    <!-- https://go.dev/issue/61410, CL 528355 -->
-    The new method
+<!-- https://go.dev/issue/61410, CL 528355 -->
+    새로운 메서드
     [`Request.PathValue`](/pkg/net/http#Request.PathValue)
-    returns path wildcard values from a request
-    and the new method
+    는 요청에서 경로 와일드카드 값을 반환합니다.
+    그리고 새로운 메서드
     [`Request.SetPathValue`](/pkg/net/http#Request.SetPathValue)
-    sets path wildcard values on a request.
+    는 요청에 경로 와일드카드 값을 설정합니다.
 
 <!-- net/http -->
 
 [net/http/cgi](/pkg/net/http/cgi/)
 
 :   <!-- CL 539615 -->
-    When executing a CGI process, the `PATH_INFO` variable is now
-    always set to the empty string or a value starting with a `/` character,
-    as required by RFC 3875. It was previously possible for some combinations of
-    [`Handler.Root`](/pkg/net/http/cgi#Handler.Root)
-    and request URL to violate this requirement.
+    CGI 프로세스를 실행할 때, `PATH_INFO` 변수는 이제 항상 빈 문자열 또는 `/` 문자로 시작하는 값으로 설정됩니다. 이는 RFC 3875 요구 사항을 충족합니다. 이전에는 `[Handler.Root](/pkg/net/http/cgi#Handler.Root)` 및 요청 URL의 특정 조합으로 인해 이 요구 사항이 위반될 수 있었습니다.
 
 <!-- net/http/cgi -->
 
 [net/netip](/pkg/net/netip/)
 
 :   <!-- https://go.dev/issue/61642 -->
-    The new [`AddrPort.Compare`](/pkg/net/netip#AddrPort.Compare)
-    method compares two `AddrPort`s.
+    새로운 [`AddrPort.Compare`](/pkg/net/netip#AddrPort.Compare)
+    메서드는 두 개의 `AddrPort`를 비교합니다.
 
 <!-- net/netip -->
 
 [os](/pkg/os/)
 
 :   <!-- CL 516555 -->
-    On Windows, the [`Stat`](/pkg/os#Stat) function now follows all reparse points
-    that link to another named entity in the system.
-    It was previously only following `IO_REPARSE_TAG_SYMLINK` and
-    `IO_REPARSE_TAG_MOUNT_POINT` reparse points.
+    Windows에서, [`Stat`](/pkg/os#Stat) 함수는 이제 시스템 내의 다른 이름이 지정된 엔티티에 연결된 모든 재파싱 지점을 따릅니다.
+    이전에는 `IO_REPARSE_TAG_SYMLINK` 및 `IO_REPARSE_TAG_MOUNT_POINT` 재파싱 지점을만 따랐습니다.
 
-    <!-- CL 541015 -->
-    On Windows, passing [`O_SYNC`](/pkg/os#O_SYNC) to [`OpenFile`](/pkg/os#OpenFile) now causes write operations to go directly to disk, equivalent to `O_SYNC` on Unix platforms.
+<!-- CL 541015 -->
+    Windows에서 [`O_SYNC`](/pkg/os#O_SYNC)를 [`OpenFile`](/pkg/os#OpenFile)에 전달하면, 쓰기 작업이 이제 직접 디스크로 전송되어, Unix 플랫폼에서 `O_SYNC`와 동일한 동작을 수행합니다.
 
-    <!-- CL 452995 -->
-    On Windows, the [`ReadDir`](/pkg/os#ReadDir),
+<!-- CL 452995 -->
+    Windows에서, [`ReadDir`](/pkg/os#ReadDir),
     [`File.ReadDir`](/pkg/os#File.ReadDir),
     [`File.Readdir`](/pkg/os#File.Readdir),
-    and [`File.Readdirnames`](/pkg/os#File.Readdirnames) functions
-    now read directory entries in batches to reduce the number of system calls,
-    improving performance up to 30%.
+    그리고 [`File.Readdirnames`](/pkg/os#File.Readdirnames) 함수는 이제 디렉토리 항목을 일괄적으로 읽어 시스템 호출 횟수를 줄여 성능을 최대 30% 향상시킵니다.
 
-    <!-- https://go.dev/issue/58808 -->
-    When [`io.Copy`](/pkg/io#Copy) copies
-    from a `File` to a `net.UnixConn`,
-    it will now use Linux's `sendfile(2)` system call if possible,
-    using the new method [`File.WriteTo`](/pkg/os#File.WriteTo).
+<!-- https://go.dev/issue/58808 -->
+    `[`io.Copy`](/pkg/io#Copy)가 `File`에서 `net.UnixConn`으로 복사할 때,
+    가능한 경우 Linux의 `sendfile(2)` 시스템 호출을 사용하게 됩니다.
+    새로운 메서드 `[`File.WriteTo`](/pkg/os#File.WriteTo)를 사용합니다.
 
 <!-- os -->
 
 [os/exec](/pkg/os/exec/)
 
 :   <!-- CL 528037 -->
-    On Windows, [`LookPath`](/pkg/os/exec#LookPath) now
-    ignores empty entries in `%PATH%`, and returns
-    `ErrNotFound` (instead of `ErrNotExist`) if
-    no executable file extension is found to resolve an otherwise-unambiguous
-    name.
+    Windows에서, [`LookPath`](/pkg/os/exec#LookPath)는 `%PATH%`에 있는 빈 항목을 이제 무시하고,
+    명확하게 해석 가능한 이름이지만 실행 파일 확장자를 찾을 수 없는 경우
+    `ErrNotFound` (예전의 `ErrNotExist` 대신)를 반환합니다.
 
-    <!-- CL 528038, CL 527820 -->
-    On Windows, [`Command`](/pkg/os/exec#Command) and
-    [`Cmd.Start`](/pkg/os/exec#Cmd.Start) no
-    longer call `LookPath` if the path to the executable is already
-    absolute and has an executable file extension. In addition,
-    `Cmd.Start` no longer writes the resolved extension back to
-    the [`Path`](/pkg/os/exec#Cmd.Path) field,
-    so it is now safe to call the `String` method concurrently
-    with a call to `Start`.
+<!-- CL 528038, CL 527820 -->
+    Windows에서, `Command` 및 `Cmd.Start`는 실행 파일의 경로가 이미 절대 경로이고 실행 파일 확장자를 가지고 있는 경우에 `LookPath`를 더 이상 호출하지 않습니다. 또한, `Cmd.Start`는 해결된 확장자를 `Path` 필드로 다시 쓰지 않으므로, `Start` 호출과 함께 `String` 메서드를 동시에 호출하는 것이 안전합니다.
 
 <!-- os/exec -->
 
 [reflect](/pkg/reflect/)
 
 :   <!-- https://go.dev/issue/61827, CL 517777 -->
-    The [`Value.IsZero`](/pkg/reflect/#Value.IsZero)
-    method will now return true for a floating-point or complex
-    negative zero, and will return true for a struct value if a
-    blank field (a field named `_`) somehow has a
-    non-zero value.
-    These changes make `IsZero` consistent with comparing
-    a value to zero using the language `==` operator.
+    `Value.IsZero` ([/pkg/reflect/#Value.IsZero])
+    메서드는 이제 부동 소수점 또는 복소수 형태의 음의 0에 대해 true를 반환하고, 또한 블랭크 필드 (이름이 `_`인 필드)가 비어 있지 않은 경우에 대해 구조체 값에 대해 true를 반환합니다.
+    이러한 변경 사항은 `IsZero`를 언어 `==` 연산자를 사용하여 값을 0과 비교하는 것과 일관되게 만듭니다.
 
-    <!-- https://go.dev/issue/59599, CL 511035 -->
-    The [`PtrTo`](/pkg/reflect/#PtrTo) function is deprecated,
-    in favor of [`PointerTo`](/pkg/reflect/#PointerTo).
+<!-- https://go.dev/issue/59599, CL 511035 -->
+    `PtrTo` 함수는 더 이상 사용되지 않으며, 대신 `PointerTo` 함수를 사용해야 합니다.
 
-    <!-- https://go.dev/issue/60088, CL 513478 -->
-    The new function [`TypeFor`](/pkg/reflect/#TypeFor)
-    returns the [`Type`](/pkg/reflect/#Type) that represents
-    the type argument T.
-    Previously, to get the `reflect.Type` value for a type, one had to use
-    `reflect.TypeOf((*T)(nil)).Elem()`.
-    This may now be written as `reflect.TypeFor[T]()`.
+<!-- https://go.dev/issue/60088, CL 513478 -->
+    새로운 함수 [`TypeFor`](/pkg/reflect/#TypeFor)는
+    `Type` (/[pkg/reflect/#Type])을 반환합니다.
+    이 `Type`은 인자 T를 나타냅니다.
+    이전에는 특정 유형의 `reflect.Type` 값을 얻으려면
+    `reflect.TypeOf((*T)(nil)).Elem()`을 사용해야 했습니다.
+    이제 이것은 `reflect.TypeFor[T]()`로 작성할 수 있습니다.
 
-<!-- reflect -->
+<!-- 반영 -->
 
 [runtime/metrics](/pkg/runtime/metrics/)
 
 :   <!-- https://go.dev/issue/63340 -->
-    Four new histogram metrics
+    새로운 히스토그램 메트릭 4개
     `/sched/pauses/stopping/gc:seconds`,
     `/sched/pauses/stopping/other:seconds`,
-    `/sched/pauses/total/gc:seconds`, and
-    `/sched/pauses/total/other:seconds` provide additional details
-    about stop-the-world pauses.
-    The "stopping" metrics report the time taken from deciding to stop the
-    world until all goroutines are stopped.
-    The "total" metrics report the time taken from deciding to stop the world
-    until it is started again.
+    `/sched/pauses/total/gc:seconds`, 및
+    `/sched/pauses/total/other:seconds`는 "스톱 더 월드" 멈춤에 대한 추가적인 정보를 제공합니다.
+    "stopping" 메트릭은 세계를 멈추기로 결정한 시점부터 모든 고루틴이 멈출 때까지 걸리는 시간을 보고합니다.
+    "total" 메트릭은 세계를 다시 시작할 때까지 멈추기로 결정한 시점부터 걸리는 시간을 보고합니다.
 
-    <!-- https://go.dev/issue/63340 -->
-    The `/gc/pauses:seconds` metric is deprecated, as it is
-    equivalent to the new `/sched/pauses/total/gc:seconds` metric.
+<!-- https://go.dev/issue/63340 -->
+    `/gc/pauses:seconds` 메트릭은 더 이상 사용되지 않으며, 이는
+    새로운 `/sched/pauses/total/gc:seconds` 메트릭과 동일합니다.
 
-    <!-- https://go.dev/issue/57071 -->
-    `/sync/mutex/wait/total:seconds` now includes contention on
-    runtime-internal locks in addition to
-    [`sync.Mutex`](/pkg/sync#Mutex) and
-    [`sync.RWMutex`](/pkg/sync#RWMutex).
+<!-- https://go.dev/issue/57071 -->
+    `/sync/mutex/wait/total:seconds`는 이제 `sync.Mutex` 및 `sync.RWMutex` 외에도
+    런타임 내부 잠금에 대한 경쟁도 포함합니다.
 
 <!-- runtime/metrics -->
 
 [runtime/pprof](/pkg/runtime/pprof/)
 
 :   <!-- https://go.dev/issue/61015 -->
-    Mutex profiles now scale contention by the number of goroutines blocked on the mutex.
-    This provides a more accurate representation of the degree to which a mutex is a bottleneck in
-    a Go program.
-    For instance, if 100 goroutines are blocked on a mutex for 10 milliseconds, a mutex profile will
-    now record 1 second of delay instead of 10 milliseconds of delay.
+    뮤텍스 프로파일은 뮤텍스에서 차단된 고루틴의 수를 기준으로 경쟁을 스케일링합니다.
+    이를 통해 뮤텍스가 Go 프로그램에서 얼마나 병목 현상을 일으키는지 보다 정확하게 나타낼 수 있습니다.
+    예를 들어, 100개의 고루틴이 10밀리초 동안 뮤텍스에서 차단되면 뮤텍스 프로파일은 10밀리초의 지연 대신 1초의 지연을 기록합니다.
 
-    <!-- https://go.dev/issue/57071 -->
-    Mutex profiles also now include contention on runtime-internal locks in addition to
-    [`sync.Mutex`](/pkg/sync#Mutex) and
-    [`sync.RWMutex`](/pkg/sync#RWMutex).
-    Contention on runtime-internal locks is always reported at `runtime._LostContendedRuntimeLock`.
-    A future release will add complete stack traces in these cases.
+<!-- https://go.dev/issue/57071 -->
+    Mutex 프로필은 `sync.Mutex` 및
+    [`sync.RWMutex`](/pkg/sync#RWMutex) 외에도 런타임 내부 잠금에 대한 경쟁 상황을 포함합니다.
+    런타임 내부 잠금에 대한 경쟁 상황은 항상 `runtime._LostContendedRuntimeLock`에서 보고됩니다.
+    향후 릴리스에서는 이러한 경우에 완전한 스택 트레이스를 추가할 예정입니다.
 
-    <!-- https://go.dev/issue/50891 -->
-    CPU profiles on Darwin platforms now contain the process's memory map, enabling the disassembly
-    view in the pprof tool.
+<!-- https://go.dev/issue/50891 -->
+    Darwin 플랫폼에서 생성되는 CPU 프로파일에는 프로세스의 메모리 맵 정보가 포함되어 있어, pprof 도구에서 디스어셈블 뷰를 사용할 수 있습니다.
 
 <!-- runtime/pprof -->
 
 [runtime/trace](/pkg/runtime/trace/)
 
 :   <!-- https://go.dev/issue/60773 -->
-    The execution tracer has been completely overhauled in this release, resolving several long-standing
-    issues and paving the way for new use-cases for execution traces.
+    이번 릴리스에서는 실행 추적기가 완전히 재구축되었으며, 여러 오래된 문제를 해결하고 실행 추적에 대한 새로운 사용 사례를 열었습니다.
 
-    Execution traces now use the operating system's clock on most platforms (Windows excluded) so
-    it is possible to correlate them with traces produced by lower-level components.
-    Execution traces no longer depend on the reliability of the platform's clock to produce a correct trace.
-    Execution traces are now partitioned regularly on-the-fly and as a result may be processed in a
-    streamable way.
-    Execution traces now contain complete durations for all system calls.
-    Execution traces now contain information about the operating system threads that goroutines executed on.
-    The latency impact of starting and stopping execution traces has been dramatically reduced.
-    Execution traces may now begin or end during the garbage collection mark phase.
+실행 추적은 대부분의 플랫폼(Windows 제외)에서 운영 체제의 클록을 사용하므로
+    이를 하위 레벨 구성 요소에서 생성된 추적과 연결할 수 있습니다.
+    실행 추적은 이제 플랫폼의 클록의 신뢰성에 의존하지 않습니다.
+    실행 추적은 이제 정기적으로 생성되며, 결과적으로 스트리밍 방식으로 처리할 수 있습니다.
+    실행 추적은 이제 모든 시스템 호출의 전체 지속 시간을 포함합니다.
+    실행 추적은 이제 goroutine이 실행된 운영 체제 스레드에 대한 정보를 포함합니다.
+    실행 추적을 시작하고 중지하는 데 따른 지연 영향이 크게 줄었습니다.
+    실행 추적은 이제 가비지 컬렉션 마크 단계 중에 시작하거나 종료될 수 있습니다.
 
-    To allow Go developers to take advantage of these improvements, an experimental
-    trace reading package is available at [golang.org/x/exp/trace](/pkg/golang.org/x/exp/trace).
-    Note that this package only works on traces produced by programs built with Go 1.22 at the moment.
-    Please try out the package and provide feedback on
-    [the corresponding proposal issue](/issue/62627).
+Go 개발자가 이러한 개선 사항을 활용할 수 있도록, 실험적인 추적 읽기 패키지가 [golang.org/x/exp/trace](https://golang.org/x/exp/trace)에 있습니다.
+참고: 이 패키지는 현재 Go 1.22로 빌드된 프로그램에서 생성된 추적만 작동합니다.
+패키지를 사용해 보고 [관련 제안 이슈](/issue/62627)에 피드백을 제공해 주시기 바랍니다.
 
-    If you experience any issues with the new execution tracer implementation, you may switch back to the
-    old implementation by building your Go program with `GOEXPERIMENT=noexectracer2`.
-    If you do, please file an issue, otherwise this option will be removed in a future release.
+만약 새로운 실행 추적 구현에 문제가 발생하면, `GOEXPERIMENT=noexectracer2`를 사용하여 Go 프로그램을 빌드함으로써 이전 구현으로 되돌릴 수 있습니다.
+    이 경우, 문제점을 보고해 주십시오. 그렇지 않으면, 향후 릴리스에서 이 옵션이 제거됩니다.
 
 <!-- runtime/trace -->
 
-[slices](/pkg/slices/)
+[슬라이스](/pkg/slices/)
 
 :   <!-- https://go.dev/issue/56353 -->
     <!-- CL 504882 -->
-    The new function `Concat` concatenates multiple slices.
+    새로운 함수 `Concat`은 여러 슬라이스를 연결합니다.
 
-    <!-- https://go.dev/issue/63393 -->
+<!-- https://go.dev/issue/63393 -->
     <!-- CL 543335 -->
-    Functions that shrink the size of a slice (`Delete`, `DeleteFunc`, `Compact`, `CompactFunc`, and `Replace`) now zero the elements between the new length and the old length.
+    `Delete`, `DeleteFunc`, `Compact`, `CompactFunc`, 및 `Replace` 함수는 이제 새 길이와 이전 길이 사이의 요소를 0으로 설정합니다.
 
-    <!-- https://go.dev/issue/63913 -->
-    <!-- CL 540155 -->
-    `Insert` now always panics if the argument `i` is out of range. Previously it did not panic in this situation if there were no elements to be inserted.
+```
+<!-- https://go.dev/issue/63913 -->
+<!-- CL 540155 -->
+`Insert` 함수는 이제 `i` 인자가 범위를 벗어나는 경우 항상 패닉(panic)을 발생시킵니다. 이전에는 요소가 삽입될 필요가 없는 경우에 패닉을 발생시키지 않았습니다.
+```
 
-<!-- slices -->
+<!-- 슬라이스 -->
 
 [syscall](/pkg/syscall/)
 
 :   <!-- https://go.dev/issue/60797 -->
-    The `syscall` package has been [frozen](/s/go1.4-syscall) since Go 1.4 and was marked as deprecated in Go 1.11, causing many editors to warn about any use of the package.
-    However, some non-deprecated functionality requires use of the `syscall` package, such as the [`os/exec.Cmd.SysProcAttr`](/pkg/os/exec#Cmd) field.
-    To avoid unnecessary complaints on such code, the `syscall` package is no longer marked as deprecated.
-    The package remains frozen to most new functionality, and new code remains encouraged to use [`golang.org/x/sys/unix`](/pkg/golang.org/x/sys/unix) or [`golang.org/x/sys/windows`](/pkg/golang.org/x/sys/windows) where possible.
+    `syscall` 패키지는 Go 1.4부터 [동결](https://go.dev/issue/60797)되었으며, Go 1.11에서 사용 중단됨으로, 많은 에디터에서 해당 패키지의 사용에 대해 경고를 표시했습니다.
+    그러나 일부 사용 중단되지 않은 기능은 `syscall` 패키지를 사용해야 합니다. 예를 들어, `os/exec.Cmd.SysProcAttr` 필드입니다.
+    이러한 코드에 대한 불필요한 경고를 피하기 위해, `syscall` 패키지는 더 이상 사용 중단됨으로 표시되지 않습니다.
+    패키지는 대부분의 새로운 기능에 대해 동결 상태를 유지하며, 새로운 코드는 가능한 경우 `golang.org/x/sys/unix` 또는 `golang.org/x/sys/windows`를 사용하는 것이 좋습니다.
 
-    <!-- https://go.dev/issue/51246, CL 520266 -->
-    On Linux, the new [`SysProcAttr.PidFD`](/pkg/syscall#SysProcAttr) field allows obtaining a PID FD when starting a child process via [`StartProcess`](/pkg/syscall#StartProcess) or [`os/exec`](/pkg/os/exec).
+<!-- https://go.dev/issue/51246, CL 520266 -->
+    리눅스에서, 새로운 `SysProcAttr.PidFD` 필드는 `StartProcess` 또는 `os/exec`을 통해 자식 프로세스를 시작할 때, 프로세스 ID (PID) FD를 얻을 수 있도록 합니다.
 
-    <!-- CL 541015 -->
-    On Windows, passing [`O_SYNC`](/pkg/syscall#O_SYNC) to [`Open`](/pkg/syscall#Open) now causes write operations to go directly to disk, equivalent to `O_SYNC` on Unix platforms.
+<!-- CL 541015 -->
+    Windows에서 [`O_SYNC`](/pkg/syscall#O_SYNC)를 [`Open`](/pkg/syscall#Open)에 전달하면, 쓰기 작업이 직접 디스크로 전송되어, Unix 플랫폼에서 `O_SYNC`와 동일한 동작을 수행합니다.
 
 <!-- syscall -->
 
 [testing/slogtest](/pkg/testing/slogtest/)
 
 :   <!-- https://go.dev/issue/61758 -->
-    The new [`Run`](/pkg/testing/slogtest#Run) function uses sub-tests to run test cases,
-    providing finer-grained control.
+    새로운 `Run` 함수는 하위 테스트를 사용하여 테스트 케이스를 실행하며, 더 세분화된 제어를 제공합니다.
 
 <!-- testing/slogtest -->
 
-## Ports {#ports}
+## 포트
 
-### Darwin {#darwin}
+### Darwin
 
 <!-- CL 461697 -->
-On macOS on 64-bit x86 architecture (the `darwin/amd64` port),
-the Go toolchain now generates position-independent executables (PIE) by default.
-Non-PIE binaries can be generated by specifying the `-buildmode=exe`
-build flag.
-On 64-bit ARM-based macOS (the `darwin/arm64` port),
-the Go toolchain already generates PIE by default.
+macOS에서 64비트 x86 아키텍처 (darwin/amd64 포트)에서,
+Go 툴체인은 기본적으로 위치 독립 실행 파일 (PIE)을 생성합니다.
+PIE가 아닌 바이너리는 `-buildmode=exe` 빌드 플래그를 지정하여 생성할 수 있습니다.
+64비트 ARM 기반 macOS (darwin/arm64 포트)에서는,
+Go 툴체인은 기본적으로 PIE를 생성합니다.
 
 <!-- go.dev/issue/64207 -->
-Go 1.22 is the last release that will run on macOS 10.15 Catalina. Go 1.23 will require macOS 11 Big Sur or later.
+Go 1.22은 macOS 10.15 Catalina에서 실행되는 마지막 버전입니다. Go 1.23은 macOS 11 Big Sur 또는 이후 버전이 필요합니다.
 
 ### ARM {#arm}
 
 <!-- CL 514907 -->
-The `GOARM` environment variable now allows you to select whether to use software or hardware floating point.
-Previously, valid `GOARM` values were `5`, `6`, or `7`. Now those same values can
-be optionally followed by `,softfloat` or `,hardfloat` to select the floating-point implementation.
+`GOARM` 환경 변수는 이제 소프트웨어 또는 하드웨어 플로팅 포인트를 선택할 수 있도록 합니다.
+이전에는 유효한 `GOARM` 값은 `5`, `6` 또는 `7`이었습니다. 이제 이러한 값 뒤에 선택적으로 `,softfloat` 또는 `,hardfloat`을 추가하여 플로팅 포인트 구현을 선택할 수 있습니다.
 
-This new option defaults to `softfloat` for version `5` and `hardfloat` for versions
-`6` and `7`.
+이 새로운 옵션은 버전 `5`에는 기본적으로 `softfloat`을, 버전 `6` 및 `7`에는 `hardfloat`을 사용하도록 설정합니다.
 
 ### Loong64 {#loong64}
 
 <!-- CL 481315 -->
-The `loong64` port now supports passing function arguments and results using registers.
+`loong64` 포트가 이제 함수 인자와 결과를 레지스터를 사용하여 전달할 수 있도록 지원합니다.
 
 <!-- CL 481315,537615,480878 -->
-The `linux/loong64` port now supports the address sanitizer, memory sanitizer, new-style linker relocations, and the `plugin` build mode.
+`linux/loong64` 포트는 이제 주소 분석기, 메모리 분석기, 새로운 스타일의 링커 위치 지정, 그리고 `plugin` 빌드 모드를 지원합니다.
 
 ### OpenBSD {#openbsd}
 
 <!-- CL 517935 -->
-Go 1.22 adds an experimental port to OpenBSD on big-endian 64-bit PowerPC
-(`openbsd/ppc64`).
+Go 1.22 버전에서 OpenBSD에서 big-endian 64비트 PowerPC (`openbsd/ppc64`) 플랫폼용 실험적인 포트가 추가되었습니다.

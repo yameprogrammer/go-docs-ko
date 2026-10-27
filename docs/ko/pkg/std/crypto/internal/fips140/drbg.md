@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package drbg provides cryptographically secure random bytes usable by FIPS code.
+패키지 `drbg`는 FIPS 코드에서 사용할 수 있는 암호학적으로 안전한 랜덤 바이트를 제공합니다.
 
 ## 원문 요약
 

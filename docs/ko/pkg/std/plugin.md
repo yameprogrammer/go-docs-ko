@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package plugin implements loading and symbol resolution of Go plugins.
+패키지 `plugin`은 Go 플러그인의 로딩 및 심볼 해결을 구현합니다.
 
 ## 원문 요약
 

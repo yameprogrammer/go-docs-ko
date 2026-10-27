@@ -1,47 +1,53 @@
 <!--{
-  "Title": "Go Fuzzing technical details",
-  "Breadcrumb": true
+  "제목": "Go 퓨징 기술 세부 사항",
+  "브레드크럼": true
 }-->
 
-This document provides an overview of the technical details of the native fuzzing implementation, and is intended to be a resource for contributors.
+이 문서는 네이티브 퍼징 구현의 기술적인 세부 사항에 대한 개요를 제공하며, 이는 기여자들을 위한 참고 자료로 작성되었습니다.
 
-## General architecture
+## 일반적인 아키텍처
 
-The fuzzer uses a single coordinator process, which manages the corpus, and multiple worker processes, which mutate inputs and execute the fuzz target. The coordinator and worker processes communicate using a piped JSON-based RPC protocol, and shared regions of virtual memory.
+이 퍼저(fuzzer)는 단일 코디네이터 프로세스를 사용하며, 이 프로세스는 코퍼스(corpus)를 관리하고, 여러 워커 프로세스를 사용하여 입력값을 변형하고 퍼저 대상(fuzz target)을 실행합니다. 코디네이터 및 워커 프로세스는 파이프(piped)된 JSON 기반 RPC 프로토콜과 공유된 가상 메모리 영역을 사용하여 통신합니다.
 
-For each worker the coordinator creates a goroutine which spawns the worker process and sets up the cross-process communication. Each goroutine then reads from a shared channel which is fed by the main coordinator loop, sending instructions it reads from the channel to the relevant worker processes.
+각 작업자에 대해 코디네이터는 goroutine을 생성하여 작업 프로세스를 시작하고, 프로세 간 통신을 설정합니다. 각 goroutine은 그런 다음 공유 채널에서 데이터를 읽습니다. 이 채널은 메인 코디네이터 루프에 의해 공급되며, goroutine은 채널에서 읽은 명령을 해당 작업 프로세스로 전송합니다.
 
-The main coordinator loop picks inputs from the corpus, sending them to the shared worker channel. Whichever worker picks up that input from the channel will send a fuzzing request to the corresponding worker process. This process sits in a loop, mutating the input and executing the fuzz target until an execution either causes an increase in the coverage counters, causes a panic or crash, or passes a predetermined deadline.
+메인 코디네이터 루프는 코퍼스에서 입력을 선택하여 공유 워커 채널로 전송합니다. 채널에서 해당 입력을 가져오는 워커는 해당 워커 프로세스에 퍼징 요청을 보냅니다. 이 프로세스는 루프를 실행하면서 입력을 수정하고, 퍼징 목표를 실행합니다. 실행은 다음 중 하나를 수행할 때까지 계속됩니다:
 
-If the worker process executes a mutated input which causes an increase in coverage counters or a recoverable panic, it signals this to the coordinator which is then able to reconstruct the mutated input. The coordinator will attempt to [minimize the input](#input-minimization), then either add it to the corpus for further fuzzing, in the case of finding increased coverage, or write it to the testdata directory, in the case of an input which causes an error or panic.
+*   커버리지 카운터가 증가하는 경우
+*   패닉 또는 충돌이 발생하는 경우
+*   사전 정의된 데드라인을 통과하는 경우
 
-If a non-recoverable error occurs while fuzzing which causes the worker process to shut down (e.g. infinite loop, os.Exit, memory exhaustion, etc), minimization will not be attempted, and the failing input will be written to the testdata directory and reported.
+만약 워커 프로세스가 변형된 입력을 실행하여 커버리지 카운터가 증가하거나 복구 가능한 패닉이 발생하면, 이는 코디네이터에게 알립니다. 코디네이터는 이 변형된 입력을 재구성할 수 있습니다.
 
-<img alt="Sequence diagram of the interaction between coordinator and worker, as described above." src="/security/fuzz/seq-diagram.png"/>
+코디네이터는 먼저 [입력 최소화](#input-minimization)를 시도한 다음, 커버리지 증가를 발견한 경우 해당 입력을 추가하여 추가적인 퍼징을 수행하거나, 오류 또는 패닉을 발생시키는 경우 해당 입력을 testdata 디렉터리에 저장합니다.
 
-### Cross-process communication
+만약 덤핑 중에 회복 불가능한 오류가 발생하여 워커 프로세스가 종료되는 경우 (예: 무한 루프, os.Exit, 메모리 부족 등), 최소화 시도는 수행되지 않으며, 실패한 입력은 testdata 디렉토리에 기록되고 보고됩니다.
 
-When spawning the child worker processes, the coordinator sets up two methods of communication: a pipe, which is used to pass JSON-based RPC messages, and a shared memory region, which is used to pass inputs and RNG state. Each worker process has its own pipe and shared memory region.
+<img alt="코디네이터와 워커 간의 상호 작용에 대한 시퀀스 다이어그램, 위에서 설명한 내용에 따라." src="/security/fuzz/seq-diagram.png"/>
 
-The RPC pipe is used by the coordinator to control the worker process, sending it either fuzzing or minimization instructions, and by the worker to relay results of its operations to the coordinator (i.e. whether the input expanded coverage, caused a crash, was successfully minimized, etc).
+### 프로세스 간 통신
 
-The shared memory region is used to pass specific information back and forth with the workers. The coordinator uses the region to pass the corpus entry to fuzz to the worker, and is used by the worker to store its current RNG state. The RNG state is used by the coordinator to reconstruct the mutations that were applied to the input by the worker when it has finished executing the target (this reconstruction happens both when the worker exits cleanly, and when it crashes.)
+자식 워커 프로세스를 생성할 때, 코디네이터는 다음과 같은 두 가지 통신 방법을 설정합니다: 파이프, 이는 JSON 기반 RPC 메시지를 전달하는 데 사용되며, 공유 메모리 영역, 이는 입력 및 RNG 상태를 전달하는 데 사용됩니다. 각 워커 프로세스는 자체 파이프 및 공유 메모리 영역을 가지고 있습니다.
 
-## Input selection
+RPC 파이프는 코디네이터가 워커 프로세스를 제어하는 데 사용되며, 워커에게 퍼징 또는 최소화 지침을 보내고, 워커는 자신의 작업 결과를 코디네이터에게 전달합니다 (예: 입력의 커버리지 확장 여부, 충돌 발생 여부, 성공적인 최소화 여부 등).
 
-The coordinator currently does not implement any advanced form of input prioritization. It cycles through the entire corpus, looping after it exhausts the entries.
+공유 메모리 영역은 작업자와 정보를 주고받는 데 사용됩니다. 코디네이터는 이 영역을 사용하여  корпу스 항목을 워커에게 전달하고, 워커는 현재 RNG(난수 생성) 상태를 저장하는 데 사용합니다. 코디네이터는 워커가 대상(target) 실행을 완료했을 때, 워커가 적용한 변환을 재구성하는 데 RNG 상태를 사용합니다(이 재구성은 워커가 정상적으로 종료될 때뿐만 아니라, 워커가 충돌하는 경우에도 발생합니다).
 
-Similarly, the coordinator does not implement any type of corpus minimization (not to be confused with input minimization, [discussed below](#input-minimization)).
+## 입력 선택
 
-## Coverage guidance
+현재 코디네이터는 고급 형태의 입력 우선순위 처리를 구현하지 않습니다. 전체 코퍼스를 순환하며, 항목이 모두 소진되면 다시 시작합니다.
 
-The fuzzer uses [libFuzzer compatible](https://clang.llvm.org/docs/SanitizerCoverage.html#inline-8bit-counters) inline 8 bit coverage counters. These counters are inserted during compilation at each code edge, and are incremented on entry. Counters are not protected against overflow, so that they don't become saturated.
+마찬가지로, 코디네이터는 어떤 종류의 코퍼스 최소화(입력 최소화와 혼동되지 않도록, [아래에서 설명](#input-minimization))를 구현하지 않습니다.
 
-Similarly to AFL and libFuzzer, when tracking coverage, the counters are quantized to the nearest power of two. This allows the fuzzer to differentiate between insignificant and significant changes in execution flow. In order to track these changes, the fuzzer holds a slice of bytes which map to the inline counters, the bits of which indicate if there is at least one input in the corpus which increments the related counter at least 2^bit-position times. These bytes can become saturated, if there are inputs which cause counters to hit each quantized value, at which point the related counter fails to provide further useful coverage information.
+## 커버리지 지침
 
-As coverage counters are added to every edge during compilation, code not being fuzzed is also instrumented, which can cause the worker to detect coverage expansion that is unrelated to the target being executed (for instance if some new code path is triggered in a goroutine unrelated to the fuzz target). The worker attempts to reduce this in two ways: firstly it resets all counters immediately before executing the fuzz target and then snapshots the counters immediately after the target returns, and secondly by explicitly ignoring a set of packages which are likely to be "noisy"
+이 퍼저(fuzzer)는 [libFuzzer와 호환되는](https://clang.llvm.org/docs/SanitizerCoverage.html#inline-8bit-counters) 8비트 간접 코드 커버리지 카운터를 사용합니다. 이 카운터는 컴파일 시 각 코드 경계에 삽입되며, 진입 시 증가됩니다. 카운터는 오버플로우에 대한 보호가 없으므로, 채워지지 않습니다.
 
-A number of packages explicitly do not have counters inserted, since they are likely to introduce counter noise that is unrelated to the target being executed. These packages are:
+마찬가지로 AFL과 libFuzzer와 같이, 커버리지를 추적할 때, 카운터는 가장 가까운 2의 거듭제곱으로 큐산트화됩니다. 이를 통해 퍼저(fuzzer)는 실행 흐름의 미미하고 중요한 변화를 구별할 수 있습니다. 이러한 변화를 추적하기 위해, 퍼저는 인라인 카운터에 매핑되는 바이트 슬라이스를 유지하며, 이 바이트의 비트가 해당 카운터가 최소 2^bit-position번만큼 증가하는 입력이 존재하는지 나타냅니다. 이러한 바이트는 카운터가 각 큐산트화된 값에 도달하는 입력이 존재하면 포화될 수 있으며, 이 경우 해당 카운터는 더 이상 유용한 커버리지 정보를 제공하지 않습니다.
+
+컴파일 시 모든 에지에 대한 커버리지 카운터를 추가하면, fuzzing되지 않는 코드도 측정되므로, 워커가 대상이 실행되는 것과 무관한 커버리지 확장을 감지할 수 있습니다 (예: fuzzing 대상과 관련 없는 goroutine에서 새로운 코드 경로가 트리거되는 경우). 워커는 다음과 같은 두 가지 방법으로 이를 줄이려고 합니다: 첫째, fuzzing 대상 실행 전에 모든 카운터를 즉시 재설정하고, 둘째, 대상이 반환된 직후 카운터를 캡처합니다. 또한, "노이즈"를 유발할 가능성이 있는 특정 패키지를 명시적으로 무시합니다.
+
+여러 패키지는 명시적으로 카운터를 삽입하지 않습니다. 그 이유는 이러한 카운터가 실행되는 대상과 관련 없는 노이즈를 유발할 가능성이 있기 때문입니다. 이러한 패키지는 다음과 같습니다:
 
 * `context`
 * `internal/fuzz`
@@ -53,32 +59,30 @@ A number of packages explicitly do not have counters inserted, since they are li
 * `testing`
 * `time`
 
-## Mutation engine
+## 돌연변이 엔진
 
-When the worker receives a new input, it applies mutations to the input before executing the target with the input. After each mutation, the fuzz target is executed with the new input, and if coverage is not expanded, further mutations are applied. In order to prevent inputs from massively diverging from their initial state, after five mutations are applied to an input, it is reset to its original state before further mutations are applied. For example for the input `hello world`, the mutation strategy may look like the following:
+새로운 입력을 받은 경우, 워커는 먼저 입력을 변형한 후, 변형된 입력을 사용하여 대상 함수를 실행합니다. 각 변형 후, 새로운 입력으로 대상 함수를 실행하고, 커버리지(코드 실행 영역)가 확장되지 않으면 추가 변형을 적용합니다. 입력이 원래 상태에서 크게 벗어나지 않도록 하기 위해, 입력에 다섯 번의 변형을 적용한 후에는 추가 변형을 적용하기 전에 원래 상태로 재설정합니다. 예를 들어, 입력이 `hello world`인 경우, 변형 전략은 다음과 같이 나타날 수 있습니다:
 
-```
-0. hello world [initial state]
-1. kello world [replace first byte]
-2. world kello [swap two chunks]
-3. world ke    [delete last three bytes]
-4. owrld ke    [shuffle first three bytes]
-5. owrldx ke   [insert random byte]
-6. ello world  [reset to initial state, delete first byte]
+0. hello world [초기 상태]
+1. kello world [첫 번째 바이트 대체]
+2. world kello [두 덩어 교체]
+3. world ke    [마지막 세 바이트 삭제]
+4. owrld ke    [첫 세 바이트 섞기]
+5. owrldx ke   [임의 바이트 삽입]
+6. ello world  [초기 상태로 재설정, 첫 번째 바이트 삭제]
 ...
-```
 
-The mutators attempt to bias towards producing smaller inputs, rather than larger inputs, in order to prevent rapid growth of the corpus size.
+이 변환기는 급격한 데이터 세트 크기 증가를 방지하기 위해, 더 큰 입력 대신 더 작은 입력을 생성하도록 시도합니다.
 
-There are numerous mutators for `[]byte` and `string` types, and a smaller number of mutators for all the `int`, `uint`, and `float` types.
+`[]byte` 및 `string` 유형에 대한 변환기(mutator)는 많지만, `int`, `uint`, `float` 유형에 대한 변환기는 적습니다.
 
-There are currently no execution driven mutation strategies implemented (such as input-to-comparison correspondence), nor dictionary based mutators.
+현재 실행 기반의 뮤테이션 전략 (예: 입력-비교 대응) 또는 딕셔너리 기반의 뮤테이터는 구현되어 있지 않습니다.
 
-## Input minimization
+## 입력 최소화
 
-In order to prevent the corpus from ballooning (which bogs down the fuzzer both in terms of performance, and reducing the probability that a mutation will actually touch interesting data) we attempt to minimize each input discovered which expands coverage or causes a recoverable crash (non-recoverable crashes, such as those caused by memory exhaustion, are not minimized, as the process would be extremely slow). The employed strategy for minimization is rather simple, sequentially attempting to remove bytes from the input while maintaining the initial coverage found. In particular the minimization mechanism uses the following strategy:
+corpus가 과도하게 커지는 것을 방지하기 위해 (이는 퍼저의 성능을 저하시키고, 변이가 실제로 흥미로운 데이터를 건드리는 확률을 줄이는 데 영향을 미칩니다) 퍼저가 처리하는 입력을 최소화하는 것을 목표로 합니다. 이를 통해 커버리지를 확장하거나 복구 가능한 충돌(메모리 고갈과 같은 복구 불가능한 충돌은 최소화되지 않음)을 일으키는 입력을 줄입니다. 사용되는 최소화 전략은 비교적 간단하며, 초기 커버리지를 유지하면서 입력에서 바이트를 순차적으로 제거하는 방법을 사용합니다. 특히 최소화 메커니즘은 다음 전략을 사용합니다:
 
-1. Attempt to cut an exponentially smaller chunk of bytes off the end of the input
-2. Attempt to remove each individual byte
-3. Attempt to remove each possible subset of bytes
-4. Attempt to replace each non-human readable byte with a human readable byte (i.e. something in the ASCII set of bytes)
+1. 입력 데이터의 끝에서 지수적으로 작은 크기의 바이트 조각을 제거하려고 시도
+2. 각 바이트를 개별적으로 제거하려고 시도
+3. 가능한 모든 바이트 집합을 제거하려고 시도
+4. 사람이 읽을 수 있는 바이트로 각 사람이 읽을 수 없는 바이트를 대체하려고 시도 (즉, 바이트의 ASCII 집합 내의 내용)

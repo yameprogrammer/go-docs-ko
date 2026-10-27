@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package runtime contains operations that interact with Go's runtime system, such as functions to control goroutines.
+패키지 `runtime`은 Go 런타임 시스템과 상호 작용하는 작업을 포함합니다. 예를 들어, goroutine을 제어하는 함수 등이 있습니다.
 
 ## 원문 요약
 

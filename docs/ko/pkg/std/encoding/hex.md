@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package hex implements hexadecimal encoding and decoding.
+패키지 `hex`은 16진수 인코딩 및 디코딩을 구현합니다.
 
 ## 원문 요약
 

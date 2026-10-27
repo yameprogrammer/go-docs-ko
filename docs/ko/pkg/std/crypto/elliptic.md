@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package elliptic implements the standard NIST P-224, P-256, P-384, and P-521 elliptic curves over prime fields.
+패키지 elliptic은 프라임 필드에서 NIST P-224, P-256, P-384, P-521 표준 곡선을 구현합니다.
 
 ## 원문 요약
 

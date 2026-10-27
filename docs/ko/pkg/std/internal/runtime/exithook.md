@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package exithook provides limited support for on-exit cleanup.
+패키지 `exithook`은 제한적인 오프-익스IT 정리 기능을 제공합니다.
 
 ## 원문 요약
 

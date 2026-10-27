@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package xml implements a simple XML 1.0 parser that understands XML name spaces.
+패키지 `xml`은 간단한 XML 1.0 파서를 구현하며, XML 네임스페이스를 이해합니다.
 
 ## 원문 요약
 

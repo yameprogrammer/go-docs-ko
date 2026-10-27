@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package suffixarray implements substring search in logarithmic time using an in-memory suffix array.
+패키지 suffixarray는 메모리에 저장된 접미사 배열을 사용하여 로그 시간 내에 부분 문자열 검색을 구현합니다.
 
 ## 원문 요약
 

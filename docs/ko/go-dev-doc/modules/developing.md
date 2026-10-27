@@ -1,118 +1,68 @@
 <!--{
-  "Title": "Developing and publishing modules"
+  "제목": "모듈 개발 및 배포"
 }-->
 
-You can collect related packages into modules, then publish the modules for
-other developers to use. This topic gives an overview of developing and
-publishing modules.
+관련 패키지를 모듈로 묶어 다른 개발자가 사용할 수 있도록 게시할 수 있습니다. 이 주제에서는 모듈 개발 및 게시에 대한 개요를 제공합니다.
 
-To support developing, publishing, and using modules, you use:
+다음 기능을 통해 모듈 개발, 배포 및 사용을 지원합니다:
 
-*   A **workflow** through which you develop and publish modules, revising them
-	with new versions over time. See [Workflow for developing and publishing
-	modules](#workflow).
-*	**Design practices** that help a module's users understand it and upgrade
-	to new versions in a stable way. See [Design and development](#design).
-*   A **decentralized system for publishing** modules and retrieving their code.
-	You make your module available for other developers to use from your own
-	repository and publish with a version number. See [Decentralized
-	publishing](#decentralized).
-*   A **package search engine** and documentation browser (pkg.go.dev) at which
-	developers can find your module. See [Package discovery](#discovery).
-*   A module **version numbering convention** to communicate expectations of
-	stability and backward compatibility to developers using your module. See
-	[Versioning](#versioning).
-*   **Go tools** that make it easier for other developers to manage
-	dependencies, including getting your module's source, upgrading, and so on.
-	See [Managing dependencies](/doc/modules/managing-dependencies).
+*   **워크플로우**를 통해 모듈을 개발하고 게시하며, 시간이 지남에 따라 새로운 버전으로 수정합니다. 자세한 내용은 [모듈 개발 및 게시 워크플로우](#workflow)를 참조하세요.
+*   모듈의 사용자가 이해하고 안정적으로 새로운 버전으로 업그레이드할 수 있도록 돕는 **설계 원칙**입니다. 자세한 내용은 [설계 및 개발](#design)를 참조하세요.
+*   모듈과 해당 코드의 게시 및 검색을 위한 **분산 시스템**입니다. 사용자는 자체 저장소에서 모듈을 다른 개발자에게 공개하고 버전 번호와 함께 게시할 수 있습니다. 자세한 내용은 [분산 게시](#decentralized)를 참조하세요.
+*   개발자가 모듈을 찾을 수 있는 **패키지 검색 엔진** 및 문서 브라우저 (pkg.go.dev)입니다. 자세한 내용은 [패키지 검색](#discovery)를 참조하세요.
+*   모듈의 **버전 번호 지정 규칙**을 사용하여 모듈을 사용하는 개발자에게 안정성과 역호환성을 기대하도록 합니다. 자세한 내용은 [버전 관리](#versioning)를 참조하세요.
+*   다른 개발자가 모듈에 대한 종속성을 관리하는 데 도움이 되는 **Go 도구**입니다. 여기에는 모듈의 소스 가져오기, 업그레이드 등을 포함합니다. 자세한 내용은 [종속성 관리](/doc/modules/managing-dependencies)를 참조하세요.
 
-**See also**
+**참고**
 
-*   If you're interested simply in using packages developed by others, this
-	isn't the topic for you. Instead, see [Managing
-	dependencies](managing-dependencies).
-*   For a tutorial that includes a few module development basics, see
-	[Tutorial: Create a Go module](/doc/tutorial/create-module).
+*   만약 다른 사람들이 개발한 패키지를 사용하는 것만 관심이 있다면, 이 주제는 아닙니다. 대신, [의존성 관리](managing-dependencies)를 참조하세요.
+*   몇 가지 모듈 개발 기본 사항을 포함한 튜토리얼을 보려면, [튜토리얼: Go 모듈 생성](doc/tutorial/create-module)을 참조하세요.
 
-## Workflow for developing and publishing modules {#workflow}
+## 모듈 개발 및 배포 워크플로우 {#workflow}
 
-When you want to publish your modules for others, you adopt a few conventions to
-make using those modules easier.
+다른 사용자가 여러분의 모듈을 사용하기 쉽게 하기 위해, 모듈을 게시할 때 몇 가지 관례를 따르는 것이 좋습니다.
 
-The following high-level steps are described in more detail in [Module release
-and versioning workflow](release-workflow).
+다음의 고수준 단계는 [모듈 출시 및 버전 관리 워크플로우](release-workflow)에서 더 자세히 설명되어 있습니다.
 
-1. Design and code the packages that the module will include.
-1. Commit code to your repository using conventions that ensure it's available
-	to others via Go tools.
-1. Publish the module to make it discoverable by developers.
-1. Over time, revise the module with versions that use a version numbering
-	convention that signals each version's stability and backward compatibility.
+1. 모듈에 포함될 패키지를 설계하고 코드를 작성합니다.
+1. Go 도구를 사용하여 다른 사람에게 사용할 수 있도록 하는 규칙을 준수하여 저장소에 코드를 커밋합니다.
+1. 개발자가 모듈을 찾을 수 있도록 모듈을 게시합니다.
+1. 시간이 지남에 따라, 각 버전을 나타내는 버전 번호 규칙을 사용하는 버전으로 모듈을 수정합니다. 버전 번호 규칙은 각 버전의 안정성과 이전 호환성을 나타냅니다.
 
-## Design and development {#design}
+## 설계 및 개발 {#design}
 
-Your module will be easier for developers to find and use if the functions and
-packages in it form a coherent whole. When you're designing a module's public
-API, try to keep its functionality focused and discrete.
+당신의 모듈이 개발자들이 더 쉽게 찾고 사용할 수 있도록, 그 안에 있는 함수와 패키지가 일관성 있는 전체를 구성하도록 하십시오. 모듈의 공용 API를 설계할 때, 그 기능이 집중적이고 명확하게 정의되도록 노력하십시오.
 
-Also, designing and developing your module with backward compatibility in mind
-helps its users upgrade while minimizing churn to their own code. You can use
-certain techniques in code to avoid releasing a version that breaks backward
-compatibility. For more about those techniques, see [Keeping your modules
-compatible](/blog/module-compatibility) on the Go blog.
+또한, 역호환성을 염두에 두고 모듈을 설계하고 개발하면 사용자가 자신의 코드로 업그레이드하는 데 도움이 되면서, 코드를 변경하는 빈도를 줄일 수 있습니다. 특정 기술을 사용하여 후방 호환성을 깨는 버전을 출시하지 않도록 할 수 있습니다. 이러한 기술에 대한 자세한 내용은 Go 블로그의 [모듈 호환성 유지](https://blog.golang.org/module-compatibility)를 참조하십시오.
 
-Before you publish a module, you can reference it on the local file system using
-the replace directive. This makes it easier to write client code that calls
-functions in the module while the module is still in development. For more
-information, see "Coding against an unpublished module" in [Module release and
-versioning workflow](release-workflow#unpublished).
+모듈을 게시하기 전에, `replace` 지시어를 사용하여 로컬 파일 시스템에서 참조할 수 있습니다. 이를 통해 모듈이 개발 중에도 모듈 내의 함수를 호출하는 클라이언트 코드를 작성하기가 더 쉬워집니다. 자세한 내용은 "[모듈 게시 및 버전 관리 워크플로우](release-workflow#unpublished)"의 "게시되지 않은 모듈에 코딩" 섹션을 참조하십시오.
 
-## Decentralized publishing {#decentralized}
+## 분산형 출판 {#decentralized}
 
-In Go, you publish your module by tagging its code in your repository to make it
-available for other developers to use. You don't need to push your module to a
-centralized service because Go tools can download your module directly from your
-repository (located using the module's path, which is a URL with the scheme
-omitted) or from a proxy server.
+Go에서, 여러분은 저장소에 코드를 태깅하여 모듈을 게시하여 다른 개발자가 사용할 수 있도록 합니다. Go 도구는 저장소에서 직접 모듈을 다운로드할 수 있으므로 (저장소의 경로를 사용하여 찾을 수 있으며, 여기에는 스킴이 누락됨) 중앙 서비스로 모듈을 푸시할 필요가 없습니다. 또한, 프록시 서버에서도 다운로드할 수 있습니다.
 
-After importing your package in their code, developers use Go tools (including
-the `go get` command) to download your module's code to compile with. To support
-this model, you follow conventions and best practices that make it possible for
-Go tools (on behalf of another developer) to retrieve your module's source from
-your repository. For example, Go tools use the module's module path you specify,
-along with the module version number you use to tag the module for release, to
-locate and download the module for its users.
+먼저, 개발자가 해당 코드에 패키지를 가져온 후, `go get` 명령과 같은 Go 도구를 사용하여 패키지의 코드를 다운로드하여 컴파일합니다. 이러한 모델을 지원하기 위해, 패키지의 소스 코드를 가져오도록 Go 도구가 (다른 개발자의 이름으로) 저장소에서 패키지의 소스를 검색할 수 있도록 하는 규칙 및 모범 사례를 따릅니다. 예를 들어, Go 도구는 사용자가 지정한 모듈 경로와 함께 모듈을 릴리스하기 위해 사용하는 모듈 버전을 사용하여 모듈을 찾고 다운로드합니다.
 
-For more about source and publishing conventions and best practices, see
-[Managing module source](/doc/modules/managing-source).
+자세한 내용은 소스 및 게시 규칙 및 모범 사례에 대해 다음을 참조하세요:
+[모듈 소스 관리](/doc/modules/managing-source).
 
-For step-by-step instructions on publishing a module, see [Publishing a
-module](publishing).
+단계별 모듈 게시 방법에 대한 지침은 [모듈 게시](publishing)를 참조하십시오.
 
-## Package discovery {#discovery}
+## 패키지 검색 {#discovery}
 
-After you've published your module and someone has fetched it with Go tools, it
-will become visible on the Go package discovery site at
-[pkg.go.dev](https://pkg.go.dev/). There, developers can search the site to find
-it and read its documentation.
+모듈을 게시하고, 누군가가 Go 도구를 사용하여 가져온 후,
+이는 [pkg.go.dev](https://pkg.go.dev/) 웹사이트의 Go 패키지 검색 사이트에 표시됩니다.
+여기서 개발자는 사이트를 검색하여 찾고, 문서를 읽을 수 있습니다.
 
-To begin using the module, a developer imports packages from the module, then
-runs the `go get` command to download its source code to compile with.
+모듈을 사용하기 시작하려면, 개발자는 먼저 모듈에서 패키지를 가져온 다음, 컴파일하기 위해 소스 코드를 다운로드하기 위해 `go get` 명령을 실행합니다.
 
-For more about how developers find and use modules, see [Managing
-dependencies](managing-dependencies).
+자세한 내용은 개발자가 모듈을 찾고 사용하는 방법에 대해 [종속성 관리](managing-dependencies)를 참조하세요.
 
-## Versioning {#versioning}
+## 버전 관리 {#versioning}
 
-As you revise and improve your module over time, you assign version numbers
-(based on the semantic versioning model) designed to signal each version's
-stability and backward compatibility. This helps developers using your module
-determine when the module is stable and whether an upgrade may include
-significant changes in behavior. You indicate a module's version number by
-tagging the module's source in the repository with the number.
+시간이 지남에 따라 모듈을 개선하고 수정하면서, 버전 번호를 할당합니다 (세мантический 버전 모델에 기반). 이는 각 버전의 안정성과 이전 버전과의 호환성을 나타내는 데 사용됩니다. 이를 통해 모듈을 사용하는 개발자는 모듈이 안정적인 시점을 파악하고, 업그레이드가 모듈의 동작에 상당한 변경 사항을 포함할 수 있는지 여부를 결정할 수 있습니다. 모듈의 버전 번호를 지정하려면, 해당 번호를 사용하여 저장소의 모듈 소스에 태그를 추가합니다.
 
-For more on developing major version updates, see [Developing a major version
-update](major-version).
+더 자세한 내용은 "주요 버전 업데이트 개발" ([Developing a major version update](major-version)) 를 참조하십시오.
 
-For more about how you use the semantic versioning model for Go modules, see
-[Module version numbering](/doc/modules/version-numbers).
+자세한 내용은 Go 모듈에서 의미론적 버전 관리를 사용하는 방법에 대해 참조하십시오.
+[모듈 버전 번호](/doc/modules/version-numbers)

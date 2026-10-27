@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package crc64 implements the 64-bit cyclic redundancy check, or CRC-64, checksum.
+패키지 `crc64`는 64비트 순환 체크 오류(CRC-64) 체크섬을 구현합니다.
 
 ## 원문 요약
 

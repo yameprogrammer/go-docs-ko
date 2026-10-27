@@ -1,82 +1,69 @@
 <!--{
-  "Title": "Publishing a module"
+  "제목": "모듈 게시"
 }-->
 
-When you want to make a module available for other developers, you publish it so
-that it's visible to Go tools. Once you've published the module, developers
-importing its packages will be able to resolve a dependency on the module by
-running commands such as `go get`.
+다음과 같이 모듈을 다른 개발자에게 사용할 수 있도록 게시할 수 있습니다.
+이렇게 하면 Go 도구가 모듈을 인식할 수 있습니다.
+모듈을 게시한 후, 모듈의 패키지를 가져오는 개발자는 `go get`과 같은 명령어를 사용하여 모듈에 대한 종속성을 해결할 수 있습니다.
 
-> **Note:** Don't change a tagged version of a module after publishing it. For
-developers using the module, Go tools authenticate a downloaded module against
-the first downloaded copy. If the two differ, Go tools will return a security
-error. Instead of changing the code for a previously published version, publish
-a new version.
+> **참고:** 모듈을 게시한 후에는 게시된 버전을 변경하지 마십시오. 모듈을 사용하는 개발자는 Go 도구가 다운로드한 모듈을 첫 번째 다운로드된 복본과 비교하여 인증합니다. 두 버전을 다를 경우, Go 도구는 보안 오류를 반환합니다. 이전 버전의 코드를 변경하는 대신, 새 버전을 게시하십시오.
 
-**See also**
+**참고**
 
-* For an overview of module development, see [Developing and publishing
-  modules](developing)
-* For a high-level module development workflow -- which includes publishing --
-  see [Module release and versioning workflow](release-workflow).
+* 모듈 개발 개요는 [모듈 개발 및 배포](developing)를 참조하십시오.
+* 모듈 개발 워크플로우 (배포 포함)에 대한 고수준 정보는 [모듈 릴리스 및 버전 관리 워크플로우](release-workflow)를 참조하십시오.
 
-## Publishing steps
+## 게시 절차
 
-Use the following steps to publish a module.
+*   **단계 1:** 콘텐츠를 준비합니다. (텍스트, 이미지, 비디오 등)
+*   **단계 2:** 플랫폼에 콘텐츠를 업로드합니다. (예: 블로그, 웹사이트, 소셜 미디어)
+*   **단계 3:** 게시 설정을 구성합니다. (제목, 설명, 태그, 공개 범위 등)
+*   **단계 4:** 콘텐츠를 게시합니다.
+*   **단계 5:** 게시 후, 콘텐츠를 확인하고 필요한 경우 수정합니다.
 
-1. Open a command prompt and change to your module's root directory in the local
-  repository.
+다음 단계를 사용하여 모듈을 게시합니다.
 
-1.  Run `go mod tidy`, which removes any dependencies the module might have
-  accumulated that are no longer necessary.
+1. 명령 프롬프트를 열고 로컬 저장소의 모듈의 루트 디렉토리로 이동합니다.
 
-    ```
-    $ go mod tidy
+1. `go mod tidy`를 실행하여 모듈이 더 이상 필요하지 않은 모든 종속성을 제거합니다.
+
+```
+    go 모드 정리
     ```
 
-1.  Run `go test ./...` a final time to make sure everything is working.
+1. `go test ./...` 명령어를 한 번 더 실행하여 모든 것이 정상적으로 작동하는지 확인합니다.
 
-    This runs the unit tests you've written to use the Go testing framework.
+이것은 Go 테스트 프레임워크를 사용하여 작성한 유닛 테스트를 실행합니다.
 
-    ```
+```
     $ go test ./...
     ok      example.com/mymodule       0.015s
     ```
 
-1.  Tag the project with a new version number using the `git tag` command.
+1. `git tag` 명령어를 사용하여 프로젝트에 새 버전 번호를 지정합니다.
 
-    For the version number, use a number that signals to users the nature of
-    changes in this release. For more, see [Module version
-    numbering](version-numbers).
+버전 번호를 지정할 때, 사용자가 이번 릴리스의 변경 사항의 종류를 알 수 있도록 숫자를 사용하십시오. 자세한 내용은 [모듈 버전 번호 지정](version-numbers)을 참조하십시오.
 
-    ```
-    $ git commit -m "mymodule: changes for v0.1.0"
+```
+    $ git commit -m "mymodule: v0.1.0 버전의 변경 사항"
     $ git tag v0.1.0
-    ```
+```
 
-1.  Push the new tag to the origin repository.
+1. 새로운 태그를 원격 저장소에 푸시합니다.
 
-    ```
+```
     $ git push origin v0.1.0
-    ```
+```
 
-1.  Make the module available by running the [`go list`
-  command](/cmd/go/#hdr-List_packages_or_modules) to prompt
-  Go to update its index of modules with information about the module you're
-  publishing.
+1.  모듈을 사용 가능하게 하기 위해 `go list` 명령을 실행하여 Go가 게시하는 모듈에 대한 정보를 포함하여 모듈 인덱스를 업데이트합니다. 자세한 내용은 [/cmd/go/#hdr-List_packages_or_modules]를 참조하십시오.
 
-    Precede the command with a statement to set the `GOPROXY` environment
-    variable to a Go proxy. This will ensure that your request reaches the
-    proxy.
+명령어를 실행하기 전에 `GOPROXY` 환경 변수를 Go 프록시로 설정하는 명령을 실행합니다. 이렇게 하면 요청이 프록시로 전달되도록 할 수 있습니다.
 
-    ```
+```
     $ GOPROXY=proxy.golang.org go list -m example.com/mymodule@v0.1.0
-    ```
+```
 
-Developers interested in your module import a package from it and run the [`go
-get` command]() just as they would with any other module. They can run the [`go
-get` command]() for latest versions or they can specify a particular version, as
-in the following example:
+개발자가 여러분의 모듈에서 패키지를 가져와 `go get` 명령을 실행합니다. 이는 다른 모듈을 사용하는 것과 동일합니다. 최신 버전이나 특정 버전을 지정하여 `go get` 명령을 실행할 수 있습니다. 다음 예제를 참조하세요:
 
 ```
 $ go get example.com/mymodule@v0.1.0

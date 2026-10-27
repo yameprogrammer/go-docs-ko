@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package sql provides a generic interface around SQL (or SQL-like) databases.
+패키지 `sql`은 SQL (또는 SQL과 유사한) 데이터베이스를 위한 일반적인 인터페이스를 제공합니다.
 
 ## 원문 요약
 

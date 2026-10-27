@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package raw provides an interface to interpret and emit Go execution traces.
+패키지 `raw`은 Go 실행 추적을 해석하고 생성하는 인터페이스를 제공합니다.
 
 ## 원문 요약
 

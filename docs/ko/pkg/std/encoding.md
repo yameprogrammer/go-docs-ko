@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package encoding defines interfaces shared by other packages that convert data to and from byte-level and textual representations.
+패키지 인코딩은 다른 패키지가 공유하는 인터페이스를 정의하며, 이는 데이터를 바이트 레벨 및 텍스트 표현으로 변환하는 데 사용됩니다.
 
 ## 원문 요약
 

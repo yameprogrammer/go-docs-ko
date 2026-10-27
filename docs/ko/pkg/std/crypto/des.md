@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package des implements the Data Encryption Standard (DES) and the Triple Data Encryption Algorithm (TDEA) as defined in U.S. Federal Information Processing Standards Publication 46-3.
+패키지 `des`는 미국 연방 정보 처리 표준 46-3에 정의된 데이터 암호화 표준 (DES) 및 트리플 데이터 암호화 알고리즘 (TDEA)을 구현합니다.
 
 ## 원문 요약
 

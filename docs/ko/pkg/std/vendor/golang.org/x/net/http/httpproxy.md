@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package httpproxy provides support for HTTP proxy determination based on environment variables, as provided by net/http.ProxyFromEnvironment function.
+패키지 `httpproxy`는 `net/http.ProxyFromEnvironment` 함수를 통해 제공되는 환경 변수를 기반으로 HTTP 프록시 설정을 지원합니다.
 
 ## 원문 요약
 

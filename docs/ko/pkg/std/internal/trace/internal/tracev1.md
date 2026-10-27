@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package tracev1 implements a parser for Go execution traces from versions 1.11–1.21.
+패키지 `tracev1`는 1.11–1.21 버전의 Go 실행 추적을 위한 파서를 구현합니다.
 
 ## 원문 요약
 

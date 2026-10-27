@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package embed provides access to files embedded in the running Go program.
+패키지 `embed`은 실행 중인 Go 프로그램에 포함된 파일에 접근하는 기능을 제공합니다.
 
 ## 원문 요약
 

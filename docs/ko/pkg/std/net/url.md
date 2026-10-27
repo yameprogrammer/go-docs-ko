@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package url parses URLs and implements query escaping.
+패키지 `url`는 URL을 파싱하고 쿼리 인코딩을 구현합니다.
 
 ## 원문 요약
 

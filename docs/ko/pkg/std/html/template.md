@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package template (html/template) implements data-driven templates for generating HTML output safe against code injection.
+패키지 템플릿 (html/template)은 HTML 출력을 생성하기 위한 데이터 기반 템플릿을 구현하며, 코드 삽입 공격으로부터 안전합니다.
 
 ## 원문 요약
 

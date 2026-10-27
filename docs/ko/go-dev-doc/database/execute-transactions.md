@@ -1,168 +1,133 @@
 <!--{
-  "Title": "Executing transactions"
+  "제목": "트랜잭션 실행"
 }-->
 
-You can execute database transactions using an
-[`sql.Tx,`](https://pkg.go.dev/database/sql#Tx) which represents a transaction.
-In addition to `Commit` and `Rollback` methods representing transaction-specific
-semantics, `sql.Tx` has all of the methods you use to perform common database
-operations. To get the `sql.Tx`, you call `DB.Begin` or `DB.BeginTx`.
+다음과 같은 [`sql.Tx`](https://pkg.go.dev/database/sql#Tx)를 사용하여 데이터베이스 트랜잭션을 실행할 수 있습니다. 이는 트랜잭션을 나타냅니다.
+`Commit` 및 `Rollback` 메서드와 같이 트랜잭션에 특정한 의미를 나타내는 것 외에도, `sql.Tx`는 일반적인 데이터베이스 작업을 수행하는 데 사용되는 모든 메서드를 포함합니다. `sql.Tx`를 얻으려면 `DB.Begin` 또는 `DB.BeginTx`를 호출합니다.
 
-A [database transaction](https://en.wikipedia.org/wiki/Database_transaction)
-groups multiple operations as part of a larger goal. All of the operations must
-succeed or none can, with the data's integrity preserved in either case.
-Typically, a transaction workflow includes:
+데이터베이스 트랜잭션은 여러 연산을 하나의 큰 목표를 달성하기 위해 그룹화합니다. 모든 연산이 성공해야 하거나, 그렇지 않으면 어떤 것도 수행할 수 없으며, 이 경우에도 데이터의 무결성이 유지됩니다.
+일반적으로 트랜잭션 워크플로우에는 다음이 포함됩니다:
 
-1. Beginning the transaction.
-2. Performing a set of database operations.
-3. If no error occurs, committing the transaction to make database changes.
-4. If an error occurs, rolling back the transaction to leave the database
-    unchanged.
+1. 트랜잭션 시작.
+2. 데이터베이스 작업 집합 실행.
+3. 오류가 발생하지 않으면, 데이터베이스 변경 사항을 반영하여 트랜잭션을 커밋.
+4. 오류가 발생하면, 데이터베이스를 변경하지 않고 트랜잭션을 롤백.
 
-The `sql` package provides methods for beginning and concluding a transaction,
-as well as methods for performing the intervening database operations. These
-methods correspond to the four steps in the workflow above.
+`sql` 패키지는 트랜잭션 시작 및 종료 방법을 제공하며, 그 중간에 수행되는 데이터베이스 작업을 수행하는 방법도 제공합니다. 이러한 방법들은 위 워크플로우의 네 단계에 해당합니다.
 
-*   Begin a transaction.
+*   트랜잭션을 시작합니다.
 
-    [`DB.Begin`](https://pkg.go.dev/database/sql#DB.Begin) or
-    [`DB.BeginTx`](https://pkg.go.dev/database/sql#DB.BeginTx) begin a new
-    database transaction, returning an `sql.Tx` that represents it.
-*   Perform database operations.
+[`DB.Begin`](https://pkg.go.dev/database/sql#DB.Begin) 또는
+    [`DB.BeginTx`](https://pkg.go.dev/database/sql#DB.BeginTx)은 새로운
+    데이터베이스 트랜잭션을 시작하고, 이를 나타내는 `sql.Tx`를 반환합니다.
+*   데이터베이스 작업을 수행합니다.
 
-    Using an `sql.Tx`, you can query or update the database in a series of
-    operations that use a single connection. To support this, `Tx` exports the
-    following methods:
+`sql.Tx`를 사용하면 단일 연결을 사용하여 여러 연산을 수행하여 데이터베이스를 쿼리하거나 업데이트할 수 있습니다. 이를 지원하기 위해 `Tx`는 다음 메서드를 내보냅니다:
 
-    *   [`Exec`](https://pkg.go.dev/database/sql#Tx.Exec) and
-        [`ExecContext`](https://pkg.go.dev/database/sql#Tx.ExecContext) for making
-        database changes through SQL statements such as `INSERT`, `UPDATE`, and
-        `DELETE`.
+*   [`Exec`](https://pkg.go.dev/database/sql#Tx.Exec) 및
+        [`ExecContext`](https://pkg.go.dev/database/sql#Tx.ExecContext)를 사용하여 `INSERT`, `UPDATE`, `DELETE`와 같은 SQL 문을 통해 데이터베이스 변경을 수행합니다.
 
-        For more, see [Executing SQL statements that don't return data](/doc/database/change-data).
+자세한 내용은 [데이터를 반환하지 않는 SQL 문 실행 방법](/doc/database/change-data)을 참조하세요.
 
-    *   [`Query`](https://pkg.go.dev/database/sql#Tx.Query),
+*   [`Query`](https://pkg.go.dev/database/sql#Tx.Query),
         [`QueryContext`](https://pkg.go.dev/database/sql#Tx.QueryContext),
-        [`QueryRow`](https://pkg.go.dev/database/sql#Tx.QueryRow), and
+        [`QueryRow`](https://pkg.go.dev/database/sql#Tx.QueryRow), 및
         [`QueryRowContext`](https://pkg.go.dev/database/sql#Tx.QueryRowContext)
-        for operations that return rows.
+        는 결과로 행을 반환하는 작업에 사용됩니다.
 
-        For more, see [Querying for data](/doc/database/querying).
+자세한 내용은 [데이터 쿼리 참조](/doc/database/querying)
 
-    *   [`Prepare`](https://pkg.go.dev/database/sql#Tx.Prepare),
-        [`PrepareContext`](https://pkg.go.dev/database/sql#Tx.PrepareContext),
-        [`Stmt`](https://pkg.go.dev/database/sql#Tx.Stmt), and
-        [`StmtContext`](https://pkg.go.dev/database/sql#Tx.StmtContext) for
-        pre-defining prepared statements.
+*   [`Prepare`](https://pkg.go.dev/database/sql#Tx.Prepare),
+    [`PrepareContext`](https://pkg.go.dev/database/sql#Tx.PrepareContext),
+    [`Stmt`](https://pkg.go.dev/database/sql#Tx.Stmt), 및
+    [`StmtContext`](https://pkg.go.dev/database/sql#Tx.StmtContext)는
+    사전 정의된 쿼리를 사용하기 위한 기능입니다.
 
-        For more, see [Using prepared statements](/doc/database/prepared-statements).
+자세한 내용은 [준비된 문을 사용하기](https://example.com/doc/database/prepared-statements)를 참조하세요.
 
-*   End the transaction with _one_ of the following:
-    *   Commit the transaction using
-        [`Tx.Commit`](https://pkg.go.dev/database/sql#Tx.Commit).
+*   다음 중 하나로 트랜잭션을 완료합니다:
+    *   `Tx.Commit`을 사용하여 트랜잭션을 커밋합니다: [`https://pkg.go.dev/database/sql#Tx.Commit`](https://pkg.go.dev/database/sql#Tx.Commit).
 
-        If `Commit` succeeds (returns a `nil` error), then all the query results
-        are confirmed as valid and all the executed updates are applied to the
-        database as a single atomic change. If `Commit` fails, then all the
-        results from `Query` and `Exec` on the `Tx` should be discarded as
-        invalid.
-    *   Roll back the transaction using
-        [`Tx.Rollback`](https://pkg.go.dev/database/sql#Tx.Rollback).
+만약 `Commit`이 성공하면 (오류가 반환되지 않으면), 모든 쿼리 결과는 유효한 것으로 확인되고, 실행된 모든 업데이트는 단일 원자적 변경으로 데이터베이스에 적용됩니다. 만약 `Commit`이 실패하면, `Tx`에 있는 `Query` 및 `Exec`의 모든 결과는 유효하지 않은 것으로 폐기되어야 합니다.
+    *   [`Tx.Rollback`](https://pkg.go.dev/database/sql#Tx.Rollback)를 사용하여 트랜잭션을 롤백합니다.
 
-        Even if `Tx.Rollback` fails, the transaction will no longer be valid,
-        nor will it have been committed to the database.
+`Tx.Rollback`이 실패하더라도, 트랜잭션은 더 이상 유효하지 않으며, 데이터베이스에 커밋되지 않습니다.
 
-### Best practices {#best_practices}
+### 최적의 실무 지침 {#best_practices}
 
-Follow the best practices below to better navigate the complicated semantics
-and connection management that transactions sometimes require.
+복잡한 의미와 트랜잭션이 필요로 하는 연결 관리를 보다 효과적으로 이해하기 위해, 다음 우수 사례를 따르세요.
 
-*   Use the APIs described in this section to manage transactions. Do _not_
-    use transaction-related SQL statements such as `BEGIN` and `COMMIT`
-    directly—doing so can leave your database in an unpredictable state,
-    especially in concurrent programs.
-*   When using a transaction, take care not to call the non-transaction
-    `sql.DB` methods directly, too, as those will execute outside the
-    transaction, giving your code an inconsistent view of the state of the
-    database or even causing deadlocks.
+*   이 섹션에 설명된 API를 사용하여 트랜잭션을 관리하십시오. `BEGIN` 및 `COMMIT`과 같은 트랜잭션 관련 SQL 문을 직접 사용하는 것은 피하십시오. 이렇게 하면 특히 동시 프로그램에서 데이터베이스 상태가 예측 불가능해질 수 있습니다.
+*   트랜잭션을 사용할 때는 또한, 직접 `sql.DB`의 트랜잭션 관련 메서드를 호출하지 않도록 주의하십시오. 이러한 호출은 트랜잭션 외부에서 실행되므로, 코드에 데이터베이스 상태에 대한 일관성 없는 뷰를 제공하거나 심지어 데드락을 발생시킬 수 있습니다.
 
-### Example {#example}
+### 예제 {#example}
 
-Code in the following example uses a transaction to create a new customer order
-for an album. Along the way, the code will:
+다음 예제에서 사용된 코드는 새 앨범 주문을 생성하기 위해 트랜잭션을 사용합니다. 이 과정에서 코드는 다음과 같이 수행합니다:
 
-1. Begin a transaction.
-2. Defer the transaction's rollback. If the transaction succeeds, it will be
-    committed before the function exits, making the deferred rollback call a
-    no-op. If the transaction fails it won't be committed, meaning that the
-    rollback will be called as the function exits.
-3. Confirm that there's sufficient inventory for the album the customer is
-    ordering.
-4. If there's enough, update the inventory count, reducing it by the number
-    of albums ordered.
-5. Create a new order and retrieve the new order's generated ID for the client.
-6. Commit the transaction and return the ID.
+1. 트랜잭션을 시작합니다.
+2. 트랜잭션의 롤백을 지연합니다. 트랜잭션이 성공하면 함수가 종료되기 전에 커밋되며, 지연된 롤백 호출은 아무 작업도 수행하지 않습니다. 트랜잭션이 실패하면 커밋되지 않으므로, 함수가 종료될 때 롤백이 호출됩니다.
+3. 고객이 주문하는 앨범에 충분한 재고가 있는지 확인합니다.
+4. 충분하다면, 주문한 앨범 수를 기준으로 재고 수를 업데이트합니다.
+5. 새로운 주문을 생성하고 클라이언트에게 생성된 주문 ID를 반환합니다.
+6. 트랜잭션을 커밋하고 ID를 반환합니다.
 
-This example uses `Tx` methods that take a `context.Context` argument. This
-makes it possible for the function's execution – including database operations
--- to be canceled if it runs too long or the client connection closes. For
-more, see [Canceling in-progress operations](/doc/database/cancel-operations).
+이 예제는 `Tx` 메서드를 사용하며, 이는 `context.Context` 인수를 취합니다. 이를 통해 함수의 실행 (데이터베이스 작업 포함)이 너무 오래 실행되거나 클라이언트 연결이 닫힐 경우 중단될 수 있습니다. 자세한 내용은 [중단 중인 작업 취소](/doc/database/cancel-operations)를 참조하세요.
 
 ```
-// CreateOrder creates an order for an album and returns the new order ID.
+// CreateOrder는 앨범에 대한 주문을 생성하고 새로운 주문 ID를 반환합니다.
 func CreateOrder(ctx context.Context, albumID, quantity, custID int) (orderID int64, err error) {
 
-	// Create a helper function for preparing failure results.
+	// 실패 결과 준비를 위한 헬퍼 함수를 만듭니다.
 	fail := func(err error) (int64, error) {
 		return 0, fmt.Errorf("CreateOrder: %v", err)
 	}
 
-	// Get a Tx for making transaction requests.
+	// 트랜잭션 요청을 위한 Tx를 가져옵니다.
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return fail(err)
 	}
-	// Defer a rollback in case anything fails.
+	// 오류가 발생하면 롤백을 미루도록 합니다.
 	defer tx.Rollback()
 
-	// Confirm that album inventory is enough for the order.
+	// 주문에 필요한 앨범 재고가 있는지 확인합니다.
 	var enough bool
 	if err = tx.QueryRowContext(ctx, "SELECT (quantity >= ?) from album where id = ?",
 		quantity, albumID).Scan(&enough); err != nil {
 		if err == sql.ErrNoRows {
-			return fail(fmt.Errorf("no such album"))
+			return fail(fmt.Errorf("앨범을 찾을 수 없음"))
 		}
 		return fail(err)
 	}
 	if !enough {
-		return fail(fmt.Errorf("not enough inventory"))
+		return fail(fmt.Errorf("재고가 부족함"))
 	}
 
-	// Update the album inventory to remove the quantity in the order.
+	// 주문에서 수량을 뺀 앨범 재고를 업데이트합니다.
 	_, err = tx.ExecContext(ctx, "UPDATE album SET quantity = quantity - ? WHERE id = ?",
 		quantity, albumID)
 	if err != nil {
 		return fail(err)
 	}
 
-	// Create a new row in the album_order table.
+	// album_order 테이블에 새 행을 만듭니다.
 	result, err := tx.ExecContext(ctx, "INSERT INTO album_order (album_id, cust_id, quantity, date) VALUES (?, ?, ?, ?)",
 		albumID, custID, quantity, time.Now())
 	if err != nil {
 		return fail(err)
 	}
-	// Get the ID of the order item just created.
+	// 새로 생성된 주문 항목의 ID를 가져옵니다.
 	orderID, err = result.LastInsertId()
 	if err != nil {
 		return fail(err)
 	}
 
-	// Commit the transaction.
+	// 트랜잭션을 커밋합니다.
 	if err = tx.Commit(); err != nil {
 		return fail(err)
 	}
 
-	// Return the order ID.
+	// 주문 ID를 반환합니다.
 	return orderID, nil
 }
 ```

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package gob manages streams of gobs - binary values exchanged between an [Encoder] (transmitter) and a [Decoder] (receiver).
+패키지 `gob`은 `gob` 스트림을 관리합니다 - 이는 [인코더](전송기)와 [디코더](수신기) 간에 교환되는 이진 값을 나타냅니다.
 
 ## 원문 요약
 

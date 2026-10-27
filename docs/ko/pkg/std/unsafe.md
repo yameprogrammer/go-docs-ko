@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package unsafe contains operations that step around the type safety of Go programs.
+패키지 `unsafe`는 Go 프로그램의 타입 안전성을 우회하는 기능을 제공합니다.
 
 ## 원문 요약
 

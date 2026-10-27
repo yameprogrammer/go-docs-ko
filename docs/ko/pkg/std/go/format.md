@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package format implements standard formatting of Go source.
+패키지 형식은 Go 소스 코드의 표준 형식을 구현합니다.
 
 ## 원문 요약
 

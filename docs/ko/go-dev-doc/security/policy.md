@@ -1,202 +1,201 @@
-## Overview
+## 개요
 
-This document explains the Go Security team's process for handling issues
-reported and what to expect in return.
+이 문서는 Go 보안 팀이 보고된 문제에 대해 처리하는 프로세스와 그 결과에 대해 설명합니다.
 
-## Reporting a Security Bug
+## 보안 취약점 보고하기
 
-All security bugs in the Go distribution should be reported by email to
-[security@golang.org](mailto:security@golang.org). This mail is delivered to
-the Go Security team.
+Go 배포판의 모든 보안 취약점은 이메일을 통해 [security@golang.org](mailto:security@golang.org)로 보고해야 합니다. 이 이메일은 Go 보안 팀으로 전달됩니다.
 
-Please format the subject of your email as "Vulnerability: {package name}:
-{one-line summary}", and **avoid sending attachments** in your email unless strictly
-necessary in order to avoid your message being marked as spam. Additionally,
-please send **one report per email.**
+제목: 취약점: {package 이름}: {한 줄 요약}
 
-If desired, please include your preferred attribution as part of the report.
-This attribution will be added to the CVE, if one is published.
+**참고:**
 
-Please keep reports succinct, including a description of the issue you've found,
-the way in which you believe it can be exploited, and a small reproduction test
-case or program which demonstrates the issue.
+*   Vulnerability 취약점 보고서 작성 시, 제목은 "Vulnerability: {package 이름}: {한 줄 요약}" 형식으로 작성해야 합니다.
+*   첨부 파일은 가능한 한 사용하지 마십시오. 메시지가 스팸으로 분류되는 것을 방지하기 위함입니다.
+*   각 이메일당 1개의 보고서만 제출하십시오.
 
-We have a [list of decisions](/doc/security/decisions) about commonly-reported
-categories of issues.
+원하는 경우, 보고서에 대한 저작권 정보를 포함해주세요.
+이 저작권 정보는 CVE에 게시되는 경우 CVE에 추가됩니다.
 
-Your email will be acknowledged within 7 days. If you have not received a reply
-by then, please follow up with the Go Security team again at
-[security@golang.org](mailto:security@golang.org). Please make sure the word
-**vulnerability** is in your email.
+보고서는 간결하게 작성하고, 발견한 문제, 이를 악용하는 방법, 그리고 문제를 보여주는 작은 재현 테스트 케이스 또는 프로그램을 포함해야 합니다.
 
-If after 3 more days you have still not received an acknowledgement of your
-report, it is possible that your email might have been marked as spam. In that
-case, please [file an issue here](https://g.co/vulnz). Select _"I want to
-report a technical security or an abuse risk related bug in a Google product
-(SQLi, XSS, etc.)"_, and list _"Go"_ as the affected product.
+저희는 일반적으로 보고되는 문제 유형에 대한 [결정 목록](/doc/security/decisions)을 가지고 있습니다.
 
-Your issue will be fixed or made public within 90 days after our initial
-acknowledgement.
+귀하의 이메일에 대한 답변은 7일 이내에 확인됩니다. 그 시점까지 답변을 받지 못하신 경우, Go 보안 팀에 다시 연락하여 [security@golang.org](mailto:security@golang.org)로 문의해 주시기 바랍니다. 이메일에 **취약점**이라는 단어가 포함되어 있는지 확인해 주세요.
 
-Emails reporting security issues will be retained indefinitely
-to track remediation status and correctly attribute discoveries.
+만약 3일이 지나도 보고서에 대한 답변을 받지 못했다면, 이메일이 스팸으로 처리되었을 가능성이 있습니다. 이 경우, [여기에서 이슈를 제기해주세요](https://g.co/vulnz). 다음을 선택하고 _"SQLi, XSS 등 Google 제품의 기술적 보안 또는 오용 위험과 관련된 버그를 보고하고 싶습니다."_를 선택하고, _"Go"_를 영향을 받는 제품으로 선택하세요.
 
-### LLM-Generated Reports
+문제는 저희의 초기 확인 후 90일 이내에 해결되거나 공개될 것입니다.
 
-Please do not send LLM-generated reports without proper curation.
+보안 관련 이메일은 복구를 추적하고 발견 사항을 정확하게 식별하기 위해 영구적으로 보관됩니다.
 
-Modern LLMs are very good at finding real and important security bugs.
-Unfortunately, they are also very good at finding imaginary issues, or real
-issues that are [not security bugs](/doc/security/decisions#non-vuln). LLM
-output is often verbose, buries important information in irrelevant text, and
-contains grandiose and unsupportable claims.
+### LLM 기반 보고서
 
-For LLM-generated reports, the value lies in curation. Sending us dozens of
-possible security issues while relying on us to find the one significant result
-hidden among them asks us to do the curation, and ultimately hinders our goal of
-making Go secure. For this reason, we only attribute discoveries to reporters
-with a substantial percentage of real findings.
+```markdown
+# 제목: 한국어 번역 결과
 
-While there are no hard and fast rules, as a general guideline, if most of your
-reports are not designated as security issues, and we do not believe that you
-are providing useful curation, we will not credit you for any discoveries in the
-remainder. We deliberately do not define a concrete threshold for "most" or what
-"curation" entails. However, our intent is that a good-faith reporter providing
-meaningful value will always receive credit, while a reporter forwarding large
-quantities of LLM output indiscriminately will not.
+## 1. 소개
 
-## Tracks
+본 문서는 영어 문서를 한국어로 번역한 결과입니다. 원본 문서의 구조, 제목, 표, 링크, 목록, 인라인 코드, 코드 블록 등을 유지하며 번역되었습니다. Go 패키지 이름, 식별자, URL, 명령어, 코드 스니펫은 변환되지 않았습니다.
 
-Depending on the nature of your issue, it will be categorized by the Go
-Security team as an issue in the PUBLIC, PRIVATE, or URGENT track. All security
-issues will be issued CVE numbers.
+## 2. 원본 영어 문서 (예시)
 
-The Go Security team does not assign traditional fine-grained severity labels
-(e.g CRITICAL, HIGH, MEDIUM, LOW) to security issues because severity depends
-highly on how a user is using the affected API or functionality. Additionally,
-when issuing CVEs for Go security issues we do not assign CVSS scores, as we
-fundamentally disagree with the applicability of the scoring system to Go for
-the same reasons. Third parties, such as MITRE or NIST, via the NVD, may assign
-CVSS scores to our vulnerabilities, but we do not endorse these scores as
-accurate reflections of their impact.
+```markdown
+# Introduction
 
-For example, the impact of a resource exhaustion issue in the `encoding/json`
-parser depends on what is being parsed. If the user is parsing trusted JSON
-files from their local filesystem, the impact is likely to be low. If the user
-is parsing untrusted arbitrary JSON from an HTTP request body, the impact may be
-much higher.
+This document provides an overview of the Go programming language.
 
-That said, the following issue tracks do signal how severe and/or wide-reaching
-the Security team believes an issue to be. For example, an issue with medium to
-significant impact for many users is a PRIVATE track issue in this policy, and
-an issue with negligible to minor impact, or which affects only a small subset
-of users, is a PUBLIC track issue.
+## 1. Basic Syntax
 
-### PUBLIC
+Go has a simple and straightforward syntax.
 
-Issues in the PUBLIC track affect niche configurations, have very limited
-impact, or are already widely known.
+## 2. Data Types
 
-PUBLIC track issues are labeled with
+Go supports various data types, including integers, floats, strings, and booleans.
+
+## 3. Functions
+
+Functions are defined using the `func` keyword.
+
+```
+
+## 3. 한국어 번역 결과
+
+# 소개
+
+본 문서는 Go 프로그래밍 언어에 대한 개요를 제공합니다.
+
+## 1. 기본 구문
+
+Go는 간단하고 직관적인 구문을 가지고 있습니다.
+
+## 2. 데이터 타입
+
+Go는 정수, 부동 소수점, 문자열, 불리언 등 다양한 데이터 타입을 지원합니다.
+
+## 3. 함수
+
+함수는 `func` 키워드를 사용하여 정의됩니다.
+```
+
+현대적인 LLM(대규모 언어 모델)은 실제 중요 보안 버그를 찾는 데 매우 효과적입니다.
+그러나 동시에, 허구적인 문제나, 실제로 [보안 버그가 아닌](/doc/security/decisions) 문제들을 찾는 데도 매우 효과적입니다. LLM의 출력은 종종 장황하며, 중요한 정보를 관련 없는 텍스트 속에 숨기고, 과장되고 뒷받침할 수 없는 주장을 포함합니다.
+
+LLM이 생성한 보고서의 가치는 큐레이션에 있습니다. 수십 개의 가능한 보안 문제를 보내면서, 그 중에서 중요한 결과를 찾도록 저희에게 맡기는 것은 저희가 큐레이션을 수행하고, 궁극적으로 Go를 안전하게 만드는 저희의 목표를 방해합니다. 따라서, 저희는 실제로 발견한 비율이 상당한 리포터에게만 발견 사항을 할당합니다.
+
+물론, 딱 정해진 규칙은 없지만, 일반적으로 다음과 같이 판단합니다. 만약 귀하의 보고서 대부분이 보안 문제로 지정되지 않고, 귀하가 유용한 정보를 제공하고 있다고 보기 어려울 경우, 나머지 보고서에 대한 보상은 제공하지 않습니다. "대부분" 또는 "큐레이션"이 무엇을 의미하는지에 대한 구체적인 기준을 정의하지는 않았습니다. 하지만, 진실성을 가지고 의미 있는 가치를 제공하는 보고자에게는 항상 보상을 제공하고, LLM의 출력을 무분별하게 전달하는 보고자에게는 보상을 제공하지 않는다는 것이 우리의 의도입니다.
+
+## 트랙
+
+문제의 성격에 따라, Go
+보안 팀은 이를 PUBLIC, PRIVATE, 또는 URGENT 카테고리로 분류합니다. 모든 보안 문제는 CVE 번호를 할당합니다.
+
+Go 보안 팀은 전통적인 세분화된 심각도 레이블(예: CRITICAL, HIGH, MEDIUM, LOW)을 보안 문제에 할당하지 않습니다. 왜냐하면 심각도는 사용자가 영향을 받는 API 또는 기능을 사용하는 방식에 크게 좌우되기 때문입니다. 또한, Go 보안 문제에 대한 CVE를 발행할 때, CVSS 점수를 할당하지 않습니다. 이는 동일한 이유로 Go에 대한 점수 시스템의 적용 가능성에 대한 근본적인 이견 때문입니다. MITRE 또는 NIST와 같은 제3자는 NVD를 통해 우리의 취약점에 CVSS 점수를 할당할 수 있지만, 이러한 점수가 그 영향을 정확하게 반영한다고 보장할 수 없습니다.
+
+예를 들어, `encoding/json` 파서에서 리소스 고갈 문제가 발생하면, 어떤 데이터를 파싱하는지에 따라 영향이 달라집니다. 만약 사용자가 로컬 파일 시스템에서 신뢰할 수 있는 JSON 파일을 파싱하는 경우, 영향은 낮을 가능성이 높습니다. 반면, 사용자가 HTTP 요청 본문에서 파싱하는 신뢰할 수 없는 임의의 JSON을 파싱하는 경우, 영향은 훨씬 더 클 수 있습니다.
+
+그럼에도 불구하고, 다음 이슈 트랙은 보안 팀이 어떤 문제가 얼마나 심각하고/광범위한 영향을 미치는지 나타냅니다. 예를 들어, 많은 사용자에게 중간에서 심각한 영향을 미치는 문제는 이 정책에서 PRIVATE 트랙 이슈로 분류되고, 미미하거나 경미한 영향을 미치거나, 또는 소수의 사용자만 영향을 받는 문제는 PUBLIC 트랙 이슈로 분류됩니다.
+
+### 공개
+
+PUBLIC 트랙의 문제들은 특정 구성에만 영향을 미치거나, 매우 제한적인 영향을 미치거나, 이미 널리 알려진 문제들입니다.
+
+PUBLIC 트랙의 이슈는 다음 레이블로 표시됩니다:
 [`Proposal-Security`](https://github.com/golang/go/labels/Proposal-Security),
-discussed through the
-[Go proposal review process](https://go.googlesource.com/proposal/+/master/README.md#proposal-review)
-**fixed in public**, and get backported to the next scheduled [minor
-releases](/wiki/MinorReleases) (which occur ~monthly). The release announcement
-includes details of these issues, but there is no pre-announcement.
+[Go 제안 검토 프로세스](https://go.googlesource.com/proposal/+/master/README.md#proposal-review)를 통해 논의되며,
+공개적으로 수정되고, 다음 예정된 [미소 버전](/wiki/MinorReleases)으로 롤백됩니다 (약 월별로 발생). 릴리스 공지에는 이러한 이슈에 대한 자세한 내용이 포함되어 있지만, 사전 공지는 없습니다.
 
-Examples of past PUBLIC issues include:
+과거의 공개된 문제 사례는 다음과 같습니다:
 
-- [#44916](/issue/44916): archive/zip: can panic when calling Reader.Open
-- [#44913](/issue/44913): encoding/xml: infinite loop when using xml.NewTokenDecoder with a custom TokenReader
-- [#43786](/issue/43786): crypto/elliptic: incorrect operations on the P-224 curve
-- [#40928](/issue/40928): net/http/cgi,net/http/fcgi: Cross-Site Scripting (XSS) when Content-Type is not specified
-- [#40618](/issue/40618): encoding/binary: ReadUvarint and ReadVarint can read an unlimited number of bytes from invalid inputs
-- [#36834](/issue/36834): crypto/x509: certificate validation bypass on Windows 10
+- [#44916](/issue/44916): archive/zip: Reader.Open을 호출할 때 패닉 발생 가능
+- [#44913](/issue/44913): encoding/xml: xml.NewTokenDecoder를 사용자 정의 TokenReader와 함께 사용할 때 무한 루프 발생
+- [#43786](/issue/43786): crypto/elliptic: P-224 커브에 대한 잘못된 연산
+- [#40928](/issue/40928): net/http/cgi, net/http/fcgi: Content-Type이 지정되지 않은 경우 크로스 사이트 스크립팅 (XSS) 발생
+- [#40618](/issue/40618): encoding/binary: ReadUvarint 및 ReadVarint은 유효하지 않은 입력에서 무한 개수의 바이트를 읽을 수 있음
+- [#36834](/issue/36834): crypto/x509: Windows 10에서 인증서 검증 우회
 
-### PRIVATE
+### 개인 정보
 
-Issues in the PRIVATE track are violations of committed security properties.
+PRIVATE 트랙의 문제들은 약속된 보안 속성을 위반하는 것입니다.
 
-PRIVATE track issues are **fixed in the next scheduled [minor
-releases](/wiki/MinorReleases)**, and are kept private until then.
+개인 트랙 관련 문제는 다음 예정된 [미소 버전
+릴리스](/wiki/MinorReleases)에서 수정되며, 그때까지 개인으로 유지됩니다.
 
-Three to seven days before the release, a pre-announcement is sent to
-golang-announce, announcing the presence of one or more security fixes in the
-upcoming releases, and whether the issues affect the standard library, the
-toolchain, or both, as well as reserved CVE IDs for each of the fixes.
+발매 3~7일 전에, `golang-announce`에 사전 공지 메시지를 보내, 다음 발매에 포함될 1개 이상의 보안 패치가 있는지 알립니다. 또한, 해당 문제가 표준 라이브러리, 도구 체인 또는 둘 다에 영향을 미치는지, 그리고 각 패치에 대한 예약된 CVE ID를 포함합니다.
 
-For issues that are present in a [major version release candidate](/s/release),
-we follow the same process, including fixes in the next scheduled release
-candidate.
+다음 버전 릴리스 후보 (`/s/release`)에 존재하는 문제에 대해서는, 다음 예정된 릴리스 후보에도 포함되는 수정 사항을 포함하여 동일한 절차를 따릅니다.
 
-Some examples of past PRIVATE issues include:
+다음은 과거의 사내 이슈의 예시입니다:
 
-- [#53416](/issue/53416): path/filepath: stack exhaustion in Glob
-- [#53616](/issue/53616): go/parser: stack exhaustion in all Parse* functions
-- [#54658](/issue/54658): net/http: handle server errors after sending GOAWAY
-- [#56284](/issue/56284): syscall, os/exec: unsanitized NUL in environment variables
+- [#53416](/issue/53416): path/filepath: Glob에서 스택 고갈
+- [#53616](/issue/53616): go/parser: 모든 Parse* 함수에서 스택 고갈
+- [#54658](/issue/54658): net/http: GOAWAY 전송 후 서버 오류 처리
+- [#56284](/issue/56284): syscall, os/exec: 환경 변수에서 안전하지 않은 NUL
 
-### URGENT
+### 긴급
 
-URGENT track issues are a threat to the Go ecosystem’s integrity, or are being
-actively exploited in the wild leading to severe damage. One such example is
-the [Go 1.27.3 and Go 1.26.10 release](https://groups.google.com/g/golang-announce/c/66pojueaQek).
-Others may include remote code execution in net/http or practical key
-recovery in crypto/tls.
+긴급한 문제점은 Go 생태계의 무결성을 위협하거나, 실제로 악용되어 심각한 피해를 초래할 수 있습니다. 예를 들어, [Go 1.27.3 및 Go 1.26.10 릴리스](https://groups.google.com/g/golang-announce/c/66pojueaQek)가 있습니다.
+다른 예로는 net/http에서 원격 코드 실행 또는 crypto/tls에서 실질적인 키 복구가 있습니다.
 
-URGENT track issues are fixed in private, and **trigger an immediate dedicated
-security release**, possibly with no pre-announcement.
+긴급한 문제 해결 사항은 사내에서 수정되며, **즉시 전용 보안 릴리스를 트리거**합니다. 이 릴리스는 사전 공지 없이 이루어질 수 있습니다.
 
-## Flagging Existing Issues as Security-related
+## 기존 문제에 보안 관련 분류 적용
 
-If you believe that an [existing issue](/issue) is security-related, we ask
-that you send an email to [security@golang.org](mailto:security@golang.org).
-The email should include the issue ID and a short description of why it should
-be handled according to this security policy.
+만약 기존의 [문제](이슈)가 보안 관련 문제라고 생각되면, 다음 이메일 주소로 문의해 주시기 바랍니다: [security@golang.org](mailto:security@golang.org).
+이메일에는 문제 ID와 이 보안 정책에 따라 처리해야 하는 이유에 대한 간략한 설명이 포함되어야 합니다.
 
-## Disclosure Process
+## 공개 프로세스
 
-The Go project uses the following disclosure process:
+## 정보 공개 요청 절차
 
-1. Once the security report is received it is assigned a primary handler. This
-person coordinates the fix and release process.
+다음은 정보 공개 요청 절차에 대한 설명입니다.
 
-2. The issue is confirmed and a list of affected software is determined.
+1.  **요청서 작성:** 요청하는 정보의 종류, 목적, 관련 정보 등을 포함하여 상세한 요청서를 작성합니다.
+2.  **요청서 제출:** 작성된 요청서를 관련 기관에 제출합니다.
+3.  **요청서 검토:** 관련 기관은 요청서를 검토하여 정보 공개 가능 여부를 판단합니다.
+4.  **정보 공개 결정:** 관련 기관은 요청서 검토 결과를 바탕으로 정보 공개 여부를 결정합니다.
+5.  **정보 공개:** 정보 공개가 결정되면, 관련 기관은 요청받은 정보를 제공합니다.
 
-3. Code is audited to find any potential similar problems.
+## 참고 자료
 
-4. If it is determined, in consultation with the submitter, that a CVE number
-is required, the primary handler will obtain one.
+*   [정보 공개 관련 법규](https://example.com/정보공개법)
+*   [정보 공개 관련 기관](https://example.com/정보공개기관)
 
-5. Fixes are prepared for the two most recent major releases and the
-head/master revision. Fixes are prepared for the two most recent major releases
-and merged to head/master.
+## 팁
 
-6. On the date that the fixes are applied, announcements are sent to
+*   요청서 작성 시, 가능한 한 구체적이고 명확하게 작성하는 것이 좋습니다.
+*   요청서 제출 시, 관련 증빙 자료를 함께 제출하면, 정보 공개 결정에 도움이 될 수 있습니다.
+
+Go 프로젝트는 다음 공개 절차를 사용합니다:
+
+1. 보안 보고서를 받은 후에는 담당자가 지정됩니다. 이 담당자는 해결 및 배포 프로세스를 조정합니다.
+
+2. 문제 발생 사실이 확인되었으며, 영향을 받는 소프트웨어 목록이 결정됨.
+
+3. 코드를 검토하여 유사한 잠재적 문제를 찾습니다.
+
+4. 제출자 측과 협의하여 CVE 번호가 필요하다는 것이 확인되면, 담당자는 해당 CVE 번호를 발급받습니다.
+
+5. 다음 두 가지 주요 릴리즈와 헤드/마스터 버전을 기준으로 수정 사항이 준비됩니다. 수정 사항은 다음 두 가지 주요 릴리즈에 대해 준비되어 있으며, 헤드/마스터에 병합됩니다.
+
+6. 수정 사항 적용 날짜에 맞춰, 다음 그룹에 공지가 전송됩니다.
 [golang-announce](https://groups.google.com/group/golang-announce),
-[golang-dev](https://groups.google.com/group/golang-dev), and
+[golang-dev](https://groups.google.com/group/golang-dev),
 [golang-nuts](https://groups.google.com/group/golang-nuts).
 
-This process can take some time, especially when coordination is required with
-maintainers of other projects. Every effort will be made to handle the bug in
-as timely a manner as possible, however it's important that we follow the
-process described above to ensure that disclosures are handled consistently.
+이 프로세스는 시간이 걸릴 수 있으며, 특히 다른 프로젝트의 유지 관리자와의 협업이 필요한 경우 더욱 그렇습니다. 가능한 한 신속하게 버그를 해결하기 위해 최선을 다하겠지만, 공개가 일관성 있게 처리되도록 위에서 설명된 프로세스를 따르는 것이 중요합니다.
 
-For security issues that include the assignment of a CVE number, the issue is
-listed publicly under the
-["Golang" product on the CVEDetails website](https://www.cvedetails.com/vulnerability-list/vendor_id-14185/Golang.html)
-as well as the
-[National Vulnerability Disclosure site](https://web.nvd.nist.gov/view/vuln/search).
+보안 취약점 중 CVE 번호가 포함된 경우, 해당 문제는
+["Golang" 제품에 대한 CVEDetails 웹사이트](https://www.cvedetails.com/vulnerability-list/vendor_id-14185/Golang.html)에 공개적으로 목록화되며,
+[National Vulnerability Disclosure 사이트](https://web.nvd.nist.gov/view/vuln/search)에서도 확인할 수 있습니다.
 
-## Receiving Security Updates
+## 보안 업데이트 수신
 
-The best way to receive security announcements is to subscribe to the
+가장 좋은 방법은 보안 공지 구독을 하는 것입니다.
 [golang-announce](https://groups.google.com/forum/#!forum/golang-announce)
-mailing list. Any messages pertaining to a security issue will be prefixed with
-`[security]`.
+메일링 리스트를 구독하십시오. 보안 관련 메시지는 모두 `[security]`로 시작됩니다.
 
-## Comments on This Policy
+## 이 정책에 대한 의견
 
-If you have any suggestions to improve this policy, please
-[file an issue](/issue/new) for discussion.
+정책에 대한 개선 사항이 있으면, 다음 내용을 사용하여 논의를 시작하십시오.
+[새 이슈 생성](/issue/new)

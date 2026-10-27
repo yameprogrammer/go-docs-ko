@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package fstest implements support for testing implementations and users of file systems.
+패키지 `fstest`는 파일 시스템의 구현체와 사용자를 테스트하기 위한 기능을 제공합니다.
 
 ## 원문 요약
 

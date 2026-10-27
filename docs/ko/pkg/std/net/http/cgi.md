@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package cgi implements CGI (Common Gateway Interface) as specified in RFC 3875.
+패키지 cgi는 RFC 3875에 명시된 CGI (Common Gateway Interface)를 구현합니다.
 
 ## 원문 요약
 

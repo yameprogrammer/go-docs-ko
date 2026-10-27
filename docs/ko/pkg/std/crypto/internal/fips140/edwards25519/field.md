@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package field implements fast arithmetic modulo 2^255-19.
+패키지 필드는 2^255-19에 대한 빠른 2의 거듭제곱을 이용한 모듈 연산을 구현합니다.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package structs defines marker types that can be used as struct fields to modify the properties of a struct.
+패키지 구조체는 구조체의 속성을 수정하는 데 사용할 수 있는 마커 유형을 정의합니다.
 
 ## 원문 요약
 

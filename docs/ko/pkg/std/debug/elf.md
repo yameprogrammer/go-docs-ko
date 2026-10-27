@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package elf implements access to ELF object files.
+패키지 elf은 ELF 오브젝트 파일에 대한 접근을 구현합니다.
 
 ## 원문 요약
 

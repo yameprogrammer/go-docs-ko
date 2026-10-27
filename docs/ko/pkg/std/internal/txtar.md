@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package txtar implements a trivial text-based file archive format.
+패키지 `txtar`는 간단한 텍스트 기반 파일 아카이브 형식을 구현합니다.
 
 ## 원문 요약
 

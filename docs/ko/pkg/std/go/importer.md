@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package importer provides access to export data importers.
+패키지 임포터는 내보내기 데이터 임포터에 접근을 제공합니다.
 
 ## 원문 요약
 

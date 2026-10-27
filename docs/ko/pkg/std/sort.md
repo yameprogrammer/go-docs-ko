@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package sort provides primitives for sorting slices and user-defined collections.
+패키지 `sort`는 슬라이스와 사용자 정의 컬렉션을 정렬하기 위한 기본 기능을 제공합니다.
 
 ## 원문 요약
 

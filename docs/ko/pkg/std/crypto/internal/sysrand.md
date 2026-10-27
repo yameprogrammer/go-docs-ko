@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package rand provides cryptographically secure random bytes from the operating system.
+패키지 `rand`는 운영 체제에서 제공하는 암호학적으로 안전한 임의의 바이트를 제공합니다.
 
 ## 원문 요약
 

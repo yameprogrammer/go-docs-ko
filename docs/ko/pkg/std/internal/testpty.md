@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package testpty is a simple pseudo-terminal package for Unix systems, implemented by calling C functions via cgo.
+패키지 `testpty`는 CGO를 통해 C 함수를 호출하여 구현된 간단한 퓨전터미널 패키지로, 유닉스 시스템용입니다.
 
 ## 원문 요약
 

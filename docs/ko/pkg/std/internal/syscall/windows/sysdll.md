@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package sysdll is an internal leaf package that records and reports which Windows DLL names are used by Go itself.
+패키지 `sysdll`는 Go 자체에서 사용되는 Windows DLL 이름에 대한 기록 및 보고를 수행하는 내부 리프 패키지입니다.
 
 ## 원문 요약
 

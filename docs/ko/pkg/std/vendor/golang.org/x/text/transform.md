@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package transform provides reader and writer wrappers that transform the bytes passing through as well as various transformations.
+패키지 `transform`은 바이트를 처리하면서 변환을 수행하는 리더 및 라이터 래퍼를 제공합니다. 또한 다양한 변환 기능을 제공합니다.
 
 ## 원문 요약
 

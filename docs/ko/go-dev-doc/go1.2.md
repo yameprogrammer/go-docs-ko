@@ -1,675 +1,553 @@
-## Introduction to Go 1.2 {#introduction}
+## Go 1.2 소개 {#introduction}
 
-Since the release of [Go version 1.1](/doc/go1.1.html) in April, 2013,
-the release schedule has been shortened to make the release process more efficient.
-This release, Go version 1.2 or Go 1.2 for short, arrives roughly six months after 1.1,
-while 1.1 took over a year to appear after 1.0.
-Because of the shorter time scale, 1.2 is a smaller delta than the step from 1.0 to 1.1,
-but it still has some significant developments, including
-a better scheduler and one new language feature.
-Of course, Go 1.2 keeps the [promise
-of compatibility](/doc/go1compat.html).
-The overwhelming majority of programs built with Go 1.1 (or 1.0 for that matter)
-will run without any changes whatsoever when moved to 1.2,
-although the introduction of one restriction
-to a corner of the language may expose already-incorrect code
-(see the discussion of the [use of nil](#use_of_nil)).
+```go
+package main
 
-## Changes to the language {#language}
+import "fmt"
 
-In the interest of firming up the specification, one corner case has been clarified,
-with consequences for programs.
-There is also one new language feature.
+func main() {
+	fmt.Println("Hello, World!")
+}
+```
 
-### Use of nil {#use_of_nil}
+## Go 언어의 특징
 
-The language now specifies that, for safety reasons,
-certain uses of nil pointers are guaranteed to trigger a run-time panic.
-For instance, in Go 1.0, given code like
+*   **경량화된 프로세스:** Go는 Go루틴이라는 경량화된 프로세스 모델을 사용하여 효율적인 동시성 프로그래밍을 지원합니다.
+*   **강력한 표준 라이브러리:** Go는 다양한 기능을 제공하는 풍부한 표준 라이브러리를 제공합니다.
+*   **컴파일 언어:** Go는 빠른 컴파일 속도를 제공하는 컴파일 언어입니다.
+*   **가비지 컬렉션:** Go는 자동 가비지 컬렉션을 지원하여 메모리 관리를 단순화합니다.
 
-	type T struct {
-	    X [1<<24]byte
-	    Field int32
-	}
+## Go 언어의 장점
 
-	func main() {
-	    var x *T
-	    ...
-	}
+*   **경쟁력 있는 성능:** Go는 C, C++와 같은 저수준 언어에 준하는 뛰어난 성능을 제공합니다.
+*   **쉬운 학습:** Go는 비교적 간단한 문법을 가지고 있어 배우기 쉽습니다.
+*   **뛰어난 동시성 지원:** Go는 Go루틴을 통해 강력한 동시성 프로그래밍을 지원합니다.
+*   **풍부한 생태계:** Go는 활발한 커뮤니티와 다양한 라이브러리를 보유하고 있습니다.
 
-the `nil` pointer `x` could be used to access memory incorrectly:
-the expression `x.Field` could access memory at address `1<<24`.
-To prevent such unsafe behavior, in Go 1.2 the compilers now guarantee that any indirection through
-a nil pointer, such as illustrated here but also in nil pointers to arrays, nil interface values,
-nil slices, and so on, will either panic or return a correct, safe non-nil value.
-In short, any expression that explicitly or implicitly requires evaluation of a nil address is an error.
-The implementation may inject extra tests into the compiled program to enforce this behavior.
+2013년 4월에 [Go 버전 1.1](/doc/go1.1.html)가 출시된 이후,
+릴리스 주기를 단축하여 릴리스 프로세스를 더욱 효율적으로 만들었습니다.
+이 릴리스, Go 버전 1.2 또는 Go 1.2라고 줄여 부르는 것은 1.1 이후 약 6개월 후에 출시되며,
+1.1은 1.0 이후 약 1년이 걸렸습니다.
+짧은 기간으로 인해 1.2는 1.0에서 1.1로의 변화보다 작은 변화이지만, 여전히 상당한 발전 사항이 포함되어 있습니다.
+예를 들어, 개선된 스케줄러와 새로운 언어 기능이 있습니다.
+물론, Go 1.2는 [호환성](/doc/go1compat.html)을 유지합니다.
+Go 1.1(또는 1.0으로 구축된)로 작성된 대부분의 프로그램은 1.2로 이동해도 전혀 변경 없이 실행될 것입니다.
+하지만 언어의 한 부분에 대한 한 가지 제한 사항이 도입되면 기존의 잘못된 코드가 드러날 수 있습니다 (자세한 내용은 [nil 사용](#use_of_nil) 참조).
 
-Further details are in the
-[design document](/s/go12nil).
+## 언어 변경 사항 {#language}
 
-_Updating_:
-Most code that depended on the old behavior is erroneous and will fail when run.
-Such programs will need to be updated by hand.
+명세를 더욱 명확하게 하기 위해, 하나의 예외적인 경우에 대한 설명이 추가되었으며, 이는 프로그램에 영향을 미칩니다.
+또한, 새로운 언어 기능이 추가되었습니다.
 
-### Three-index slices {#three_index}
+### `nil` 사용법 {#use_of_nil}
 
-Go 1.2 adds the ability to specify the capacity as well as the length when using a slicing operation
-on an existing array or slice.
-A slicing operation creates a new slice by describing a contiguous section of an already-created array or slice:
+```go
+package main
 
-	var array [10]int
+func main() {
+	var x *int
+	fmt.Println(x) // 출력: nil
+
+	var y *int
+	y = nil
+	fmt.Println(y) // 출력: nil
+}
+```
+
+현재 언어는 안전상의 이유로,
+특정 `nil` 포인터 사용은 실행 시 패닉을 발생시킬 것으로 보장합니다.
+예를 들어, Go 1.0에서는 다음과 같은 코드를 사용하면
+
+```markdown
+```go
+type T struct {
+	X [1<<24]byte
+	Field int32
+}
+```
+
+```markdown
+func main() {
+    var x *T
+    ...
+}
+```
+
+`nil` 포인터 `x`는 잘못된 방식으로 메모리에 접근할 수 있습니다:
+`x.Field`라는 표현은 주소 `1<<24`에 접근할 수 있습니다.
+이러한 위험한 동작을 방지하기 위해, Go 1.2에서는 컴파일러가 `nil` 포인터를 통해 발생하는 모든 간접 참조(예: 여기에서 설명된 것뿐만 아니라 배열, 인터페이스 값, 슬라이스 등에 대한 `nil` 포인터)가 실패하거나 올바른, 안전한 비-`nil` 값을 반환하도록 보장합니다.
+요약하면, 명시적이거나 암묵적으로 `nil` 주소의 평가를 필요로 하는 모든 표현은 오류입니다.
+구현은 이 동작을 강제하기 위해 컴파일된 프로그램에 추가 테스트를 삽입할 수 있습니다.
+
+자세한 내용은 다음 문서를 참조하십시오:
+[설계 문서](/s/go12nil).
+
+_업데이트_:
+오래된 동작에 의존하는 대부분의 코드는 잘못되었으며 실행될 때 오류가 발생합니다.
+이러한 프로그램은 수동으로 업데이트해야 합니다.
+
+### 3개 인덱스 슬라이스 {#three_index}
+
+Go 1.2에서는 기존의 배열 또는 슬라이스에 대한 슬라이싱 연산을 사용할 때, 길이를 지정하는 것뿐만 아니라 용량도 지정할 수 있는 기능을 추가했습니다.
+슬라이싱 연산은 이미 생성된 배열 또는 슬라이스의 연속적인 부분을 설명하여 새로운 슬라이스를 생성합니다:
+
+```markdown
+var array [10]int
 	slice := array[2:4]
+```
 
-The capacity of the slice is the maximum number of elements that the slice may hold, even after reslicing;
-it reflects the size of the underlying array.
-In this example, the capacity of the `slice` variable is 8.
+슬라이스의 용량은 슬라이스가 재할당 후에도 담을 수 있는 최대 개수의 요소를 나타냅니다.
+이는 기본 배열의 크기를 반영합니다.
+이 예시에서 `slice` 변수의 용량은 8입니다.
 
-Go 1.2 adds new syntax to allow a slicing operation to specify the capacity as well as the length.
-A second
-colon introduces the capacity value, which must be less than or equal to the capacity of the
-source slice or array, adjusted for the origin. For instance,
+Go 1.2는 슬라이싱 연산이 길이를 지정할 뿐만 아니라 용량도 지정할 수 있도록 새로운 구문을 추가합니다.
+두 번째
+콜론은 용량 값을 도입하며, 이는 소스 슬라이스 또는 배열의 용량보다 작거나 같아야 하며, 원본에 따라 조정됩니다. 예를 들어,
 
-	slice = array[2:4:7]
+slice = array[2:4:7]
 
-sets the slice to have the same length as in the earlier example but its capacity is now only 5 elements (7-2).
-It is impossible to use this new slice value to access the last three elements of the original array.
+새 슬라이스는 이전 예제와 동일한 길이를 갖지만, 이제 용량은 5개의 요소(7-2)만 갖습니다.
+이 새로운 슬라이스 값을 사용하여 원래 배열의 마지막 3개의 요소를 접근하는 것은 불가능합니다.
 
-In this three-index notation, a missing first index (`[:i:j]`) defaults to zero but the other
-two indices must always be specified explicitly.
-It is possible that future releases of Go may introduce default values for these indices.
+이 세 인덱스 표기법에서 첫 번째 인덱스가 누락된 경우 (`[:i:j]`) 기본값은 0이지만, 다른 두 인덱스는 항상 명시적으로 지정해야 합니다.
+향후 Go의 버전에서 이러한 인덱스에 대한 기본값을 도입할 수도 있습니다.
 
-Further details are in the
-[design document](/s/go12slice).
+자세한 내용은 다음에서 확인할 수 있습니다:
+[설계 문서](/s/go12slice)
 
-_Updating_:
-This is a backwards-compatible change that affects no existing programs.
+_업데이트_:
+이것은 기존 프로그램에 영향을 미치지 않는 역호환성 변경 사항입니다.
 
-## Changes to the implementations and tools {#impl}
+## 구현 및 도구에 대한 변경 사항 {#impl}
 
-### Pre-emption in the scheduler {#preemption}
+### 스케줄러에서의 우선순위 설정 {#preemption}
 
-In prior releases, a goroutine that was looping forever could starve out other
-goroutines on the same thread, a serious problem when GOMAXPROCS
-provided only one user thread.
-In Go 1.2, this is partially addressed: The scheduler is invoked occasionally
-upon entry to a function.
-This means that any loop that includes a (non-inlined) function call can
-be pre-empted, allowing other goroutines to run on the same thread.
+이전 버전에서는 무한 루프를 실행하는 goroutine이 동일한 스레드 내의 다른 goroutine을 "굶게" 만들 수 있었고, 이는 `GOMAXPROCS`가 단일 사용자 스레드만 제공할 때 심각한 문제였습니다.
+Go 1.2에서는 이 문제가 부분적으로 해결되었습니다: 스케줄러는 함수 진입 시 간헐적으로 호출됩니다.
+따라서 (인라인되지 않은) 함수 호출을 포함하는 모든 루프는 중단될 수 있으며, 이를 통해 동일한 스레드 내에서 다른 goroutine을 실행할 수 있습니다.
 
-### Limit on the number of threads {#thread_limit}
+### 스레드 수 제한 {#thread_limit}
 
-Go 1.2 introduces a configurable limit (default 10,000) to the total number of threads
-a single program may have in its address space, to avoid resource starvation
-issues in some environments.
-Note that goroutines are multiplexed onto threads so this limit does not directly
-limit the number of goroutines, only the number that may be simultaneously blocked
-in a system call.
-In practice, the limit is hard to reach.
+Go 1.2 버전에서는 프로그램이 사용할 수 있는 주소 공간 내의 총 스레드 수를 구성 가능하게 설정 (기본값: 10,000) 합니다. 이는 일부 환경에서 자원 고갈 문제를 방지하기 위한 것입니다.
+참고: goroutine은 스레드에 묶여 있으므로, 이 제한은 직접적으로 goroutine의 수를 제한하는 것이 아니라, 시스템 호출 시 동시에 차단될 수 있는 스레드 수를 제한합니다.
+실제로 이 제한을 달성하는 것은 어렵습니다.
 
-The new [`SetMaxThreads`](/pkg/runtime/debug/#SetMaxThreads) function in the
-[`runtime/debug`](/pkg/runtime/debug/) package controls the thread count limit.
+새로운 [`SetMaxThreads`](/pkg/runtime/debug/#SetMaxThreads) 함수는
+[`runtime/debug`](/pkg/runtime/debug/) 패키지에 포함되어 있으며, 스레드 개수 제한을 제어합니다.
 
-_Updating_:
-Few functions will be affected by the limit, but if a program dies because it hits the
-limit, it could be modified to call `SetMaxThreads` to set a higher count.
-Even better would be to refactor the program to need fewer threads, reducing consumption
-of kernel resources.
+_업데이트_:
+몇몇 함수만 제한에 영향을 받지만, 제한에 도달하여 프로그램이 종료되는 경우, `SetMaxThreads`를 호출하여 더 높은 값을 설정하도록 수정할 수 있습니다.
+더 나은 방법은 프로그램 자체를 수정하여 더 적은 수의 스레드를 사용하도록 변경하고, 이를 통해 커널 자원 소비를 줄이는 것입니다.
 
-### Stack size {#stack_size}
+### 스택 크기 {#stack_size}
 
-In Go 1.2, the minimum size of the stack when a goroutine is created has been lifted from 4KB to 8KB.
-Many programs were suffering performance problems with the old size, which had a tendency
-to introduce expensive stack-segment switching in performance-critical sections.
-The new number was determined by empirical testing.
+Go 1.2에서 goroutine이 생성될 때 기본 스택 크기가 4KB에서 8KB로 변경되었습니다.
+이전 크기는 많은 프로그램에서 성능 문제를 일으켰고, 특히 성능이 중요한 부분에서 비싼 스택 세그먼트 전환을 유발하는 경향이 있었습니다.
+새로운 값은 실험적인 테스트를 통해 결정되었습니다.
 
-At the other end, the new function [`SetMaxStack`](/pkg/runtime/debug/#SetMaxStack)
-in the [`runtime/debug`](/pkg/runtime/debug) package controls
-the _maximum_ size of a single goroutine's stack.
-The default is 1GB on 64-bit systems and 250MB on 32-bit systems.
-Before Go 1.2, it was too easy for a runaway recursion to consume all the memory on a machine.
+반대쪽에서는 [`SetMaxStack`](/pkg/runtime/debug/#SetMaxStack) 함수가 [`runtime/debug`](/pkg/runtime/debug) 패키지에 존재하며,
+단일 고루틴의 스택의 최대 크기를 제어합니다.
+기본값은 64비트 시스템에서는 1GB, 32비트 시스템에서는 250MB입니다.
+Go 1.2 이전에는, 무한 반복이 시스템의 메모리를 모두 소모하는 경우가 많았습니다.
 
-_Updating_:
-The increased minimum stack size may cause programs with many goroutines to use
-more memory. There is no workaround, but plans for future releases
-include new stack management technology that should address the problem better.
+_업데이트_:
+최대 스택 크기 증가로 인해 많은 고루틴을 사용하는 프로그램이 더 많은 메모리를 사용할 수 있습니다. 이 문제를 해결할 수 있는 방법은 없지만, 향후 릴리스에는 더 나은 해결책을 제공할 새로운 스택 관리 기술이 포함될 예정입니다.
 
-### Cgo and C++ {#cgo_and_cpp}
+### Cgo와 C++ {#cgo_and_cpp}
 
-The [`cgo`](/cmd/cgo/) command will now invoke the C++
-compiler to build any pieces of the linked-to library that are written in C++;
-[the documentation](/cmd/cgo/) has more detail.
+명령 `cgo`는 이제 C++로 작성된 링크된 라이브러리의 일부를 빌드하기 위해 C++ 컴파일러를 호출합니다. 자세한 내용은 [문서](/cmd/cgo/)를 참조하십시오.
 
-### Godoc and vet moved to the go.tools subrepository {#go_tools_godoc}
+### Godoc 및 vet를 go.tools 서브리포지토리로 이동 (#go_tools_godoc)
 
-Both binaries are still included with the distribution, but the source code for the
-godoc and vet commands has moved to the
-[go.tools](https://code.google.com/p/go.tools) subrepository.
+`godoc` 및 `vet` 명령에 대한 소스 코드는 여전히 배포판에 포함되어 있지만, [go.tools](https://code.google.com/p/go.tools) 서브 저장소로 이동했습니다.
 
-Also, the core of the godoc program has been split into a
-[library](https://code.google.com/p/go/source/browse/?repo=tools#hg%2Fgodoc),
-while the command itself is in a separate
-[directory](https://code.google.com/p/go/source/browse/?repo=tools#hg%2Fcmd%2Fgodoc).
-The move allows the code to be updated easily and the separation into a library and command
-makes it easier to construct custom binaries for local sites and different deployment methods.
+또한, godoc 프로그램의 핵심 기능이 [라이브러리](https://code.google.com/p/go/source/browse/?repo=tools#hg%2Fgodoc)로 분리되었으며, 자체 명령은 별도의 [디렉토리](https://code.google.com/p/go/source/browse/?repo=tools#hg%2Fcmd%2Fgodoc)에 있습니다. 이러한 변경을 통해 코드를 쉽게 업데이트할 수 있으며, 라이브러리와 명령으로의 분리는 로컬 사이트 및 다양한 배포 방법에 대한 사용자 정의 바이너리를 구축하는 데 용이합니다.
 
-_Updating_:
-Since godoc and vet are not part of the library,
-no client Go code depends on their source and no updating is required.
+_업데이트_:
+`godoc` 및 `vet`은 라이브러리의 일부가 아니므로,
+클라이언트 Go 코드에서 이러한 소스에 의존하지 않으며, 업데이트가 필요하지 않습니다.
 
-The binary distributions available from [golang.org](/)
-include these binaries, so users of these distributions are unaffected.
+다음 바이너리 배포판은 [golang.org](/)에서 제공되므로, 이러한 배포판의 사용자는 영향을 받지 않습니다.
 
-When building from source, users must use "go get" to install godoc and vet.
-(The binaries will continue to be installed in their usual locations, not
-`$GOPATH/bin`.)
+소스에서 빌드할 때, 사용자는 godoc 및 vet를 설치하기 위해 "go get"을 사용해야 합니다.
+(실행 파일은 일반적인 위치에 계속 설치됩니다. `$GOPATH/bin`이 아닌.)
 
-	$ go get code.google.com/p/go.tools/cmd/godoc
+$ go get code.google.com/p/go.tools/cmd/godoc
 	$ go get code.google.com/p/go.tools/cmd/vet
 
-### Status of gccgo {#gccgo}
+### gccgo의 상태 {#gccgo}
 
-We expect the future GCC 4.9 release to include gccgo with full
-support for Go 1.2.
-In the current (4.8.2) release of GCC, gccgo implements Go 1.1.2.
+저희는 향후 GCC 4.9 릴리스에 gccgo가 Go 1.2에 대한 완전한 지원을 포함할 것으로 예상합니다.
+현재 (4.8.2) 릴리스의 GCC에서 gccgo는 Go 1.1.2를 구현합니다.
 
-### Changes to the gc compiler and linker {#gc_changes}
+### GC 컴파일러 및 링커 변경 사항 {#gc_changes}
 
-Go 1.2 has several semantic changes to the workings of the gc compiler suite.
-Most users will be unaffected by them.
+Go 1.2에는 GC 컴파일러 스위트의 작동 방식에 여러 의미론적 변경 사항이 있습니다.
+대부분의 사용자는 이 변경 사항으로 인해 영향을 받지 않습니다.
 
-The [`cgo`](/cmd/cgo/) command now
-works when C++ is included in the library being linked against.
-See the [`cgo`](/cmd/cgo/) documentation
-for details.
+명령 `cgo`는 이제 C++이 링크되는 라이브러리에 포함될 때 작동합니다.
+자세한 내용은 `cgo` 문서를 참조하십시오.
 
-The gc compiler displayed a vestigial detail of its origins when
-a program had no `package` clause: it assumed
-the file was in package `main`.
-The past has been erased, and a missing `package` clause
-is now an error.
+`gc` 컴파일러는 프로그램에 `package` 절이 없을 때, 컴파일러의 원래 형태를 반영하는 오류 메시지를 표시했습니다. 즉, 파일을 `main` 패키지에 있다고 가정했습니다.
 
-On the ARM, the toolchain supports "external linking", which
-is a step towards being able to build shared libraries with the gc
-toolchain and to provide dynamic linking support for environments
-in which that is necessary.
+과거는 사라졌고, `package` 절이 누락되면 이제는 오류가 발생합니다.
 
-In the runtime for the ARM, with `5a`, it used to be possible to refer
-to the runtime-internal `m` (machine) and `g`
-(goroutine) variables using `R9` and `R10` directly.
-It is now necessary to refer to them by their proper names.
+ARM 아키텍처에서는 "외부 링크" 기능을 지원하며, 이는 `gc` 툴체인을 사용하여 공유 라이브러리를 빌드하고, 필요한 환경에서 동적 링크를 지원하는 데 필요한 단계입니다.
 
-Also on the ARM, the `5l` linker (sic) now defines the
-`MOVBS` and `MOVHS` instructions
-as synonyms of `MOVB` and `MOVH`,
-to make clearer the separation between signed and unsigned
-sub-word moves; the unsigned versions already existed with a
-`U` suffix.
+ARM 아키텍처의 런타임 환경에서, `5a` 버전에서는 `R9`와 `R10`을 직접 사용하여 런타임 내부의 `m` (메시) 및 `g` (고루틴) 변수에 접근할 수 있었습니다.
+이제는 해당 변수들을 적절한 이름으로 참조해야 합니다.
 
-### Test coverage {#cover}
+또한 ARM 아키텍처에서는 `5l` 링커가 `MOVBS` 및 `MOVHS` 명령어를 `MOVB` 및 `MOVH` 명령어와 동의어로 정의하여, 부호 있는(signed) 및 부호 없는(unsigned) 서브워드 이동 간의 구분을 명확하게 합니다. 이미 부호 없는 버전은 `U` 접미사를 사용하여 존재했습니다.
 
-One major new feature of [`go test`](/pkg/go/) is
-that it can now compute and, with help from a new, separately installed
-"go tool cover" program, display test coverage results.
+### 테스트 커버리지 {#cover}
 
-The cover tool is part of the
-[`go.tools`](https://code.google.com/p/go/source/checkout?repo=tools)
-subrepository.
-It can be installed by running
+`go test`의 주요 새로운 기능 중 하나는 이제 테스트 커버리지를 계산하고, 새로운 별도로 설치된 "go tool cover" 프로그램을 사용하여 테스트 커버리지를 표시할 수 있다는 것입니다.
 
-	$ go get code.google.com/p/go.tools/cmd/cover
+`cover` 도구는 [`go.tools`](https://code.google.com/p/go/source/checkout?repo=tools)
+서브리포지토리의 일부입니다.
+다음 명령을 실행하여 설치할 수 있습니다:
 
-The cover tool does two things.
-First, when "go test" is given the `-cover` flag, it is run automatically
-to rewrite the source for the package and insert instrumentation statements.
-The test is then compiled and run as usual, and basic coverage statistics are reported:
+$ go get code.google.com/p/go.tools/cmd/cover
 
-	$ go test -cover fmt
-	ok  	fmt	0.060s	coverage: 91.4% of statements
+이 도구는 두 가지 기능을 수행합니다.
+첫째, "go test"에 "-cover" 플래그를 제공하면, 자동으로 패키지의 소스를 다시 작성하고 측정 문을 삽입하도록 실행됩니다.
+그런 다음 테스트는 정상적으로 컴파일되고 실행되며, 기본적인 커버리지 통계가 보고됩니다:
+
+```markdown
+$ go test -cover fmt
+	ok 	fmt	0.060s	테스트 결과: 91.4%의 코드 커버리지
 	$
+```
 
-Second, for more detailed reports, different flags to "go test" can create a coverage profile file,
-which the cover program, invoked with "go tool cover", can then analyze.
+둘째, 더 자세한 보고서를 위해, `go test` 명령에 다양한 플래그를 사용하면 커버리지 프로필 파일을 생성할 수 있으며, `go tool cover` 명령으로 실행되는 `cover` 프로그램은 이를 분석할 수 있습니다.
 
-Details on how to generate and analyze coverage statistics can be found by running the commands
+다음 명령을 실행하여 생성 및 분석 방법에 대한 자세한 내용은 확인할 수 있습니다.
 
-	$ go help testflag
+```
+$ go help testflag
 	$ go tool cover -help
+```
 
-### The go doc command is deleted {#go_doc}
+### `go doc` 명령어는 삭제되었습니다 {#go_doc}
 
-The "go doc" command is deleted.
-Note that the [`godoc`](/cmd/godoc/) tool itself is not deleted,
-just the wrapping of it by the [`go`](/cmd/go/) command.
-All it did was show the documents for a package by package path,
-which godoc itself already does with more flexibility.
-It has therefore been deleted to reduce the number of documentation tools and,
-as part of the restructuring of godoc, encourage better options in future.
+"go doc" 명령이 삭제되었습니다.
+참고: [`godoc`](/cmd/godoc/) 도구 자체는 삭제되지 않았으며,
+단 `go` 명령에서 제공하는 래퍼 기능만 삭제되었습니다.
+이 도구는 단순히 패키지 경로별로 문서를 보여주는 기능만 제공했으며,
+godoc 자체도 더 많은 유연성을 제공합니다.
+따라서, 문서 생성 도구의 수를 줄이고, godoc의 재구성을 통해 향후 더 나은 옵션을 제공하기 위해 삭제되었습니다.
 
-_Updating_: For those who still need the precise functionality of running
+_업데이트_: 다음 기능을 정확하게 사용해야 하는 분들을 위해:
 
-	$ go doc
+$ go doc
 
-in a directory, the behavior is identical to running
+디렉토리 내에서, 동작은 다음과 같이 실행하는 것과 동일합니다.
 
-	$ godoc .
+`godoc .`
 
-### Changes to the go command {#gocmd}
+### `go` 명령어에 대한 변경 사항 {#gocmd}
 
-The [`go get`](/cmd/go/) command
-now has a `-t` flag that causes it to download the dependencies
-of the tests run by the package, not just those of the package itself.
-By default, as before, dependencies of the tests are not downloaded.
+[`go get`](/cmd/go/) 명령어는 이제 `-t` 플래그를 통해 패키지에 포함된 테스트를 실행하는 데 필요한 의존성을 다운로드할 수 있습니다. (패키지 자체의 의존성뿐만 아니라).
+기본적으로, 이전과 마찬가지로, 테스트의 의존성은 다운로드되지 않습니다.
 
-## Performance {#performance}
+## 성능 {#performance}
 
-There are a number of significant performance improvements in the standard library; here are a few of them.
+표준 라이브러리에는 여러 가지 중요한 성능 개선 사항이 있습니다. 몇 가지 예시는 다음과 같습니다.
 
-  - The [`compress/bzip2`](/pkg/compress/bzip2/)
-    decompresses about 30% faster.
-  - The [`crypto/des`](/pkg/crypto/des/) package
-    is about five times faster.
-  - The [`encoding/json`](/pkg/encoding/json/) package
-    encodes about 30% faster.
-  - Networking performance on Windows and BSD systems is about 30% faster through the use
-    of an integrated network poller in the runtime, similar to what was done for Linux and OS X
-    in Go 1.1.
+- [`compress/bzip2`](/pkg/compress/bzip2/)
+    는 압축/해제 속도가 약 30% 더 빠릅니다.
+  - [`crypto/des`](/pkg/crypto/des/) 패키지는 약 5배 더 빠릅니다.
+  - [`encoding/json`](/pkg/encoding/json/) 패키지는 압축/해제 속도가 약 30% 더 빠릅니다.
+  - Windows 및 BSD 시스템의 네트워크 성능은 통합 네트워크 폴러를 사용하여 약 30% 더 빠릅니다 (이는 Go 1.1에서 Linux 및 OS X에 적용된 방식과 유사합니다).
 
-## Changes to the standard library {#library}
+## 표준 라이브러리의 변경 사항 {#library}
 
-### The archive/tar and archive/zip packages {#archive_tar_zip}
+이 섹션에서는 표준 라이브러리의 변경 사항에 대한 개요를 제공합니다.
 
-The
+### 아카이브/tar 및 아카이브/zip 패키지 {#archive_tar_zip}
+
 [`archive/tar`](/pkg/archive/tar/)
-and
+과
 [`archive/zip`](/pkg/archive/zip/)
-packages have had a change to their semantics that may break existing programs.
-The issue is that they both provided an implementation of the
+패키지는 의미론적 측면에서 변경되었으며, 이는 기존 프로그램에 영향을 줄 수 있습니다.
+문제는 이 두 패키지가 모두
 [`os.FileInfo`](/pkg/os/#FileInfo)
-interface that was not compliant with the specification for that interface.
-In particular, their `Name` method returned the full
-path name of the entry, but the interface specification requires that
-the method return only the base name (final path element).
+인터페이스의 구현을 제공했지만, 이 인터페이스의 사양과 일치하지 않았다는 점입니다.
+특히, `Name` 메서드는 엔트리의 전체
+경로 이름을 반환했지만, 인터페이스 사양은 메서드가 최종 경로 요소(기본 이름)만 반환하도록 요구합니다.
 
-_Updating_: Since this behavior was newly implemented and
-a bit obscure, it is possible that no code depends on the broken behavior.
-If there are programs that do depend on it, they will need to be identified
-and fixed manually.
+_업데이트_: 이 동작이 최근에 구현되었고 다소 불명확하기 때문에, 이 오류 동작에 의존하는 코드가 없는 경우도 있을 수 있습니다. 만약 이 동작에 의존하는 프로그램이 있다면, 해당 프로그램을 식별하고 수동으로 수정해야 합니다.
 
-### The new encoding package {#encoding}
+### 새로운 인코딩 패키지 {#encoding}
 
-There is a new package, [`encoding`](/pkg/encoding/),
-that defines a set of standard encoding interfaces that may be used to
-build custom marshalers and unmarshalers for packages such as
-[`encoding/xml`](/pkg/encoding/xml/),
-[`encoding/json`](/pkg/encoding/json/),
-and
-[`encoding/binary`](/pkg/encoding/binary/).
-These new interfaces have been used to tidy up some implementations in
-the standard library.
+새로운 패키지인 [`encoding`](/pkg/encoding/)는 표준 인코딩 인터페이스 집합을 정의하며, 이를 사용하여 `encoding/xml`](/pkg/encoding/xml/),
+`encoding/json`](/pkg/encoding/json/),
+그리고
+`encoding/binary`](/pkg/encoding/binary/)와 같은 패키지를 위한 사용자 정의 마샬러 및 언마샬러를 구축하는 데 사용할 수 있습니다.
 
-The new interfaces are called
+이 새로운 인터페이스는 표준 라이브러리의 일부 구현을 정리하는 데 사용되었습니다.
+
+새로운 인터페이스는 다음과 같이 명명됩니다:
 [`BinaryMarshaler`](/pkg/encoding/#BinaryMarshaler),
 [`BinaryUnmarshaler`](/pkg/encoding/#BinaryUnmarshaler),
 [`TextMarshaler`](/pkg/encoding/#TextMarshaler),
-and
+그리고
 [`TextUnmarshaler`](/pkg/encoding/#TextUnmarshaler).
-Full details are in the [documentation](/pkg/encoding/) for the package
-and a separate [design document](/s/go12encoding).
+전체 내용은 패키지의 [문서](/pkg/encoding/)에 있으며, 별도의 [설계 문서](/s/go12encoding)도 있습니다.
 
-### The fmt package {#fmt_indexed_arguments}
+### `fmt` 패키지 {#fmt_indexed_arguments}
 
-The [`fmt`](/pkg/fmt/) package's formatted print
-routines such as [`Printf`](/pkg/fmt/#Printf)
-now allow the data items to be printed to be accessed in arbitrary order
-by using an indexing operation in the formatting specifications.
-Wherever an argument is to be fetched from the argument list for formatting,
-either as the value to be formatted or as a width or specification integer,
-a new optional indexing notation `[`_n_`]`
-fetches argument _n_ instead.
-The value of _n_ is 1-indexed.
-After such an indexing operating, the next argument to be fetched by normal
-processing will be _n_+1.
+[`fmt`](/pkg/fmt/) 패키지의 포맷된 출력
+루틴, 예를 들어 [`Printf`](/pkg/fmt/#Printf),
+이제 형식 사양 내의 인덱싱 연산을 사용하여 데이터를 임의의 순서로 출력할 수 있습니다.
+형식에 사용할 인수를 가져올 위치, 즉 형식을 지정하거나 너비 또는 사양 정수로서,
+새로운 선택적 인덱싱 표기법 `[_n_]`을 사용하여 _n_번째 인수를 가져옵니다.
+_n_의 값은 1부터 시작합니다.
+이러한 인덱싱 연산 후, 정상적인 처리가 다음 가져올 인수는 _n_+1이 됩니다.
 
-For example, the normal `Printf` call
+예를 들어, 일반적인 `Printf` 호출
+```go
+fmt.Printf("Hello, world!\n")
+```
 
-	fmt.Sprintf("%c %c %c\n", 'a', 'b', 'c')
+`fmt.Sprintf("%c %c %c\n", 'a', 'b', 'c')`
 
-would create the string `"a b c"`, but with indexing operations like this,
+다음과 같이 인덱싱 작업을 수행하면 `"a b c"`라는 문자열을 생성할 수 있습니다.
 
-	fmt.Sprintf("%[3]c %[1]c %c\n", 'a', 'b', 'c')
+`fmt.Sprintf("%[3]c %[1]c %c\n", 'a', 'b', 'c')`
 
-the result is "`"c a b"`. The `[3]` index accesses the third formatting
-argument, which is `'c'`, `[1]` accesses the first, `'a'`,
-and then the next fetch accesses the argument following that one, `'b'`.
+결과는 "`"c a b"`. 인덱스 `[3]`는 세 번째 포맷팅 인수를 참조하며, 이는 `'c'`입니다. 인덱스 `[1]`은 첫 번째 인수를 참조하며, 이는 `'a'`입니다. 그런 다음 다음 획득은 그 다음 인수를 참조하며, 이는 `'b'`입니다.
 
-The motivation for this feature is programmable format statements to access
-the arguments in different order for localization, but it has other uses:
+이 기능의 목적은 다양한 언어에 맞게 인수를 다른 순서로 접근하기 위한 프로그래밍 가능한 형식 문을 제공하는 것입니다. 하지만, 이 기능은 다음과 같은 다른 용도로도 사용될 수 있습니다:
 
-	log.Printf("trace: value %v of type %[1]T\n", expensiveFunction(a.b[c]))
+log.Printf("trace: 값 %v 유형 %[1]T\n", expensiveFunction(a.b[c]))
 
-_Updating_: The change to the syntax of format specifications
-is strictly backwards compatible, so it affects no working programs.
+_업데이트_: 형식 사양의 구문 변경은 엄격하게 역호환성을 유지하므로, 기존에 작동하는 프로그램에는 영향을 미치지 않습니다.
 
-### The text/template and html/template packages {#text_template}
+### `text/template` 및 `html/template` 패키지 {#text_template}
 
-The
-[`text/template`](/pkg/text/template/) package
-has a couple of changes in Go 1.2, both of which are also mirrored in the
-[`html/template`](/pkg/html/template/) package.
+[`text/template`](/pkg/text/template/) 패키지는 Go 1.2에서 몇 가지 변경 사항이 있으며, 이 변경 사항은 `html/template`](/pkg/html/template/) 패키지도 반영하고 있습니다.
 
-First, there are new default functions for comparing basic types.
-The functions are listed in this table, which shows their names and
-the associated familiar comparison operator.
+먼저, 기본 유형 비교를 위한 새로운 기본 함수가 추가되었습니다.
+이 함수 목록은 테이블에 나와 있으며, 함수 이름과 관련된 일반적인 비교 연산자를 보여줍니다.
 
-<table cellpadding="0" summary="Template comparison functions">
+```markdown
+<table cellpadding="0" summary="템플릿 비교 함수">
 <tbody><tr>
-<th width="50"></th><th width="100">Name</th> <th width="50">Operator</th>
+<th width="50"></th><th width="100">이름</th> <th width="50">연산자</th>
 </tr>
 <tr>
-<td></td><td><code>eq</code></td> <td><code>==</code></td>
+<td></td><td><<code>eq</code></code></td> <td><<code>==</code></code></td>
 </tr>
 <tr>
-<td></td><td><code>ne</code></td> <td><code>!=</code></td>
+<td></td><td><<code>ne</code></code></td> <td><<code>!=</code></code></td>
 </tr>
 <tr>
-<td></td><td><code>lt</code></td> <td><code>&lt;</code></td>
+<td></td><td><<code>lt</code></code></td> <td><<code>&lt;</code></code></td>
 </tr>
 <tr>
-<td></td><td><code>le</code></td> <td><code>&lt;=</code></td>
+<td></td><td><<code>le</code></code></td> <td><<code>&lt;=</code></code></td>
 </tr>
 <tr>
-<td></td><td><code>gt</code></td> <td><code>&gt;</code></td>
+<td></td><td><<code>gt</code></code></td> <td><<code>&gt;</code></code></td>
 </tr>
 <tr>
-<td></td><td><code>ge</code></td> <td><code>&gt;=</code></td>
+<td></td><td><<code>ge</code></code></td> <td><<code>&gt;=</code></code></td>
 </tr>
 </tbody></table>
+```
 
-These functions behave slightly differently from the corresponding Go operators.
-First, they operate only on basic types (`bool`, `int`,
-`float64`, `string`, etc.).
-(Go allows comparison of arrays and structs as well, under some circumstances.)
-Second, values can be compared as long as they are the same sort of value:
-any signed integer value can be compared to any other signed integer value for example. (Go
-does not permit comparing an `int8` and an `int16`).
-Finally, the `eq` function (only) allows comparison of the first
-argument with one or more following arguments. The template in this example,
+이 함수들은 해당 Go 연산자와 약간 다른 방식으로 작동합니다.
+첫째, 이 함수들은 기본 타입(`bool`, `int`,
+`float64`, `string` 등)에만 작동합니다.
+(Go는 특정 조건 하에서 배열과 구조체도 비교할 수 있습니다.)
+둘째, 동일한 유형의 값끼리 비교할 수 있습니다:
+예를 들어, 어떤 부호 있는 정수 값도 다른 부호 있는 정수 값과 비교할 수 있습니다. (Go는 `int8`과 `int16`의 비교를 허용하지 않습니다.)
+마지막으로, `eq` 함수(전용)는 첫 번째 인수를 하나 이상의 후속 인수로 비교할 수 있습니다. 이 예제에서 사용된 템플릿은
 
-	{{if eq .A 1 2 3}} equal {{else}} not equal {{end}}
+{{if eq .A 1 2 3}} 같음 {{else}} 다름 {{end}}
 
-reports "equal" if `.A` is equal to _any_ of 1, 2, or 3.
+보고서는 `.A`가 1, 2, 또는 3 중 _어느 값과_ 같을 경우 "equal"이라고 보고합니다.
 
-The second change is that a small addition to the grammar makes "if else if" chains easier to write.
-Instead of writing,
+두 번째 변경 사항은 문법에 약간의 추가를 통해 "if else if" 형태의 조건문을 더 쉽게 작성할 수 있도록 하는 것입니다.
+예를 들어, 다음과 같이 작성하는 대신,
 
-	{{if eq .A 1}} X {{else}} {{if eq .A 2}} Y {{end}} {{end}}
+{{if eq .A 1}} X {{else}} {{if eq .A 2}} Y {{end}} {{end}}
 
-one can fold the second "if" into the "else" and have only one "end", like this:
+두 번째 "if" 문을 "else" 안에 통합하고, 단 하나의 "end"만 사용하는 방식으로 변경할 수 있습니다. 예를 들어:
 
-	{{if eq .A 1}} X {{else if eq .A 2}} Y {{end}}
+{{if eq .A 1}} X {{else if eq .A 2}} Y {{end}}
 
-The two forms are identical in effect; the difference is just in the syntax.
+두 형태는 효과가 동일합니다. 차이점은 문법만 다릅니다.
 
-_Updating_: Neither the "else if" change nor the comparison functions
-affect existing programs. Those that
-already define functions called `eq` and so on through a function
-map are unaffected because the associated function map will override the new
-default function definitions.
+_업데이트_: "else if" 변경 사항이나 비교 함수는 기존 프로그램에 영향을 미치지 않습니다. 이미 `eq`와 같은 함수를 호출하는 함수를 정의한 프로그램은 영향을 받지 않습니다. 이는 연관된 함수 맵이 새로운 기본 함수 정의를 덮어쓸 것이기 때문입니다.
 
-### New packages {#new_packages}
+### 새로운 패키지 {#new_packages}
 
-There are two new packages.
+두 개의 새로운 패키지가 있습니다.
 
-  - The [`encoding`](/pkg/encoding/) package is
-    [described above](#encoding).
-  - The [`image/color/palette`](/pkg/image/color/palette/) package
-    provides standard color palettes.
+- [`encoding`](/pkg/encoding/) 패키지는
+    [위에 설명](#encoding)되어 있습니다.
+  - [`image/color/palette`](/pkg/image/color/palette/) 패키지는
+    표준 색상 팔레트를 제공합니다.
 
-### Minor changes to the library {#minor_library_changes}
+### 라이브러리의 미미한 변경 사항 {#minor_library_changes}
 
-The following list summarizes a number of minor changes to the library, mostly additions.
-See the relevant package documentation for more information about each change.
+다음 목록은 라이브러리의 여러 개의 소규모 변경 사항을 요약하고 있으며, 대부분은 추가 사항입니다.
+각 변경 사항에 대한 자세한 내용은 관련 패키지 문서를 참조하십시오.
 
-  - The [`archive/zip`](/pkg/archive/zip/) package
-    adds the
-    [`DataOffset`](/pkg/archive/zip/#File.DataOffset) accessor
-    to return the offset of a file's (possibly compressed) data within the archive.
-  - The [`bufio`](/pkg/bufio/) package
-    adds [`Reset`](/pkg/bufio/#Reader.Reset)
-    methods to [`Reader`](/pkg/bufio/#Reader) and
-    [`Writer`](/pkg/bufio/#Writer).
-    These methods allow the [`Readers`](/pkg/io/#Reader)
-    and [`Writers`](/pkg/io/#Writer)
-    to be re-used on new input and output readers and writers, saving
-    allocation overhead.
-  - The [`compress/bzip2`](/pkg/compress/bzip2/)
-    can now decompress concatenated archives.
-  - The [`compress/flate`](/pkg/compress/flate/)
-    package adds a [`Reset`](/pkg/compress/flate/#Writer.Reset)
-    method on the [`Writer`](/pkg/compress/flate/#Writer),
-    to make it possible to reduce allocation when, for instance, constructing an
-    archive to hold multiple compressed files.
-  - The [`compress/gzip`](/pkg/compress/gzip/) package's
-    [`Writer`](/pkg/compress/gzip/#Writer) type adds a
+- [`archive/zip`](/pkg/archive/zip/) 패키지는
+    [`DataOffset`](/pkg/archive/zip/#File.DataOffset) 접근자를 추가하여,
+    파일의 (압축된) 데이터의 내 보관 파일 내 위치를 반환합니다.
+  - [`bufio`](/pkg/bufio/) 패키지는
+    [`Reset`](/pkg/bufio/#Reader.Reset)
+    메서드를 [`Reader`](/pkg/bufio/#Reader) 및
+    [`Writer`](/pkg/bufio/#Writer)에 추가합니다.
+    이 메서드는 [`Readers`](/pkg/io/#Reader) 및
+    [`Writers`](/pkg/io/#Writer)를 새로운 입력 및 출력 리더 및 라이터에서 재사용할 수 있도록 하며,
+    할당 오버헤드를 절약합니다.
+  - [`compress/bzip2`](/pkg/compress/bzip2/)는 이제 묶인 보관 파일을 압축 해제할 수 있습니다.
+  - [`compress/flate`](/pkg/compress/flate/) 패키지는 [`Writer`](/pkg/compress/flate/#Writer)에
+    [`Reset`](/pkg/compress/flate/#Writer.Reset)
+    메서드를 추가하여, 예를 들어 여러 압축 파일을 포함하는 보관 파일을 구성할 때 할당을 줄일 수 있도록 합니다.
+  - [`compress/gzip`](/pkg/compress/gzip/) 패키지의
+    [`Writer`](/pkg/compress/gzip/#Writer) 유형에
     [`Reset`](/pkg/compress/gzip/#Writer.Reset)
-    so it may be reused.
-  - The [`compress/zlib`](/pkg/compress/zlib/) package's
-    [`Writer`](/pkg/compress/zlib/#Writer) type adds a
+    이 추가되어 재사용할 수 있습니다.
+  - [`compress/zlib`](/pkg/compress/zlib/) 패키지의
+    [`Writer`](/pkg/compress/zlib/#Writer) 유형에
     [`Reset`](/pkg/compress/zlib/#Writer.Reset)
-    so it may be reused.
-  - The [`container/heap`](/pkg/container/heap/) package
-    adds a [`Fix`](/pkg/container/heap/#Fix)
-    method to provide a more efficient way to update an item's position in the heap.
-  - The [`container/list`](/pkg/container/list/) package
-    adds the [`MoveBefore`](/pkg/container/list/#List.MoveBefore)
-    and
+    이 추가되어 재사용할 수 있습니다.
+  - [`container/heap`](/pkg/container/heap/) 패키지는
+    더 효율적인 방식으로 힙 내 항목의 위치를 업데이트하는 방법을 제공하기 위해
+    [`Fix`](/pkg/container/heap/#Fix)
+    메서드를 추가합니다.
+  - [`container/list`](/pkg/container/list/) 패키지는
+    [`MoveBefore`](/pkg/container/list/#List.MoveBefore) 및
     [`MoveAfter`](/pkg/container/list/#List.MoveAfter)
-    methods, which implement the obvious rearrangement.
-  - The [`crypto/cipher`](/pkg/crypto/cipher/) package
-    adds the new GCM mode (Galois Counter Mode), which is almost always
-    used with AES encryption.
-  - The
-    [`crypto/md5`](/pkg/crypto/md5/) package
-    adds a new [`Sum`](/pkg/crypto/md5/#Sum) function
-    to simplify hashing without sacrificing performance.
-  - Similarly, the
-    [`crypto/sha1`](/pkg/crypto/md5/) package
-    adds a new [`Sum`](/pkg/crypto/sha1/#Sum) function.
-  - Also, the
-    [`crypto/sha256`](/pkg/crypto/sha256/) package
-    adds [`Sum256`](/pkg/crypto/sha256/#Sum256)
-    and [`Sum224`](/pkg/crypto/sha256/#Sum224) functions.
-  - Finally, the [`crypto/sha512`](/pkg/crypto/sha512/) package
-    adds [`Sum512`](/pkg/crypto/sha512/#Sum512) and
-    [`Sum384`](/pkg/crypto/sha512/#Sum384) functions.
-  - The [`crypto/x509`](/pkg/crypto/x509/) package
-    adds support for reading and writing arbitrary extensions.
-  - The [`crypto/tls`](/pkg/crypto/tls/) package adds
-    support for TLS 1.1, 1.2 and AES-GCM.
-  - The [`database/sql`](/pkg/database/sql/) package adds a
-    [`SetMaxOpenConns`](/pkg/database/sql/#DB.SetMaxOpenConns)
-    method on [`DB`](/pkg/database/sql/#DB) to limit the
-    number of open connections to the database.
-  - The [`encoding/csv`](/pkg/encoding/csv/) package
-    now always allows trailing commas on fields.
-  - The [`encoding/gob`](/pkg/encoding/gob/) package
-    now treats channel and function fields of structures as if they were unexported,
-    even if they are not. That is, it ignores them completely. Previously they would
-    trigger an error, which could cause unexpected compatibility problems if an
-    embedded structure added such a field.
-    The package also now supports the generic `BinaryMarshaler` and
-    `BinaryUnmarshaler` interfaces of the
-    [`encoding`](/pkg/encoding/) package
-    described above.
-  - The [`encoding/json`](/pkg/encoding/json/) package
-    now will always escape ampersands as "\u0026" when printing strings.
-    It will now accept but correct invalid UTF-8 in
-    [`Marshal`](/pkg/encoding/json/#Marshal)
-    (such input was previously rejected).
-    Finally, it now supports the generic encoding interfaces of the
-    [`encoding`](/pkg/encoding/) package
-    described above.
-  - The [`encoding/xml`](/pkg/encoding/xml/) package
-    now allows attributes stored in pointers to be marshaled.
-    It also supports the generic encoding interfaces of the
-    [`encoding`](/pkg/encoding/) package
-    described above through the new
+    메서드를 추가하여, 명확한 재정렬을 구현합니다.
+  - [`crypto/cipher`](/pkg/crypto/cipher/) 패키지는
+    거의 항상 AES 암호화와 함께 사용되는 새로운 GCM 모드 (Galois Counter Mode)를 추가합니다.
+  - [`crypto/md5`](/pkg/crypto/md5/) 패키지는
+    가성능을 저하시키지 않고 단순화하기 위해 새로운 [`Sum`](/pkg/crypto/md5/#Sum) 함수를 추가합니다.
+  - 마찬가지로
+    [`crypto/sha1`](/pkg/crypto/md5/) 패키지는 새로운 [`Sum`](/pkg/crypto/sha1/#Sum) 함수를 추가합니다.
+  - 또한
+    [`crypto/sha256`](/pkg/crypto/sha256/) 패키지는 [`Sum256`](/pkg/crypto/sha256/#Sum256) 및
+    [`Sum224`](/pkg/crypto/sha256/#Sum224) 함수를 추가합니다.
+  - 마지막으로, [`crypto/sha512`](/pkg/crypto/sha512/) 패키지는
+    [`Sum512`](/pkg/crypto/sha512/#Sum512) 및
+    [`Sum384`](/pkg/crypto/sha512/#Sum384) 함수를 추가합니다.
+  - [`crypto/x509`](/pkg/crypto/x509/) 패키지는
+    임의의 확장 파일을 읽고 쓰는 기능을 추가합니다.
+  - [`crypto/tls`](/pkg/crypto/tls/) 패키지는
+    TLS 1.1, 1.2 및 AES-GCM을 지원합니다.
+  - [`database/sql`](/pkg/database/sql/) 패키지는
+    [`DB`](/pkg/database/sql/#DB)에 [`SetMaxOpenConns`](/pkg/database/sql/#DB.SetMaxOpenConns)
+    메서드를 추가하여, 데이터베이스에 열린 연결 수를 제한합니다.
+  - [`encoding/csv`](/pkg/encoding/csv/) 패키지는
+    이제 필드에 트레일링 쉼표를 항상 허용합니다.
+  - [`encoding/gob`](/pkg/encoding/gob/) 패키지는
+    구조체의 채널 및 함수 필드를 비개방으로 취급하며,
+    이러한 필드가 비개방인 경우 오류를 발생시킵니다. 이전에는 이러한 필드가 오류를 발생시켜, 내장 구조가 이러한 필드를 추가하면 예상치 못한 호환성 문제가 발생할 수 있었습니다. 패키지는 또한
+    `encoding` 패키지의 일반적인 `BinaryMarshaler` 및
+    `BinaryUnmarshaler` 인터페이스를 지원합니다.
+  - [`encoding/json`](/pkg/encoding/json/) 패키지는
+    이제 문자열을 출력할 때 항상 "\u0026"로 "&"를 이스케이프합니다.
+    이전에는 잘못된 UTF-8 인수가 거부되었습니다. 이제 잘못된 UTF-8를 허용하고 수정합니다. 마지막으로,
+    `encoding` 패키지의 일반적인 인코딩 인터페이스를 지원합니다.
+  - [`encoding/xml`](/pkg/encoding/xml/) 패키지는
+    포인터에 저장된 속성을 매핑할 수 있습니다.
+    또한 새로운
     [`Marshaler`](/pkg/encoding/xml/#Marshaler),
-    [`Unmarshaler`](/pkg/encoding/xml/#Unmarshaler),
-    and related
-    [`MarshalerAttr`](/pkg/encoding/xml/#MarshalerAttr) and
+    [`Unmarshaler`](/pkg/encoding/xml/#Unmarshaler) 및 관련된
+    [`MarshalerAttr`](/pkg/encoding/xml/#MarshalerAttr) 및
     [`UnmarshalerAttr`](/pkg/encoding/xml/#UnmarshalerAttr)
-    interfaces.
-    The package also adds a
-    [`Flush`](/pkg/encoding/xml/#Encoder.Flush) method
-    to the
-    [`Encoder`](/pkg/encoding/xml/#Encoder)
-    type for use by custom encoders. See the documentation for
-    [`EncodeToken`](/pkg/encoding/xml/#Encoder.EncodeToken)
-    to see how to use it.
-  - The [`flag`](/pkg/flag/) package now
-    has a [`Getter`](/pkg/flag/#Getter) interface
-    to allow the value of a flag to be retrieved. Due to the
-    Go 1 compatibility guidelines, this method cannot be added to the existing
-    [`Value`](/pkg/flag/#Value)
-    interface, but all the existing standard flag types implement it.
-    The package also now exports the [`CommandLine`](/pkg/flag/#CommandLine)
-    flag set, which holds the flags from the command line.
-  - The [`go/ast`](/pkg/go/ast/) package's
-    [`SliceExpr`](/pkg/go/ast/#SliceExpr) struct
-    has a new boolean field, `Slice3`, which is set to true
-    when representing a slice expression with three indices (two colons).
-    The default is false, representing the usual two-index form.
-  - The [`go/build`](/pkg/go/build/) package adds
-    the `AllTags` field
-    to the [`Package`](/pkg/go/build/#Package) type,
-    to make it easier to process build tags.
-  - The [`image/draw`](/pkg/image/draw/) package now
-    exports an interface, [`Drawer`](/pkg/image/draw/#Drawer),
-    that wraps the standard [`Draw`](/pkg/image/draw/#Draw) method.
-    The Porter-Duff operators now implement this interface, in effect binding an operation to
-    the draw operator rather than providing it explicitly.
-    Given a paletted image as its destination, the new
-    [`FloydSteinberg`](/pkg/image/draw/#FloydSteinberg)
-    implementation of the
-    [`Drawer`](/pkg/image/draw/#Drawer)
-    interface will use the Floyd-Steinberg error diffusion algorithm to draw the image.
-    To create palettes suitable for such processing, the new
-    [`Quantizer`](/pkg/image/draw/#Quantizer) interface
-    represents implementations of quantization algorithms that choose a palette
-    given a full-color image.
-    There are no implementations of this interface in the library.
-  - The [`image/gif`](/pkg/image/gif/) package
-    can now create GIF files using the new
-    [`Encode`](/pkg/image/gif/#Encode)
-    and [`EncodeAll`](/pkg/image/gif/#EncodeAll)
-    functions.
-    Their options argument allows specification of an image
-    [`Quantizer`](/pkg/image/draw/#Quantizer) to use;
-    if it is `nil`, the generated GIF will use the
-    [`Plan9`](/pkg/image/color/palette/#Plan9)
-    color map (palette) defined in the new
-    [`image/color/palette`](/pkg/image/color/palette/) package.
-    The options also specify a
-    [`Drawer`](/pkg/image/draw/#Drawer)
-    to use to create the output image;
-    if it is `nil`, Floyd-Steinberg error diffusion is used.
-  - The [`Copy`](/pkg/io/#Copy) method of the
-    [`io`](/pkg/io/) package now prioritizes its
-    arguments differently.
-    If one argument implements [`WriterTo`](/pkg/io/#WriterTo)
-    and the other implements [`ReaderFrom`](/pkg/io/#ReaderFrom),
-    [`Copy`](/pkg/io/#Copy) will now invoke
-    [`WriterTo`](/pkg/io/#WriterTo) to do the work,
-    so that less intermediate buffering is required in general.
-  - The [`net`](/pkg/net/) package requires cgo by default
-    because the host operating system must in general mediate network call setup.
-    On some systems, though, it is possible to use the network without cgo, and useful
-    to do so, for instance to avoid dynamic linking.
-    The new build tag `netgo` (off by default) allows the construction of a
-    `net` package in pure Go on those systems where it is possible.
-  - The [`net`](/pkg/net/) package adds a new field
-    `DualStack` to the [`Dialer`](/pkg/net/#Dialer)
-    struct for TCP connection setup using a dual IP stack as described in
-    [RFC 6555](https://tools.ietf.org/html/rfc6555).
-  - The [`net/http`](/pkg/net/http/) package will no longer
-    transmit cookies that are incorrect according to
-    [RFC 6265](https://tools.ietf.org/html/rfc6265).
-    It just logs an error and sends nothing.
-    Also,
-    the [`net/http`](/pkg/net/http/) package's
-    [`ReadResponse`](/pkg/net/http/#ReadResponse)
-    function now permits the `*Request` parameter to be `nil`,
-    whereupon it assumes a GET request.
-    Finally, an HTTP server will now serve HEAD
-    requests transparently, without the need for special casing in handler code.
-    While serving a HEAD request, writes to a
-    [`Handler`](/pkg/net/http/#Handler)'s
+    인터페이스를 통해
+    [`encoding`](/pkg/encoding/) 패키지의 일반적인 인코딩 인터페이스를 지원합니다.
+    또한
+    [`Encoder`](/pkg/encoding/xml/#Encoder) 유형에
+    [`Flush`](/pkg/encoding/xml/#Encoder.Flush)
+    메서드를 추가하여 사용자가 자체 인코더를 만들 수 있도록 합니다.
+    [`EncodeToken`](/pkg/encoding/xml/#Encoder.EncodeToken)를 사용하여 사용하는 방법을 참조하십시오.
+  - [`flag`](/pkg/flag/) 패키지는
+    [`Getter`](/pkg/flag/#Getter) 인터페이스를 추가하여 플래그의 값을 가져올 수 있습니다.
+    Go 1 호환성 지침으로 인해 이 메서드는 기존 [`Value`](/pkg/flag/#Value) 인터페이스에 추가할 수 없지만 모든 기존 표준 플래그 유형이 이를 구현합니다.
+    패키지는 또한 명령줄에 있는 플래그를 포함하는 [`CommandLine`](/pkg/flag/#CommandLine) 플래그 세트를 내보냅니다.
+  - [`go/ast`](/pkg/go/ast/) 패키지의
+    [`SliceExpr`](/pkg/go/ast/#SliceExpr) 구조에 새로운 부울 필드, `Slice3`가 추가되어 세 개의 인덱스를 사용하는 슬라이스 표현을 나타냅니다. 기본값은 false이며, 이는 일반적인 두 개의 인덱스 형태를 나타냅니다.
+  - [`go/build`](/pkg/go/build/) 패키지는
+    [`Package`](/pkg/go/build/#Package) 유형에 `AllTags` 필드를 추가하여 빌드 태그를 처리하는 것을 더 쉽게 만듭니다.
+  - [`image/draw`](/pkg/image/draw/) 패키지는
+    새로운 인터페이스, [`Drawer`](/pkg/image/draw/#Drawer)를 내보냅니다.
+    Porter-Duff 연산자는 이제 이 인터페이스를 구현하여, 연산을 draw operator에 묶어 연산을 직접 제공하지 않아도 됩니다.
+    새로운 [`FloydSteinberg`](/pkg/image/draw/#FloydSteinberg) 구현은
+    [`Drawer`](/pkg/image/draw/#Drawer) 인터페이스를 사용하여 팔레팅된 이미지를 그립니다.
+    이러한 처리를 위한 적절한 팔레트를 만드는 새로운
+    [`Quantizer`](/pkg/image/draw/#Quantizer) 인터페이스는 팔레트 선택 알고리즘을 구현합니다.
+    이 인터페이스의 구현이 라이브러리에는 없습니다.
+  - [`image/gif`](/pkg/image/gif/) 패키지는 이제 새로운
+    [`Encode`](/pkg/image/gif/#Encode) 및
+    [`EncodeAll`](/pkg/image/gif/#EncodeAll)
+    함수를 사용하여 GIF 파일을 만들 수 있습니다.
+    이 함수는 `nil`인 경우 (`nil`이면 기본인 `Plan9` 색상 맵(팔레트)을 사용합니다.
+    또한 이 함수는 출력 이미지에 사용할 새
+    [`Quantizer`](/pkg/image/draw/#Quantizer)를 지정할 수 있습니다.
+    이 함수는 새
+    [`Drawer`](/pkg/image/draw/#Drawer)를 지정할 수 있습니다. Floyd-Steinberg 오류 확산을 사용합니다.
+  - [`Copy`](/pkg/io/#Copy) 메서드는 이제 우선순위를 다른 방식으로 지정합니다.
+    `Copy`는 한쪽이 [`WriterTo`](/pkg/io/#WriterTo)를 구현하고 다른 쪽이 [`ReaderFrom`](/pkg/io/#ReaderFrom)를 구현하는 경우 이제
+    `WriterTo`를 호출하여 작업을 수행하므로 일반적으로 중간 버퍼링이 덜 필요합니다.
+  - [`net`](/pkg/net/) 패키지는 cgo를 기본으로 요구합니다.
+    호스트 운영 체제가 네트워크 호출 설정을 일반적으로 중재해야 하기 때문입니다.
+    그러나 시스템에서 cgo를 사용하지 않는 것이 가능하며, 이는 일반적으로 장점을 제공합니다.
+    새로운 빌드 태그 `netgo`는 기본적으로 꺼져 있습니다.
+  - [`net`](/pkg/net/) 패키지는 새로운 필드 `DualStack`을 [`Dialer`](/pkg/net/#Dialer) 구조에 추가하여 RFC 6555에 설명된 TCP 연결 설정을 중단합니다.
+  - [`net/http`](/pkg/net/http/) 패키지는 이제 RFC 6265를 준수하지 않는 쿠키를 전송하지 않습니다.
+    오류를 기록하고 전송하지 않습니다.
+    또한 [`net/http`](/pkg/net/http/) 패키지의
+    [`ReadResponse`](/pkg/net/http/#ReadResponse) 함수는 `*Request` 매개변수에 `nil`을 허용할 수 있으며, 이 경우 GET 요청으로 가정합니다.
+    마지막으로, HTTP 서버는 이제 헤더를 처리하지 않고 HEAD 요청을 처리합니다.
+    헤더를 처리할 때, [`Handler`](/pkg/net/http/#Handler)의
     [`ResponseWriter`](/pkg/net/http/#ResponseWriter)
-    are absorbed by the
-    [`Server`](/pkg/net/http/#Server)
-    and the client receives an empty body as required by the HTTP specification.
-  - The [`os/exec`](/pkg/os/exec/) package's
-    [`Cmd.StdinPipe`](/pkg/os/exec/#Cmd.StdinPipe) method
-    returns an `io.WriteCloser`, but has changed its concrete
-    implementation from `*os.File` to an unexported type that embeds
-    `*os.File`, and it is now safe to close the returned value.
-    Before Go 1.2, there was an unavoidable race that this change fixes.
-    Code that needs access to the methods of `*os.File` can use an
-    interface type assertion, such as `wc.(interface{ Sync() error })`.
-  - The [`runtime`](/pkg/runtime/) package relaxes
-    the constraints on finalizer functions in
-    [`SetFinalizer`](/pkg/runtime/#SetFinalizer): the
-    actual argument can now be any type that is assignable to the formal type of
-    the function, as is the case for any normal function call in Go.
-  - The [`sort`](/pkg/sort/) package has a new
-    [`Stable`](/pkg/sort/#Stable) function that implements
-    stable sorting. It is less efficient than the normal sort algorithm, however.
-  - The [`strings`](/pkg/strings/) package adds
-    an [`IndexByte`](/pkg/strings/#IndexByte)
-    function for consistency with the [`bytes`](/pkg/bytes/) package.
-  - The [`sync/atomic`](/pkg/sync/atomic/) package
-    adds a new set of swap functions that atomically exchange the argument with the
-    value stored in the pointer, returning the old value.
-    The functions are
+    에 대한 쓰기는
+    [`Server`](/pkg/net/http/#Server)에 의해 소비되며, 클라이언트는 HTTP 사양에 따라 빈 바디를 받습니다.
+  - [`os/exec`](/pkg/os/exec/) 패키지의
+    [`Cmd.StdinPipe`](/pkg/os/exec/#Cmd.StdinPipe) 메서드는 이제
+    `io.WriteCloser`를 반환하지만, 더 이상 `*os.File`이 아닌 unexported 유형을 사용하여 반환합니다. 이전 Go 1.2 버전에서는 이로 인해 불필요한 경쟁이 발생했습니다. 이 문제를 해결하려면 인터페이스 유형 암시를 사용할 수 있습니다. 예를 들어, `wc.(interface{ Sync() error })`
+  - [`runtime`](/pkg/runtime/) 패키지는
+    [`SetFinalizer`](/pkg/runtime/#SetFinalizer) 메서드에서 finalizer 함수에 대한 제약을 완화합니다.
+    이제 형식의 원래 유형에 매핑되는 모든 유형의 finalizer 인수를 허용합니다.
+  - [`sort`](/pkg/sort/) 패키지는 이제 새로운
+    [`Stable`](/pkg/sort/#Stable) 함수를 추가하여 안정적인 정렬을 구현합니다.
+    이 함수는 표준 정렬 알고리즘보다 덜 효율적이지만.
+  - [`strings`](/pkg/strings/) 패키지는
+    [`IndexByte`](/pkg/strings/#IndexByte) 함수를 추가하여
+    [`bytes`](/pkg/bytes/) 패키지의 해당 함수와 일관성을 유지합니다.
+  - [`sync/atomic`](/pkg/sync/atomic/) 패키지는
+    새로운 스왑 함수 세트를 추가합니다.
+    이 함수는 지정된 포인터에 저장된 값을 원본 값으로 교환하고, 원래 값을 반환합니다.
+    이러한 함수는
     [`SwapInt32`](/pkg/sync/atomic/#SwapInt32),
     [`SwapInt64`](/pkg/sync/atomic/#SwapInt64),
     [`SwapUint32`](/pkg/sync/atomic/#SwapUint32),
     [`SwapUint64`](/pkg/sync/atomic/#SwapUint64),
     [`SwapUintptr`](/pkg/sync/atomic/#SwapUintptr),
-    and
-    [`SwapPointer`](/pkg/sync/atomic/#SwapPointer),
-    which swaps an `unsafe.Pointer`.
-  - The [`syscall`](/pkg/syscall/) package now implements
-    [`Sendfile`](/pkg/syscall/#Sendfile) for Darwin.
-  - The [`testing`](/pkg/testing/) package
-    now exports the [`TB`](/pkg/testing/#TB) interface.
-    It records the methods in common with the
-    [`T`](/pkg/testing/#T)
-    and
-    [`B`](/pkg/testing/#B) types,
-    to make it easier to share code between tests and benchmarks.
-    Also, the
-    [`AllocsPerRun`](/pkg/testing/#AllocsPerRun)
-    function now quantizes the return value to an integer (although it
-    still has type `float64`), to round off any error caused by
-    initialization and make the result more repeatable.
-  - The [`text/template`](/pkg/text/template/) package
-    now automatically dereferences pointer values when evaluating the arguments
-    to "escape" functions such as "html", to bring the behavior of such functions
-    in agreement with that of other printing functions such as "printf".
-  - In the [`time`](/pkg/time/) package, the
-    [`Parse`](/pkg/time/#Parse) function
-    and
-    [`Format`](/pkg/time/#Time.Format)
-    method
-    now handle time zone offsets with seconds, such as in the historical
-    date "1871-01-01T05:33:02+00:34:08".
-    Also, pattern matching in the formats for those routines is stricter: a non-lowercase letter
-    must now follow the standard words such as "Jan" and "Mon".
-  - The [`unicode`](/pkg/unicode/) package
-    adds [`In`](/pkg/unicode/#In),
-    a nicer-to-use but equivalent version of the original
-    [`IsOneOf`](/pkg/unicode/#IsOneOf),
-    to see whether a character is a member of a Unicode category.
+    [`SwapPointer`](/pkg/sync/atomic/#SwapPointer)입니다.
+  - [`syscall`](/pkg/syscall/) 패키지는 이제
+    [`Sendfile`](/pkg/syscall/#Sendfile)를 Darwin용으로 구현합니다.
+  - [`testing`](/pkg/testing/) 패키지는 이제
+    [`TB`](/pkg/testing/#TB) 인터페이스를 내보냅니다.
+    이는 [`T`](/pkg/testing/#T) 및
+    [`B`](/pkg/testing/#B) 유형에서 공통 메서드를 제공합니다.
+  - [`text/template`](/pkg/text/template/) 패키지는 이제
+    "escape" 함수에 대한 인수를 평가할 때 포인터 값의 무덤을 자동으로 처리합니다.
+    `printf`와 같은 인쇄 함수에서 다른 함수와 일관성을 유지합니다.
+  - [`time`](/pkg/time/) 패키지에서
+    [`Parse`](/pkg/time/#Parse) 함수 및
+    [`Format`](/pkg/time/#Time.Format) 메서드는
+    예: "1871-01-01T05:33:02+00:34:08"와 같이 초 단위의 시간대를 처리합니다.
+    또한 이러한 형식의 패턴 일치 규칙이 더 엄격합니다. 이제 "Jan" 및 "Mon"과 같이 표준 단어를 따릅니다.
+  - [`unicode`](/pkg/unicode/) 패키지는
+    새로운 [`In`](/pkg/unicode/#In) 함수를 추가합니다.
+    이 함수는 원래의 [`IsOneOf`](/pkg/unicode/#IsOneOf)와 동일한 기능을 수행합니다.

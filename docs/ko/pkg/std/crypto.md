@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package crypto collects common cryptographic constants.
+패키지 crypto는 일반적인 암호화 상수들을 모아둡니다.
 
 ## 원문 요약
 

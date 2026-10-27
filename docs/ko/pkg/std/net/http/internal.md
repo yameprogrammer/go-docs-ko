@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package internal contains HTTP internals shared by net/http and net/http/httputil.
+패키지 `internal`은 `net/http` 및 `net/http/httputil`에서 공유되는 HTTP 내부 기능을 포함합니다.
 
 ## 원문 요약
 

@@ -1,895 +1,620 @@
-## Introduction to Go 1.5 {#introduction}
+## Go 1.5 소개 {#introduction}
 
-The latest Go release, version 1.5,
-is a significant release, including major architectural changes to the implementation.
-Despite that, we expect almost all Go programs to continue to compile and run as before,
-because the release still maintains the Go 1 [promise
-of compatibility](/doc/go1compat.html).
+```go
+package main
 
-The biggest developments in the implementation are:
+import "fmt"
 
-  - The compiler and runtime are now written entirely in Go (with a little assembler).
-    C is no longer involved in the implementation, and so the C compiler that was
-    once necessary for building the distribution is gone.
-  - The garbage collector is now [concurrent](/s/go14gc) and provides dramatically lower
-    pause times by running, when possible, in parallel with other goroutines.
-  - By default, Go programs run with `GOMAXPROCS` set to the
-    number of cores available; in prior releases it defaulted to 1.
-  - Support for [internal packages](/s/go14internal)
-    is now provided for all repositories, not just the Go core.
-  - The `go` command now provides [experimental
-    support](/s/go15vendor) for "vendoring" external dependencies.
-  - A new `go tool trace` command supports fine-grained
-    tracing of program execution.
-  - A new `go doc` command (distinct from `godoc`)
-    is customized for command-line use.
+func main() {
+	fmt.Println("Hello, Go 1.5!")
+}
+```
 
-These and a number of other changes to the implementation and tools
-are discussed below.
+이 예제는 Go 1.5의 기본적인 구조를 보여줍니다. `package main`은 Go 프로그램의 시작점을 정의하고, `import "fmt"`는 `fmt` 패키지를 가져와서 문자열을 출력하는 기능을 사용합니다. `func main()`은 프로그램의 실행 시작점을 나타냅니다.
 
-The release also contains one small language change involving map literals.
+가장 최신 Go 릴리스, 버전 1.5는, 상당한 아키텍처 변경 사항을 포함하는 중요한 릴리스입니다.
+그럼에도 불구하고, 대부분의 Go 프로그램이 이전과 동일하게 컴파일 및 실행될 것으로 예상합니다.
+왜냐하면 이 릴리스는 여전히 Go 1 [호환성
+약속](/doc/go1compat.html)을 유지하기 때문입니다.
 
-Finally, the timing of the [release](/s/releasesched)
-strays from the usual six-month interval,
-both to provide more time to prepare this major release and to shift the schedule thereafter to
-time the release dates more conveniently.
+가장 중요한 구현 사항은 다음과 같습니다:
 
-## Changes to the language {#language}
+- 컴파일러와 런타임은 이제 완전히 Go로 작성되었습니다 (작은 어셈블러 포함).
+    C는 더 이상 구현에 사용되지 않으므로, 이전에는 배포를 빌드하는 데 필요한 C 컴파일러는 더 이상 필요하지 않습니다.
+  - 가비지 컬렉터는 이제 [병렬]( /s/go14gc)이며, 가능한 경우 다른 고루틴과 병렬로 실행하여 극적으로 낮은 일시 중지 시간을 제공합니다.
+  - 기본적으로 Go 프로그램은 사용 가능한 코어의 수에 따라 `GOMAXPROCS`가 설정됩니다. 이전 버전에서는 기본값이 1이었습니다.
+  - [내부 패키지]( /s/go14internal) 지원은 이제 Go 코어에만 제공되는 것이 아니라 모든 저장소에 제공됩니다.
+  - `go` 명령은 이제 외부 의존성을 "렌더링"하는 데 대한 [실험적인 지원]( /s/go15vendor)을 제공합니다.
+  - 새로운 `go tool trace` 명령은 프로그램 실행의 미세한 추적을 지원합니다.
+  - 새로운 `go doc` 명령 (godoc와 구별)은 명령줄 사용을 위해 특별히 맞춤화되었습니다.
 
-### Map literals {#map_literals}
+다음과 같이 구현 및 도구에 대한 여러 가지 변경 사항이 논의됩니다.
 
-Due to an oversight, the rule that allowed the element type to be elided from slice literals was not
-applied to map keys.
-This has been [corrected](/cl/2591) in Go 1.5.
-An example will make this clear.
-As of Go 1.5, this map literal,
+이 릴리스에는 맵 리터럴과 관련된 하나의 작은 언어 변경 사항이 포함되어 있습니다.
 
-	m := map[Point]string{
+마지막으로, [릴리즈](/s/releasesched)의 시기가 일반적인 6개월 간격에서 벗어나,
+이 주요 릴리즈를 준비하는 데 더 많은 시간을 제공하고, 이후 릴리즈 날짜를 보다 편리하게 조정하기 위해 변경되었습니다.
+
+## 언어 변경 사항 {#language}
+
+### 맵 리터럴 {#map_literals}
+
+```go
+// Go package name
+```
+
+```
+// Example of a map literal
+myMap := map[string]int{
+    "apple":  1,
+    "banana": 2,
+    "orange": 3,
+}
+
+// Example of a map with a default value
+myMapWithDefault := map[string]int{
+    "apple":  1,
+    "banana": 2,
+    "orange": 3,
+}
+
+// Example of a map with an empty initial value
+emptyMap := map[string]int{}
+
+// Example of a map with a specific initial value
+specificMap := map[string]int{"apple": 1, "banana": 2, "orange": 3}
+```
+
+오류로 인해, 슬라이스 리터럴에서 요소 유형을 생략할 수 있도록 하는 규칙이 매핑 키에는 적용되지 않았습니다.
+이는 Go 1.5에서 [수정되었습니다](/cl/2591).
+다음 예제가 이를 명확하게 보여줍니다.
+Go 1.5부터, 다음 매핑 리터럴,
+
+m := map[Point]string{
 	    Point{29.935523, 52.891566}:   "Persepolis",
 	    Point{-25.352594, 131.034361}: "Uluru",
 	    Point{37.422455, -122.084306}: "Googleplex",
 	}
 
-may be written as follows, without the `Point` type listed explicitly:
+다음과 같이 작성될 수도 있습니다 (Point 유형은 명시적으로 언급하지 않음):
 
-	m := map[Point]string{
-	    {29.935523, 52.891566}:   "Persepolis",
-	    {-25.352594, 131.034361}: "Uluru",
-	    {37.422455, -122.084306}: "Googleplex",
-	}
+m := map[Point]string{
+    {29.935523, 52.891566}: "Persepolis",
+    {-25.352594, 131.034361}: "Uluru",
+    {37.422455, -122.084306}: "Googleplex",
+}
 
-## The Implementation {#implementation}
+## 구현 방법 {#implementation}
 
-### No more C {#c}
+### 더 이상 C는 없습니다. {#c}
 
-The compiler and runtime are now implemented in Go and assembler, without C.
-The only C source left in the tree is related to testing or to `cgo`.
-There was a C compiler in the tree in 1.4 and earlier.
-It was used to build the runtime; a custom compiler was necessary in part to
-guarantee the C code would work with the stack management of goroutines.
-Since the runtime is in Go now, there is no need for this C compiler and it is gone.
-Details of the process to eliminate C are discussed [elsewhere](/s/go13compiler).
+컴파일러와 런타임은 이제 Go와 어셈블리어로 구현되었으며, C를 사용하지 않습니다.
+트리에서 남은 유일한 C 소스는 테스트나 `cgo`와 관련된 것입니다.
+1.4 버전 이전에는 트리에서 C 컴파일러가 있었습니다.
+이는 런타임을 빌드하는 데 사용되었으며, C 코드가 goroutine의 스택 관리를 지원하도록 보장하기 위해 사용자 정의 컴파일러가 필요했습니다.
+런타임이 이제 Go로 구현되었으므로, 이 C 컴파일러는 더 이상 필요하지 않으며, 제거되었습니다.
+C를 제거하는 과정에 대한 자세한 내용은 [다른 곳](/s/go13compiler)에서 확인할 수 있습니다.
 
-The conversion from C was done with the help of custom tools created for the job.
-Most important, the compiler was actually moved by automatic translation of
-the C code into Go.
-It is in effect the same program in a different language.
-It is not a new implementation
-of the compiler so we expect the process will not have introduced new compiler
-bugs.
-An overview of this process is available in the slides for
-[this presentation](/talks/2015/gogo.slide).
+C 언어에서 Go 언어로의 변환은 특정 목적을 위해 제작된 맞춤 도구를 사용하여 수행되었습니다.
+가장 중요한 점은, C 코드를 자동으로 Go로 번역하여 컴파일러 자체를 이동시킨 것입니다.
+이는 실질적으로 다른 언어로 작성된 동일한 프로그램입니다.
+이는 컴파일러 자체를 새로 구현한 것이 아니므로, 이 과정이 새로운 컴파일러 버그를 유발하지 않을 것으로 예상됩니다.
+이 프로세스의 개요는 다음 발표의 슬라이드에서 확인할 수 있습니다: [이 발표](/talks/2015/gogo.slide).
 
-### Compiler and tools {#compiler_and_tools}
+### 컴파일러 및 도구 {#compiler_and_tools}
 
-Independent of but encouraged by the move to Go, the names of the tools have changed.
-The old names `6g`, `8g` and so on are gone; instead there
-is just one binary, accessible as `go` `tool` `compile`,
-that compiles Go source into binaries suitable for the architecture and operating system
-specified by `$GOARCH` and `$GOOS`.
-Similarly, there is now one linker (`go` `tool` `link`)
-and one assembler (`go` `tool` `asm`).
-The linker was translated automatically from the old C implementation,
-but the assembler is a new native Go implementation discussed
-in more detail below.
+독립적으로, 하지만 Go로의 전환을 통해 장려되는 방식으로 도구의 이름이 변경되었습니다.
+이전의 이름인 `6g`, `8g` 등은 더 이상 존재하지 않습니다. 대신, 하나의 바이너리가 있으며, 이는 `go tool compile`로 액세스할 수 있습니다.
+이 바이너리는 `$GOARCH` 및 `$GOOS`에 지정된 아키텍처 및 운영 체제에 적합한 Go 소스 코드를 바이너리로 컴파일합니다.
+마찬가지로, 이제 하나의 링커 (`go tool link`)와 하나의 어셈블러 (`go tool asm`)가 있습니다.
+링커는 이전의 C 구현에서 자동으로 번역되었지만, 어셈블러는 자세히 설명된 새로운 네이티브 Go 구현입니다.
 
-Similar to the drop of the names `6g`, `8g`, and so on,
-the output of the compiler and assembler are now given a plain `.o` suffix
-rather than `.8`, `.6`, etc.
+마찬가지로 `6g`, `8g`와 같은 이름의 파일이 삭제된 것처럼,
+컴파일러 및 어셈블러의 출력 파일은 이제 `.o` 확장자를 사용하며, `.8`, `.6`와 같은 확장자를 더 이상 사용하지 않습니다.
 
-### Garbage collector {#gc}
+### 가비지 컬렉터 {#gc}
 
-The garbage collector has been re-engineered for 1.5 as part of the development
-outlined in the [design document](/s/go14gc).
-Expected latencies are much lower than with the collector
-in prior releases, through a combination of advanced algorithms,
-better [scheduling](/s/go15gcpacing) of the collector,
-and running more of the collection in parallel with the user program.
-The "stop the world" phase of the collector
-will almost always be under 10 milliseconds and usually much less.
+이 가비지 컬렉터는 1.5 버전에서 개발된 [설계 문서](/s/go14gc)에 따라 재구현되었습니다.
+이전 버전의 컬렉터보다 훨씬 낮은 지연 시간이 예상되는데, 이는 고급 알고리즘, 컬렉터의 개선된 [스케줄링](/s/go15gcpacing), 그리고 사용자 프로그램과 병렬로 컬렉션을 실행하는 것 등의 조합 때문입니다.
+컬렉터의 "스톱 더 월드" 단계는 거의 항상 10밀리초 미만이며, 일반적으로 훨씬 짧습니다.
 
-For systems that benefit from low latency, such as user-responsive web sites,
-the drop in expected latency with the new collector may be important.
+다음과 같은 저지연을 필요로 하는 시스템(예: 사용자 반응형 웹 사이트)의 경우, 새로운 수집기의 도입으로 예상되는 지연 시간 감소가 중요할 수 있습니다.
 
-Details of the new collector were presented in a
-[talk](/talks/2015/go-gc.pdf) at GopherCon 2015.
+새로운 수집기 관련 정보는
+[강연](/talks/2015/go-gc.pdf)에서 GopherCon 2015에서 발표되었습니다.
 
-### Runtime {#runtime}
+### 실행 시점 {#runtime}
 
-In Go 1.5, the order in which goroutines are scheduled has been changed.
-The properties of the scheduler were never defined by the language,
-but programs that depend on the scheduling order may be broken
-by this change.
-We have seen a few (erroneous) programs affected by this change.
-If you have programs that implicitly depend on the scheduling
-order, you will need to update them.
+Go 1.5에서 goroutine의 실행 순서가 변경되었습니다.
+스케줄러의 속성은 언어에 의해 정의되지 않았습니다.
+따라서 실행 순서에 의존하는 프로그램은 이 변경으로 인해 오류가 발생할 수 있습니다.
+우리는 이 변경으로 인해 영향을 받는 몇 가지 (잘못된) 프로그램들을 확인했습니다.
+만약 귀하의 프로그램이 명시적으로 실행 순서에 의존하는 경우, 이를 업데이트해야 합니다.
 
-Another potentially breaking change is that the runtime now
-sets the default number of threads to run simultaneously,
-defined by `GOMAXPROCS`, to the number
-of cores available on the CPU.
-In prior releases the default was 1.
-Programs that do not expect to run with multiple cores may
-break inadvertently.
-They can be updated by removing the restriction or by setting
-`GOMAXPROCS` explicitly.
-For a more detailed discussion of this change, see
-the [design document](/s/go15gomaxprocs).
+또 다른 잠재적인 변경 사항은 런타임이 이제 CPU에 사용 가능한 코어 수를 기준으로 동시에 실행할 기본 스레드 수를 설정한다는 것입니다.
+이전 버전에서는 기본값이 1이었습니다.
+여러 코어를 사용하는 것을 예상하지 않는 프로그램은 예상치 않게 오류가 발생할 수 있습니다.
+이러한 제한을 제거하거나 `GOMAXPROCS`를 명시적으로 설정하여 업데이트할 수 있습니다.
+이 변경 사항에 대한 자세한 내용은 [설계 문서](/s/go15gomaxprocs)를 참조하십시오.
 
-### Build {#build}
+### 빌드 {#build}
 
-Now that the Go compiler and runtime are implemented in Go, a Go compiler
-must be available to compile the distribution from source.
-Thus, to build the Go core, a working Go distribution must already be in place.
-(Go programmers who do not work on the core are unaffected by this change.)
-Any Go 1.4 or later distribution (including `gccgo`) will serve.
-For details, see the [design document](/s/go15bootstrap).
+이제 Go 컴파일러와 런타임이 Go로 구현되었으므로, 배포본을 소스에서 컴파일하려면 Go 컴파일러가 필요합니다.
+따라서 Go 코어를 빌드하려면 이미 작동하는 Go 배포본이 존재해야 합니다.
+(Go 코어를 개발하지 않는 Go 프로그래머에게는 이 변경 사항이 영향을 미치지 않습니다.)
+Go 1.4 이상 또는 `gccgo`를 포함한 모든 배포본이 사용됩니다.
+자세한 내용은 [설계 문서](/s/go15bootstrap)를 참조하십시오.
 
-## Ports {#ports}
+## 포트
 
-Due mostly to the industry's move away from the 32-bit x86 architecture,
-the set of binary downloads provided is reduced in 1.5.
-A distribution for the OS X operating system is provided only for the
-`amd64` architecture, not `386`.
-Similarly, the ports for Snow Leopard (Apple OS X 10.6) still work but are no
-longer released as a download or maintained since Apple no longer maintains that version
-of the operating system.
-Also, the `dragonfly/386` port is no longer supported at all
-because DragonflyBSD itself no longer supports the 32-bit 386 architecture.
+대부분 산업계가 32비트 x86 아키텍처에서 벗어나면서,
+1.5 버전에서는 제공되는 바이너리 다운로드 세트가 줄어들었습니다.
+macOS 운영 체제용 배포는 `amd64` 아키텍처에만 제공되며, `386`에는 제공되지 않습니다.
+Snow Leopard (Apple OS X 10.6)용 포트도 여전히 작동하지만, Apple이 해당 운영 체제 버전을 더 이상 유지 관리하지 않기 때문에 더 이상 다운로드되거나 유지 관리되지 않습니다.
+또한, `dragonfly/386` 포트는 더 이상 지원되지 않습니다.
+DragonflyBSD 자체도 32비트 386 아키텍처를 더 이상 지원하지 않기 때문입니다.
 
-There are however several new ports available to be built from source.
-These include `darwin/arm` and `darwin/arm64`.
-The new port `linux/arm64` is mostly in place, but `cgo`
-is only supported using external linking.
+그러나 소스에서 빌드할 수 있는 몇 가지 새로운 포트가 있습니다.
+이들은 `darwin/arm` 및 `darwin/arm64`를 포함합니다.
+새로운 포트 `linux/arm64`는 대부분 완료되었지만, `cgo`는 외부 링크를 통해서만 지원됩니다.
 
-Also available as experiments are `ppc64`
-and `ppc64le` (64-bit PowerPC, big- and little-endian).
-Both these ports support `cgo` but
-only with internal linking.
+다음 버전도 실험용으로 제공됩니다:
+`ppc64`
+및 `ppc64le` (64비트 PowerPC, big- 및 little-endian).
+이 두 가지 포트는 모두 `cgo`를 지원하지만
+단, 내부 링크만 지원합니다.
 
-On FreeBSD, Go 1.5 requires FreeBSD 8-STABLE+ because of its new use of the `SYSCALL` instruction.
+FreeBSD에서 Go 1.5는 `SYSCALL` 지시어의 새로운 사용으로 인해 FreeBSD 8-STABLE+ 이상 버전을 필요로 합니다.
 
-On NaCl, Go 1.5 requires SDK version pepper-41. Later pepper versions are not
-compatible due to the removal of the sRPC subsystem from the NaCl runtime.
+NaCl에서 Go 1.5는 pepper-41 SDK 버전을 필요로 합니다. 이후의 pepper 버전은 NaCl 런타임에서 sRPC 서브시스템이 제거됨으로 인해 호환되지 않습니다.
 
-On Darwin, the use of the system X.509 certificate interface can be disabled
-with the `ios` build tag.
+Darwin에서 X.509 인증 인터페이스 사용을 비활성화할 수 있습니다. 이를 위해 `ios` 빌드 태그를 사용합니다.
 
-The Solaris port now has full support for cgo and the packages
-[`net`](/pkg/net/) and
-[`crypto/x509`](/pkg/crypto/x509/),
-as well as a number of other fixes and improvements.
+솔라리스 포트는 이제 cgo에 대한 완벽한 지원을 제공하며,
+[`net`](/pkg/net/) 및
+[`crypto/x509`](/pkg/crypto/x509/) 패키지뿐만 아니라,
+또한 여러 가지 다른 수정 및 개선 사항도 포함합니다.
 
-## Tools {#tools}
+## 도구 {#tools}
 
-### Translating {#translate}
+### 번역하기 {#translate}
 
-As part of the process to eliminate C from the tree, the compiler and
-linker were translated from C to Go.
-It was a genuine (machine assisted) translation, so the new programs are essentially
-the old programs translated rather than new ones with new bugs.
-We are confident the translation process has introduced few if any new bugs,
-and in fact uncovered a number of previously unknown bugs, now fixed.
+C 언어를 트리에서 제거하는 과정의 일부로, 컴파일러와 링커를 C에서 Go로 번역했습니다.
+이는 진정한 (머신 지원) 번역이었으므로, 새로운 프로그램은 기존 프로그램의 번역본일 뿐이며, 새로운 버그가 발생하지 않았습니다.
+번역 과정에서 새로운 버그가 발생하지 않았거나, 발생한 경우 극히 적으며, 실제로 이전에는 알려지지 않았던 버그를 발견하여 수정했습니다.
 
-The assembler is a new program, however; it is described below.
+아셈블러는 새로운 프로그램이지만, 아래에 설명되어 있습니다.
 
-### Renaming {#rename}
+### 이름 변경 {#rename}
 
-The suites of programs that were the compilers (`6g`, `8g`, etc.),
-the assemblers (`6a`, `8a`, etc.),
-and the linkers (`6l`, `8l`, etc.)
-have each been consolidated into a single tool that is configured
-by the environment variables `GOOS` and `GOARCH`.
-The old names are gone; the new tools are available through the `go` `tool`
-mechanism as `go tool compile`,
+컴파일러(`6g`, `8g` 등),
+어셈블러(`6a`, `8a` 등),
+그리고 링커(`6l`, `8l` 등)의 이러한 프로그램 세트는
+환경 변수 `GOOS` 및 `GOARCH`에 의해 구성되는
+단일 도구로 통합되었습니다.
+구 이름을 모두 제거했습니다. 새로운 도구는 `go tool` 메커니즘을 통해 `go tool compile`,
 `go tool asm`,
-`and go tool link`.
-Also, the file suffixes `.6`, `.8`, etc. for the
-intermediate object files are also gone; now they are just plain `.o` files.
+그리고 `go tool link`로 사용할 수 있습니다.
+또한 중간 객체 파일에 사용되었던 `.6`, `.8` 등의 파일 접미어도 더 이상 사용되지 않으며, 이제는 단순히 `.o` 파일로 사용됩니다.
 
-For example, to build and link a program on amd64 for Darwin
-using the tools directly, rather than through `go build`,
-one would run:
+예를 들어, Darwin (amd64)에서 직접 도구를 사용하여 프로그램을 빌드하고 링크하는 경우, `go build`를 사용하는 대신 다음 명령을 실행합니다:
 
-	$ export GOOS=darwin GOARCH=amd64
+```
+$ export GOOS=darwin GOARCH=amd64
 	$ go tool compile program.go
 	$ go tool link program.o
+```
 
-### Moving {#moving}
+### 이동 {#moving}
 
-Because the [`go/types`](/pkg/go/types/) package
-has now moved into the main repository (see below),
-the [`vet`](/cmd/vet) and
-[`cover`](/cmd/cover)
-tools have also been moved.
-They are no longer maintained in the external `golang.org/x/tools` repository,
-although (deprecated) source still resides there for compatibility with old releases.
+왜냐하면 [`go/types`](/pkg/go/types/) 패키지가 이제 메인 저장소로 이동했기 (아래 참조)
+따라서 [`vet`](/cmd/vet) 및
+[`cover`](/cmd/cover) 도 함께 이동되었습니다.
+이 도구는 더 이상 `golang.org/x/tools` 외부 저장소에서 유지 관리되지 않지만, (더 이상 사용하지 않는) 소스가 여전히 그곳에 남아 있어 이전 버전과의 호환성을 유지합니다.
 
-### Compiler {#compiler}
+### 컴파일러
 
-As described above, the compiler in Go 1.5 is a single Go program,
-translated from the old C source, that replaces `6g`, `8g`,
-and so on.
-Its target is configured by the environment variables `GOOS` and `GOARCH`.
+위에서 설명한 바와 같이, Go 1.5의 컴파일러는 기존 C 소스에서 번역된 단일 Go 프로그램이며, `6g`, `8g` 등을 대체합니다.
 
-The 1.5 compiler is mostly equivalent to the old,
-but some internal details have changed.
-One significant change is that evaluation of constants now uses
-the [`math/big`](/pkg/math/big/) package
-rather than a custom (and less well tested) implementation of high precision
-arithmetic.
-We do not expect this to affect the results.
+대상은 환경 변수 `GOOS` 및 `GOARCH`에 의해 구성됩니다.
 
-For the amd64 architecture only, the compiler has a new option, `-dynlink`,
-that assists dynamic linking by supporting references to Go symbols
-defined in external shared libraries.
+1.5 컴파일러는 기본적으로 이전 버전과 동일하지만, 내부적으로 몇 가지 변경 사항이 있습니다.
+주요 변경 사항 중 하나는 상수 평가가 이제 [`math/big`](/pkg/math/big/) 패키지를 사용합니다.
+이는 이전의 사용자 정의 (그리고 덜 테스트된) 고정밀 산술 구현 대신입니다.
+이 변경 사항이 결과에 영향을 미칠 것으로 예상하지 않습니다.
 
-### Assembler {#assembler}
+amd64 아키텍처에만 해당, 컴파일러에는 새로운 옵션 `-dynlink`이 있으며, 이는 외부 공유 라이브러리에 정의된 Go 심볼에 대한 참조를 지원하여 동적 링크를 지원합니다.
 
-Like the compiler and linker, the assembler in Go 1.5 is a single program
-that replaces the suite of assemblers (`6a`,
-`8a`, etc.) and the environment variables
-`GOARCH` and `GOOS`
-configure the architecture and operating system.
-Unlike the other programs, the assembler is a wholly new program
-written in Go.
+### 어셈블러 {#assembler}
 
-The new assembler is very nearly compatible with the previous
-ones, but there are a few changes that may affect some
-assembler source files.
-See the updated [assembler guide](/doc/asm)
-for more specific information about these changes. In summary:
+와 마찬가지로 Go 1.5의 어셈블러는 단일 프로그램이며, `6a`, `8a` 등 어셈블러의 집합과 환경 변수 `GOARCH` 및 `GOOS`를 대체합니다.
+이러한 변수를 사용하여 아키텍처와 운영 체제를 구성합니다.
+다른 프로그램과는 달리, 어셈블러는 Go로 작성된 완전히 새로운 프로그램입니다.
 
-First, the expression evaluation used for constants is a little
-different.
-It now uses unsigned 64-bit arithmetic and the precedence
-of operators (`+`, `-`, `<<`, etc.)
-comes from Go, not C.
-We expect these changes to affect very few programs but
-manual verification may be required.
+새로운 어셈블러는 이전 버전과 매우 유사하게 호환되지만, 일부 어셈블러 소스 파일에 영향을 줄 수 있는 몇 가지 변경 사항이 있습니다.
+자세한 내용은 [어셈블러 가이드](/doc/asm)를 참조하십시오. 요약하면:
 
-Perhaps more important is that on machines where
-`SP` or `PC` is only an alias
-for a numbered register,
-such as `R13` for the stack pointer and
-`R15` for the hardware program counter
-on ARM,
-a reference to such a register that does not include a symbol
-is now illegal.
-For example, `SP` and `4(SP)` are
-illegal but `sym+4(SP)` is fine.
-On such machines, to refer to the hardware register use its
-true `R` name.
+먼저, 상수에 대한 표현식 평가 방식이 약간 다릅니다.
+이제 부호 없는 64비트 산술 연산을 사용하며, 연산자의 우선순위 (`+`, `-`, `<<` 등)는 Go에서 가져온 것입니다.
+이러한 변경 사항이 매우 적은 프로그램에 영향을 미칠 것으로 예상되지만, 수동으로 확인이 필요할 수 있습니다.
 
-One minor change is that some of the old assemblers
-permitted the notation
+아마도 더 중요한 것은 다음과 같은 경우에,
+`SP` 또는 `PC`가 단순히 번호로 지정된 레지스터의 별칭일 때 (예: ARM에서 스택 포인터인 `R13` 및 하드웨어 프로그램 카운터인 `R15`),
+이러한 레지스터를 참조할 때, 심볼을 포함하지 않는 참조는 더 이상 유효하지 않습니다.
+예를 들어, `SP` 및 `4(SP)`는 유효하지 않지만, `sym+4(SP)`는 유효합니다.
+이러한 기계에서는 하드웨어 레지스터를 참조할 때, 실제 `R` 이름을 사용해야 합니다.
 
-	constant=value
+하나의 작은 변경 사항은 이전 어셈블러 중 일부가 다음과 같은 표기법을 허용했다는 것입니다
 
-to define a named constant.
-Since this is always possible to do with the traditional
-C-like `#define` notation, which is still
-supported (the assembler includes an implementation
-of a simplified C preprocessor), the feature was removed.
+상수 = 값
 
-### Linker {#link}
+명명된 상수를 정의하기 위해.
+이것은 전통적인 C와 유사한 `#define` 표기법을 사용하여 항상 가능하기 때문에, 이 기능은 제거되었습니다. 이 표기법은 여전히 지원되며 (어셈블러에는 단순화된 C 프리프로세서의 구현이 포함됨),
 
-The linker in Go 1.5 is now one Go program,
-that replaces `6l`, `8l`, etc.
-Its operating system and instruction set are specified
-by the environment variables `GOOS` and `GOARCH`.
+### 링크 편집기 {#link}
 
-There are several other changes.
-The most significant is the addition of a `-buildmode` option that
-expands the style of linking; it now supports
-situations such as building shared libraries and allowing other languages
-to call into Go libraries.
-Some of these were outlined in a [design document](/s/execmodes).
-For a list of the available build modes and their use, run
+Go 1.5의 링커는 이제 하나의 Go 프로그램입니다.
+`6l`, `8l` 등과 같은 것을 대체합니다.
+그 운영 체제와 명령어 집합은 환경 변수 `GOOS` 및 `GOARCH`에 의해 지정됩니다.
 
-	$ go help buildmode
+다음은 몇 가지 다른 변경 사항이 있습니다.
+가장 중요한 것은 `-buildmode` 옵션을 추가하여 링킹 스타일을 확장하는 것입니다. 이제 공유 라이브러리를 빌드하고 다른 언어가 Go 라이브러리를 호출하는 등과 같은 상황을 지원합니다.
+이러한 내용은 [설계 문서](/s/execmodes)에서 설명되어 있습니다.
+사용 가능한 빌드 모드와 사용법을 확인하려면 다음 명령을 실행하세요:
 
-Another minor change is that the linker no longer records build time stamps in
-the header of Windows executables.
-Also, although this may be fixed, Windows cgo executables are missing some
-DWARF information.
+```
+$ go help buildmode
+```
 
-Finally, the `-X` flag, which takes two arguments,
-as in
+또 다른 작은 변경 사항은 링커가 Windows 실행 파일의 헤더에 빌드 타임스탬프를 더 이상 기록하지 않는다는 것입니다.
+또한, 이 문제가 해결될 수 있지만, Windows cgo 실행 파일에는 일부 DWARF 정보가 누락되었습니다.
 
-	-X importpath.name value
+마지막으로, 두 개의 인수를 받는 `-X` 플래그는 다음과 같습니다.
 
-now also accepts a more common Go flag style with a single argument
-that is itself a `name=value` pair:
+-X importpath.name 값
 
-	-X importpath.name=value
+이제 더 일반적인 Go 플래그 스타일을 지원하며, 단일 인수가 필요합니다.
+이 인수는 `name=value` 쌍입니다:
 
-Although the old syntax still works, it is recommended that uses of this
-flag in scripts and the like be updated to the new form.
+-X importpath.name=값
 
-### Go command {#go_command}
+물론, 이전 문법도 여전히 작동하지만, 이 플래그를 스크립트 등에서 사용하는 경우, 새로운 형식으로 업데이트하는 것이 권장됩니다.
 
-The [`go`](/cmd/go) command's basic operation
-is unchanged, but there are a number of changes worth noting.
+### Go 명령어 {#go_command}
 
-The previous release introduced the idea of a directory internal to a package
-being unimportable through the `go` command.
-In 1.4, it was tested with the introduction of some internal elements
-in the core repository.
-As suggested in the [design document](/s/go14internal),
-that change is now being made available to all repositories.
-The rules are explained in the design document, but in summary any
-package in or under a directory named `internal` may
-be imported by packages rooted in the same subtree.
-Existing packages with directory elements named `internal` may be
-inadvertently broken by this change, which was why it was advertised
-in the last release.
+[`go`](/cmd/go) 명령어의 기본 작동 방식은 동일하지만, 몇 가지 주목할 만한 변경 사항이 있습니다.
 
-Another change in how packages are handled is the experimental
-addition of support for "vendoring".
-For details, see the documentation for the [`go` command](/cmd/go/#hdr-Vendor_Directories)
-and the [design document](/s/go15vendor).
+이전 버전에서는 패키지 내부에 있는 디렉토리가 `go` 명령어를 통해 가져올 수 없다는 개념을 도입했습니다.
+1.4에서는 핵심 저장소에 일부 내부 요소를 추가하면서 테스트되었습니다.
+[설계 문서](/s/go14internal)에 언급된 대로, 이러한 변경 사항은 이제 모든 저장소에 적용됩니다.
+규칙은 설계 문서에 설명되어 있지만, 요약하면 `internal`이라는 이름의 디렉토리에 있는 모든 패키지는 동일한 서브 트리의 루트에 있는 패키지에서 가져올 수 있습니다.
+`internal`이라는 이름의 디렉토리 요소를 가진 기존 패키지는 이 변경 사항으로 인해 의도치 않게 손상될 수 있으며, 따라서 이전 버전에서 이를 알렸습니다.
 
-There have also been several minor changes.
-Read the [documentation](/cmd/go) for full details.
+또 다른 패키지 관리에 대한 변경 사항은 "벤더링" 지원에 대한 실험적인 추가입니다.
+자세한 내용은 [`go` 명령의](/cmd/go/#hdr-Vendor_Directories) 설명서와 [설계 문서](/s/go15vendor)를 참조하십시오.
 
-  - SWIG support has been updated such that
-    `.swig` and `.swigcxx`
-    now require SWIG 3.0.6 or later.
-  - The `install` subcommand now removes the
-    binary created by the `build` subcommand
-    in the source directory, if present,
-    to avoid problems having two binaries present in the tree.
-  - The `std` (standard library) wildcard package name
-    now excludes commands.
-    A new `cmd` wildcard covers the commands.
-  - A new `-asmflags` build option
-    sets flags to pass to the assembler.
-    However,
-    the `-ccflags` build option has been dropped;
-    it was specific to the old, now deleted C compiler .
-  - A new `-buildmode` build option
-    sets the build mode, described above.
-  - A new `-pkgdir` build option
-    sets the location of installed package archives,
-    to help isolate custom builds.
-  - A new `-toolexec` build option
-    allows substitution of a different command to invoke
-    the compiler and so on.
-    This acts as a custom replacement for `go tool`.
-  - The `test` subcommand now has a `-count`
-    flag to specify how many times to run each test and benchmark.
-    The [`testing`](/pkg/testing/) package
-    does the work here, through the `-test.count` flag.
-  - The `generate` subcommand has a couple of new features.
-    The `-run` option specifies a regular expression to select which directives
-    to execute; this was proposed but never implemented in 1.4.
-    The executing pattern now has access to two new environment variables:
-    `$GOLINE` returns the source line number of the directive
-    and `$DOLLAR` expands to a dollar sign.
-  - The `get` subcommand now has a `-insecure`
-    flag that must be enabled if fetching from an insecure repository, one that
-    does not encrypt the connection.
+다음과 같은 몇 가지 세부 사항도 변경되었습니다.
+자세한 내용은 [문서]( /cmd/go)를 참조하십시오.
 
-### Go vet command {#vet_command}
+- SWIG 지원이 업데이트되어
+    `.swig` 및 `.swigcxx` 파일은 이제 SWIG 3.0.6 이상을 필요로 합니다.
+  - `install` 하위명령은 이제 소스 디렉토리에 존재하는 경우 `build` 하위명령으로 생성된 바이너리를 제거하여, 트리에 두 개의 바이너리가 존재할 때 발생하는 문제를 방지합니다.
+  - `std` (표준 라이브러리) 와일드카드 패키지 이름은 이제 명령어를 제외합니다.
+    새로운 `cmd` 와일드카드는 명령어를 캡처합니다.
+  - 새로운 `-asmflags` 빌드 옵션은 어셈블러에 전달할 플래그를 설정합니다.
+    그러나, `-ccflags` 빌드 옵션은 제거되었습니다. 이는 이전, 현재 삭제된 C 컴파일러에 특화되어 있었습니다.
+  - 새로운 `-buildmode` 빌드 옵션은 위에서 설명한 빌드 모드를 설정합니다.
+  - 새로운 `-pkgdir` 빌드 옵션은 설치된 패키지 아카이브의 위치를 설정하여, 사용자 정의 빌드를 격리하는 데 도움이 됩니다.
+  - 새로운 `-toolexec` 빌드 옵션은 컴파일러 등을 호출하기 위한 다른 명령어를 대체할 수 있도록 합니다.
+    이는 `go tool`에 대한 사용자 정의 대체 기능입니다.
+  - `test` 하위명령은 이제 각 테스트 및 벤치를 몇 번 실행할지 지정하는 `-count` 플래그를 갖습니다.
+    [`testing`](/pkg/testing/) 패키지가 이 기능을 수행하며, `-test.count` 플래그를 통해 작동합니다.
+  - `generate` 하위명령은 몇 가지 새로운 기능을 제공합니다.
+    `-run` 옵션은 실행할 명령어를 선택하는 정규 표현식을 지정합니다. 이는 1.4에서 제안되었지만 구현되지 않았습니다.
+    실행 패턴은 이제 두 개의 새로운 환경 변수에 액세스할 수 있습니다:
+    `$GOLINE`은 명령의 소스 라인 번호를 반환하고, `$DOLLAR`은 달러 기호를 확장합니다.
+  - `get` 하위명령은 이제 `-insecure` 플래그를 갖습니다. 이는 암호화되지 않은 연결을 사용하는 경우에만 활성화해야 합니다.
 
-The [`go tool vet`](/cmd/vet) command now does
-more thorough validation of struct tags.
+### Go 래디(vet) 명령어 {#vet_command}
 
-### Trace command {#trace_command}
+```bash
+go vet
+```
 
-A new tool is available for dynamic execution tracing of Go programs.
-The usage is analogous to how the test coverage tool works.
-Generation of traces is integrated into `go test`,
-and then a separate execution of the tracing tool itself analyzes the results:
+`go vet`는 Go 코드에서 잠재적인 문제를 자동으로 검사하는 명령어입니다. 예를 들어, 다음과 같은 문제를 감지할 수 있습니다.
 
-	$ go test -trace=trace.out path/to/package
-	$ go tool trace [flags] pkg.test trace.out
+*   사용되지 않는 변수
+*   잘못된 포맷팅
+*   타입 불일치
 
-The flags enable the output to be displayed in a browser window.
-For details, run `go tool trace -help`.
-There is also a description of the tracing facility in this
-[talk](/talks/2015/dynamic-tools.slide)
-from GopherCon 2015.
+`go vet`를 사용하려면, Go 프로젝트의 루트 디렉토리에서 다음 명령어를 실행합니다.
 
-### Go doc command {#doc_command}
+```bash
+go vet ./...
+```
 
-A few releases back, the `go doc`
-command was deleted as being unnecessary.
-One could always run "`godoc .`" instead.
-The 1.5 release introduces a new [`go doc`](/cmd/doc)
-command with a more convenient command-line interface than
-`godoc`'s.
-It is designed for command-line usage specifically, and provides a more
-compact and focused presentation of the documentation for a package
-or its elements, according to the invocation.
-It also provides case-insensitive matching and
-support for showing the documentation for unexported symbols.
-For details run "`go help doc`".
+이 명령어는 현재 디렉토리 및 하위 디렉토리의 모든 Go 파일을 검사합니다.
+
+`go vet`는 다양한 옵션을 지원합니다. 예를 들어, `-v` 플래그는 더 자세한 출력을 제공하고, `-failfast` 플래그는 첫 번째 문제 발견 시 즉시 중단합니다.
+
+자세한 내용은 `go vet --help` 명령어를 참조하십시오.
+
+[`go tool vet`](/cmd/vet) 명령은 이제 구조체 태그에 대해 더 철저한 검증을 수행합니다.
+
+### trace 명령 {#trace_command}
+
+새로운 도구가 Go 프로그램의 동적 실행 추적에 사용 가능합니다.
+사용법은 테스트 커버리지 도구와 유사합니다.
+추적 생성은 `go test`에 통합되어 있으며,
+그런 다음 별도의 방식으로 추적 도구를 실행하여 결과를 분석합니다:
+
+$ go 테스트 -트레이스=trace.out path/to/package
+	$ go 툴 트레이스 [플래그] pkg.test trace.out
+
+이 플래그를 사용하면 출력을 브라우저 창에 표시할 수 있습니다.
+자세한 내용은 `go tool trace -help`를 실행하십시오.
+또한, 트레이싱 기능에 대한 설명은 다음
+[강연](/talks/2015/dynamic-tools.slide)
+에서 확인할 수 있습니다 (GopherCon 2015).
+
+### Go 문서 생성 명령어 {#doc_command}
+
+몇 릴리스 전, `go doc`
+명령어가 삭제되었습니다.
+대신 "`godoc .`"를 실행할 수 있습니다.
+1.5 릴리스에서는 [`go doc`](/cmd/doc)
+새로운 명령어를 도입했으며, `godoc`보다 더 편리한 명령줄 인터페이스를 제공합니다.
+이는 특정 명령줄 사용을 위해 설계되었으며, 호출 방법에 따라 패키지 또는 그 요소에 대한 설명을 보다 간결하고 집중적으로 제공합니다.
+또한, 대소문자를 구분하지 않는 일치 기능과, 비공개 심볼에 대한 설명 표시를 지원합니다.
+자세한 내용은 "`go help doc`"를 실행하십시오.
 
 ### Cgo {#cgo}
 
-When parsing `#cgo` lines,
-the invocation `${SRCDIR}` is now
-expanded into the path to the source directory.
-This allows options to be passed to the
-compiler and linker that involve file paths relative to the
-source code directory. Without the expansion the paths would be
-invalid when the current working directory changes.
+`#cgo` 줄을 파싱할 때,
+`${SRCDIR}`이 이제는
+소스 디렉토리의 경로로 확장됩니다.
+이를 통해 컴파일러 및 링커에 전달할 수 있는
+소스 코드 디렉토리에 상대적인 파일 경로를 포함하는 옵션을 지정할 수 있습니다. 확장되지 않으면 현재 작업 디렉토리가 변경될 때 경로가 유효하지 않습니다.
 
-Solaris now has full cgo support.
+Solaris는 이제 완전한 cgo 지원을 제공합니다.
 
-On Windows, cgo now uses external linking by default.
+Windows에서 cgo는 이제 기본적으로 외부 링크를 사용합니다.
 
-When a C struct ends with a zero-sized field, but the struct itself is
-not zero-sized, Go code can no longer refer to the zero-sized field.
-Any such references will have to be rewritten.
+C 구조체가 0 크기의 필드로 끝을 맺지만, 구조체 자체는 0 크기가 아닌 경우, Go 코드는 더 이상 0 크기의 필드에 참조할 수 없습니다.
+이러한 참조는 모두 다시 작성해야 합니다.
 
-## Performance {#performance}
+## 성능 {#performance}
 
-As always, the changes are so general and varied that precise statements
-about performance are difficult to make.
-The changes are even broader ranging than usual in this release, which
-includes a new garbage collector and a conversion of the runtime to Go.
-Some programs may run faster, some slower.
-On average the programs in the Go 1 benchmark suite run a few percent faster in Go 1.5
-than they did in Go 1.4,
-while as mentioned above the garbage collector's pauses are
-dramatically shorter, and almost always under 10 milliseconds.
+물론, 변경 사항이 너무 광범위하고 다양하여 정확한 성능에 대한 진술을 내리기가 어렵습니다.
+이번 릴리스의 변경 사항은 평소보다 훨씬 더 광범위하며, 여기에는 새로운 가비지 컬렉터와 런타임의 Go로의 변환이 포함됩니다.
+일부 프로그램은 더 빠르게 실행될 수 있고, 일부는 더 느리게 실행될 수 있습니다.
+평균적으로 Go 1 벤치마크 세트의 프로그램은 Go 1.5에서 Go 1.4보다 몇 퍼센트 더 빠르게 실행됩니다.
+위에서 언급했듯이, 가비지 컬렉터의 일시 중지는 현저하게 짧고, 거의 항상 10밀리초 미만입니다.
 
-Builds in Go 1.5 will be slower by a factor of about two.
-The automatic translation of the compiler and linker from C to Go resulted in
-unidiomatic Go code that performs poorly compared to well-written Go.
-Analysis tools and refactoring helped to improve the code, but much remains to be done.
-Further profiling and optimization will continue in Go 1.6 and future releases.
-For more details, see these [slides](/talks/2015/gogo.slide)
-and associated [video](https://www.youtube.com/watch?v=cF1zJYkBW4A).
+Go 1.5에서 빌드하는 데 걸리는 시간이 약 2배 더 오래 걸립니다.
+C에서 Go로 컴파일러 및 링커의 자동 번역으로 인해 Go의 일반적인 코딩 방식과 어긋나는 코드가 생성되어, 잘 작성된 Go 코드보다 성능이 떨어집니다.
+분석 도구와 리팩토링을 통해 코드를 개선했지만, 여전히 많은 작업이 남아 있습니다.
+더 자세한 내용은 다음 [슬라이드](/talks/2015/gogo.slide)와 관련된 [동영상](https://www.youtube.com/watch?v=cF1zJYkBW4A)을 참조하십시오.
 
-## Standard library {#library}
+## 표준 라이브러리 {#library}
 
-### Flag {#flag}
+### 플래그 {#flag}
 
-The flag package's
+`flag 패키지의
 [`PrintDefaults`](/pkg/flag/#PrintDefaults)
-function, and method on [`FlagSet`](/pkg/flag/#FlagSet),
-have been modified to create nicer usage messages.
-The format has been changed to be more human-friendly and in the usage
-messages a word quoted with \`backquotes\` is taken to be the name of the
-flag's operand to display in the usage message.
-For instance, a flag created with the invocation,
+함수와 `FlagSet`의 메서드는 더 보기 좋게 작성된 사용 메시지를 만들기 위해 수정되었습니다.
+형식은 사람이 더 쉽게 이해할 수 있도록 변경되었으며, 사용 메시지에 백틱(`\`으로 묶인 단어는 플래그의 인수를 나타내며, 이를 사용 메시지에 표시합니다.
+예를 들어, 다음과 같은 인수로 생성된 플래그는:
 
-	cpuFlag = flag.Int("cpu", 1, "run `N` processes in parallel")
+```markdown
+cpuFlag = flag.Int("cpu", 1, "병렬로 `N`개의 프로세스를 실행")
+```
 
-will show the help message,
+도움 메시지를 표시합니다.
 
-	-cpu N
-	    	run N processes in parallel (default 1)
+-cpu N
+    	N개의 프로세스를 병렬로 실행 (기본값: 1)
 
-Also, the default is now listed only when it is not the zero value for the type.
+또한, 기본값은 해당 타입이 0이 아닌 경우에만 나열됩니다.
 
-### Floats in math/big {#math_big}
+### `math/big` 모듈의 부동 소수점 숫자 지원 {#math_big}
 
-The [`math/big`](/pkg/math/big/) package
-has a new, fundamental data type,
+[`math/big`](/pkg/math/big/) 패키지는
+새로운, 기본적인 데이터 유형인
 [`Float`](/pkg/math/big/#Float),
-which implements arbitrary-precision floating-point numbers.
-A `Float` value is represented by a boolean sign,
-a variable-length mantissa, and a 32-bit fixed-size signed exponent.
-The precision of a `Float` (the mantissa size in bits)
-can be specified explicitly or is otherwise determined by the first
-operation that creates the value.
-Once created, the size of a `Float`'s mantissa may be modified with the
-[`SetPrec`](/pkg/math/big/#Float.SetPrec) method.
-`Floats` support the concept of infinities, such as are created by
-overflow, but values that would lead to the equivalent of IEEE 754 NaNs
-trigger a panic.
-`Float` operations support all IEEE-754 rounding modes.
-When the precision is set to 24 (53) bits,
-operations that stay within the range of normalized `float32`
-(`float64`)
-values produce the same results as the corresponding IEEE-754
-arithmetic on those values.
+이를 통해 임의 정밀도의 부동 소수점 숫자를 구현합니다.
+`Float` 값은 부울 부호,
+가변 길이의 소수 부분, 및 32비트 고정 크기의 부호화된 지수를 나타냅니다.
+`Float`의 정밀도 (소수 부분 크기, 비트 단위)는
+명시적으로 지정하거나, 또는 값이 생성되는 첫 번째 연산에 의해 결정됩니다.
+생성된 후, `Float`의 소수 부분 크기는
+[`SetPrec`](/pkg/math/big/#Float.SetPrec) 메서드를 사용하여 수정할 수 있습니다.
+`Floats`는 오버플로우와 같이 생성되는 무한대와 같은 개념을 지원하지만, IEEE 754 NaNs의 결과로 이어지는 값은 패닉을 발생시킵니다.
+`Float` 연산은 모든 IEEE-754 반올림 모드를 지원합니다.
+정밀도가 24 (53) 비트로 설정되면,
+정규화된 `float32`
+(`float64`) 값의 범위 내에 있는 연산은
+해당 값에 대한 해당하는 IEEE-754 산술 연산과 동일한 결과를 생성합니다.
 
-### Go types {#go_types}
+### Go 타입 {#go_types}
 
-The [`go/types`](/pkg/go/types/) package
-up to now has been maintained in the `golang.org/x`
-repository; as of Go 1.5 it has been relocated to the main repository.
-The code at the old location is now deprecated.
-There is also a modest API change in the package, discussed below.
+```go
+package main
 
-Associated with this move, the
+import "fmt"
+
+func main() {
+	// 정수 타입
+	var x int = 10
+	fmt.Println("정수:", x)
+
+	// 부동 소수점 타입
+	var y float64 = 3.14
+	fmt.Println("부동 소수점:", y)
+
+	// 문자열 타입
+	var s string = "Hello, world!"
+	fmt.Println("문자열:", s)
+
+	// 불리언 타입
+	var b bool = true
+	fmt.Println("불리언:", b)
+
+	// 배열 타입
+	var arr [5]int
+	arr[0] = 1
+	arr[1] = 2
+	fmt.Println("배열:", arr)
+
+	// 슬라이스 타입
+	var slice []int
+	slice = append(slice, 1, 2, 3)
+	fmt.Println("슬라이스:", slice)
+
+	// 맵 타입
+	var m map[string]int
+	m["a"] = 1
+	m["b"] = 2
+	fmt.Println("맵:", m)
+}
+```
+
+[`go/types`](/pkg/go/types/) 패키지는 지금까지 `golang.org/x`
+저장소에 유지되었습니다. Go 1.5부터는 메인 저장소로 이동되었습니다.
+이전 위치의 코드는 이제 사용되지 않습니다.
+패키지에는 아래에서 논의할 소규모의 API 변경 사항도 있습니다.
+
+이 움직임과 함께,
 [`go/constant`](/pkg/go/constant/)
-package also moved to the main repository;
-it was `golang.org/x/tools/exact` before.
-The [`go/importer`](/pkg/go/importer/) package
-also moved to the main repository,
-as well as some tools described above.
+패키지도 메인 저장소로 이동했습니다;
+이전에는 `golang.org/x/tools/exact`였습니다.
+[`go/importer`](/pkg/go/importer/)
+패키지도 메인 저장소로 이동했으며,
+위에 설명된 일부 도구도 함께 이동했습니다.
 
-### Net {#net}
+### 네트워크 {#net}
 
-The DNS resolver in the net package has almost always used `cgo` to access
-the system interface.
-A change in Go 1.5 means that on most Unix systems DNS resolution
-will no longer require `cgo`, which simplifies execution
-on those platforms.
-Now, if the system's networking configuration permits, the native Go resolver
-will suffice.
-The important effect of this change is that each DNS resolution occupies a goroutine
-rather than a thread,
-so a program with multiple outstanding DNS requests will consume fewer operating
-system resources.
+`net` 패키지의 DNS 리졸버는 거의 항상 `cgo`를 사용하여 시스템 인터페이스에 접근했습니다.
+Go 1.5의 변경 사항은 대부분의 Unix 시스템에서 DNS 해싱이 더 이상 `cgo`를 필요로 하지 않음을 의미하며, 이는 해당 플랫폼에서 실행을 단순화합니다.
+이제 시스템의 네트워킹 구성이 허용하는 경우, 네이티브 Go 리졸버로 충분합니다.
+이 변경의 중요한 효과는 각 DNS 해싱이 스레드 대신 고루틴을 사용한다는 것입니다.
+따라서 여러 개의 대기 중인 DNS 요청을 가진 프로그램은 운영 체제 리소스를 덜 소비합니다.
 
-The decision of how to run the resolver applies at run time, not build time.
-The `netgo` build tag that has been used to enforce the use
-of the Go resolver is no longer necessary, although it still works.
-A new `netcgo` build tag forces the use of the `cgo` resolver at
-build time.
-To force `cgo` resolution at run time set
-`GODEBUG=netdns=cgo` in the environment.
-More debug options are documented [here](/cl/11584).
+이 결정은 런타임에 적용되며, 빌드 시간에 적용되는 것은 아닙니다.
+Go 래서의 사용을 강제하는 데 사용된 `netgo` 빌드 태그는 더 이상 필요하지 않지만, 여전히 작동합니다.
+새로운 `netcgo` 빌드 태그는 빌드 시간에 `cgo` 래서를 강제로 사용하도록 합니다.
+런타임에 `cgo` 래서 사용을 강제로 설정하려면 환경 변수에 `GODEBUG=netdns=cgo`를 설정합니다.
+더 많은 디버깅 옵션은 [여기](/cl/11584)에서 설명되어 있습니다.
 
-This change applies to Unix systems only.
-Windows, Mac OS X, and Plan 9 systems behave as before.
+이 변경 사항은 Unix 시스템에만 적용됩니다.
 
-### Reflect {#reflect}
+Windows, Mac OS X 및 Plan 9 시스템은 이전과 동일하게 작동합니다.
 
-The [`reflect`](/pkg/reflect/) package
-has two new functions: [`ArrayOf`](/pkg/reflect/#ArrayOf)
-and [`FuncOf`](/pkg/reflect/#FuncOf).
-These functions, analogous to the extant
-[`SliceOf`](/pkg/reflect/#SliceOf) function,
-create new types at runtime to describe arrays and functions.
+### 반사 {#reflect}
 
-### Hardening {#hardening}
+[`reflect`](/pkg/reflect/) 패키지는 다음과 같은 두 가지 새로운 함수를 제공합니다: [`ArrayOf`](/pkg/reflect/#ArrayOf)
+과 [`FuncOf`](/pkg/reflect/#FuncOf).
+이 함수는 기존의 [`SliceOf`](/pkg/reflect/#SliceOf) 함수와 유사하며, 런타임에 배열과 함수를 설명하는 새 유형을 생성합니다.
 
-Several dozen bugs were found in the standard library
-through randomized testing with the
-[`go-fuzz`](https://github.com/dvyukov/go-fuzz) tool.
-Bugs were fixed in the
-[`archive/tar`](/pkg/archive/tar/),
-[`archive/zip`](/pkg/archive/zip/),
-[`compress/flate`](/pkg/compress/flate/),
-[`encoding/gob`](/pkg/encoding/gob/),
-[`fmt`](/pkg/fmt/),
-[`html/template`](/pkg/html/template/),
-[`image/gif`](/pkg/image/gif/),
-[`image/jpeg`](/pkg/image/jpeg/),
-[`image/png`](/pkg/image/png/), and
-[`text/template`](/pkg/text/template/),
-packages.
-The fixes harden the implementation against incorrect and malicious inputs.
+### 보안 강화 {#hardening}
 
-### Minor changes to the library {#minor_library_changes}
+수십 개의 버그가 표준 라이브러리에서 발견되었습니다.
+`go-fuzz` 도구를 사용하여 무작위 테스트를 수행한 결과입니다.
+버그는 다음 패키지에서 수정되었습니다.
+`archive/tar` (/pkg/archive/tar/),
+`archive/zip` (/pkg/archive/zip/),
+`compress/flate` (/pkg/compress/flate/),
+`encoding/gob` (/pkg/encoding/gob/),
+`fmt` (/pkg/fmt/),
+`html/template` (/pkg/html/template/),
+`image/gif` (/pkg/image/gif/),
+`image/jpeg` (/pkg/image/jpeg/),
+`image/png` (/pkg/image/png/), 및
+`text/template` (/pkg/text/template/),
+패키지.
+이 수정 사항은 잘못되거나 악의적인 입력에 대한 구현을 강화합니다.
 
-  - The [`archive/zip`](/pkg/archive/zip/) package's
-    [`Writer`](/pkg/archive/zip/#Writer) type now has a
-    [`SetOffset`](/pkg/archive/zip/#Writer.SetOffset)
-    method to specify the location within the output stream at which to write the archive.
-  - The [`Reader`](/pkg/bufio/#Reader) in the
-    [`bufio`](/pkg/bufio/) package now has a
-    [`Discard`](/pkg/bufio/#Reader.Discard)
-    method to discard data from the input.
-  - In the [`bytes`](/pkg/bytes/) package,
-    the [`Buffer`](/pkg/bytes/#Buffer) type
-    now has a [`Cap`](/pkg/bytes/#Buffer.Cap) method
-    that reports the number of bytes allocated within the buffer.
-    Similarly, in both the [`bytes`](/pkg/bytes/)
-    and [`strings`](/pkg/strings/) packages,
-    the [`Reader`](/pkg/bytes/#Reader)
-    type now has a [`Size`](/pkg/bytes/#Reader.Size)
-    method that reports the original length of the underlying slice or string.
-  - Both the [`bytes`](/pkg/bytes/) and
-    [`strings`](/pkg/strings/) packages
-    also now have a [`LastIndexByte`](/pkg/bytes/#LastIndexByte)
-    function that locates the rightmost byte with that value in the argument.
-  - The [`crypto`](/pkg/crypto/) package
-    has a new interface, [`Decrypter`](/pkg/crypto/#Decrypter),
-    that abstracts the behavior of a private key used in asymmetric decryption.
-  - In the [`crypto/cipher`](/pkg/crypto/cipher/) package,
-    the documentation for the [`Stream`](/pkg/crypto/cipher/#Stream)
-    interface has been clarified regarding the behavior when the source and destination are
-    different lengths.
-    If the destination is shorter than the source, the method will panic.
-    This is not a change in the implementation, only the documentation.
-  - Also in the [`crypto/cipher`](/pkg/crypto/cipher/) package,
-    there is now support for nonce lengths other than 96 bytes in AES's Galois/Counter mode (GCM),
-    which some protocols require.
-  - In the [`crypto/elliptic`](/pkg/crypto/elliptic/) package,
-    there is now a `Name` field in the
-    [`CurveParams`](/pkg/crypto/elliptic/#CurveParams) struct,
-    and the curves implemented in the package have been given names.
-    These names provide a safer way to select a curve, as opposed to
-    selecting its bit size, for cryptographic systems that are curve-dependent.
-  - Also in the [`crypto/elliptic`](/pkg/crypto/elliptic/) package,
-    the [`Unmarshal`](/pkg/crypto/elliptic/#Unmarshal) function
-    now verifies that the point is actually on the curve.
-    (If it is not, the function returns nils).
-    This change guards against certain attacks.
-  - The [`crypto/sha512`](/pkg/crypto/sha512/)
-    package now has support for the two truncated versions of
-    the SHA-512 hash algorithm, SHA-512/224 and SHA-512/256.
-  - The [`crypto/tls`](/pkg/crypto/tls/) package
-    minimum protocol version now defaults to TLS 1.0.
-    The old default, SSLv3, is still available through [`Config`](/pkg/crypto/tls/#Config) if needed.
-  - The [`crypto/tls`](/pkg/crypto/tls/) package
-    now supports Signed Certificate Timestamps (SCTs) as specified in RFC 6962.
-    The server serves them if they are listed in the
-    [`Certificate`](/pkg/crypto/tls/#Certificate) struct,
-    and the client requests them and exposes them, if present,
-    in its [`ConnectionState`](/pkg/crypto/tls/#ConnectionState) struct.
-  - The stapled OCSP response to a [`crypto/tls`](/pkg/crypto/tls/) client connection,
-    previously only available via the
-    [`OCSPResponse`](/pkg/crypto/tls/#Conn.OCSPResponse) method,
-    is now exposed in the [`ConnectionState`](/pkg/crypto/tls/#ConnectionState) struct.
-  - The [`crypto/tls`](/pkg/crypto/tls/) server implementation
-    will now always call the
-    `GetCertificate` function in
-    the [`Config`](/pkg/crypto/tls/#Config) struct
-    to select a certificate for the connection when none is supplied.
-  - Finally, the session ticket keys in the
-    [`crypto/tls`](/pkg/crypto/tls/) package
-    can now be changed while the server is running.
-    This is done through the new
-    [`SetSessionTicketKeys`](/pkg/crypto/tls/#Config.SetSessionTicketKeys)
-    method of the
-    [`Config`](/pkg/crypto/tls/#Config) type.
-  - In the [`crypto/x509`](/pkg/crypto/x509/) package,
-    wildcards are now accepted only in the leftmost label as defined in
-    [the specification](https://tools.ietf.org/html/rfc6125#section-6.4.3).
-  - Also in the [`crypto/x509`](/pkg/crypto/x509/) package,
-    the handling of unknown critical extensions has been changed.
-    They used to cause parse errors but now they are parsed and caused errors only
-    in [`Verify`](/pkg/crypto/x509/#Certificate.Verify).
-    The new field `UnhandledCriticalExtensions` of
-    [`Certificate`](/pkg/crypto/x509/#Certificate) records these extensions.
-  - The [`DB`](/pkg/database/sql/#DB) type of the
-    [`database/sql`](/pkg/database/sql/) package
-    now has a [`Stats`](/pkg/database/sql/#DB.Stats) method
-    to retrieve database statistics.
-  - The [`debug/dwarf`](/pkg/debug/dwarf/)
-    package has extensive additions to better support DWARF version 4.
-    See for example the definition of the new type
-    [`Class`](/pkg/debug/dwarf/#Class).
-  - The [`debug/dwarf`](/pkg/debug/dwarf/) package
-    also now supports decoding of DWARF line tables.
-  - The [`debug/elf`](/pkg/debug/elf/)
-    package now has support for the 64-bit PowerPC architecture.
-  - The [`encoding/base64`](/pkg/encoding/base64/) package
-    now supports unpadded encodings through two new encoding variables,
-    [`RawStdEncoding`](/pkg/encoding/base64/#RawStdEncoding) and
-    [`RawURLEncoding`](/pkg/encoding/base64/#RawURLEncoding).
-  - The [`encoding/json`](/pkg/encoding/json/) package
-    now returns an [`UnmarshalTypeError`](/pkg/encoding/json/#UnmarshalTypeError)
-    if a JSON value is not appropriate for the target variable or component
-    to which it is being unmarshaled.
-  - The `encoding/json`'s
-    [`Decoder`](/pkg/encoding/json/#Decoder)
-    type has a new method that provides a streaming interface for decoding
-    a JSON document:
-    [`Token`](/pkg/encoding/json/#Decoder.Token).
-    It also interoperates with the existing functionality of `Decode`,
-    which will continue a decode operation already started with `Decoder.Token`.
-  - The [`flag`](/pkg/flag/) package
-    has a new function, [`UnquoteUsage`](/pkg/flag/#UnquoteUsage),
-    to assist in the creation of usage messages using the new convention
-    described above.
-  - In the [`fmt`](/pkg/fmt/) package,
-    a value of type [`Value`](/pkg/reflect/#Value) now
-    prints what it holds, rather than use the `reflect.Value`'s `Stringer`
-    method, which produces things like `<int Value>`.
-  - The [`EmptyStmt`](/pkg/ast/#EmptyStmt) type
-    in the [`go/ast`](/pkg/go/ast/) package now
-    has a boolean `Implicit` field that records whether the
-    semicolon was implicitly added or was present in the source.
-  - For forward compatibility the [`go/build`](/pkg/go/build/) package
-    reserves `GOARCH` values for a number of architectures that Go might support one day.
-    This is not a promise that it will.
-    Also, the [`Package`](/pkg/go/build/#Package) struct
-    now has a `PkgTargetRoot` field that stores the
-    architecture-dependent root directory in which to install, if known.
-  - The (newly migrated) [`go/types`](/pkg/go/types/)
-    package allows one to control the prefix attached to package-level names using
-    the new [`Qualifier`](/pkg/go/types/#Qualifier)
-    function type as an argument to several functions. This is an API change for
-    the package, but since it is new to the core, it is not breaking the Go 1 compatibility
-    rules since code that uses the package must explicitly ask for it at its new location.
-    To update, run
-    [`go fix`](/cmd/go/#hdr-Run_go_tool_fix_on_packages) on your package.
-  - In the [`image`](/pkg/image/) package,
-    the [`Rectangle`](/pkg/image/#Rectangle) type
-    now implements the [`Image`](/pkg/image/#Image) interface,
-    so a `Rectangle` can serve as a mask when drawing.
-  - Also in the [`image`](/pkg/image/) package,
-    to assist in the handling of some JPEG images,
-    there is now support for 4:1:1 and 4:1:0 YCbCr subsampling and basic
-    CMYK support, represented by the new `image.CMYK` struct.
-  - The [`image/color`](/pkg/image/color/) package
-    adds basic CMYK support, through the new
-    [`CMYK`](/pkg/image/color/#CMYK) struct,
-    the [`CMYKModel`](/pkg/image/color/#CMYKModel) color model, and the
-    [`CMYKToRGB`](/pkg/image/color/#CMYKToRGB) function, as
-    needed by some JPEG images.
-  - Also in the [`image/color`](/pkg/image/color/) package,
-    the conversion of a [`YCbCr`](/pkg/image/color/#YCbCr)
-    value to `RGBA` has become more precise.
-    Previously, the low 8 bits were just an echo of the high 8 bits;
-    now they contain more accurate information.
-    Because of the echo property of the old code, the operation
-    `uint8(r)` to extract an 8-bit red value worked, but is incorrect.
-    In Go 1.5, that operation may yield a different value.
-    The correct code is, and always was, to select the high 8 bits:
-    `uint8(r>>8)`.
-    Incidentally, the `image/draw` package
-    provides better support for such conversions; see
-    [this blog post](/blog/go-imagedraw-package)
-    for more information.
-  - Finally, as of Go 1.5 the closest match check in
-    [`Index`](/pkg/image/color/#Palette.Index)
-    now honors the alpha channel.
-  - The [`image/gif`](/pkg/image/gif/) package
-    includes a couple of generalizations.
-    A multiple-frame GIF file can now have an overall bounds different
-    from all the contained single frames' bounds.
-    Also, the [`GIF`](/pkg/image/gif/#GIF) struct
-    now has a `Disposal` field
-    that specifies the disposal method for each frame.
-  - The [`io`](/pkg/io/) package
-    adds a [`CopyBuffer`](/pkg/io/#CopyBuffer) function
-    that is like [`Copy`](/pkg/io/#Copy) but
-    uses a caller-provided buffer, permitting control of allocation and buffer size.
-  - The [`log`](/pkg/log/) package
-    has a new [`LUTC`](/pkg/log/#LUTC) flag
-    that causes time stamps to be printed in the UTC time zone.
-    It also adds a [`SetOutput`](/pkg/log/#Logger.SetOutput) method
-    for user-created loggers.
-  - In Go 1.4, [`Max`](/pkg/math/#Max) was not detecting all possible NaN bit patterns.
-    This is fixed in Go 1.5, so programs that use `math.Max` on data including NaNs may behave differently,
-    but now correctly according to the IEEE754 definition of NaNs.
-  - The [`math/big`](/pkg/math/big/) package
-    adds a new [`Jacobi`](/pkg/math/big/#Jacobi)
-    function for integers and a new
-    [`ModSqrt`](/pkg/math/big/#Int.ModSqrt)
-    method for the [`Int`](/pkg/math/big/#Int) type.
-  - The mime package
-    adds a new [`WordDecoder`](/pkg/mime/#WordDecoder) type
-    to decode MIME headers containing RFC 204-encoded words.
-    It also provides [`BEncoding`](/pkg/mime/#BEncoding) and
-    [`QEncoding`](/pkg/mime/#QEncoding)
-    as implementations of the encoding schemes of RFC 2045 and RFC 2047.
-  - The [`mime`](/pkg/mime/) package also adds an
-    [`ExtensionsByType`](/pkg/mime/#ExtensionsByType)
-    function that returns the MIME extensions know to be associated with a given MIME type.
-  - There is a new [`mime/quotedprintable`](/pkg/mime/quotedprintable/)
-    package that implements the quoted-printable encoding defined by RFC 2045.
-  - The [`net`](/pkg/net/) package will now
-    [`Dial`](/pkg/net/#Dial) hostnames by trying each
-    IP address in order until one succeeds.
-    The <code>[Dialer](/pkg/net/#Dialer).DualStack</code>
-    mode now implements Happy Eyeballs
-    ([RFC 6555](https://tools.ietf.org/html/rfc6555)) by giving the
-    first address family a 300ms head start; this value can be overridden by
-    the new `Dialer.FallbackDelay`.
-  - A number of inconsistencies in the types returned by errors in the
-    [`net`](/pkg/net/) package have been
-    tidied up.
-    Most now return an
-    [`OpError`](/pkg/net/#OpError) value
-    with more information than before.
-    Also, the [`OpError`](/pkg/net/#OpError)
-    type now includes a `Source` field that holds the local
-    network address.
-  - The [`net/http`](/pkg/net/http/) package now
-    has support for setting trailers from a server [`Handler`](/pkg/net/http/#Handler).
-    For details, see the documentation for
-    [`ResponseWriter`](/pkg/net/http/#ResponseWriter).
-  - There is a new method to cancel a [`net/http`](/pkg/net/http/)
-    `Request` by setting the new
-    [`Request.Cancel`](/pkg/net/http/#Request)
-    field.
-    It is supported by `http.Transport`.
-    The `Cancel` field's type is compatible with the
-    [`context.Context.Done`](https://godoc.org/golang.org/x/net/context)
-    return value.
-  - Also in the [`net/http`](/pkg/net/http/) package,
-    there is code to ignore the zero [`Time`](/pkg/time/#Time) value
-    in the [`ServeContent`](/pkg/net/#ServeContent) function.
-    As of Go 1.5, it now also ignores a time value equal to the Unix epoch.
-  - The [`net/http/fcgi`](/pkg/net/http/fcgi/) package
-    exports two new errors,
-    [`ErrConnClosed`](/pkg/net/http/fcgi/#ErrConnClosed) and
-    [`ErrRequestAborted`](/pkg/net/http/fcgi/#ErrRequestAborted),
-    to report the corresponding error conditions.
-  - The [`net/http/cgi`](/pkg/net/http/cgi/) package
-    had a bug that mishandled the values of the environment variables
-    `REMOTE_ADDR` and `REMOTE_HOST`.
-    This has been fixed.
-    Also, starting with Go 1.5 the package sets the `REMOTE_PORT`
-    variable.
-  - The [`net/mail`](/pkg/net/mail/) package
-    adds an [`AddressParser`](/pkg/net/mail/#AddressParser)
-    type that can parse mail addresses.
-  - The [`net/smtp`](/pkg/net/smtp/) package
-    now has a [`TLSConnectionState`](/pkg/net/smtp/#Client.TLSConnectionState)
-    accessor to the [`Client`](/pkg/net/smtp/#Client)
-    type that returns the client's TLS state.
-  - The [`os`](/pkg/os/) package
-    has a new [`LookupEnv`](/pkg/os/#LookupEnv) function
-    that is similar to [`Getenv`](/pkg/os/#Getenv)
-    but can distinguish between an empty environment variable and a missing one.
-  - The [`os/signal`](/pkg/os/signal/) package
-    adds new [`Ignore`](/pkg/os/signal/#Ignore) and
-    [`Reset`](/pkg/os/signal/#Reset) functions.
-  - The [`runtime`](/pkg/runtime/),
-    [`runtime/trace`](/pkg/runtime/trace/),
-    and [`net/http/pprof`](/pkg/net/http/pprof/) packages
-    each have new functions to support the tracing facilities described above:
-    [`ReadTrace`](/pkg/runtime/#ReadTrace),
-    [`StartTrace`](/pkg/runtime/#StartTrace),
-    [`StopTrace`](/pkg/runtime/#StopTrace),
-    [`Start`](/pkg/runtime/trace/#Start),
-    [`Stop`](/pkg/runtime/trace/#Stop), and
-    [`Trace`](/pkg/net/http/pprof/#Trace).
-    See the respective documentation for details.
-  - The [`runtime/pprof`](/pkg/runtime/pprof/) package
-    by default now includes overall memory statistics in all memory profiles.
-  - The [`strings`](/pkg/strings/) package
-    has a new [`Compare`](/pkg/strings/#Compare) function.
-    This is present to provide symmetry with the [`bytes`](/pkg/bytes/) package
-    but is otherwise unnecessary as strings support comparison natively.
-  - The [`WaitGroup`](/pkg/sync/#WaitGroup) implementation in
-    package [`sync`](/pkg/sync/)
-    now diagnoses code that races a call to [`Add`](/pkg/sync/#WaitGroup.Add)
-    against a return from [`Wait`](/pkg/sync/#WaitGroup.Wait).
-    If it detects this condition, the implementation panics.
-  - In the [`syscall`](/pkg/syscall/) package,
-    the Linux `SysProcAttr` struct now has a
-    `GidMappingsEnableSetgroups` field, made necessary
-    by security changes in Linux 3.19.
-    On all Unix systems, the struct also has new `Foreground` and `Pgid` fields
-    to provide more control when exec'ing.
-    On Darwin, there is now a `Syscall9` function
-    to support calls with too many arguments.
-  - The [`testing/quick`](/pkg/testing/quick/) will now
-    generate `nil` values for pointer types,
-    making it possible to use with recursive data structures.
-    Also, the package now supports generation of array types.
-  - In the [`text/template`](/pkg/text/template/) and
-    [`html/template`](/pkg/html/template/) packages,
-    integer constants too large to be represented as a Go integer now trigger a
-    parse error. Before, they were silently converted to floating point, losing
-    precision.
-  - Also in the [`text/template`](/pkg/text/template/) and
-    [`html/template`](/pkg/html/template/) packages,
-    a new [`Option`](/pkg/text/template/#Template.Option) method
-    allows customization of the behavior of the template during execution.
-    The sole implemented option allows control over how a missing key is
-    handled when indexing a map.
-    The default, which can now be overridden, is as before: to continue with an invalid value.
-  - The [`time`](/pkg/time/) package's
-    `Time` type has a new method
-    [`AppendFormat`](/pkg/time/#Time.AppendFormat),
-    which can be used to avoid allocation when printing a time value.
-  - The [`unicode`](/pkg/unicode/) package and associated
-    support throughout the system has been upgraded from version 7.0 to
-    [Unicode 8.0](https://www.unicode.org/versions/Unicode8.0.0/).
+### 라이브러리의 미세 조정 {#minor_library_changes}
+
+- [`archive/zip`](/pkg/archive/zip/) 패키지의
+    [`Writer`](/pkg/archive/zip/#Writer) 타입에
+    [`SetOffset`](/pkg/archive/zip/#Writer.SetOffset) 메서드가 추가되어, 출력 스트림 내에서 파일을 쓰는 위치를 지정할 수 있습니다.
+  - `bufio` 패키지의
+    [`Reader`](/pkg/bufio/#Reader)에
+    [`Discard`](/pkg/bufio/#Reader.Discard) 메서드가 추가되어 입력 데이터에서 데이터를 버릴 수 있습니다.
+  - `bytes` 패키지에서,
+    [`Buffer`](/pkg/bytes/#Buffer) 타입에
+    [`Cap`](/pkg/bytes/#Buffer.Cap) 메서드가 추가되어, 버퍼 내에서 할당된 바이트 수를 보고할 수 있습니다. 마찬가지로, `bytes`와 `strings` 패키지 모두,
+    [`Reader`](/pkg/bytes/#Reader) 타입에
+    [`Size`](/pkg/bytes/#Reader.Size) 메서드가 추가되어, 기본 슬라이스 또는 문자열의 원래 길이를 보고할 수 있습니다.
+  - `bytes`와 `strings` 패키지 모두,
+    [`LastIndexByte`](/pkg/bytes/#LastIndexByte) 함수가 추가되어, 해당 값을 가진 가장 오른쪽에 있는 바이트를 인수에 위치로 찾습니다.
+  - `crypto` 패키지에는
+    [`Decrypter`](/pkg/crypto/#Decrypter) 인터페이스가 추가되어, 비대칭 해독에 사용되는 개인 키의 동작을 추상화합니다.
+  - `crypto/cipher` 패키지에서,
+    [`Stream`](/pkg/crypto/cipher/#Stream) 인터페이스에 대한 설명이, 소스와 목적지가 서로 다른 경우 동작에 대한 내용이 명확해졌습니다.
+    목적이 소스보다 짧으면 메서드가 패닉됩니다. 이는 구현의 변경 사항이 아니라 설명입니다.
+  - `crypto/cipher` 패키지에서,
+    AES의 Galois/Counter 모드 (GCM)에서 96 바이트를 넘는 nonce 길이의 지원이 추가되었습니다. 이는 일부 프로토콜에서 필요합니다.
+  - `crypto/elliptic` 패키지에서,
+    `CurveParams` 구조에 `Name` 필드가 추가되었고, 패키지에 구현된 곡선에 이름이 할당되었습니다. 이러한 이름은, 곡선을 선택하는 보다 안전한 방법을 제공하며, 이는 곡기에 의존적인 암호 시스템에 곡의 크기를 선택하는 것보다 안전합니다.
+  - `crypto/elliptic` 패키지에서,
+    [`Unmarshal`](/pkg/crypto/elliptic/#Unmarshal) 함수가 실제로 점이 곡선에 있는지 확인합니다. (그렇지 않으면 함수는 nil을 반환합니다). 이 변경은 특정 공격으로부터 보호합니다.
+  - `crypto/sha512` 패키지에 SHA-512 해시 알고리즘의 두 개의 잘린 버전을 지원합니다. SHA-512/224 및 SHA-512/256.
+  - `crypto/tls` 패키지의 최소 프로토콜 버전이 기본값으로 TLS 1.0으로 설정되었습니다. 이전 기본값인 SSLv3는 필요에 따라 [`Config`](/pkg/crypto/tls/#Config)를 통해 여전히 사용할 수 있습니다.
+  - `crypto/tls` 패키지는 RFC 6962에 정의된 Signed Certificate Timestamps (SCTs)를 지원합니다. 서버는 [`Certificate`](/pkg/crypto/tls/#Certificate) 구조에 나열된 경우에만 제공하고, 클라이언트는 요청하고, 존재할 때 [`ConnectionState`](/pkg/crypto/tls/#ConnectionState) 구조에 노출합니다.
+  - `crypto/tls` 패키지에 이전에는 [`OCSPResponse`](/pkg/crypto/tls/#Conn.OCSPResponse) 메서드를 통해만 사용 가능한 `crypto/tls` 클라이언트 연결에 대한 stapled OCSP 응답이 이제 [`ConnectionState`](/pkg/crypto/tls/#ConnectionState) 구조에 노출됩니다.
+  - `crypto/tls` 서버 구현이 이제 연결을 선택하기 위해 `GetCertificate` 함수를 항상 [`Config`](/pkg/crypto/tls/#Config) 구조에서 호출합니다.
+  - 마지막으로, `crypto/tls` 패키지에 있는 세션 티켓 키를 실행 중인 서버에서도 변경할 수 있습니다. 이는 새 `SetSessionTicketKeys` 메서드를 통해 `Config` 타입에서 수행됩니다.
+  - `crypto/x509` 패키지에서, 와일드카드는 [사양](https://tools.ietf.org/html/rfc6125#section-6.4.3)에 정의된 왼쪽 레이블에서만 허용됩니다.
+  - `crypto/x509` 패키지에서, 알려지지 않은 중요한 확장에 대한 처리가 변경되었습니다. 이전에 파싱 오류를 발생시켰지만 이제 오류가 발생하여 파싱되고 있습니다.
+    이것은 `Verify`에서 발생합니다.
+    새 `UnhandledCriticalExtensions` 필드를 `Certificate` 구조에 기록합니다.
+  - `DB` 타입이 `database/sql` 패키지에서 이제 데이터베이스 통계를 가져오는 [`Stats`](/pkg/database/sql/#DB.Stats) 메서드를 제공합니다.
+  - `debug/dwarf` 패키지는 DWARF 버전 4를 더 잘 지원하기 위해 광범위한 추가 기능을 제공합니다. 예를 들어 새 타입 `Class`의 정의를 참조하십시오.
+  - `debug/dwarf` 패키지는 이제 DWARF 라인 테이블을 디코딩하도록 지원합니다.
+  - `debug/elf` 패키지는 64비트 PowerPC 아키텍처를 지원합니다.
+  - `encoding/base64` 패키지는 두 개의 새로운 인코딩 변수를 통해 패딩되지 않은 인코딩을 지원합니다.
+    [`RawStdEncoding`](/pkg/encoding/base64/#RawStdEncoding) 및 [`RawURLEncoding`](/pkg/encoding/base64/#RawURLEncoding).
+  - `encoding/json` 패키지는 이제 JSON 값이 대상 변수 또는 구성 요소에 적합하지 않으면 [`UnmarshalTypeError`](/pkg/encoding/json/#UnmarshalTypeError)를 반환합니다.
+  - `encoding/json`의 `Decoder` 타입에 새로운 메서드가 추가되어, JSON 문서를 스트리밍 방식으로 디코딩할 인터페이스를 제공합니다.
+    [`Token`](/pkg/encoding/json/#Decoder.Token)
+    또한 기존 `Decode` 기능을 계속하여 시작한 디코딩 작업에 대해 작동합니다.
+  - `flag` 패키지에 새로운 함수, `UnquoteUsage`가 추가되어 새 규약을 사용하여 사용법 메시지를 만드는 데 도움이 됩니다.
+  - `fmt` 패키지에서, `Value` 타입의 값이 이제, `<int Value>`와 같은, `reflect.Value`의 `Stringer` 메서드를 사용하는 대신, 표시됩니다.
+  - `go/ast` 패키지의 `EmptyStmt` 타입에는 이제, 소스에 세미콜론이 포함되어 있는지 여부를 기록하는 부울 필드 `Implicit`가 있습니다.
+  - 향후 호환성을 위해 `go/build` 패키지는 Go가 지원할 수 있는 몇 가지 아키텍처에 대해 `GOARCH` 값을 예약합니다. 이는 약속이 아닙니다.
+    또한 `Package` 구조에 `PkgTargetRoot` 필드가 추가되어 대상 아키텍처에 대한 설치 디렉토리를 저장합니다.
+  - 새로 마이그레이션된 `go/types` 패키지는, 패키지 수준의 이름에 추가로 할당할 프리픽스를 제어할 수 있는 새로운 `Qualifier` 타입의 함수에 대한 API 변경을 제공합니다. 이는 패키지에 대한 변경 사항이지만, Go 1 호환성을 유지하기 위해 기존 코드에서 이 패키지를 명시적으로 가져와야 합니다. 업데이트하려면 `go fix`를 실행하십시오.
+  - `image` 패키지에서, `Rectangle` 타입이 `Image` 인터페이스를 구현하여 그림 작업에서 마스크로 사용할 수 있습니다.
+  - `image` 패키지에서, 몇몇 JPEG 이미지 처리를 지원하기 위해, 새로운 `image.CMYK` 구조와 `CMYKToRGB` 함수가 추가되었습니다.
+  - `image/color` 패키지는 기본 CMYK 지원을 추가합니다. `CMYK` 구조, `CMYKModel` 색상 모델, `CMYKToRGB` 함수를 통해.
+  - `image/color` 패키지에서, `YCbCr` 값을 `RGBA`로 변환하는 정확도가 향상되었습니다. 이전 코드는 낮은 8비트가 높은 8비트의 값을 단순히 반복하는 기능이 있었지만 이제 정확한 정보가 포함됩니다. 이전 코드는 작동했지만 이것은 잘못된 것입니다. Go 1.5에서 이 작업은 다음과 같이 수행해야 합니다. `uint8(r>>8)`.
+    이것은 `image/draw` 패키지에서 더 나은 지원을 제공합니다.
+  - 마지막으로, `crypto/tls` 패키지에서 세션 티켓 키가 이제 실행 중인 서버에서도 변경할 수 있습니다. 이는 새 `SetSessionTicketKeys` 메서드를 통해 `Config` 타입에서 수행됩니다.
+  - `crypto/x509` 패키지에서, 와일드카드는 [사양](https://tools.ietf.org/html/rfc6125#section-6.4.3)에 정의된 왼쪽 레이블에서만 허용됩니다.
+  - `crypto/x509` 패키지에서, 알려지지 않은 중요한 확장 처리가 변경되었습니다. 이전에 파싱 오류를 발생시켰지만 이제 오류가 발생하여 파싱됩니다.
+    이것은 `Verify`에서 발생합니다.
+    새 `UnhandledCriticalExtensions` 필드를 `Certificate` 구조에 기록합니다.
+  - `DB` 타입이 `database/sql` 패키지에서 이제 데이터베이스 통계를 가져오는 [`Stats`](/pkg/database/sql/#DB.Stats) 메서드를 제공합니다.
+  - `debug/dwarf` 패키지는 DWARF 버전 4를 더 잘 지원하기 위해 광범위한 추가 기능을 제공합니다. 예를 들어 새 타입 `Class`의 정의를 참조하십시오.
+  - `debug/dwarf` 패키지는 이제 DWARF 라인 테이블을 디코딩하도록 지원합니다.
+  - `debug/elf` 패키지는 64비트 PowerPC 아키텍처를 지원합니다.
+  - `encoding/base64` 패키지는 두 개의 새로운 인코딩 변수를 통해 패딩되지 않은 인코딩을 지원합니다.
+    [`RawStdEncoding`](/pkg/encoding/base64/#RawStdEncoding) 및 [`RawURLEncoding`](/pkg/encoding/base64/#RawURLEncoding).
+  - `encoding/json` 패키지는 이제 JSON 값이 대상 변수 또는 구성 요소에 적합하지 않으면 [`UnmarshalTypeError`](/pkg/encoding/json/#UnmarshalTypeError)를 반환합니다.
+  - `encoding/json`의 `Decoder` 타입에 새로운 메서드가 추가되어, JSON 문서를 스트리밍 방식으로 디코딩할 인터페이스를 제공합니다.
+    [`Token`](/pkg/encoding/json/#Decoder.Token)
+    또한 기존 `Decode` 기능을 계속하여 시작한 디코딩 작업에 대해 작동합니다.
+  - `flag` 패키지에 새로운 함수, `UnquoteUsage`가 추가되어 새 규약을 사용하여 사용법 메시지를 만드는 데 도움이 됩니다.
+  - `fmt` 패키지에서, `Value` 타입의 값이 이제, `<int Value>`와 같은, `reflect.Value`의 `Stringer` 메서드를 사용하는 대신, 표시됩니다.
+  - `go/ast` 패키지의 `EmptyStmt` 타입에는 이제, 소스에 세미콜론이 포함되어 있는지 여부를 기록하는 부울 필드 `Implicit`가 있습니다.
+  - 향후 호환성을 위해 `go/build` 패키지는 Go가 지원할 수 있는 몇 가지 아키텍처에 대해 `GOARCH` 값을 예약합니다. 이는 약속이 아닙니다.
+    또한 `Package` 구조에 `PkgTargetRoot` 필드가 추가되어 대상 아키텍처에 대한 설치 디렉토리를 저장합니다.
+  - 새로 마이그레이션된 `go/types` 패키지는, 패키지 수준의 이름에 추가로 할당할 프리픽스를 제어할 수 있는 새로운 `Qualifier` 타입의 함수에 대한 API 변경을 제공합니다. 이는 패키지에 대한 변경 사항이지만, Go 1 호환성을 유지하기 위해 기존 코드에서 이 패키지를 명시적으로 가져와야 합니다. 업데이트하려면 `go fix`를 실행하십시오.
+  - `image` 패키지에서, `Rectangle` 타입이 `Image` 인터페이스를 구현하여 그림 작업에서 마스크로 사용할 수 있습니다.
+  - `image` 패키지에서, 몇몇 JPEG 이미지 처리를 지원하기 위해, 새로운 `image.CMYK` 구조와 `CMYKToRGB` 함수가 추가되었습니다.
+  - `image/color` 패키지는 기본 CMYK 지원을 추가합니다. `CMYK` 구조, `CMYKModel` 색상 모델, `CMYKToRGB` 함수를 통해.
+  - `image/color` 패키지에서, `YCbCr` 값을 `RGBA`로 변환하는 정확도가 향상되었습니다. 이전 코드는 낮은 8비트가 높은 8비트의 값을 단순히 반복하는 기능이 있었지만 이제 정확한 정보가 포함됩니다. 이전 코드는 작동했지만 이것은 잘못된 것입니다. Go 1.5에서 이 작업은 다음과 같이 수행해야 합니다. `uint8(r>>8)`.
+    이것은 `image/draw` 패키지에서 더 나은 지원을 제공합니다.
+  - 마지막으로, `crypto/tls` 패키지에서 세션 티켓 키가 이제 실행 중인 서버에서도 변경할 수 있습니다. 이는 새 `SetSessionTicketKeys` 메서드를 통해 `Config` 타입에서 수행됩니다.

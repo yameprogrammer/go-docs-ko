@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package subtle implements functions that are often useful in cryptographic code but require careful thought to use correctly.
+패키지 `subtle`는 암호화 코드에서 자주 사용되지만, 올바르게 사용하려면 신중한 고려가 필요한 함수들을 구현합니다.
 
 ## 원문 요약
 

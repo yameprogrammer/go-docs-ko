@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package ioutil implements some I/O utility functions.
+패키지 ioutil는 일부 I/O 유틸리티 함수를 구현합니다.
 
 ## 원문 요약
 

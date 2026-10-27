@@ -1,361 +1,255 @@
 <!--{
-  "Title": "Managing dependencies"
+  "제목": "의존성 관리"
 }-->
 
-When your code uses external packages, those packages (distributed as modules)
-become dependencies. Over time, you may need to upgrade them or replace them. Go
-provides dependency management tools that help you keep your Go applications
-secure as you incorporate external dependencies.
+코드에서 외부 패키지를 사용할 때, 해당 패키지(모듈로 배포됨)는 의존성으로 간주됩니다. 시간이 지남에 따라, 업데이트하거나 교체해야 할 수도 있습니다. Go는 외부 의존성을 통합하면서 Go 애플리케이션을 안전하게 유지하는 데 도움이 되는 의존성 관리 도구를 제공합니다.
 
-This topic describes how to perform tasks to manage dependencies you take on in
-your code. You can perform most of these with Go tools. This topic also
-describes how to perform a few other dependency-related tasks you might find
-useful.
+이 주제에서는 코드를 작성할 때 관리해야 하는 의존성을 관리하는 방법에 대해 설명합니다. 대부분의 작업을 Go 도구를 사용하여 수행할 수 있습니다. 이 주제에서는 유용하게 사용할 수 있는 몇 가지 다른 의존성 관련 작업에 대한 방법도 설명합니다.
 
-**See also**
+**참고**
 
-*   If you're new to working with dependencies as modules, take a look at the
-    [Getting started tutorial](/doc/tutorial/getting-started)
-    for a brief introduction.
-*   Using the `go` command to manage dependencies helps ensure that your
-    requirements remain consistent and the content of your go.mod file is valid.
-    For reference on the commands, see [Command go](/cmd/go/).
-    You can also get help from the command line by typing `go help`
-    _command-name_, as with `go help mod tidy`.
-*   Go commands you use to make dependency changes edit your go.mod file. For
-    more about the contents of the file, see [go.mod file reference](/doc/modules/gomod-ref).
-*   Making your editor or IDE aware of Go modules can make the work of managing
-    them easier. For more on editors that support Go, see [Editor plugins and
-    IDEs](/doc/editors.html).
-*   This topic doesn't describe how to develop, publish, and version modules for
-    others to use. For more on that, see [Developing and publishing
-    modules](developing).
+*   새로운 사용자가 모듈로 의존성을 관리하는 방법을 배우는 데 도움이 되도록, [시작 가이드 튜토리얼](/doc/tutorial/getting-started)을 참조하십시오.
+*   `go` 명령을 사용하여 의존성을 관리하면, 요구 사항이 일관성을 유지하고 `go.mod` 파일의 내용이 유효하도록 보장할 수 있습니다. 명령에 대한 참조는 [명령 go](/cmd/go/)를 참조하십시오. 또한 `go help` 명령과 같이 `go help mod tidy`와 같이 명령줄에서 도움을 받을 수도 있습니다.
+*   의존성 변경을 위해 사용하는 Go 명령어는 `go.mod` 파일을 편집합니다. 파일의 내용에 대한 자세한 내용은 [go.mod 파일 참조](/doc/modules/gomod-ref)를 참조하십시오.
+*   Go 모듈을 편집기 또는 IDE에 인식시키면 관리 작업을 더 쉽게 할 수 있습니다. Go를 지원하는 편집기에 대한 자세한 내용은 [편집기 플러그인 및 IDE](/doc/editors.html)를 참조하십시오.
+*   이 주제는 다른 사람이 사용할 수 있도록 모듈을 개발, 게시 및 버전 관리하는 방법에 대해 설명하지 않습니다. 이에 대한 자세한 내용은 [모듈 개발 및 게시](developing)를 참조하십시오.
 
-## Workflow for using and managing dependencies {#workflow}
+## 사용 및 관리 워크플로우
 
-You can get and use useful packages with Go tools. On
-[pkg.go.dev](https://pkg.go.dev), you can search for packages you might find
-useful, then use the `go` command to import those packages into your own code to
-call their functions.
+다음 Go 도구와 함께 유용한 패키지를 가져와 사용할 수 있습니다.
+[pkg.go.dev](https://pkg.go.dev)에서, 유용하게 사용할 만한 패키지를 검색하고, 그런 다음 `go` 명령을 사용하여 해당 패키지를 자신의 코드에 가져와 해당 함수를 호출할 수 있습니다.
 
-The following lists the most common dependency management steps. For more about
-each, see the sections in this topic.
+다음은 가장 일반적인 의존성 관리 단계 목록입니다. 각 단계에 대한 자세한 내용은 이 주제의 해당 섹션을 참조하십시오.
 
-1. [Locate useful packages](#locating_packages) on [pkg.go.dev](https://pkg.go.dev).
-1. [Import the packages](#locating_packages) you want in your code.
-1. Add your code to a module for dependency tracking (if it isn't in a module
-    already). See [Enabling dependency tracking](#enable_tracking)
-1. [Add external packages as dependencies](#adding_dependency) so you can manage
-    them.
-1. [Upgrade or downgrade dependency versions](#upgrading) as needed over time.
+1. [유용한 패키지를 찾으세요](#locating_packages) [pkg.go.dev](https://pkg.go.dev)에서.
+1. 코드를 사용하여 필요한 패키지를 가져옵니다.
+1. 의존성 추적을 위해 코드를 모듈로 추가합니다 (이미 모듈에 있지 않은 경우). 자세한 내용은 [의존성 추적 활성화](#enable_tracking)를 참조하세요.
+1. 외부 패키지를 의존성으로 추가하여 관리할 수 있습니다.
+1. 필요에 따라 의존성 버전을 주기적으로 업그레이드 또는 다운그레이드합니다.
 
-## Managing dependencies as modules {#modules}
+## 모듈로 의존성 관리하기 {#modules}
 
-In Go, you manage dependencies as modules that contain the packages you import.
-This process is supported by:
+Go에서, 여러분은 가져오는 패키지를 포함하는 모듈로 의존성을 관리합니다.
+이 프로세스는 다음과 같은 기능을 통해 지원됩니다:
 
-*   A **decentralized system for publishing** modules and retrieving their code.
-    Developers make their modules available for other developers to use from
-    their own repository and publish with a version number.
-*   A **package search engine** and documentation browser (pkg.go.dev) at which
-    you can find modules. See [Locating and importing useful packages](#locating_packages).
-*   A module **version numbering convention** to help you understand a module's
-    stability and backward compatibility guarantees. See [Module version
-    numbering](version-numbers).
-*   **Go tools** that make it easier for you to manage dependencies, including
-    getting a module's source, upgrading, and so on. See sections of this topic
-    for more.
+*   **모듈 게시 및 코드 검색**을 위한 분산 시스템.
+    개발자는 자신의 저장소에서 다른 개발자가 사용할 수 있도록 모듈을 공개하고 버전 번호와 함께 게시합니다.
+*   모듈을 찾을 수 있는 **패키지 검색 엔진 및 문서 브라우저 (pkg.go.dev)**. [유용한 패키지 찾기](locating_packages)를 참조하세요.
+*   모듈의 안정성과 이전 버전과의 호환성을 이해하는 데 도움이 되는 **모듈 버전 번호 지정 규칙**입니다. [모듈 버전 번호](version-numbers)를 참조하세요.
+*   종속성 관리를 더 쉽게 해주는 **Go 도구**를 포함하여 모듈의 소스, 업그레이드 등을 관리하는 데 도움이 됩니다. 자세한 내용은 이 주제의 해당 섹션을 참조하세요.
 
-## Locating and importing useful packages {#locating_packages}
+## 유용한 패키지 찾고 임포트하기 {#locating_packages}
 
-You can search [pkg.go.dev](https://pkg.go.dev) to find packages with functions
-you might find useful.
+다음 [pkg.go.dev](https://pkg.go.dev)에서 유용한 함수를 가진 패키지를 찾을 수 있습니다.
 
-When you've found a package you want to use in your code, locate the package
-path at the top of the page and click the Copy path button to copy the path to
-your clipboard. In your own code, paste the path into an import statement, as in
-the following example:
+원하는 패키지를 찾았으면, 페이지 상단에 있는 패키지 경로를 찾아서 "경로 복사" 버튼을 클릭하여 경로를 클립보드에 복사합니다. 본인의 코드에서, 다음 예제와 같이 해당 경로를 import 문에 붙여넣습니다:
 
 ```
 import "rsc.io/quote"
 ```
 
-After your code imports the package, enable dependency tracking and get the
-package's code to compile with. For more, see [Enabling dependency tracking in
-your code](#enable_tracking) and [Adding a dependency](#adding_dependency).
+코드에서 패키지를 가져온 후, 종속성 추적을 활성화하고 패키지의 코드를 컴파일할 수 있도록 합니다. 자세한 내용은 [코드에서 종속성 추적 활성화](#enable_tracking) 및 [종속성 추가](#adding_dependency)를 참조하십시오.
 
-## Enabling dependency tracking in your code {#enable_tracking}
-
-To track and manage the dependencies you add, you begin by putting your code in
-its own module. This creates a go.mod file at the root of your source tree.
-Dependencies you add will be listed in that file.
-
-To add your code to its own module, use the
-[`go mod init` command](/ref/mod#go-mod-init). For example, from the command
-line, change to your code's root directory, then run the command as in the
-following example:
+## 코드 내에서 의존성 추적 활성화하기 {#enable_tracking}
 
 ```
-$ go mod init example/mymodule
+# Enable dependency tracking in your code
 ```
 
-The `go mod init` command's argument is your module's module path. If possible,
-the module path should be the repository location of your source code.
+제게 추가하는 의존성을 추적하고 관리하려면 먼저 코드를 자체 모듈로 구성합니다. 그러면 소스 트리의 루트 위치에 `go.mod` 파일이 생성됩니다.
+추가하는 의존성은 해당 파일에 나열됩니다.
 
-If at first you don't know the module's eventual repository location, use a
-safe substitute. This might be the name of a domain you own or another name you
-control (such as your company name), along with a path following from the
-module's name or source directory. For more, see
-[Naming a module](#naming_module).
-
-As you use Go tools to manage dependencies, the tools update the go.mod file so
-that it maintains a current list of your dependencies.
-
-When you add dependencies, Go tools also create a go.sum file that contains
-checksums of modules you depend on. Go uses this to verify the integrity of
-downloaded module files, especially for other developers working on your
-project.
-
-Include the go.mod and go.sum files in your repository with your code.
-
-See the [go.mod reference](/doc/modules/gomod-ref) for more.
-
-## Naming a module {#naming_module}
-
-When you run `go mod init` to create a module for tracking dependencies, you
-specify a module path that serves as the module's name. The module path
-becomes the import path prefix for packages in the module. Be sure to specify
-a module path that won't conflict with the module path of other modules.
-
-At a minimum, a module path need only indicate something about its origin, such
-as a company or author or owner name. But the path might also be more
-descriptive about what the module is or does.
-
-The module path is typically of the following form:
+자신의 코드에 코드를 추가하려면 다음 명령어를 사용하세요:
+[`go mod init`](/ref/mod#go-mod-init). 예를 들어, 명령줄에서, 코드의 루트 디렉토리로 이동한 다음 다음 예제와 같이 명령을 실행합니다:
 
 ```
-<prefix>/<descriptive-text>
+go mod init example/mymodule
 ```
 
-* The _prefix_ is typically a string that partially describes the module, such
-    as a string that describes its origin. This might be:
+`go mod init` 명령어의 인수는 모듈의 모듈 경로입니다. 가능하다면, 모듈 경로는 소스 코드의 저장소 위치여야 합니다.
 
-    *   The location of the repository where Go tools can find the module's source
-        code (required if you're publishing the module).
+만약 모듈의 최종 저장소 위치를 처음 알 수 없는 경우, 안전한 대체 이름을 사용하십시오. 이는 귀사 소유의 도메인 이름 또는 귀사가 제어하는 다른 이름일 수 있으며, 모듈 이름 또는 소스 디렉토리를 따르는 경로와 함께 사용합니다. 자세한 내용은 "[모듈 이름 지정](#naming_module)"를 참조하십시오.
 
-        For example, it might be `github.com/<project-name>/`.
+Go 툴을 사용하여 의존성을 관리할 때, 이러한 툴은 `go.mod` 파일을 업데이트하여, 현재 의존성 목록을 유지합니다.
 
-        Use this best practice if you think you might publish the module for
-        others to use. For more about publishing, see
-        [Developing and publishing modules](/doc/modules/developing).
+`go.sum` 파일은 Go 도구가 종속 모듈의 체크섬을 포함하여 생성합니다. Go는 이를 사용하여 다운로드한 모듈 파일의 무결성을 확인하며, 특히 귀하의 프로젝트에서 작업하는 다른 개발자를 위해 사용됩니다.
 
-    *   A name you control.
+저장소에 `go.mod` 및 `go.sum` 파일을 포함하십시오.
 
-        If you're not using a repository name, be sure to choose a prefix that
-        you're confident won't be used by others. A good choice is your
-        company's name. Avoid common terms such as `widgets`, `utilities`, or
-        `app`.
+자세한 내용은 [go.mod 참조](/doc/modules/gomod-ref)를 참조하세요.
 
-* For the _descriptive text_, a good choice would be a project name. Remember
-    that package names carry most of the weight of describing functionality.
-    The module path creates a namespace for those package names.
+## 모듈 명명 {#naming_module}
 
-**Reserved module path prefixes**
+`go mod init` 명령을 사용하여 의존성을 추적하기 위한 모듈을 생성할 때, 모듈의 이름을 지정하는 모듈 경로를 지정합니다. 모듈 경로는 모듈 내의 패키지에 대한 가져오기 경로 접두사로 사용됩니다. 다른 모듈의 모듈 경로와 충돌하지 않는 모듈 경로를 지정하는 것을 잊지 마십시오.
 
-Go guarantees that the following strings won't be used in package names.
+최소한, 모듈 경로는 단지 모듈의 출처에 대한 정보를 나타내야 합니다. 예를 들어 회사, 작성자 또는 소유자의 이름을 나타낼 수 있습니다. 그러나 경로가 모듈이 무엇인지 또는 무엇을 하는지에 대해 더 자세한 정보를 제공할 수도 있습니다.
 
-- `test` -- You can use `test` as a module path prefix for a module whose code
-    is designed to locally test functions in another module.
+모듈 경로는 일반적으로 다음과 같은 형태를 갖습니다:
 
-    Use the `test` path prefix for modules that are created as part of a test.
-    For example, your test itself might run `go mod init test` and then set up
-    that module in some particular way in order to test with a Go source code
-    analysis tool.
+`<prefix>/<설명적인 텍스트>`
+```
 
-- `example` -- Used as a module path prefix in some Go documentation, such as
-    in tutorials where you're creating a module just to track dependencies.
+* 접두사는 일반적으로 모듈을 부분적으로 설명하는 문자열입니다. 예를 들어, 모듈의 출처를 설명하는 문자열일 수 있습니다. 예시:
 
-    Note that Go documentation also uses `example.com` to illustrate when the
-    example might be a published module.
+*   저장소의 위치 (Go 도구가 모듈의 소스 코드를 찾을 수 있는 곳)
+        (모듈을 게시하는 경우에 필요)
 
-## Adding a dependency {#adding_dependency}
+예를 들어, `github.com/<프로젝트-이름>/`일 수 있습니다.
 
-Once you're importing packages from a published module, you can add that module
-to manage as a dependency by using the [`go get`
-command](/cmd/go/#hdr-Add_dependencies_to_current_module_and_install_them).
+다음 가이드라인을 사용하여 다른 사람들이 사용할 수 있도록 모듈을 게시할 수 있다고 생각하는 경우 사용하십시오. 게시에 대한 자세한 내용은 다음을 참조하십시오.
+        [모듈 개발 및 게시]( /doc/modules/developing)
 
-The command does the following:
+*   당신이 지정하는 이름.
 
-*   If needed, it adds `require` directives to your go.mod file for modules
-    needed to build packages named on the command line. A `require` directive
-    tracks the minimum version of a module that your module depends on. See the
-    [go.mod reference](/doc/modules/gomod-ref) for more.
-*   If needed, it downloads module source code so you can compile packages that
-    depend on them. It can download modules from a module proxy like
-    proxy.golang.org or directly from version control repositories. The source
-    is cached locally.
+만약 저장소 이름을 사용하지 않는 경우, 다른 사람이 사용하지 않을 것임을 확신할 수 있는 접두사를 선택해야 합니다. 좋은 선택은 회사의 이름을 사용하는 것입니다. `widgets`, `utilities` 또는 `app`과 같은 일반적인 용어는 피하십시오.
 
-    You can set the location from which Go tools download modules. For more, see
-    [Specifying a module proxy server](#proxy_server).
+* 설명 텍스트의 경우, 좋은 선택은 프로젝트 이름입니다. 기억하세요
+    `package` 이름이 기능에 대한 설명을 하는 데 가장 큰 역할을 합니다.
+    모듈 경로는 이러한 `package` 이름에 대한 네임스페이스를 만듭니다.
 
-The following describes a few examples.
+**예약된 모듈 경로 접두사**
 
-*   To add all dependencies for a package in your module, run a command like the
-    one below ("." refers to the package in the current directory):
+*   `com.example.myproject`
+*   `org.myorg.myapp`
+*   `net.mycompany.app`
 
-    ```
+Go는 다음 문자열이 패키지 이름으로 사용되지 않음을 보장합니다.
+
+- `test` -- `test`를 모듈 경로 접두사로 사용할 수 있습니다. 이 접두사는 다른 모듈의 함수를 로컬에서 테스트하도록 설계된 모듈에 사용됩니다.
+
+테스트의 일부로 생성된 모듈에는 `test` 경로 접두사를 사용합니다.
+예를 들어, 자체 테스트가 `go mod init test`를 실행하고, 그런 다음 Go 소스 코드 분석 도구를 사용하여 테스트하기 위해 해당 모듈을 특정 방식으로 구성할 수 있습니다.
+
+- `example` -- 일부 Go 문서(예: 튜토리얼)에서 모듈 경로 접두사로 사용됩니다. 예를 들어, 의존성을 추적하기 위해 모듈을 생성할 때 사용됩니다.
+
+참고: Go 문서는 예시가 게시된 모듈일 수 있음을 설명하기 위해 `example.com`을 사용합니다.
+
+## 종속성 추가하기 {#adding_dependency}
+
+한 번 공개된 모듈에서 패키지를 가져온 후에는 `go get`
+명령을 사용하여 해당 모듈을 관리하는 의존성으로 추가할 수 있습니다. 자세한 내용은 [/cmd/go/#hdr-Add_dependencies_to_current_module_and_install_them]을 참조하세요.
+
+이 명령어는 다음 작업을 수행합니다:
+
+*   필요한 경우, 명령줄에서 지정된 패키지를 빌드하는 데 필요한 모듈에 대해 `require` 지시문을 `go.mod` 파일에 추가합니다. `require` 지시문은 모듈이 의존하는 모듈의 최소 버전을 추적합니다. 자세한 내용은 [go.mod 참조](/doc/modules/gomod-ref)를 참조하십시오.
+*   필요한 경우, 모듈 소스 코드를 다운로드하여 해당 모듈에 의존하는 패키지를 컴파일할 수 있습니다. 모듈 프록시(예: proxy.golang.org) 또는 직접 버전 관리 저장소에서 모듈을 다운로드할 수 있습니다. 소스 코드는 로컬에 캐시됩니다.
+
+사용자에서 Go 도구가 모듈을 다운로드하는 위치를 설정할 수 있습니다. 자세한 내용은 다음을 참조하세요.
+    [모듈 프록시 서버 지정](#proxy_server)
+
+다음은 몇 가지 예제를 설명합니다.
+
+*   현재 디렉토리에 있는 패키지에 있는 모든 종속성을 추가하려면 다음과 같은 명령을 실행합니다 ("."은 현재 디렉토리에 있는 패키지를 나타냄):
+
+```
     $ go get .
-    ```
+```
 
-*   To add a specific dependency, specify its module path as an argument to the
-    command.
+*   특정 종속성을 추가하려면, 명령에 해당 모듈 경로를 인수로 지정합니다.
 
-    ```
-    $ go get example.com/theirmodule
-    ```
+```
+    go get example.com/theirmodule
+```
 
-The command also authenticates each module it downloads. This ensures that it's
-unchanged from when the module was published. If the module has changed since it
-was published -- for example, the developer changed the contents of the commit
--- Go tools will present a security error. This authentication check protects
-you from modules that might have been tampered with.
+이 명령어는 다운로드한 각 모듈의 인증도 수행합니다. 이를 통해 모듈이 처음 게시될 때와 동일한 상태인지 확인합니다. 만약 모듈이 게시 이후 변경되었다면 (예: 개발자가 커밋의 내용을 변경한 경우) Go 도구는 보안 오류를 표시합니다. 이 인증 확인은 변조되었을 가능성이 있는 모듈로부터 사용자를 보호합니다.
 
-## Getting a specific dependency version {#getting_version}
+## 특정 의존성 버전 얻기 {#getting_version}
 
-You can get a specific version of a dependency module by specifying its version
-in the `go get` command. The command updates the `require` directive in your
-go.mod file (though you can also update that manually).
+특정 버전의 의존성 모듈을 얻으려면 `go get` 명령에 해당 버전을 지정할 수 있습니다. 이 명령은 `go.mod` 파일의 `require` 지시문을 업데이트합니다 (하지만 수동으로 업데이트할 수도 있습니다).
 
-You might want to do this if:
+다음과 같은 경우에 유용할 수 있습니다:
 
-*   You want to get a specific pre-release version of a module to try out.
-*   You've discovered that the version you're currently requiring isn't working
-    for you, so you want to get a version you know you can rely on.
-*   You want to upgrade or downgrade a module you're already requiring.
+*   특정 프리릴리즈 버전을 사용하여 모듈을 테스트하고 싶습니다.
+*   현재 사용하는 버전이 작동하지 않는 것을 발견하여, 안정적으로 사용할 수 있는 버전을 얻고 싶습니다.
+*   이미 사용하는 모듈을 업그레이드하거나 다운그레이드하고 싶습니다.
 
-Here are examples for using the [`go get`
-command](/ref/mod#go-get):
+다음은 [`go get`
+명령의 사용 예시입니다](/ref/mod#go-get):
 
-*   To get a specific numbered version, append the module path with an @ sign
-    followed by the version you want:
+*   특정 버전(번호)을 얻으려면, 모듈 경로 뒤에 @ 기호와 원하는 버전을 추가합니다:
 
-    ```
-    $ go get example.com/theirmodule@v1.3.4
-    ```
+```
+    go get example.com/theirmodule@v1.3.4
+```
 
-*   To get the latest version, append the module path with `@latest`:
+*   최신 버전을 얻으려면, 모듈 경로에 `@latest`를 추가합니다:
 
-    ```
-    $ go get example.com/theirmodule@latest
-    ```
+```
+    go get example.com/theirmodule@latest
+```
 
-The following go.mod file `require` directive example (see the [go.mod
-reference](/doc/modules/gomod-ref) for more) illustrates how to require a specific version
-number:
+다음 `go.mod` 파일의 `require` 지침 예시 (자세한 내용은 [go.mod
+참조](/doc/modules/gomod-ref) 참조)는 특정 버전 번호를 지정하는 방법을 보여줍니다:
 
 ```
 require example.com/theirmodule v1.3.4
 ```
 
-## Discovering available updates {#discovering_updates}
+## 사용 가능한 업데이트 확인하기 {#discovering_updates}
 
-You can check to see if there are newer versions of dependencies you're already
-using in your current module. Use the `go list` command to display a list of
-your module's dependencies, along with the latest version available for that
-module. Once you've discovered available upgrades, you can try them out with your
-code to decide whether or not to upgrade to new versions.
+현재 모듈에서 이미 사용하고 있는 의존성에 더 새로운 버전이 있는지 확인할 수 있습니다. `go list` 명령을 사용하여 모듈의 의존성 목록과 해당 모듈의 사용 가능한 최신 버전을 표시할 수 있습니다. 사용 가능한 업그레이드를 확인한 후에는 코드를 사용하여 업그레이드 여부를 결정할 수 있습니다.
 
-For more about the `go list` command, see [`go list -m`](/ref/mod#go-list-m).
+자세한 내용은 `go list` 명령에 대해 [`go list -m`](/ref/mod#go-list-m)를 참조하십시오.
 
-Here are a couple of examples.
+다음은 몇 가지 예시입니다.
 
-*   List all of the modules that are dependencies of your current module,
-    along with the latest version available for each:
+*   현재 모듈의 모든 의존 모듈과 각 모듈의 최신 사용 가능한 버전을 나열하세요:
 
-    ```
+```
     $ go list -m -u all
-    ```
+```
 
-*   Display the latest version available for a specific module:
+*   특정 모듈에 대해 사용할 수 있는 최신 버전을 표시합니다:
 
-    ```
+```
     $ go list -m -u example.com/theirmodule
-    ```
+```
 
-## Upgrading or downgrading a dependency {#upgrading}
+## 종속성 업그레이드 또는 다운그레이드 {#upgrading}
 
-You can upgrade or downgrade a dependency module by using Go tools to discover
-available versions, then add a different version as a dependency.
+다음 Go 도구를 사용하여 사용 가능한 버전을 확인하고, 다른 버전을 종속성으로 추가하여 종속성 모듈을 업그레이드하거나 다운그레이드할 수 있습니다.
 
-1. To discover new versions use the `go list` command as described in
-    [Discovering available updates](#discovering_updates).
+1. 사용 가능한 업데이트를 확인하려면 `go list` 명령을 참조하십시오. 자세한 내용은 [사용 가능한 업데이트 확인](#discovering_updates)를 참조하십시오.
 
-1. To add a particular version as a dependency, use the `go get` command as
-    described in [Getting a specific dependency version](#getting_version).
+1. 특정 버전을 종속성으로 추가하려면 다음 명령을 사용하세요:
+    [특정 버전 가져오기](#getting_version)에서 설명된 `go get` 명령.
 
-## Synchronizing your code's dependencies {#synchronizing}
+## 코드의 의존성 동기화 {#synchronizing}
 
-You can ensure that you're managing dependencies for all of your code's imported
-packages while also removing dependencies for packages you're no longer
-importing.
+다음과 같이 관리하면, 코드에서 사용되는 모든 패키지의 종속성을 관리하고, 더 이상 사용하지 않는 패키지의 종속성을 제거할 수 있습니다.
 
-This can be useful when you've been making changes to your code and
-dependencies, possibly creating a collection of managed dependencies and
-downloaded modules that no longer match the collection specifically required by
-the packages imported in your code.
+이것은 코드를 변경하고 종속성을 관리할 때 유용합니다. 특히, 코드로 가져온 패키지가 필요로 하는 특정 종속성 컬렉션과 일치하지 않는 관리된 종속성과 다운로드된 모듈의 집합을 만들 수 있습니다.
 
-To keep your managed dependency set tidy, use the `go mod tidy` command. Using
-the set of packages imported in your code, this command edits your go.mod file
-to add modules that are necessary but missing. It also removes unused modules
-that don't provide any relevant packages.
+관리형 종속성을 깔끔하게 유지하려면 `go mod tidy` 명령을 사용하십시오. 코드에서 가져온 패키지의 세트를 사용하여, 이 명령은 `go.mod` 파일을 수정하여 필요한 모듈을 추가하고, 사용되지 않는 모듈을 제거합니다. 이는 관련 패키지를 제공하지 않는 모듈을 제거합니다.
 
-The command has no arguments except for one flag, -v, that prints information
-about removed modules.
+이 명령어는 `-v` 플래그 외에는 인수를 받지 않습니다. 이 플래그는 제거된 모듈에 대한 정보를 출력합니다.
 
 ```
 $ go mod tidy
 ```
 
-## Developing and testing against unpublished module code {#unpublished}
+## 게시되지 않은 모듈 코드에 대한 개발 및 테스트 {#unpublished}
 
-You can specify that your code should use dependency modules that may not be
-published. The code for these modules might be in their respective repositories,
-in a fork of those repositories, or on a drive with the current module that
-consumes them.
+다음과 같이 지정할 수 있습니다. 코드가 사용해야 하는 종속 모듈 중 일부가 아직 게시되지 않을 수 있습니다. 이러한 모듈의 코드는 해당 저장소, 해당 저장소의 포크, 또는 현재 모듈이 소비하는 드라이브에 있을 수 있습니다.
 
-You might want to do this when:
+다음과 같은 경우에 유용할 수 있습니다:
 
-*   You want to make your own changes to an external module's code, such as
-    after forking and/or cloning it. For example, you might want to prepare a
-    fix to the module, then send it as a pull request to the module's developer.
-*   You're building a new module and haven't yet published it, so it's
-    unavailable on a repository where the `go get` command can reach it.
+*   외부 모듈의 코드를 수정하고 싶을 때, 예를 들어 포크하고/또는 복제한 후. 예를 들어, 모듈을 수정하는 것을 준비하고, 그런 다음 수정 사항을 모듈의 개발자에게 풀 요청으로 보내는 것을 원할 수 있습니다.
+*   새로운 모듈을 만들고 아직 공개하지 않았으므로, `go get` 명령이 해당 모듈에 도달할 수 있는 저장소에 존재하지 않습니다.
 
-### Requiring module code in a local directory {#local_directory}
+### 로컬 디렉토리에서 모듈 코드 요구하기 {#local_directory}
 
-You can specify that the code for a required module is on the same local drive
-as the code that requires it. You might find this useful when you are:
+다음과 같이 지정할 수 있습니다. 즉, 필요한 모듈의 코드가 해당 코드를 사용하는 동일한 로컬 드라이브에 있습니다. 다음 경우에 유용할 수 있습니다:
 
-*   Developing your own separate module and want to test from the current module.
-*   Fixing issues in or adding features to an external module and want to test
-    from the current module. (Note that you can also require the external module
-    from your own fork of its repository. For more, see [Requiring external
-    module code from your own repository fork](#external_fork).)
+*   자체 모듈을 개발하고 현재 모듈에서 테스트하고 싶습니다.
+*   외부 모듈에 있는 문제를 수정하거나 기능을 추가하고 현재 모듈에서 테스트하고 싶습니다. (참고: 외부 모듈을 자체 저장소의 포크에서 요구할 수도 있습니다. 자세한 내용은 [자체 저장소 포크에서 외부 모듈 코드를 요구하는 방법](#external_fork)를 참조하십시오.)
 
-To tell Go commands to use the local copy of the module's code, use the
-`replace` directive in your go.mod file to replace the module path given in a
-`require` directive. See the [go.mod reference](/doc/modules/gomod-ref) for
-more about directives.
+Go 명령이 모듈의 로컬 복사본의 코드를 사용하도록 하려면, `require` 지시문에 지정된 모듈 경로를 대체하는 `replace` 지시문을 `go.mod` 파일에 사용하세요. 지시문에 대한 자세한 내용은 [go.mod 참조](/doc/modules/gomod-ref)를 참조하세요.
 
-In the following go.mod file example, the current module requires the external
-module `example.com/theirmodule`, with a nonexistent version number
-(`v0.0.0-unpublished`) used to ensure the replacement works correctly. The
-`replace` directive then replaces the original module path with
-`../theirmodule`, a directory that is at the same level as the current module's
-directory.
+다음 `go.mod` 파일 예시에서 현재 모듈은 외부 모듈 `example.com/theirmodule`를 필요로 하며, 버전 번호가 없는 (`v0.0.0-unpublished`) 을 사용하여 대체가 올바르게 작동하도록 합니다. `replace` 지시어는 원래 모듈 경로를 `../theirmodule`로 대체합니다. 이 경로는 현재 모듈의 디렉토리와 동일한 레벨의 디렉토리입니다.
 
-```
-module example.com/mymodule
+```markdown
+모듈 example.com/mymodule
 
 go 1.23.0
 
@@ -364,49 +258,33 @@ require example.com/theirmodule v0.0.0-unpublished
 replace example.com/theirmodule v0.0.0-unpublished => ../theirmodule
 ```
 
-When setting up a `require`/`replace` pair, use the
-[`go mod edit`](/ref/mod#go-mod-edit) and [`go get`](/ref/mod#go-get) commands
-to ensure that requirements described by the file remain consistent:
+`require`/`replace` 쌍을 설정할 때, 파일에 설명된 요구 사항이 일관성을 유지하도록 `go mod edit` 및 `go get` 명령을 사용하십시오:
 
 ```
 $ go mod edit -replace=example.com/theirmodule@v0.0.0-unpublished=../theirmodule
 $ go get example.com/theirmodule@v0.0.0-unpublished
 ```
 
-**Note:** When you use the replace directive, Go tools don't authenticate
-external modules as described in [Adding a dependency](#adding_dependency).
+**참고:** Go 도구는 외부 모듈을 [추가하기](#adding_dependency)에 설명된 대로 인증하지 않습니다.
 
-For more about version numbers, see [Module version numbering](/doc/modules/version-numbers).
+더 자세한 내용은 [모듈 버전 번호 지정]( /doc/modules/version-numbers)를 참조하십시오.
 
-Go 1.18 adds [workspace mode](/blog/get-familiar-with-workspaces) to Go, which
-lets you work on multiple modules simultaneously. See [Tutorial: Getting started
-with multi-module workspaces](/doc/tutorial/workspaces).
+Go 1.18에 추가된 [워크스페이스 모드](/blog/get-familiar-with-workspaces)는 Go에서 여러 모듈을 동시에 작업할 수 있도록 합니다. 자세한 내용은 [튜토리얼: 멀티 모듈 워크스페이스 시작하기](/doc/tutorial/workspaces)를 참조하세요.
 
-### Requiring external module code from your own repository fork {#external_fork}
+### 자신의 저장소 포크에서 외부 모듈 코드를 사용하기 {#external_fork}
 
-When you have forked an external module's repository (such as to fix an issue in
-the module's code or to add a feature), you can have Go tools use your fork for
-the module's source. This can be useful for testing changes from your own code.
-(Note that you can also require the module code in a directory that's on the
-local drive with the module that requires it. For more, see [Requiring module
-code in a local directory](#local_directory).)
+외부 모듈의 저장소를 포크한 경우 (예: 모듈의 코드에 있는 문제를 수정하거나 기능을 추가하기 위해) Go 도구를 사용하여 모듈의 소스를 포크된 저장소로 지정할 수 있습니다. 이는 자체 코드를 사용하여 변경 사항을 테스트하는 데 유용합니다.
+(참고: 모듈이 필요한 폴더에 모듈 코드를 로컬 드라이브에 직접 요구할 수도 있습니다. 자세한 내용은 [로컬 디렉터리에서 모듈 코드 요구](#local_directory) 참조)
 
-You do this by using a `replace` directive in your go.mod file to replace the
-external module's original module path with a path to the fork in your
-repository. This directs Go tools to use the replacement path (the fork's
-location) when compiling, for example, while allowing you to leave `import`
-statements unchanged from the original module path.
+이를 수행하려면 `go.mod` 파일에 `replace` 지시문을 사용하여 외부 모듈의 원래 모듈 경로를 저장소 내의 포크의 경로로 대체합니다. 이렇게 하면 Go 도구가 컴파일하는 동안 대체 경로(포크의 위치)를 사용하도록 지시할 수 있으며, 원래 모듈 경로의 `import` 문을 변경하지 않고도 원래 모듈 경로의 `import` 문을 유지할 수 있습니다.
 
-For more about the `replace` directive, see the [go.mod file
-reference](gomod-ref).
+`replace` 지침에 대한 자세한 내용은 [go.mod 파일
+참조](gomod-ref)를 참조하세요.
 
-In the following go.mod file example, the current module requires the external
-module `example.com/theirmodule`. The `replace` directive then replaces the
-original module path with `example.com/myfork/theirmodule`, a fork of the
-module's own repository.
+다음 `go.mod` 파일 예제에서 현재 모듈은 외부 모듈 `example.com/theirmodule`에 의존합니다. `replace` 지시어는 원래 모듈 경로를 `example.com/myfork/theirmodule`로 대체합니다. 이는 모듈 자체의 저장소의 포크입니다.
 
 ```
-module example.com/mymodule
+모듈 example.com/mymodule
 
 go 1.23.0
 
@@ -415,11 +293,7 @@ require example.com/theirmodule v1.2.3
 replace example.com/theirmodule v1.2.3 => example.com/myfork/theirmodule v1.2.3-fixed
 ```
 
-When setting up a `require`/`replace` pair, use Go tool commands to ensure that
-requirements described by the file remain consistent. Use the [`go
-list`](/ref/mod#go-list-m) command to get the version in use by the current
-module. Then use the [`go mod edit`](/ref/mod#go-mod-edit) command to replace
-the required module with the fork:
+`require`/`replace` 쌍을 설정할 때, 파일에 설명된 요구 사항이 일관성을 유지하도록 Go 도구 명령을 사용하십시오. 현재 모듈에서 사용 중인 버전을 가져오기 위해 [`go list`](/ref/mod#go-list-m) 명령을 사용하십시오. 그런 다음 [`go mod edit`](/ref/mod#go-mod-edit) 명령을 사용하여 필요한 모듈을 포크로 교체합니다:
 
 ```
 $ go list -m example.com/theirmodule
@@ -427,177 +301,171 @@ example.com/theirmodule v1.2.3
 $ go mod edit -replace=example.com/theirmodule@v1.2.3=example.com/myfork/theirmodule@v1.2.3-fixed
 ```
 
-**Note:** When you use the `replace` directive, Go tools don't authenticate
-external modules as described in [Adding a dependency](#adding_dependency).
+**참고:** `replace` 지시어를 사용할 때, Go 도구는 [의존성을 추가하는 방법](#adding_dependency)에 설명된 대로 외부 모듈을 인증하지 않습니다.
 
-For more about version numbers, see [Module version numbering](/doc/modules/version-numbers).
+더 자세한 내용은 [모듈 버전 번호](/doc/modules/version-numbers)를 참조하십시오.
 
-## Getting a specific commit using a repository identifier {#repo_identifier}
+## 특정 커밋을 저장소 식별자를 사용하여 가져오기 {#repo_identifier}
 
-You can use the `go get` command to add unpublished code for a module from a
-specific commit in its repository.
+```go
+func GetCommit(repoIdentifier string) (Commit, error) {
+  // ... (Go 코드) ...
+}
+```
 
-To do this, you use the `go get` command, specifying the code you want with an
-`@` sign. When you use `go get`, the command will add to your go.mod file a
-`require` directive that requires the external module, using a pseudo-version
-number based on details about the commit.
+`go get` 명령을 사용하여 특정 저장소의 특정 커밋에서 모듈의 미출시 코드를 추가할 수 있습니다.
 
-The following examples provide a few illustrations. These are based on a module
-whose source is in a git repository.
+이를 수행하려면 `go get` 명령을 사용하여 원하는 코드를 지정하고 `@` 기호를 사용합니다. `go get`을 사용할 때, 명령은 `go.mod` 파일에 외부 모듈을 필요로 하는 `require` 지침을 추가합니다. 이 지침은 커밋에 대한 세부 정보에 기반한 가상 버전 번호를 사용합니다.
 
-*   To get the module at a specific commit, append the form @<em>commithash</em>:
+다음 예시들은 몇 가지 예시를 제공합니다. 이러한 예시는 특정 모듈의 소스가 Git 저장소에 있는 경우에 기반합니다.
 
-    ```
-    $ go get example.com/theirmodule@4cf76c2
-    ```
+*   특정 커밋의 모듈을 가져오려면, 다음 형식을 사용하세요: @<em>커밋해시</em>:
 
-*   To get the module at a specific branch, append the form @<em>branchname</em>:
+```
+    go get example.com/theirmodule@4cf76c2
+```
 
-    ```
+*   특정 브랜치에서 모듈을 가져오려면, 다음 형식을 사용합니다: @<em>브랜치명</em>:
+
+```
     $ go get example.com/theirmodule@bugfixes
-    ```
-
-## Removing a dependency {#removing_dependency}
-
-When your code no longer uses any packages in a module, you can stop tracking
-the module as a dependency.
-
-To stop tracking all unused modules, run the [`go mod tidy`
-command](/ref/mod#go-mod-tidy). This command may also add missing dependencies
-needed to build packages in your module.
-
-```
-$ go mod tidy
 ```
 
-To remove a specific dependency, use the [`go get`
-command](/ref/mod#go-get), specifying the module's module path and appending
-`@none`, as in the following example:
+## 종속성 제거 {#removing_dependency}
+
+```go
+package main
+
+import (
+	"fmt"
+	"os/exec"
+)
+
+func main() {
+	// 예시: go 모듈에서 종속성 제거
+	// `go mod unload <module_name>` 명령을 사용하여 모듈에서 종속성을 제거합니다.
+	cmd := exec.Command("go", "mod", "unload", "github.com/example/my_module")
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Println("오류 발생:", err)
+		return
+	}
+	fmt.Println("go mod unload 출력:", string(output))
+
+	// 또는, go.mod 파일에서 직접 종속성을 삭제할 수 있습니다.
+	// go.mod 파일을 열고 해당 종속성을 제거한 후 파일을 저장합니다.
+	// go 모듈이 자동으로 변경 사항을 감지하고 종속성을 제거합니다.
+}
+```
+
+코드에서 더 이상 모듈 내의 패키지를 사용하지 않으면, 해당 모듈을 종속성으로 추적하는 것을 중단할 수 있습니다.
+
+다음 명령을 실행하여 사용되지 않는 모든 모듈을 추적 중지합니다: [`go mod tidy`](/ref/mod#go-mod-tidy). 이 명령은 또한 모듈에 패키지를 빌드하는 데 필요한 누락된 종속성을 추가할 수도 있습니다.
+
+```
+go mod tidy
+```
+
+특정 종속성을 제거하려면 [`go get`
+명령을 사용하고, 모듈의 모듈 경로를 지정하고, `@none`을 추가합니다. 다음 예제를 참조하세요:
 
 ```
 $ go get example.com/theirmodule@none
 ```
 
-The `go get` command will also downgrade or remove other dependencies that
-depend on the removed module.
+명령 `go get`는 제거된 모듈에 의존하는 다른 의존성도 함께 제거하거나 이전 버전으로 다운그레이드합니다.
 
-## Tool dependencies {#tools}
+## 도구 종속성 {#tools}
 
-Tool dependencies let you manage developer tools that are written in Go and used
-when working on your module. For example, you might use
-[`stringer`](https://pkg.go.dev/golang.org/x/tools/cmd/stringer) with [`go
-generate`](/blog/generate), or a specific linter or formatter as part of
-preparing your change for submission.
+도구 의존성은 Go로 작성된 개발 도구를 관리하고, 모듈을 작업할 때 사용하는 도구를 관리할 수 있게 해줍니다. 예를 들어, `stringer` (https://pkg.go.dev/golang.org/x/tools/cmd/stringer)와 `go generate`를 함께 사용하거나, 변경 사항을 제출하기 전에 특정 린터 또는 포맷터를 사용하는 등의 작업을 수행할 수 있습니다.
 
-In Go 1.24 and above, you can add a tool dependency with:
+Go 1.24 이상 버전에서는 다음을 사용하여 도우미 종속성을 추가할 수 있습니다:
 
 ```
 $ go get -tool golang.org/x/tools/cmd/stringer
 ```
 
-This will add a [`tool` directive](/ref/mod/#go-mod-file-tool) to your `go.mod` file, and ensure the
-necessary require directives are present. Once this directive is added you can
-run the tool by passing the last [non-major-version](/ref/mod#major-version-suffixes)
-component of the tool's import path to `go tool`:
+이것은 `go.mod` 파일에 [`tool` 지시어](/ref/mod/#go-mod-file-tool)를 추가하고, 필요한 `require` 지시어가 존재하는지 확인합니다. 이 지시어를 추가한 후에는 다음 단계를 따르세요: `go tool`에 도구의 가져오기 경로의 마지막 (대체로 주요 버전이 아닌) 구성 요소를 전달하여 도구를 실행할 수 있습니다:
 
 ```
 $ go tool stringer
 ```
 
-In the case that multiple tools share the last path fragment, or the path fragment
-matches one of the tools shipped with the Go distribution, you must pass the full
-package path instead:
+만약 여러 도구가 마지막 경로 조각을 공유하거나, 경로 조각이 Go 배포판에 포함된 도구 중 하나와 일치하는 경우, 전체 패키지 경로를 전달해야 합니다:
 
 ```
 $ go tool golang.org/x/tools/cmd/stringer
 ```
 
-To see a list of all tools currently available, run `go tool` with no arguments:
+다음 명령을 실행하여 현재 사용 가능한 모든 도구 목록을 확인하세요: `go tool` (인수 없이)
 
 ```
 $ go tool
 ```
 
-You can manually add a `tool` directive to your `go.mod`, but you must ensure
-that there is a `require` directive for the module that defines the tool. The
-easiest way to add any missing `require` directives is to run:
+`go mod` 파일에 수동으로 `tool` 지시문을 추가할 수 있지만, 도구를 정의하는 모듈에 대한 `require` 지시문이 있는지 확인해야 합니다. 누락된 모든 `require` 지시문을 추가하는 가장 쉬운 방법은 다음과 같습니다.
 
 ```
-$ go mod tidy
+go mod tidy
 ```
 
-Requirements needed to satisfy tool dependencies behave like any other
-requirements in your [module graph](/ref/mod#glos-module-graph). They
-participate in [minimal version selection](/ref/mod#minimal-version-selection)
-and respect `require`, `replace` and `exclude` directives. Due to module
-pruning, when you depend on a module that itself has a tool dependency,
-requirements that exist just to satisfy that tool dependency do not usually
-become requirements of your module.
+다음 요구 사항을 충족하여 도구 종속성을 다른 모듈 그래프의 다른 요구 사항과 동일하게 처리해야 합니다 ([모듈 그래프](/ref/mod#glos-module-graph)).
+이들은 [최소 버전 선택](/ref/mod#minimal-version-selection)에 참여하고 `require`, `replace` 및 `exclude` 지시어를 준수합니다. 모듈 가지치기 때문에, 자체적으로 도구 종속성을 가진 모듈에 의존하는 경우, 해당 도구 종속성을 충족하기 위해 존재하는 요구 사항은 일반적으로 모듈의 요구 사항이 되지 않습니다.
 
-The `tool` [meta-pattern](/cmd/go#hdr-Package_lists_and_patterns) provides a way to perform operations on all
-tools simultaneously. For example you can upgrade all tools with `go get tool`,
-which is equivalent to `go get tool@upgrade`, or install them all to $GOBIN
-with `go install tool`.
+`tool` [메타 패턴](/cmd/go#hdr-Package_lists_and_patterns)은 모든 도구에 대해 동시에 작업을 수행하는 방법을 제공합니다. 예를 들어, `go get tool`을 사용하여 모든 도구를 업그레이드할 수 있으며, 이는 `go get tool@upgrade`와 동일합니다. 또는 `go install tool`을 사용하여 모든 도구를 $GOBIN으로 설치할 수 있습니다.
 
-In Go versions before 1.24, you can achieve something similar to a `tool`
-directive by adding a blank import to a go file within the module that is
-excluded from the build using [build
-constraints](/pkg/go/build/#hdr-Build_Constraints). If you do this, you can then
-use `go run` with the full package path to run the tool.
+Go 버전 1.24 이전에서는 모듈에서 빌드에서 제외되는 go 파일 내에 빈 가져오기를 추가하여 유사한 `tool` 지침을 달성할 수 있습니다. [빌드 제약 조건](/pkg/go/build/#hdr-Build_Constraints)를 참조하십시오. 이렇게 하면 `go run`을 사용하여 전체 패키지 경로를 사용하여 도구를 실행할 수 있습니다.
 
-## Specifying a module proxy server {#proxy_server}
+## 모듈 프록시 서버 지정 {#proxy_server}
 
-When you use Go tools to work with modules, the tools by default download
-modules from proxy.golang.org (a public Google-run module mirror) or directly
-from the module's repository. You can specify that Go tools should instead use
-another proxy server for downloading and authenticating modules.
+이 섹션에서는 모듈 프록시 서버를 구성하는 방법을 설명합니다.
 
-You might want to do this if you (or your team) have set up or chosen a
-different module proxy server that you want to use. For example, some set up a
-module proxy server in order to have greater control over how dependencies are
-used.
+```
+# 모듈 프록시 서버 설정 예시
+module.proxy.server = "http://example.com:8080"
+```
 
-To specify another module proxy server for Go tools use, set the `GOPROXY`
-environment variable to the URL of one or more servers. Go tools will try each
-URL in the order you specify. By default, `GOPROXY` specifies a public
-Google-run module proxy first, then direct download from the module's repository
-(as specified in its module path):
+**설명:**
+
+*   `module.proxy.server`: 모듈 프록시 서버의 URL을 지정하는 설정입니다.
+*   `http://example.com:8080`: 예시 URL입니다. 실제 프록시 서버 URL로 변경해야 합니다.
+
+**참고:**
+
+*   프록시 서버 URL은 HTTPS를 사용할 수도 있습니다.
+*   프록시 서버에 인증이 필요한 경우, `module.proxy.auth.username` 및 `module.proxy.auth.password` 설정을 구성해야 합니다.
+
+Go 도구를 사용하여 모듈을 작업할 때, 도구는 기본적으로 `proxy.golang.org` (Google에서 운영하는 공개 모듈 미러)에서 또는 모듈의 저장소에서 모듈을 다운로드합니다. Go 도구가 모듈을 다운로드하고 인증하는 데 사용할 다른 프록시 서버를 지정할 수 있습니다.
+
+만약 (당신 또는 당신의 팀)이 다른 모듈 프록시 서버를 설정하거나 선택한 경우, 이 문구가 적용될 수 있습니다. 예를 들어, 일부 사용자는 의존성이 사용되는 방식을 더 세밀하게 제어하기 위해 모듈 프록시 서버를 설정했습니다.
+
+Go 도구를 위한 다른 모듈 프록시 서버를 지정하려면 `GOPROXY` 환경 변수를 서버의 URL로 설정합니다. Go 도구는 지정된 순서대로 URL을 하나씩 시도합니다. 기본적으로 `GOPROXY`는 먼저 Google에서 운영하는 공개 모듈 프록시를 지정하고, 그런 다음 모듈의 저장소(모듈 경로에 지정된 대로)에서 직접 다운로드합니다:
 
 ```
 GOPROXY="https://proxy.golang.org,direct"
 ```
 
-For more about the `GOPROXY` environment variable, including values to support
-other behavior, see the [`go` command
-reference](/cmd/go/#hdr-Module_downloading_and_verification).
+`GOPROXY` 환경 변수에 대한 자세한 내용, 특히 다른 동작을 지원하는 값에 대해서는 [`go` 명령
+참조](/cmd/go/#hdr-Module\_downloading\_and\_verification)를 참조하십시오.
 
-You can set the variable to URLs for other module proxy servers, separating URLs
-with either a comma or a pipe.
+다음과 같이 변수를 URL로 설정하여 다른 모듈 프록시 서버를 지정할 수 있습니다. URL을 쉼표 또는 파이프 기호로 구분합니다.
 
-*   When you use a comma, Go tools will try the next URL in the list only if the
-    current URL returns an HTTP 404 or 410.
+*   Coma를 사용할 때, Go 도구는 현재 URL이 HTTP 404 또는 410 오류를 반환하는 경우에만 목록의 다음 URL을 시도합니다.
 
-    ```
+```
     GOPROXY="https://proxy.example.com,https://proxy2.example.com"
-    ```
+```
 
-*   When you use a pipe, Go tools will try the next URL in the list regardless
-    of the HTTP error code.
+*   파이프를 사용할 때, Go 도구는 HTTP 오류 코드와 관계없이 목록의 다음 URL을 시도합니다.
 
-    ```
+```
     GOPROXY="https://proxy.example.com|https://proxy2.example.com"
-    ```
+```
 
+Go 모듈은 버전 관리 서버 및 대중 인터넷에 직접 사용 불가능한 모듈 프록시에서 자주 개발 및 배포됩니다. `GOPRIVATE` 환경 변수를 설정하여 `go` 명령을 사용하여 개인 소스에서 모듈을 다운로드하고 빌드하도록 구성할 수 있습니다.
+그러면 `go` 명령은 개인 소스에서 모듈을 다운로드하고 빌드할 수 있습니다.
 
-Go modules are frequently developed and distributed on version control servers
-and module proxies that aren’t available on the public internet. You can set the
-`GOPRIVATE` environment variable to configure the `go` command
-to download and build modules from private sources.
-Then the go command can download and build modules from private sources.
-
-The `GOPRIVATE` or `GONOPROXY` environment variables may be set to lists of glob
-patterns matching module prefixes that are private and should not be requested
-from any proxy. For example:
+`GOPRIVATE` 또는 `GONOPROXY` 환경 변수는 프라이버리 모듈 접두사와 일치하는 쉘 패턴 목록으로 설정할 수 있습니다. 이러한 패턴은 프라이버리 모듈이며, 어떤 프록시에서도 요청해서는 안 됩니다. 예를 들어:
 
 ```
 GOPRIVATE=*.corp.example.com,*.research.example.com

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package hmac implements HMAC according to [FIPS 198-1].
+패키지 hmac은 [FIPS 198-1]에 따라 HMAC을 구현합니다.
 
 ## 원문 요약
 

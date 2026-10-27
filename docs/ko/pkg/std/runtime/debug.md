@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package debug contains facilities for programs to debug themselves while they are running.
+패키지 `debug`는 프로그램이 실행 중에 자체 디버깅을 위한 기능을 제공합니다.
 
 ## 원문 요약
 

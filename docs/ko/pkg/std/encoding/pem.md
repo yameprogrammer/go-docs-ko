@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package pem implements the PEM data encoding, which originated in Privacy Enhanced Mail.
+패키지 pem는 PEM 데이터 인코딩을 구현하며, 이는 프라이버시 강화 이메일에서 유래되었습니다.
 
 ## 원문 요약
 

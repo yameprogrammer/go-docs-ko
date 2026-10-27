@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package pprof serves via its HTTP server runtime profiling data in the format expected by the pprof visualization tool.
+패키지 `pprof`는 HTTP 서버를 통해 `pprof` 시각화 도구가 예상하는 형식으로 런타임 프로파일링 데이터를 제공합니다.
 
 ## 원문 요약
 

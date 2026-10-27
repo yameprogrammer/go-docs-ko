@@ -4,22 +4,45 @@
 - 이 디렉터리는 `go list std` 결과를 기반으로 생성됩니다.
 - API 상세의 권위 있는 원문은 pkg.go.dev 및 golang/go입니다.
 
-## 패키지 목록
+## 패키지 섹션
+
+### archive
 
 - [archive/tar](archive/tar.md)
 - [archive/zip](archive/zip.md)
+
+### bufio
+
 - [bufio](bufio.md)
+
+### bytes
+
 - [bytes](bytes.md)
+
+### cmp
+
 - [cmp](cmp.md)
+
+### compress
+
 - [compress/bzip2](compress/bzip2.md)
 - [compress/flate](compress/flate.md)
 - [compress/gzip](compress/gzip.md)
 - [compress/lzw](compress/lzw.md)
 - [compress/zlib](compress/zlib.md)
+
+### container
+
 - [container/heap](container/heap.md)
 - [container/list](container/list.md)
 - [container/ring](container/ring.md)
+
+### context
+
 - [context](context.md)
+
+### crypto
+
 - [crypto](crypto.md)
 - [crypto/aes](crypto/aes.md)
 - [crypto/cipher](crypto/cipher.md)
@@ -102,9 +125,15 @@
 - [crypto/tls/internal/fips140tls](crypto/tls/internal/fips140tls.md)
 - [crypto/x509](crypto/x509.md)
 - [crypto/x509/pkix](crypto/x509/pkix.md)
+
+### database
+
 - [database/sql](database/sql.md)
 - [database/sql/driver](database/sql/driver.md)
 - [database/sql/internal](database/sql/internal.md)
+
+### debug
+
 - [debug/buildinfo](debug/buildinfo.md)
 - [debug/dwarf](debug/dwarf.md)
 - [debug/elf](debug/elf.md)
@@ -112,8 +141,14 @@
 - [debug/macho](debug/macho.md)
 - [debug/pe](debug/pe.md)
 - [debug/plan9obj](debug/plan9obj.md)
+
+### embed
+
 - [embed](embed.md)
 - [embed/internal/embedtest](embed/internal/embedtest.md)
+
+### encoding
+
 - [encoding](encoding.md)
 - [encoding/ascii85](encoding/ascii85.md)
 - [encoding/asn1](encoding/asn1.md)
@@ -133,10 +168,25 @@
 - [encoding/json/v2](encoding/json/v2.md)
 - [encoding/pem](encoding/pem.md)
 - [encoding/xml](encoding/xml.md)
+
+### errors
+
 - [errors](errors.md)
+
+### expvar
+
 - [expvar](expvar.md)
+
+### flag
+
 - [flag](flag.md)
+
+### fmt
+
 - [fmt](fmt.md)
+
+### go
+
 - [go/ast](go/ast.md)
 - [go/build](go/build.md)
 - [go/build/constraint](go/build/constraint.md)
@@ -154,14 +204,23 @@
 - [go/token](go/token.md)
 - [go/types](go/types.md)
 - [go/version](go/version.md)
+
+### hash
+
 - [hash](hash.md)
 - [hash/adler32](hash/adler32.md)
 - [hash/crc32](hash/crc32.md)
 - [hash/crc64](hash/crc64.md)
 - [hash/fnv](hash/fnv.md)
 - [hash/maphash](hash/maphash.md)
+
+### html
+
 - [html](html.md)
 - [html/template](html/template.md)
+
+### image
+
 - [image](image.md)
 - [image/color](image/color.md)
 - [image/color/palette](image/color/palette.md)
@@ -170,7 +229,13 @@
 - [image/internal/imageutil](image/internal/imageutil.md)
 - [image/jpeg](image/jpeg.md)
 - [image/png](image/png.md)
+
+### index
+
 - [index/suffixarray](index/suffixarray.md)
+
+### internal
+
 - [internal/abi](internal/abi.md)
 - [internal/asan](internal/asan.md)
 - [internal/bisect](internal/bisect.md)
@@ -270,10 +335,19 @@
 - [internal/unsafeheader](internal/unsafeheader.md)
 - [internal/xcoff](internal/xcoff.md)
 - [internal/zstd](internal/zstd.md)
+
+### io
+
 - [io](io.md)
 - [io/fs](io/fs.md)
 - [io/ioutil](io/ioutil.md)
+
+### iter
+
 - [iter](iter.md)
+
+### log
+
 - [log](log.md)
 - [log/internal](log/internal.md)
 - [log/slog](log/slog.md)
@@ -281,7 +355,13 @@
 - [log/slog/internal/benchmarks](log/slog/internal/benchmarks.md)
 - [log/slog/internal/buffer](log/slog/internal/buffer.md)
 - [log/syslog](log/syslog.md)
+
+### maps
+
 - [maps](maps.md)
+
+### math
+
 - [math](math.md)
 - [math/big](math/big.md)
 - [math/big/internal/asmgen](math/big/internal/asmgen.md)
@@ -289,9 +369,15 @@
 - [math/cmplx](math/cmplx.md)
 - [math/rand](math/rand.md)
 - [math/rand/v2](math/rand/v2.md)
+
+### mime
+
 - [mime](mime.md)
 - [mime/multipart](mime/multipart.md)
 - [mime/quotedprintable](mime/quotedprintable.md)
+
+### net
+
 - [net](net.md)
 - [net/http](net/http.md)
 - [net/http/cgi](net/http/cgi.md)
@@ -316,19 +402,37 @@
 - [net/smtp](net/smtp.md)
 - [net/textproto](net/textproto.md)
 - [net/url](net/url.md)
+
+### os
+
 - [os](os.md)
 - [os/exec](os/exec.md)
 - [os/exec/internal/fdtest](os/exec/internal/fdtest.md)
 - [os/signal](os/signal.md)
 - [os/user](os/user.md)
+
+### path
+
 - [path](path.md)
 - [path/filepath](path/filepath.md)
+
+### plugin
+
 - [plugin](plugin.md)
+
+### reflect
+
 - [reflect](reflect.md)
 - [reflect/internal/example1](reflect/internal/example1.md)
 - [reflect/internal/example2](reflect/internal/example2.md)
+
+### regexp
+
 - [regexp](regexp.md)
 - [regexp/syntax](regexp/syntax.md)
+
+### runtime
+
 - [runtime](runtime.md)
 - [runtime/coverage](runtime/coverage.md)
 - [runtime/debug](runtime/debug.md)
@@ -337,14 +441,38 @@
 - [runtime/race](runtime/race.md)
 - [runtime/race/internal/amd64v1](runtime/race/internal/amd64v1.md)
 - [runtime/trace](runtime/trace.md)
+
+### slices
+
 - [slices](slices.md)
+
+### sort
+
 - [sort](sort.md)
+
+### strconv
+
 - [strconv](strconv.md)
+
+### strings
+
 - [strings](strings.md)
+
+### structs
+
 - [structs](structs.md)
+
+### sync
+
 - [sync](sync.md)
 - [sync/atomic](sync/atomic.md)
+
+### syscall
+
 - [syscall](syscall.md)
+
+### testing
+
 - [testing](testing.md)
 - [testing/cryptotest](testing/cryptotest.md)
 - [testing/fstest](testing/fstest.md)
@@ -353,18 +481,39 @@
 - [testing/quick](testing/quick.md)
 - [testing/slogtest](testing/slogtest.md)
 - [testing/synctest](testing/synctest.md)
+
+### text
+
 - [text/scanner](text/scanner.md)
 - [text/tabwriter](text/tabwriter.md)
 - [text/template](text/template.md)
 - [text/template/parse](text/template/parse.md)
+
+### time
+
 - [time](time.md)
 - [time/tzdata](time/tzdata.md)
+
+### unicode
+
 - [unicode](unicode.md)
 - [unicode/utf16](unicode/utf16.md)
 - [unicode/utf8](unicode/utf8.md)
+
+### unique
+
 - [unique](unique.md)
+
+### unsafe
+
 - [unsafe](unsafe.md)
+
+### uuid
+
 - [uuid](uuid.md)
+
+### vendor
+
 - [vendor/golang.org/x/crypto/chacha20](vendor/golang.org/x/crypto/chacha20.md)
 - [vendor/golang.org/x/crypto/chacha20poly1305](vendor/golang.org/x/crypto/chacha20poly1305.md)
 - [vendor/golang.org/x/crypto/cryptobyte](vendor/golang.org/x/crypto/cryptobyte.md)
@@ -388,4 +537,8 @@
 - [vendor/golang.org/x/text/transform](vendor/golang.org/x/text/transform.md)
 - [vendor/golang.org/x/text/unicode/bidi](vendor/golang.org/x/text/unicode/bidi.md)
 - [vendor/golang.org/x/text/unicode/norm](vendor/golang.org/x/text/unicode/norm.md)
+
+### weak
+
 - [weak](weak.md)
+

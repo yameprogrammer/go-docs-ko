@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package jpeg implements a JPEG image decoder and encoder.
+패키지 `jpeg`는 JPEG 이미지 디코더 및 인코더를 구현합니다.
 
 ## 원문 요약
 

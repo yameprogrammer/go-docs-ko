@@ -1,199 +1,183 @@
+```markdown
 <style>
   main ul li { margin: 0.5em 0; }
 </style>
+```
 
-## Introduction to Go 1.25 {#introduction}
+## Go 1.25 소개 {#introduction}
 
-The latest Go release, version 1.25, arrives in [August 2025](/doc/devel/release#go1.25.0), six months after [Go 1.24](/doc/go1.24).
-Most of its changes are in the implementation of the toolchain, runtime, and libraries.
-As always, the release maintains the Go 1 promise of compatibility.
-We expect almost all Go programs to continue to compile and run as before.
+### 새 기능 및 개선 사항
 
-## Changes to the language {#language}
+*   **Go 1.25의 주요 특징**
+    *   새로운 기능
+    *   성능 개선
+    *   보안 강화
+*   **Go 1.25에서 변경된 사항**
+    *   버그 수정
+    *   API 변경
+    *   기타 개선 사항
+
+### Go 1.25 다운로드
+
+*   [Go 1.25 다운로드](https://example.com/go1.25)
+*   [Go 1.25 설치 가이드](https://example.com/go1.25-install)
+
+가장 최신 Go 릴리스인 버전 1.25는 [2025년 8월](/doc/devel/release#go1.25.0)에 출시되며, Go 1.24 이후 6개월 후입니다.
+대부분의 변경 사항은 도구 체인, 런타임 및 라이브러리의 구현에 있습니다.
+항상처럼, 이 릴리스는 Go 1의 호환성 약속을 유지합니다.
+대부분의 Go 프로그램이 이전과 동일하게 컴파일되고 실행될 것으로 예상합니다.
+
+## 언어 변경 사항 {#language}
 
 <!-- go.dev/issue/70128 -->
 
-There are no languages changes that affect Go programs in Go 1.25.
-However, in the [language specification](/ref/spec) the notion of core types
-has been removed in favor of dedicated prose.
-See the respective [blog post](/blog/coretypes) for more information.
+Go 1.25에서는 Go 프로그램에 영향을 미치는 언어 변경 사항은 없습니다.
+그러나 [언어 사양](/ref/spec)에서는 핵심 유형의 개념을 제거하고 대신 상세한 설명을 사용하도록 변경되었습니다.
+자세한 내용은 다음 [블로그 게시물](/blog/coretypes)를 참조하십시오.
 
-## Tools {#tools}
+## 도구 {#tools}
 
-### Go command {#go-command}
+### Go 명령어 {#go-command}
 
-The `go build` `-asan` option now defaults to doing leak detection at
-program exit.
-This will report an error if memory allocated by C is not freed and is
-not referenced by any other memory allocated by either C or Go.
-These new error reports may be disabled by setting
-`ASAN_OPTIONS=detect_leaks=0` in the environment when running the
-program.
+`go build` 명령어의 `-asan` 옵션은 이제 프로그램 종료 시 누수 감지를 기본 설정으로 사용합니다.
+이 옵션은 C에서 할당된 메모리가 해제되지 않고, C 또는 Go에서 할당된 다른 메모리에 의해 참조되지 않으면 오류를 보고합니다.
+이 새로운 오류 보고는 `ASAN_OPTIONS=detect_leaks=0`을 환경 변수에 설정하여 비활성화할 수 있습니다.
 
 <!-- go.dev/issue/71867 -->
-The Go distribution will include fewer prebuilt tool binaries. Core
-toolchain binaries such as the compiler and linker will still be
-included, but tools not invoked by build or test operations will be built
-and run by `go tool` as needed.
+Go 배포판에는 사전 빌드된 도구 바이너리가 줄어듭니다. 컴파일러 및 링커와 같은 핵심 도구 체인 바이너리는 여전히 포함되지만, 빌드 또는 테스트 작업에 의해 호출되지 않는 도구는 필요에 따라 `go tool`을 사용하여 빌드 및 실행됩니다.
 
 <!-- go.dev/issue/42965 -->
-The new `go.mod` `ignore` [directive](/ref/mod#go-mod-file-ignore) can be used to
-specify directories the `go` command should ignore. Files in these directories
-and their subdirectories  will be ignored by the `go` command when matching package
-patterns, such as `all` or `./...`, but will still be included in module zip files.
+새로운 `go.mod` `ignore` 지시문 [설명](https://go.dev/ref/mod#go-mod-file-ignore)을 사용하여, `go` 명령이 무시해야 할 디렉토리를 지정할 수 있습니다. 이러한 디렉토리 및 하위 디렉토리에 있는 파일은 `go` 명령에서 `all` 또는 `./...`과 같은 패키지 패턴과 일치할 때 무시되지만, 여전히 모듈 ZIP 파일에 포함됩니다.
 
 <!-- go.dev/issue/68106 -->
-The new `go doc` `-http` option will start a documentation server showing
-documentation for the requested object, and open the documentation in a browser
-window.
+새로운 `go doc` `-http` 옵션은 요청된 객체의 문서를 보여주는 문서 서버를 시작하고, 브라우저 창에서 문서를 엽니다.
 
 <!-- go.dev/issue/69712 -->
 
-The new `go version -m -json` option will print the JSON encodings of the
-`runtime/debug.BuildInfo` structures embedded in the given Go binary files.
+새로운 `go version -m -json` 옵션은 주어진 Go 바이너리 파일에 내장된 `runtime/debug.BuildInfo` 구조체의 JSON 인코딩을 출력합니다.
 
 <!-- go.dev/issue/34055 -->
-The `go` command now supports using a subdirectory of a repository as the
-path for a module root, when [resolving a module path](/ref/mod#vcs-find) using the syntax
-`<meta name="go-import" content="root-path vcs repo-url subdir">` to indicate
-that the `root-path` corresponds to the `subdir` of the `repo-url` with
-version control system `vcs`.
+`go` 명령은 이제 저장소의 하위 디렉토리를 모듈의 루트 경로로 사용할 수 있습니다. `<meta name="go-import" content="root-path vcs repo-url subdir">` 구문을 사용하여 모듈 경로를 `<vcs-find>` 시에 지정할 때, `root-path`가 버전 관리 시스템 `vcs`의 `repo-url`의 `subdir`와 일치함을 나타낼 수 있습니다.
 
 <!-- go.dev/issue/71294 -->
 
-The new `work` package pattern matches all packages in the work (formerly called main)
-modules: either the single work module in module mode or the set of workspace modules
-in workspace mode.
+새로운 `work` 패키지 패턴은 `work` (이전에는 `main`이라고 불렸던) 모듈 내의 모든 패키지를 일치시킵니다.
+이것은 모드 모드에서 단일 `work` 모듈이거나, 워크스페이스 모드에서 워크스페이스 모듈의 집합일 수 있습니다.
 
 <!-- go.dev/issue/65847 -->
 
-When the go command updates the `go` line in a `go.mod` or `go.work` file,
-it [no longer](/ref/mod#go-mod-file-toolchain) adds a toolchain line
-specifying the command's current version.
+`go` 명령이 `go.mod` 또는 `go.work` 파일의 `go` 줄을 업데이트하면,
+[더 이상](/ref/mod#go-mod-file-toolchain) 도구 줄을 추가하지 않고,
+명령의 현재 버전을 지정하는 줄을 추가하지 않습니다.
 
-### Vet {#vet}
+### 수의사 {#vet}
 
-The `go vet` command includes new analyzers:
+`go vet` 명령어는 다음과 같은 새로운 분석 기능을 포함합니다:
 
 <!-- go.dev/issue/18022 -->
 
 - [waitgroup](https://pkg.go.dev/golang.org/x/tools/go/analysis/passes/waitgroup),
-  which reports misplaced calls to [`sync.WaitGroup.Add`](/pkg/sync#WaitGroup.Add); and
+  `sync.WaitGroup.Add` 호출이 잘못된 경우를 보고합니다;
 
 <!-- go.dev/issue/28308 -->
 
 - [hostport](https://pkg.go.dev/golang.org/x/tools/go/analysis/passes/hostport),
-  which reports uses of `fmt.Sprintf("%s:%d", host, port)` to
-  construct addresses for [`net.Dial`](/pkg/net#Dial), as these will not work with
-  IPv6; instead it suggests using [`net.JoinHostPort`](/pkg/net#JoinHostPort).
+  이것은 `fmt.Sprintf("%s:%d", host, port)`를 사용하여 주소(`net.Dial`](/pkg/net#Dial)를 구성하는 사용법을 보고하며, 이는 IPv6와 호환되지 않습니다. 대신, `net.JoinHostPort`](/pkg/net#JoinHostPort)를 사용하는 것을 권장합니다.
 
-## Runtime {#runtime}
+## 런타임 {#runtime}
 
-### Container-aware `GOMAXPROCS`
+### 컨테이너를 고려한 `GOMAXPROCS`
 
 <!-- go.dev/issue/73193 -->
 
-The default behavior of the `GOMAXPROCS` has changed. In prior versions of Go,
-`GOMAXPROCS` defaults to the number of logical CPUs available at startup
-([`runtime.NumCPU`](/pkg/runtime#NumCPU)). Go 1.25 introduces two changes:
+`GOMAXPROCS`의 기본 동작이 변경되었습니다. 이전 Go 버전에서는 `GOMAXPROCS`는 시작 시 사용 가능한 논리적 CPU의 수를 기본값으로 사용했습니다 ([`runtime.NumCPU`](/pkg/runtime#NumCPU)). Go 1.25에서는 두 가지 변경 사항이 도입되었습니다:
 
-1. On Linux, the runtime considers the CPU bandwidth limit of the cgroup
-   containing the process, if any. If the CPU bandwidth limit is lower than the
-   number of logical CPUs available, `GOMAXPROCS` will default to the lower
-   limit. In container runtime systems like Kubernetes, cgroup CPU bandwidth
-   limits generally correspond to the "CPU limit" option. The Go runtime does
-   not consider the "CPU requests" option.
+1. 리눅스에서, 런타임은 프로세스가 포함된 cgroup의 CPU 대역폭 제한을 고려합니다. 만약 CPU 대역폭 제한이 사용 가능한 논리 CPU 수보다 낮다면, `GOMAXPROCS`는 기본적으로 낮은 제한값으로 설정됩니다. 컨테이너 런타임 시스템(예: Kubernetes)에서 cgroup CPU 대역폭 제한은 일반적으로 "CPU 제한" 옵션과 일치합니다. Go 런타임은 "CPU 요청" 옵션을 고려하지 않습니다.
 
-2. On all OSes, the runtime periodically updates `GOMAXPROCS` if the number
-   of logical CPUs available or the cgroup CPU bandwidth limit change.
+2. 모든 운영체제에서 런타임은 사용 가능한 논리적 CPU 개수 또는 cgroup CPU 대역폭 제한이 변경되면 주기적으로 `GOMAXPROCS`를 업데이트합니다.
 
-Both of these behaviors are automatically disabled if `GOMAXPROCS` is set
-manually via the `GOMAXPROCS` environment variable or a call to
-[`runtime.GOMAXPROCS`](/pkg/runtime#GOMAXPROCS). They can also be disabled explicitly with the [GODEBUG
-settings](/doc/godebug) `containermaxprocs=0` and `updatemaxprocs=0`,
-respectively.
+이 두 가지 동작은 `GOMAXPROCS` 환경 변수를 수동으로 설정하거나 `runtime.GOMAXPROCS` 호출을 통해 설정되었을 때 자동으로 비활성화됩니다. 또한, `GODEBUG` 설정인 `containermaxprocs=0` 및 `updatemaxprocs=0`을 사용하여 명시적으로 비활성화할 수도 있습니다.
 
-In order to support reading updated cgroup limits, the runtime will keep cached
-file descriptors for the cgroup files for the duration of the process lifetime.
+업데이트된 cgroup 한도를 읽기 위해, 런타임은 프로세스 수명 동안 cgroup 파일의 파일 디스크립터를 캐시에 유지합니다.
 
-### New experimental garbage collector
+### 새로운 실험적인 가비지 컬렉터
 
 <!-- go.dev/issue/73581 -->
 
-A new garbage collector is now available as an experiment. This garbage
-collector's design improves the performance of marking and scanning small objects
-through better locality and CPU scalability. Benchmark result vary, but we expect
-somewhere between a 10—40% reduction in garbage collection overhead in real-world
-programs that heavily use the garbage collector.
+새로운 가비지 컬렉터가 실험용으로 제공됩니다. 이 가비지 컬렉터의 설계는 더 나은 지역성과 CPU 확장성을 통해, 작은 객체의 마킹 및 스캔 성능을 향상시킵니다. 벤치마크 결과는 다양하지만, 실제 프로그램에서 가비지 컬렉터를 많이 사용하는 경우, 10~40%의 가비지 컬렉션 오버헤드 감소를 기대할 수 있습니다.
 
-The new garbage collector may be enabled by setting `GOEXPERIMENT=greenteagc`
-at build time. We expect the design to continue to evolve and improve. To that
-end, we encourage Go developers to try it out and report back their experiences.
-See the [GitHub issue](/issue/73581) for more details on the design and
-instructions for sharing feedback.
+새로운 가비지 컬렉터는 빌드 시간에 `GOEXPERIMENT=greenteagc`를 설정하여 활성화할 수 있습니다. 저희는 이 설계가 계속 발전하고 개선될 것으로 예상합니다. 이에 Go 개발자 여러분께서는 이 기능을 사용해 보시고 경험을 공유해 주시기를 권장합니다. 설계에 대한 자세한 내용과 피드백 공유 방법을 참조하려면 [GitHub 이슈](https://github.com/issue/73581)를 참조하십시오.
 
-### Trace flight recorder
+### 비행기 블랙박스 추적
 
 <!-- go.dev/issue/63185 -->
 
-[Runtime execution traces](/pkg/runtime/trace) have long provided a powerful,
-but expensive way to understand and debug the low-level behavior of an
-application. Unfortunately, because of their size and the cost of continuously
-writing an execution trace, they were generally impractical for debugging rare
-events.
+[실시간 실행 추적](/pkg/runtime/trace)은 오랫동안 애플리케이션의 저수준 동작을 이해하고 디버깅하는 강력하고 효과적인 방법을 제공해 왔지만, 비용이 많이 듭니다. 불행하게도, 추적의 크기와 지속적으로 실행 추적을 기록하는 비용 때문에, 이러한 추적은 드문 이벤트의 디버깅에는 일반적으로 실용적이지 않았습니다.
 
-The new [`runtime/trace.FlightRecorder`](/pkg/runtime/trace#FlightRecorder) API
-provides a lightweight way to capture a runtime execution trace by continuously
-recording the trace into an in-memory ring buffer. When a significant event
-occurs, a program can call
-[`FlightRecorder.WriteTo`](/pkg/runtime/trace#FlightRecorder.WriteTo) to
-snapshot the last few seconds of the trace to a file. This approach produces a
-much smaller trace by enabling applications to capture only the traces that
-matter.
+새로운 [`runtime/trace.FlightRecorder`](/pkg/runtime/trace#FlightRecorder) API는 지속적으로 트레이스를 메모리 내 링 버퍼에 기록하는 방식으로 런타임 실행 트레이스를 캡처하는 가벼운 방법을 제공합니다. 중요한 이벤트가 발생하면 프로그램은 [`FlightRecorder.WriteTo`](/pkg/runtime/trace#FlightRecorder.WriteTo)를 호출하여 트레이스의 마지막 몇 초를 파일에 저장할 수 있습니다. 이 방법은 애플리케이션이 실제로 중요한 트레이스만 캡처할 수 있도록 하여 훨씬 작은 트레이스를 생성합니다.
 
-The length of time and amount of data captured by a
-[`FlightRecorder`](/pkg/runtime/trace#FlightRecorder) may be configured within
-the [`FlightRecorderConfig`](/pkg/runtime/trace#FlightRecorderConfig).
+[`FlightRecorder`](/pkg/runtime/trace#FlightRecorder)가 캡처하는 시간 및 데이터 양은
+[`FlightRecorderConfig`](/pkg/runtime/trace#FlightRecorderConfig) 내에서 구성할 수 있습니다.
 
-### Change to unhandled panic output
+### 처리되지 않은 패닉 출력 변경
 
 <!-- go.dev/issue/71517 -->
 
-The message printed when a program exits due to an unhandled panic
-that was recovered and repanicked no longer repeats the text of
-the panic value.
+프로그램이 처리되지 않은 패닉으로 종료될 때 출력되는 메시지
+(패닉이 복구되었지만 다시 패닉이 발생한 경우)에는 더 이상
+패닉 값의 텍스트가 반복되지 않습니다.
 
-Previously, a program which panicked with `panic("PANIC")`,
-recovered the panic, and then repanicked with the original
-value would print:
+이전에, 프로그램이 `panic("PANIC")`를 발생시키고, 발생한 panic을 복구한 다음 원래 값을 사용하여 다시 panic을 발생시키면 다음과 같은 내용을 출력했습니다:
 
-    panic: PANIC [recovered]
+panic: PANIC [복구됨]
       panic: PANIC
 
-This program will now print:
+이 프로그램은 이제 다음을 출력합니다:
 
-    panic: PANIC [recovered, repanicked]
+panic: PANIC [복구, 재발생]
 
-### VMA names on Linux
+### Linux에서 VMA (가상 주소 영역) 이름
+
+```
+# VMA 이름 관련 정보
+# 예시:
+# /proc/meminfo 파일에서 VMA 정보 확인
+# cat /proc/meminfo | grep VMA
+```
+
+## VMA의 종류
+
+*   **Physical Memory:** 실제 물리 메모리 영역
+*   **DMA 영역:** DMA (Direct Memory Access)를 통해 접근 가능한 영역
+*   **Swap 영역:** 스왑 영역
+
+## VMA 이름 확인 방법
+
+1.  `cat /proc/meminfo` 명령어를 사용하여 VMA 정보를 확인합니다.
+2.  `grep` 명령어를 사용하여 특정 VMA 이름을 검색합니다.
+
+## 예시
+
+```bash
+cat /proc/meminfo | grep VMA
+```
+
+## 추가 정보
+
+*   VMA는 프로세스 및 시스템 메모리 관리에 중요한 역할을 합니다.
+*   VMA 정보를 통해 메모리 사용량을 분석하고 문제를 해결할 수 있습니다.
 
 <!-- go.dev/issue/71546 -->
 
-On Linux systems with kernel support for anonymous virtual memory area (VMA) names
-(`CONFIG_ANON_VMA_NAME`), the Go runtime will annotate anonymous memory
-mappings with context about their purpose. e.g., `[anon: Go: heap]` for heap
-memory. This can be disabled with the [GODEBUG setting](/doc/godebug)
-`decoratemappings=0`.
+Linux 시스템에서 익명 가상 메모리 영역 (VMA) 이름에 대한 커널 지원이 있는 경우 (`CONFIG_ANON_VMA_NAME`), Go 런타임은 익명 메모리 매핑에 목적에 대한 컨텍스트 정보를 추가합니다. 예를 들어, 힙 메모리의 경우 `[anon: Go: heap]`입니다. 이 기능을 비활성화하려면 [GODEBUG 설정](/doc/godebug)에서 `decoratemappings=0`를 사용하십시오.
 
-## Compiler {#compiler}
+## 컴파일러
 
-### `nil` pointer bug
+### `nil` 포인터 버그
 
 <!-- https://go.dev/issue/72860, CL 657715 -->
 
-This release fixes a [compiler bug](/issue/72860), introduced in Go 1.21, that
-could incorrectly delay nil pointer checks. Programs like the following, which
-used to execute successfully (incorrectly), will now (correctly) panic with a
-nil-pointer exception:
+이 릴리스는 Go 1.21에 도입된 [컴파일러 버그](/issue/72860)를 수정합니다. 이 버그는 nil 포인터 검사를 잘못하게 지연시킬 수 있습니다. 다음과 같은 프로그램(이전에는 성공적으로, 하지만(잘못하게) 실행되었지만) 이제(올바르게) nil-포인터 예외로 인해 패닉됩니다:
 
 ```
 package main
@@ -210,350 +194,253 @@ func main() {
 }
 ```
 
-This program is incorrect because it uses the result of `os.Open` before
-checking the error. If `err` is non-nil, then the `f` result may be nil, in
-which case `f.Name()` should panic. However, in Go versions 1.21 through 1.24,
-the compiler incorrectly delayed the nil check until *after* the error check,
-causing the program to execute successfully, in violation of the Go spec. In Go
-1.25, it will no longer run successfully. If this change is affecting your code,
-the solution is to put the non-nil error check earlier in your code, preferably
-immediately after the error-generating statement.
+이 프로그램은 `os.Open`의 결과를 확인하기 전에 결과를 사용하기 때문에 잘못되었습니다. 만약 `err`가 nil이 아니면, `f`의 결과가 nil일 수 있으며, 이 경우 `f.Name()`을 호출하면 오류가 발생해야 합니다. 하지만 Go 1.21 ~ 1.24 버전에서는 컴파일러가 오류 확인 후에 nil 체크를 지연시켜, Go 사양 위반으로 프로그램이 성공적으로 실행됩니다. Go 1.25에서는 더 이상 성공적으로 실행되지 않습니다. 만약 이러한 변경 사항이 코드를 영향을 미치고 있다면, 해결책은 `err`가 nil이 아닌지 확인하는 부분을 코드의 앞부분, 특히 오류를 발생시키는 문 바로 뒤에 배치하는 것입니다.
 
-### DWARF5 support
+### DWARF5 지원
 
 <!-- https://go.dev/issue/26379 -->
 
-The compiler and linker in Go 1.25 now generate debug information
-using [DWARF version 5](https://dwarfstd.org/dwarf5std.html). The
-newer DWARF version reduces the space required for debugging
-information in Go binaries, and reduces the time for linking,
-especially for large Go binaries.
-DWARF 5 generation can be disabled by setting the environment
-variable `GOEXPERIMENT=nodwarf5` at build time
-(this fallback may be removed in a future Go release).
+Go 1.25의 컴파일러와 링커는 이제 [DWARF 버전 5](https://dwarfstd.org/dwarf5std.html)를 사용하여 디버깅 정보를 생성합니다.
+새로운 DWARF 버전은 Go 바이너리에 필요한 디버깅 정보의 공간을 줄이고, 특히 큰 Go 바이너리의 경우 링킹 시간을 단축합니다.
+DWARF 5 생성 기능을 비활성화하려면 빌드 시간에 환경 변수 `GOEXPERIMENT=nodwarf5`를 설정할 수 있습니다 (이 백업 기능은 향후 Go 릴리스에서 제거될 수 있습니다).
 
-### Faster slices
+### 더 빠른 슬라이스
 
-<!-- CLs 653856, 657937, 663795, 664299 -->
+<!-- CL 653856, 657937, 663795, 664299 -->
 
-The compiler can now allocate the backing store for slices on the
-stack in more situations, which improves performance. This change has
-the potential to amplify the effects of incorrect
-[unsafe.Pointer](/pkg/unsafe#Pointer) usage, see for example [issue
-73199](/issue/73199). In order to track down these problems, the
-[bisect tool](https://pkg.go.dev/golang.org/x/tools/cmd/bisect) can be
-used to find the allocation causing trouble using the
-`-compile=variablemake` flag. All such new stack allocations can also
-be turned off using `-gcflags=all=-d=variablemakehash=n`.
+컴파일러는 이제 슬라이스의 백잉 스토어를 스택에 더 많은 경우에 할당할 수 있으며, 이는 성능을 향상시킵니다. 이 변경 사항은 잘못된 [unsafe.Pointer](/pkg/unsafe#Pointer) 사용의 영향을 증폭시킬 수 있습니다. 예를 들어 [issue 73199](/issue/73199)를 참조하십시오. 이러한 문제를 해결하려면 [bisect tool](https://pkg.go.dev/golang.org/x/tools/cmd/bisect)을 사용하여 `-compile=variablemake` 플래그를 사용하여 문제를 일으키는 할당을 찾을 수 있습니다. 또한 이러한 모든 새로운 스택 할당을 `-gcflags=all=-d=variablemakehash=n`을 사용하여 비활성화할 수도 있습니다.
 
-## Linker {#linker}
+## 링커 {#linker}
 
 <!-- CL 660996 -->
 
-The linker now accepts a `-funcalign=N` command line option, which
-specifies the alignment of function entries.
-The default value is platform-dependent, and is unchanged in this
-release.
+이제 링커는 `-funcalign=N` 명령줄 옵션을 지원하며, 이는 함수 엔트리의 정렬을 지정합니다.
+기본값은 플랫폼에 따라 다르며, 이번 릴리스에서는 변경되지 않았습니다.
 
-## Standard library {#library}
+## 표준 라이브러리 {#library}
 
-### New testing/synctest package
+### 새로운 testing/synctest 패키지
 
 <!-- go.dev/issue/67434, go.dev/issue/73567 -->
-The new [`testing/synctest`](/pkg/testing/synctest) package
-provides support for testing concurrent code.
+새로운 `testing/synctest` 패키지는 동시성 코드 테스트를 위한 지원을 제공합니다.
 
-The [`Test`](/pkg/testing/synctest#Test) function runs a test function in an isolated
-"bubble". Within the bubble, time is virtualized: [`time`](/pkg/time) package
-functions operate on a fake clock and the clock moves forward instantaneously if
-all goroutines in the bubble are blocked.
+[`Test`](/pkg/testing/synctest#Test) 함수는 격리된 "방" 내에서 테스트 함수를 실행합니다. 이 방 안에서는 시간이 가상으로 작동합니다: [`time`](/pkg/time) 패키지의 함수는 가짜 시계에서 작동하며, 방 내의 모든 고루틴이 차단되면 시계가 즉시 진행됩니다.
 
-The [`Wait`](/pkg/testing/synctest#Wait) function waits for all goroutines in the
-current bubble to block.
+[`Wait`](/pkg/testing/synctest#Wait) 함수는 현재 루프 내의 모든 고루틴이 차단될 때까지 대기합니다.
 
-This package was first available in Go 1.24 under `GOEXPERIMENT=synctest`, with
-a slightly different API. The experiment has now graduated to general
-availability. The old API is still present if `GOEXPERIMENT=synctest` is set,
-but will be removed in Go 1.26.
+이 패키지는 Go 1.24에서 `GOEXPERIMENT=synctest`로 처음 제공되었으며, 약간 다른 API를 사용했습니다. 이 실험 기능은 이제 일반적으로 사용 가능합니다. 이전 API는 `GOEXPERIMENT=synctest`로 설정된 경우 여전히 존재하지만, Go 1.26에서 제거될 예정입니다.
 
-### New experimental encoding/json/v2 package {#json_v2}
+### 새로운 실험적인 encoding/json/v2 패키지 {#json_v2}
 
-Go 1.25 includes a new, experimental JSON implementation,
-which can be enabled by setting the environment variable
-`GOEXPERIMENT=jsonv2` at build time.
+Go 1.25에는 새로운 실험적인 JSON 구현이 포함되어 있으며, 빌드 시간에 환경 변수 `GOEXPERIMENT=jsonv2`를 설정하여 활성화할 수 있습니다.
 
-When enabled, two new packages are available:
-- The [`encoding/json/v2`](/pkg/encoding/json/v2) package is
-  a major revision of the `encoding/json` package.
-- The [`encoding/json/jsontext`](/pkg/encoding/json/jsontext) package
-  provides lower-level processing of JSON syntax.
+사용 시, 다음 두 개의 새로운 패키지가 사용 가능합니다:
+- [`encoding/json/v2`](/pkg/encoding/json/v2) 패키지는 `encoding/json` 패키지의 주요 버전입니다.
+- [`encoding/json/jsontext`](/pkg/encoding/json/jsontext) 패키지는 JSON 구문에 대한 더 낮은 수준의 처리를 제공합니다.
 
-In addition, when the "jsonv2" GOEXPERIMENT is enabled:
-- The [`encoding/json`](/pkg/encoding/json) package
-  uses the new JSON implementation.
-  Marshaling and unmarshaling behavior is unaffected,
-  but the text of errors returned by package function may change.
-- The [`encoding/json`](/pkg/encoding/json) package contains
-  a number of new options which may be used
-  to configure the marshaler and unmarshaler.
+또한, "jsonv2" GOEXPERIMENT이 활성화되면:
+- [`encoding/json`](/pkg/encoding/json) 패키지는 새로운 JSON 구현을 사용합니다.
+  - 직렬화 및 역직렬화 동작은 변경되지 않지만, 패키지 함수의 반환하는 오류의 텍스트가 변경될 수 있습니다.
+- [`encoding/json`](/pkg/encoding/json) 패키지에는 직렬화 및 역직렬화 설정을 위한 여러 새로운 옵션이 포함되어 있습니다.
 
-The new implementation performs substantially better than
-the existing one under many scenarios. In general,
-encoding performance is at parity between the implementations
-and decoding is substantially faster in the new one.
-See the [github.com/go-json-experiment/jsonbench](https://github.com/go-json-experiment/jsonbench)
-repository for more detailed analysis.
+새로운 구현은 많은 시나리오에서 기존 구현보다 훨씬 뛰어난 성능을 보입니다. 일반적으로, 인코딩 성능은 두 구현 간에 거의 동일하며, 새로운 구현에서는 디코딩 속도가 훨씬 빠릅니다. 더 자세한 분석은 [github.com/go-json-experiment/jsonbench](https://github.com/go-json-experiment/jsonbench) 저장소에서 확인할 수 있습니다.
 
-See the [proposal issue](/issue/71497) for more details.
+자세한 내용은 [제안 이슈](/issue/71497)를 참조하십시오.
 
-We encourage users of [`encoding/json`](/pkg/encoding/json) to test
-their programs with `GOEXPERIMENT=jsonv2` enabled to help detect
-any compatibility issues with the new implementation.
+저희는 `encoding/json`을 사용하는 사용자들이 `GOEXPERIMENT=jsonv2`를 활성화하여 프로그램을 테스트하도록 권장합니다. 이를 통해 새로운 구현과의 호환성 문제를 감지하는 데 도움이 됩니다.
 
-We expect the design of [`encoding/json/v2`](/pkg/encoding/json/v2)
-to continue to evolve. We encourage developers to try out the new
-API and provide feedback on the [proposal issue](/issue/71497).
+저희는 [`encoding/json/v2`](/pkg/encoding/json/v2)의 디자인이 계속 발전할 것으로 예상합니다. 개발자 여러분께서는 새로운 API를 사용해 보고 [제안 이슈](/issue/71497)에 피드백을 제공해 주시기를 권장합니다.
 
-### Minor changes to the library {#minor_library_changes}
+### 라이브러리의 미세 조정 {#미세_조정}
 
 #### [`archive/tar`](/pkg/archive/tar/)
 
-The [`Writer.AddFS`](/pkg/archive/tar#Writer.AddFS) implementation now supports symbolic links
-for filesystems that implement [`io/fs.ReadLinkFS`](/pkg/io/fs#ReadLinkFS).
+[`Writer.AddFS`](/pkg/archive/tar#Writer.AddFS) 구현은 이제 `io/fs.ReadLinkFS`](/pkg/io/fs#ReadLinkFS)를 구현하는 파일 시스템에 대한 심볼릭 링크를 지원합니다.
 
+```
 #### [`encoding/asn1`](/pkg/encoding/asn1/)
+```
 
-[`Unmarshal`](/pkg/encoding/asn1#Unmarshal) and [`UnmarshalWithParams`](/pkg/encoding/asn1#UnmarshalWithParams)
-now parse the ASN.1 types T61String and BMPString more consistently. This may
-result in some previously accepted malformed encodings now being rejected.
+[`Unmarshal`](/pkg/encoding/asn1#Unmarshal) 및 [`UnmarshalWithParams`](/pkg/encoding/asn1#UnmarshalWithParams)
+이제 ASN.1 유형인 T61String 및 BMPString을 보다 일관성 있게 파싱합니다. 이로 인해 이전에는 허용되었던 잘못된 인코딩이 이제 거부될 수 있습니다.
 
 #### [`crypto`](/pkg/crypto/)
 
-[`MessageSigner`](/pkg/crypto#MessageSigner) is a new signing interface that can
-be implemented by signers that wish to hash the message to be signed themselves.
-A new function is also introduced, [`SignMessage`](/pkg/crypto#SignMessage),
-which attempts to upgrade a [`Signer`](/pkg/crypto#Signer) interface to
-[`MessageSigner`](/pkg/crypto#MessageSigner), using the
-[`MessageSigner.SignMessage`](/pkg/crypto#MessageSigner.SignMessage) method if
-successful, and [`Signer.Sign`](/pkg/crypto#Signer.Sign) if not. This can be
-used when code wishes to support both [`Signer`](/pkg/crypto#Signer) and
-[`MessageSigner`](/pkg/crypto#MessageSigner).
+[`MessageSigner`](/pkg/crypto#MessageSigner)는 메시지를 서명하기 전에 직접 해시를 생성하고자 하는 서명자에게 구현될 수 있는 새로운 서명 인터페이스입니다.
+또한, [`SignMessage`](/pkg/crypto#SignMessage)라는 새로운 함수가 도입되었으며, 이는 [`Signer`](/pkg/crypto#Signer) 인터페이스를 [`MessageSigner`](/pkg/crypto#MessageSigner)로 업그레이드하려고 시도합니다. 성공적으로 수행되면 [`MessageSigner.SignMessage`](/pkg/crypto#MessageSigner.SignMessage) 메서드를 사용하고, 그렇지 않으면 [`Signer.Sign`](/pkg/crypto#Signer.Sign) 메서드를 사용합니다. 이를 통해 코드가 [`Signer`](/pkg/crypto#Signer) 및 [`MessageSigner`](/pkg/crypto#MessageSigner)를 모두 지원할 수 있습니다.
 
-Changing the `fips140` [GODEBUG setting](/doc/godebug) after the program has started is now a no-op.
-Previously, it was documented as not allowed, and could cause a panic if changed.
+`fips140` [GODEBUG 설정](/doc/godebug)이 프로그램이 시작된 후 변경하는 것은 더 이상 효과가 없습니다.
+이전에는 이 설정을 변경하는 것이 허용되지 않았으며, 변경하면 프로그램이 예기치 않게 종료될 수 있다고 설명되어 있었습니다.
 
-SHA-1, SHA-256, and SHA-512 are now slower on amd64 when AVX2 instructions are not available.
-All server processors (and most others) produced since 2015 support AVX2.
+SHA-1, SHA-256 및 SHA-512은 AVX2 명령어가 사용되지 않는 amd64 환경에서는 더 느려집니다.
+2015년 이후에 출시된 모든 서버 프로세서(및 대부분의 다른 프로세서)는 AVX2를 지원합니다.
 
 #### [`crypto/ecdsa`](/pkg/crypto/ecdsa/)
 
-The new [`ParseRawPrivateKey`](/pkg/crypto/ecdsa#ParseRawPrivateKey),
+새로운 [`ParseRawPrivateKey`](/pkg/crypto/ecdsa#ParseRawPrivateKey),
 [`ParseUncompressedPublicKey`](/pkg/crypto/ecdsa#ParseUncompressedPublicKey),
-[`PrivateKey.Bytes`](/pkg/crypto/ecdsa#PrivateKey.Bytes), and
-[`PublicKey.Bytes`](/pkg/crypto/ecdsa#PublicKey.Bytes) functions and methods
-implement low-level encodings, replacing the need to use
-[`crypto/elliptic`](/pkg/crypto/elliptic) or [`math/big`](/pkg/math/big)
-functions and methods.
+[`PrivateKey.Bytes`](/pkg/crypto/ecdsa#PrivateKey.Bytes), 및
+[`PublicKey.Bytes`](/pkg/crypto/ecdsa#PublicKey.Bytes) 함수 및 메서드는
+낮은 수준의 인코딩을 구현하며, [`crypto/elliptic`](/pkg/crypto/elliptic) 또는 [`math/big`](/pkg/math/big)
+함수 및 메서드를 사용하는 필요성을 대체합니다.
 
-When FIPS 140-3 mode is enabled, signing is now four times faster, matching the
-performance of non-FIPS mode.
+FIPS 140-3 모드가 활성화되면 서명 속도가 4배 더 빨라져, 비-FIPS 모드와 동일한 성능을 제공합니다.
 
 #### [`crypto/ed25519`](/pkg/crypto/ed25519/)
 
-When FIPS 140-3 mode is enabled, signing is now four times faster, matching the
-performance of non-FIPS mode.
+FIPS 140-3 모드가 활성화되면, 서명 속도가 4배 빨라져, 비-FIPS 모드와 동일한 성능을 제공합니다.
 
 #### [`crypto/elliptic`](/pkg/crypto/elliptic/)
 
-The hidden and undocumented `Inverse` and `CombinedMult` methods on some
-[`Curve`](/pkg/crypto/elliptic#Curve) implementations have been removed.
+일부 [`Curve`](/pkg/crypto/elliptic#Curve) 구현에서 숨겨져 있거나 문서화되지 않은 `Inverse` 및 `CombinedMult` 메서드가 제거되었습니다.
 
 #### [`crypto/rsa`](/pkg/crypto/rsa/)
 
-[`PublicKey`](/pkg/crypto/rsa#PublicKey) no longer claims that the modulus value
-is treated as secret. [`VerifyPKCS1v15`](/pkg/crypto/rsa#VerifyPKCS1v15) and
-[`VerifyPSS`](/pkg/crypto/rsa#VerifyPSS) already warned that all inputs are
-public and could be leaked, and there are mathematical attacks that can recover
-the modulus from other public values.
+[`PublicKey`](/pkg/crypto/rsa#PublicKey)는 더 이상 모듈 값은 비밀로 취급된다는 주장을 하지 않습니다. [`VerifyPKCS1v15`](/pkg/crypto/rsa#VerifyPKCS1v15) 및 [`VerifyPSS`](/pkg/crypto/rsa#VerifyPSS)는 이미 모든 입력이 공개되어 유출될 수 있으며, 다른 공개 값으로부터 모듈을 복구할 수 있는 수학적 공격이 존재한다는 경고를 이미 표시하고 있었습니다.
 
-Key generation is now three times faster.
+키 생성 속도가 현재 3배 더 빨라졌습니다.
 
 #### [`crypto/sha1`](/pkg/crypto/sha1/)
 
-Hashing is now two times faster on amd64 when SHA-NI instructions are available.
+해싱은 SHA-NI 지침이 사용 가능한 경우 amd64에서 2배 더 빠릅니다.
 
 #### [`crypto/sha3`](/pkg/crypto/sha3/)
 
-The new [`SHA3.Clone`](/pkg/crypto/sha3#SHA3.Clone) method implements [`hash.Cloner`](/pkg/hash#Cloner).
+새로운 [`SHA3.Clone`](/pkg/crypto/sha3#SHA3.Clone) 메서드는 [`hash.Cloner`](/pkg/hash#Cloner)를 구현합니다.
 
-Hashing is now two times faster on Apple M processors.
+해싱은 Apple M 프로세서에서 2배 더 빠르게 수행됩니다.
 
 #### [`crypto/tls`](/pkg/crypto/tls/)
 
-The new [`ConnectionState.CurveID`](/pkg/crypto/tls#ConnectionState.CurveID)
-field exposes the key exchange mechanism used to establish the connection.
+새로운 [`ConnectionState.CurveID`](/pkg/crypto/tls#ConnectionState.CurveID)
+필드는 연결을 설정하는 데 사용되는 키 교환 메커니즘을 노출합니다.
 
-The new [`Config.GetEncryptedClientHelloKeys`](/pkg/crypto/tls#Config.GetEncryptedClientHelloKeys)
-callback can be used to set the [`EncryptedClientHelloKey`](/pkg/crypto/tls#EncryptedClientHelloKey)s
-for a server to use when a client sends an Encrypted Client Hello extension.
+새로운 [`Config.GetEncryptedClientHelloKeys`](/pkg/crypto/tls#Config.GetEncryptedClientHelloKeys)
+콜백은 서버가 암호화된 클라이언트 헬로 확장(Encrypted Client Hello extension)을 수신할 때 사용할 [`EncryptedClientHelloKey`](/pkg/crypto/tls#EncryptedClientHelloKey)를 설정하는 데 사용될 수 있습니다.
 
-SHA-1 signature algorithms are now disallowed in TLS 1.2 handshakes, per
-[RFC 9155](https://www.rfc-editor.org/rfc/rfc9155.html).
-They can be re-enabled with the [GODEBUG setting](/doc/godebug) `tlssha1=1`.
+SHA-1 서명 알고리즘은 TLS 1.2 핸shakes에서 더 이상 허용되지 않습니다 (RFC 9155 참조: [https://www.rfc-editor.org/rfc/rfc9155.html]).
+`tlssha1=1`의 [GODEBUG 설정](/doc/godebug)을 사용하여 다시 활성화할 수 있습니다.
 
-When [FIPS 140-3 mode](/doc/security/fips140) is enabled, Extended Master Secret
-is now required in TLS 1.2, and Ed25519 and X25519MLKEM768 are now allowed.
+[FIPS 140-3 모드](/doc/security/fips140)가 활성화되면, TLS 1.2에서는 Extended Master Secret이 필요하며, Ed25519 및 X25519MLKEM768이 허용됩니다.
 
-TLS servers now prefer the highest supported protocol version, even if it isn't
-the client's most preferred protocol version.
+TLS 서버는 이제 가장 지원되는 프로토콜 버전을 선호하며, 이는 클라이언트가 선호하는 버전이 아닐 수도 있습니다.
 
 <!-- CL 687855 -->
-Both TLS clients and servers are now stricter in following the specifications
-and in rejecting off-spec behavior. Connections with compliant peers should be
-unaffected.
+TLS 클라이언트와 서버 모두 이제 사양을 더 엄격하게 준수하고, 비호환 동작을 거부합니다. 호환되는 피어와의 연결에는 영향을 미치지 않아야 합니다.
 
 #### [`crypto/x509`](/pkg/crypto/x509/)
 
 [`CreateCertificate`](/pkg/crypto/x509#CreateCertificate),
-[`CreateCertificateRequest`](/pkg/crypto/x509#CreateCertificateRequest), and
-[`CreateRevocationList`](/pkg/crypto/x509#CreateRevocationList) can now accept a
-[`crypto.MessageSigner`](/pkg/crypto#MessageSigner) signing interface as well as
-[`crypto.Signer`](/pkg/crypto#Signer). This allows these functions to use
-signers which implement "one-shot" signing interfaces, where hashing is done as
-part of the signing operation, instead of by the caller.
+[`CreateCertificateRequest`](/pkg/crypto/x509#CreateCertificateRequest) 및
+[`CreateRevocationList`](/pkg/crypto/x509#CreateRevocationList)는 이제 `crypto.MessageSigner` 서명 인터페이스뿐만 아니라
+`crypto.Signer`도 받을 수 있습니다. 이를 통해 이러한 함수는 "한 번 실행" 서명 인터페이스를 구현하는 서명자를 사용할 수 있으며, 호출자가 아닌 서명 자체에서 해싱을 수행합니다.
 
-[`CreateCertificate`](/pkg/crypto/x509#CreateCertificate) now uses truncated
-SHA-256 to populate the `SubjectKeyId` if it is missing.
-The [GODEBUG setting](/doc/godebug) `x509sha256skid=0` reverts to SHA-1.
+[`CreateCertificate`](/pkg/crypto/x509#CreateCertificate)는 `SubjectKeyId`가 누락된 경우에 SHA-256의 절단된 버전을 사용하여 채웁니다.
+[GODEBUG 설정](/doc/godebug)인 `x509sha256skid=0`는 SHA-1로 되돌립니다.
 
-[`ParseCertificate`](/pkg/crypto/x509#ParseCertificate) now rejects certificates
-which contain a BasicConstraints extension that contains a negative pathLenConstraint.
+[`ParseCertificate`](/pkg/crypto/x509#ParseCertificate)는 이제 `BasicConstraints` 확장 내에 음성 `pathLenConstraint`가 포함된 인증서를 거부합니다.
 
-[`ParseCertificate`](/pkg/crypto/x509#ParseCertificate) now handles strings encoded
-with the ASN.1 T61String and BMPString types more consistently. This may result in
-some previously accepted malformed encodings now being rejected.
+[`ParseCertificate`](/pkg/crypto/x509#ParseCertificate)는 이제 ASN.1 T61String 및 BMPString 유형으로 인코딩된 문자열을 보다 일관성 있게 처리합니다. 이로 인해 이전에는 허용되었던 잘못된 인코딩이 이제 거부될 수 있습니다.
 
 #### [`debug/elf`](/pkg/debug/elf/)
 
-The [`debug/elf`](/pkg/debug/elf) package adds two new constants:
+[`debug/elf`](/pkg/debug/elf) 패키지는 다음과 같은 두 가지 새로운 상수를 추가합니다:
 - [`PT_RISCV_ATTRIBUTES`](/pkg/debug/elf#PT_RISCV_ATTRIBUTES)
 - [`SHT_RISCV_ATTRIBUTES`](/pkg/debug/elf#SHT_RISCV_ATTRIBUTES)
-  for RISC-V ELF parsing.
+  RISC-V ELF 파싱용.
 
-#### [`go/ast`](/pkg/go/ast/)
+```
+#### [`go/ast`](패키지/go/ast/)
+```
 
-The [`FilterPackage`](/pkg/ast#FilterPackage), [`PackageExports`](/pkg/ast#PackageExports), and
-[`MergePackageFiles`](/pkg/ast#MergePackageFiles) functions, and the [`MergeMode`](/pkg/go/ast#MergeMode) type and its
-constants, are all deprecated, as they are for use only with the
-long-deprecated [`Object`](/pkg/ast#Object) and [`Package`](/pkg/ast#Package) machinery.
+`[FilterPackage](pkg/ast#FilterPackage)`, `[PackageExports](pkg/ast#PackageExports)`, 및 `[MergePackageFiles](pkg/ast#MergePackageFiles)` 함수, 그리고 `[MergeMode](pkg/go/ast#MergeMode)` 타입 및 그 상수들은 모두 더 이상 사용되지 않습니다. 이는 매우 오래된 `[Object](pkg/ast#Object)` 및 `[Package](pkg/ast#Package)` 메커니즘에서만 사용하기 위한 것입니다.
 
-The new [`PreorderStack`](/pkg/go/ast#PreorderStack) function, like [`Inspect`](/pkg/go/ast#Inspect), traverses a syntax
-tree and provides control over descent into subtrees, but as a
-convenience it also provides the stack of enclosing nodes at each
-point.
+새로운 [`PreorderStack`](/pkg/go/ast#PreorderStack) 함수는 [`Inspect`](/pkg/go/ast#Inspect)와 마찬가지로 구문 트리를 순회하고 서브 트리의 탐색을 제어하지만, 편의를 위해 각 지점에서 감싸고 있는 노드의 스택도 제공합니다.
 
 #### [`go/parser`](/pkg/go/parser/)
 
-The [`ParseDir`](/pkg/go/parser#ParseDir) function is deprecated.
+[`ParseDir`](/pkg/go/parser#ParseDir) 함수는 더 이상 사용되지 않습니다.
 
 #### [`go/token`](/pkg/go/token/)
 
-The new [`FileSet.AddExistingFiles`](/pkg/go/token#FileSet.AddExistingFiles) method enables existing
-[`File`](/pkg/go/token#File)s to be added to a [`FileSet`](/pkg/go/token#FileSet),
-or a [`FileSet`](/pkg/go/token#FileSet) to be constructed for an arbitrary
-set of [`File`](/pkg/go/token#File)s, alleviating the problems associated with a single global
-[`FileSet`](/pkg/go/token#FileSet) in long-lived applications.
+새로운 [`FileSet.AddExistingFiles`](/pkg/go/token#FileSet.AddExistingFiles) 메서드는 기존
+[`File`](/pkg/go/token#File)를 [`FileSet`](/pkg/go/token#FileSet)에 추가하거나, 특정
+[`File`](/pkg/go/token#File)들의 집합에 대해 [`FileSet`](/pkg/go/token#FileSet)를 생성할 수 있도록 하여, 장기간 실행되는 애플리케이션에서 단일 전역
+[`FileSet`](/pkg/go/token#FileSet)와 관련된 문제를 해결합니다.
 
 #### [`go/types`](/pkg/go/types/)
 
-[`Var`](/pkg/go/types#Var) now has a [`Var.Kind`](/pkg/go/types#Var.Kind) method that classifies the variable as one
-of: package-level, receiver, parameter, result, local variable, or
-a struct field.
+[`Var`](/pkg/go/types#Var)에 이제 `Var.Kind` 메서드가 추가되어 변수를 다음과 같이 분류할 수 있습니다: 패키지 수준, 수신자, 매개변수, 결과, 지역 변수 또는 구조체 필드.
 
-The new [`LookupSelection`](/pkg/go/types#LookupSelection) function looks up the field or method of a
-given name and receiver type, like the existing [`LookupFieldOrMethod`](/pkg/go/types#LookupFieldOrMethod)
-function, but returns the result in the form of a [`Selection`](/pkg/go/types#Selection).
+새로운 [`LookupSelection`](/pkg/go/types#LookupSelection) 함수는 주어진 이름과 수신자 유형에 해당하는 필드 또는 메서드를 찾고, 기존의 [`LookupFieldOrMethod`](/pkg/go/types#LookupFieldOrMethod) 함수와 유사하게 작동하지만, 결과를 [`Selection`](/pkg/go/types#Selection) 형식으로 반환합니다.
 
 #### [`hash`](/pkg/hash/)
 
-The new [`XOF`](/pkg/hash#XOF) interface can be implemented by "extendable output
-functions", which are hash functions with arbitrary or unlimited output length
-such as [SHAKE](/pkg/crypto/sha3#SHAKE).
+새로운 [`XOF`](/pkg/hash#XOF) 인터페이스는 "확장 가능한 출력 함수"를 통해 구현될 수 있으며, 이는 임의의 또는 무제한의 출력 길이를 갖는 해시 함수와 같습니다. 예를 들어 [SHAKE](/pkg/crypto/sha3#SHAKE)가 있습니다.
 
-Hashes implementing the new [`Cloner`](/pkg/hash#Cloner) interface can return a copy of their state.
-All standard library [`Hash`](/pkg/hash#Hash) implementations now implement [`Cloner`](/pkg/hash#Cloner).
+새로운 [`Cloner`](/pkg/hash#Cloner) 인터페이스를 구현하는 해시 객체는 자신의 상태의 복사본을 반환할 수 있습니다.
+표준 라이브러리의 모든 [`Hash`](/pkg/hash#Hash) 구현이 이제 [`Cloner`](/pkg/hash#Cloner) 인터페이스를 구현합니다.
 
 #### [`hash/maphash`](/pkg/hash/maphash/)
 
-The new [`Hash.Clone`](/pkg/hash/maphash#Hash.Clone) method implements [`hash.Cloner`](/pkg/hash#Cloner).
+새로운 `[Hash.Clone](pkg/hash/maphash#Hash.Clone)` 메서드는 `[hash.Cloner](pkg/hash#Cloner)`를 구현합니다.
 
 #### [`io/fs`](/pkg/io/fs/)
 
-A new [`ReadLinkFS`](/pkg/io/fs#ReadLinkFS) interface provides the ability to read symbolic links in a filesystem.
+새로운 [`ReadLinkFS`](/pkg/io/fs#ReadLinkFS) 인터페이스는 파일 시스템 내의 심볼릭 링크를 읽을 수 있는 기능을 제공합니다.
 
 #### [`log/slog`](/pkg/log/slog/)
 
-[`GroupAttrs`](/pkg/log/slog#GroupAttrs) creates a group [`Attr`](/pkg/log/slog#Attr) from a slice of [`Attr`](/pkg/log/slog#Attr) values.
+[`GroupAttrs`](/pkg/log/slog#GroupAttrs)는 [`Attr`](/pkg/log/slog#Attr) 값의 슬라이스를 사용하여 그룹 [`Attr`](/pkg/log/slog#Attr)를 생성합니다.
 
-[`Record`](/pkg/log/slog#Record) now has a [`Source`](/pkg/log/slog#Record.Source) method,
-returning its source location or nil if unavailable.
+[`Record`](/pkg/log/slog#Record)에 이제 `Source` 메서드가 추가되었으며, 해당 소스 위치를 반환하거나, 사용할 수 없는 경우 `nil`을 반환합니다.
 
+```
 #### [`mime/multipart`](/pkg/mime/multipart/)
+```
 
-The new helper function [`FileContentDisposition`](/pkg/mime/multipart#FileContentDisposition) builds multipart
-Content-Disposition header fields.
+새로운 헬퍼 함수 [`FileContentDisposition`](/pkg/mime/multipart#FileContentDisposition)는 multipart
+Content-Disposition 헤더 필드를 생성합니다.
 
 #### [`net`](/pkg/net/)
 
-[`LookupMX`](/pkg/net#LookupMX) and [`Resolver.LookupMX`](/pkg/net#Resolver.LookupMX) now return DNS names that look
-like valid IP address, as well as valid domain names.
-Previously if a name server returned an IP address as a DNS name,
-[`LookupMX`](/pkg/net#LookupMX) would discard it, as required by the RFCs.
-However, name servers in practice do sometimes return IP addresses.
+[`LookupMX`](/pkg/net#LookupMX) 및 [`Resolver.LookupMX`](/pkg/net#Resolver.LookupMX)는 이제 유효한 IP 주소와 함께 유효한 도메인 이름을 반환합니다.
+이전에는 이름 서버가 IP 주소를 DNS 이름으로 반환하면, `LookupMX`는 RFC 요구 사항에 따라 이를 버렸습니다.
+그러나 실제로는 이름 서버가 때때로 IP 주소를 반환합니다.
 
-On Windows, [`ListenMulticastUDP`](/pkg/net#ListenMulticastUDP) now supports IPv6 addresses.
+Windows에서, [`ListenMulticastUDP`](/pkg/net#ListenMulticastUDP)가 이제 IPv6 주소를 지원합니다.
 
-On Windows, it is now possible to convert between an [`os.File`](/pkg/os#File)
-and a network connection. Specifically, the [`FileConn`](/pkg/net#FileConn),
-[`FilePacketConn`](/pkg/net#FilePacketConn), and
-[`FileListener`](/pkg/net#FileListener) functions are now implemented, and
-return a network connection or listener corresponding to an open file.
-Similarly, the `File` methods of [`TCPConn`](/pkg/net#TCPConn.File),
-[`UDPConn`](/pkg/net#UDPConn.File), [`UnixConn`](/pkg/net#UnixConn.File),
-[`IPConn`](/pkg/net#IPConn.File), [`TCPListener`](/pkg/net#TCPListener.File),
-and [`UnixListener`](/pkg/net#UnixListener.File) are now implemented, and return
-the underlying [`os.File`](/pkg/os#File) of a network connection.
+On Windows, 이제 [`os.File`](/pkg/os#File) 와 네트워크 연결 간의 변환이 가능합니다. 구체적으로, `[FileConn](https://pkg/net#FileConn)`, `[FilePacketConn](https://pkg/net#FilePacketConn)`, 그리고 `[FileListener](https://pkg/net#FileListener)` 함수가 구현되었으며, 이는 열린 파일에 해당하는 네트워크 연결 또는 리스너를 반환합니다.
+
+마찬가지로, `[TCPConn](https://pkg/net#TCPConn.File)`, `[UDPConn](https://pkg/net#UDPConn.File)`, `[UnixConn](https://pkg/net#UnixConn.File)`, `[IPConn](https://pkg/net#IPConn.File)`, `[TCPListener](https://pkg/net#TCPListener.File)`, 그리고 `[UnixListener](https://pkg/net#UnixListener.File)`의 `File` 메서드가 구현되었으며, 이는 네트워크 연결의 기본 `[os.File](https://pkg/os#File)`을 반환합니다.
 
 #### [`net/http`](/pkg/net/http/)
 
-The new [`CrossOriginProtection`](/pkg/net/http#CrossOriginProtection) implements protections against [Cross-Site
-Request Forgery (CSRF)](https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/CSRF) by rejecting non-safe cross-origin browser requests.
-It uses [modern browser Fetch metadata](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Sec-Fetch-Site), doesn't require tokens
-or cookies, and supports origin-based and pattern-based bypasses.
+새로운 [`CrossOriginProtection`](/pkg/net/http#CrossOriginProtection)는 [Cross-Site
+Request Forgery (CSRF)](https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/CSRF)에 대한 보호를 구현하여, 안전하지 않은 크로스-오리진 브라우저 요청을 거부합니다.
+[최신 브라우저 Fetch 메타데이터](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Sec-Fetch-Site)를 사용하며, 토큰이나 쿠키가 필요하지 않으며, 원본 기반 및 패턴 기반 우회 기능을 지원합니다.
 
 #### [`os`](/pkg/os/)
 
-On Windows, [`NewFile`](/pkg/os#NewFile) now supports handles opened for asynchronous I/O (that is,
-[`syscall.FILE_FLAG_OVERLAPPED`](/pkg/syscall#FILE_FLAG_OVERLAPPED) is specified in the [`syscall.CreateFile`](/pkg/syscall#CreateFile) call).
-These handles are associated with the Go runtime's I/O completion port,
-which provides the following benefits for the resulting [`File`](/pkg/os#File):
+Windows에서, [`NewFile`](/pkg/os#NewFile)는 이제 비동기 I/O에 사용되는 핸들을 지원합니다 (즉,
+[`syscall.FILE_FLAG_OVERLAPPED`](/pkg/syscall#FILE_FLAG_OVERLAPPED)가 [`syscall.CreateFile`](/pkg/syscall#CreateFile) 호출에 지정됩니다).
+이 핸들은 Go 런타임의 I/O 완료 포트와 연결되며, 그 결과인 [`File`](/pkg/os#File)에 다음과 같은 이점을 제공합니다:
 
-- I/O methods ([`File.Read`](/pkg/os#File.Read), [`File.Write`](/pkg/os#File.Write), [`File.ReadAt`](/pkg/os#File.ReadAt), and [`File.WriteAt`](/pkg/os#File.WriteAt)) do not block an OS thread.
-- Deadline methods ([`File.SetDeadline`](/pkg/os#File.SetDeadline), [`File.SetReadDeadline`](/pkg/os#File.SetReadDeadline), and [`File.SetWriteDeadline`](/pkg/os#File.SetWriteDeadline)) are supported.
+- I/O 메서드 (`File.Read`, `/pkg/os#File.Read`, `File.Write`, `/pkg/os#File.Write`, `File.ReadAt`, `/pkg/os#File.ReadAt`, `File.WriteAt`, `/pkg/os#File.WriteAt`)는 OS 스레드를 차단하지 않습니다.
+- 데드라인 메서드 (`File.SetDeadline`, `/pkg/os#File.SetDeadline`, `File.SetReadDeadline`, `/pkg/os#File.SetReadDeadline`, `File.SetWriteDeadline`, `/pkg/os#File.SetWriteDeadline`)는 지원됩니다.
 
-This enhancement is especially beneficial for applications that communicate via named pipes on Windows.
+이 기능은 특히 Windows에서 이름 지정된 파이프를 통해 통신하는 애플리케이션에 특히 유용합니다.
 
-Note that a handle can only be associated with one completion port at a time.
-If the handle provided to [`NewFile`](/pkg/os#NewFile) is already associated with a completion port,
-the returned [`File`](/pkg/os#File) is downgraded to synchronous I/O mode.
-In this case, I/O methods will block an OS thread, and the deadline methods have no effect.
+참고: 핸들은 한 번에 하나의 완료 포트와만 연결될 수 있습니다.
+`NewFile`에 제공된 핸드가 이미 완료 포트와 연결되어 있는 경우, 반환되는 `File`은 동기 I/O 모드로 다운그레이드됩니다.
+이 경우, I/O 메서드는 OS 스레드를 차단하고, 타임아웃 메서드는 아무런 효과가 없습니다.
 
-The filesystems returned by [`DirFS`](/pkg/os#DirFS) and [`Root.FS`](/pkg/os#Root.FS) implement the new [`io/fs.ReadLinkFS`](/pkg/io/fs#ReadLinkFS) interface.
-[`CopyFS`](/pkg/os#CopyFS) supports symlinks when copying filesystems that implement [`io/fs.ReadLinkFS`](/pkg/io/fs#ReadLinkFS).
+`DirFS` 및 `Root.FS`가 반환하는 파일 시스템은 새로운 `io/fs.ReadLinkFS` 인터페이스를 구현합니다.
+`CopyFS`는 `io/fs.ReadLinkFS` 인터페이스를 구현하는 파일 시스템을 복사할 때 심볼릭 링크를 지원합니다.
 
-The [`Root`](/pkg/os#Root) type supports the following additional methods:
+[`Root`](/pkg/os#Root) 타입은 다음 추가 메서드를 지원합니다:
 
-  * [`Root.Chmod`](/pkg/os#Root.Chmod)
+* [`Root.Chmod`](/pkg/os#Root.Chmod)
   * [`Root.Chown`](/pkg/os#Root.Chown)
   * [`Root.Chtimes`](/pkg/os#Root.Chtimes)
   * [`Root.Lchown`](/pkg/os#Root.Lchown)
@@ -566,182 +453,149 @@ The [`Root`](/pkg/os#Root) type supports the following additional methods:
   * [`Root.Symlink`](/pkg/os#Root.Symlink)
   * [`Root.WriteFile`](/pkg/os#Root.WriteFile)
 
-<!-- go.dev/issue/73126 is documented as part of 67002 -->
+<!-- go.dev/issue/73126는 67002의 일부로 문서화됨 -->
 
 #### [`reflect`](/pkg/reflect/)
 
-The new [`TypeAssert`](/pkg/reflect#TypeAssert) function permits converting a [`Value`](/pkg/reflect#Value) directly to a Go value
-of the given type. This is like using a type assertion on the result of [`Value.Interface`](/pkg/reflect#Value.Interface),
-but avoids unnecessary memory allocations.
+새로운 [`TypeAssert`](/pkg/reflect#TypeAssert) 함수는 주어진 유형의 [`Value`](/pkg/reflect#Value)를 직접 Go 값으로 변환할 수 있습니다. 이는 [`Value.Interface`](/pkg/reflect#Value.Interface)의 결과에 대한 유형 확인과 유사하지만, 불필요한 메모리 할당을 방지합니다.
 
 #### [`regexp/syntax`](/pkg/regexp/syntax/)
 
-The `\p{name}` and `\P{name}` character class syntaxes now accept the names
-Any, ASCII, Assigned, Cn, and LC, as well as Unicode category aliases like `\p{Letter}` for `\pL`.
-Following [Unicode TR18](https://unicode.org/reports/tr18/), they also now use
-case-insensitive name lookups, ignoring spaces, underscores, and hyphens.
+`\p{name}` 및 `\P{name}` 특수 문자 클래스 구문은 이제 다음과 같은 이름을 허용합니다.
+Any, ASCII, Assigned, Cn, 및 LC, 뿐만 아니라 `\p{Letter}`를 `\pL`로 사용하는와 같이 유니코드 범주 별칭도 지원합니다.
+[Unicode TR18](https://unicode.org/reports/tr18/)에 따라, 대소문자를 구분하지 않고, 공백, 밑줄, 하이픈을 무시하며 이름 검색을 수행합니다.
 
 #### [`runtime`](/pkg/runtime/)
 
-Cleanup functions scheduled by [`AddCleanup`](/pkg/runtime#AddCleanup) are now executed
-concurrently and in parallel, making cleanups more viable for heavy
-use like the [`unique`](/pkg/unique) package. Note that individual cleanups should
-still shunt their work to a new goroutine if they must execute or
-block for a long time to avoid blocking the cleanup queue.
+`[`AddCleanup`](/pkg/runtime#AddCleanup)에 의해 예약된 정리 함수는 이제 동시에
+병렬로 실행되므로, 특히 `[unique]( /pkg/unique)` 패키지와 같이
+많은 사용 사례에 적합한 정리 작업을 더 효율적으로 수행할 수 있습니다.
+단, 개별 정리 작업이 실행하거나, 오랜 시간 동안 대기해야 하는 경우,
+정리 큐를 차단하지 않도록 새 고루틴으로 작업을 전달해야 합니다.
 
-A new `GODEBUG=checkfinalizers=1` setting helps find common issues with
-finalizers and cleanups, such as those described [in the GC
-guide](/doc/gc-guide#Finalizers_cleanups_and_weak_pointers).
-In this mode, the runtime runs diagnostics on each garbage collection cycle,
-and will also regularly report the finalizer and
-cleanup queue lengths to stderr to help identify issues with
-long-running finalizers and/or cleanups.
-See the [GODEBUG documentation](https://pkg.go.dev/runtime#hdr-Environment_Variables)
-for more details.
+새로운 `GODEBUG=checkfinalizers=1` 설정은 finalizer 및 정리 작업과 관련된 일반적인 문제를 찾도록 도와줍니다. 예를 들어, GC 가이드 [`/doc/gc-guide#Finalizers_cleanups_and_weak_pointers`](https://pkg.go.dev/runtime#hdr-Environment_Variables)에 설명된 내용과 유사한 문제들을 찾을 수 있습니다.
 
-The new [`SetDefaultGOMAXPROCS`](/pkg/runtime#SetDefaultGOMAXPROCS) function sets `GOMAXPROCS` to the runtime
-default value, as if the `GOMAXPROCS` environment variable is not set. This is
-useful for enabling the [new `GOMAXPROCS` default](#container-aware-gomaxprocs) if it has been
-disabled by the `GOMAXPROCS` environment variable or a prior call to
-[`GOMAXPROCS`](/pkg/runtime#GOMAXPROCS).
+이 모드에서는 런타임이 각 가비지 컬렉션 주기마다 진단을 실행하고, 또한 finalizer 및 정리 큐의 길이를 정기적으로 stderr로 보고하여, 장시간 실행되는 finalizer 및/또는 정리 작업과 관련된 문제를 식별하는 데 도움이 됩니다.
+
+자세한 내용은 [GODEBUG 문서](https://pkg.go.dev/runtime#hdr-Environment_Variables)를 참조하십시오.
+
+새로운 [`SetDefaultGOMAXPROCS`](/pkg/runtime#SetDefaultGOMAXPROCS) 함수는 `GOMAXPROCS`를 런타임 기본값으로 설정합니다. 즉, `GOMAXPROCS` 환경 변수가 설정되지 않은 것처럼 동작합니다. 이는 [새로운 `GOMAXPROCS` 기본값](https://container-aware-gomaxprocs)을 활성화하는 데 유용하며, 이 기본값이 `GOMAXPROCS` 환경 변이나 이전 [`GOMAXPROCS`](/pkg/runtime#GOMAXPROCS) 호출에 의해 비활성화된 경우에 사용됩니다.
 
 #### [`runtime/pprof`](/pkg/runtime/pprof/)
 
-The mutex profile for contention on runtime-internal locks now correctly points
-to the end of the critical section that caused the delay. This matches the
-profile's behavior for contention on `sync.Mutex` values. The
-`runtimecontentionstacks` setting for `GODEBUG`, which allowed opting in to the
-unusual behavior of Go 1.22 through 1.24 for this part of the profile, is now
-gone.
+실시간 내부 잠금에 대한 뮤텍스 프로파일이 이제 올바르게 작동하여 지연을 유발한 비상 영역의 끝을 가리킵니다. 이는 `sync.Mutex` 값에 대한 비상 상황에 대한 프로파일의 동작과 일치합니다. `GODEBUG`에 설정된 `runtimecontentionstacks` 설정, 이 설정은 Go 1.22부터 1.24까지의 이 프로파일의 비정상적인 동작을 활성화할 수 있었지만, 이제 제거되었습니다.
 
 #### [`sync`](/pkg/sync/)
 
-The new [`WaitGroup.Go`](/pkg/sync#WaitGroup.Go) method
-makes the common pattern of creating and counting goroutines more convenient.
+새로운 [`WaitGroup.Go`](/pkg/sync#WaitGroup.Go) 메서드는 goroutine을 생성하고 카운트하는 일반적인 패턴을 더 쉽게 사용할 수 있도록 합니다.
 
 #### [`testing`](/pkg/testing/)
 
-The new methods [`T.Attr`](/pkg/testing#T.Attr), [`B.Attr`](/pkg/testing#B.Attr), and [`F.Attr`](/pkg/testing#F.Attr) emit an
-attribute to the test log. An attribute is an arbitrary
-key and value associated with a test.
+새로운 메서드 [`T.Attr`](/pkg/testing#T.Attr), [`B.Attr`](/pkg/testing#B.Attr), 및 [`F.Attr`](/pkg/testing#F.Attr)는 테스트 로그에 속성을 출력합니다. 속성은 테스트와 관련된 임의의 키와 값을 나타냅니다.
 
-For example, in a test named `TestF`,
-`t.Attr("key", "value")` emits:
+예를 들어, `TestF`라는 이름의 테스트에서,
+`t.Attr("key", "value")`는 다음과 같이 출력됩니다:
 
 ```
-=== ATTR  TestF key value
+=== ATTR 테스트 키 값
 ```
 
-With the `-json` flag, attributes appear as a new "attr" action.
+`-json` 플래그를 사용하면 속성이 "attr"라는 새 액션으로 나타납니다.
 
 <!-- go.dev/issue/59928 -->
 
-The new [`Output`](/pkg/testing#T.Output) method of [`T`](/pkg/testing#T), [`B`](/pkg/testing#B) and [`F`](/pkg/testing#F) provides an [`io.Writer`](/pkg/io#Writer)
-that writes to the same test output stream as [`TB.Log`](/pkg/testing#TB.Log).
-Like `TB.Log`, the output is indented, but it does not include the file and line number.
+새로운 `[`Output`](/pkg/testing#T.Output) 메서드인 [`T`](/pkg/testing#T), [`B`](/pkg/testing#B) 및 [`F`](/pkg/testing#F)는 `[`TB.Log`](/pkg/testing#TB.Log)와 동일한 테스트 출력 스트림에 쓰는 `io.Writer`를 제공합니다.
+`TB.Log`와 마찬가지로, 출력은 들여쓰기가 되어 있지만 파일 및 줄 번호는 포함하지 않습니다.
 
 <!-- https://go.dev/issue/70464, CL 630137 -->
-The [`AllocsPerRun`](/pkg/testing#AllocsPerRun) function now panics
-if parallel tests are running.
-The result of [`AllocsPerRun`](/pkg/testing#AllocsPerRun) is inherently
-flaky if other tests are running.
-The new panicking behavior helps catch such bugs.
+`AllocsPerRun` 함수가 이제 병렬 테스트가 실행될 때 패닉을 발생시킵니다.
+`AllocsPerRun` 함수의 결과는 다른 테스트가 실행될 때 본질적으로 불안정합니다.
+새로운 패닉 동작은 이러한 버그를 감지하는 데 도움이 됩니다.
 
 #### [`testing/fstest`](/pkg/testing/fstest/)
 
-[`MapFS`](/pkg/testing/fstest#MapFS) implements the new [`io/fs.ReadLinkFS`](/pkg/io/fs#ReadLinkFS) interface.
-[`TestFS`](/pkg/testing/fstest#TestFS) will verify the functionality of the [`io/fs.ReadLinkFS`](/pkg/io/fs#ReadLinkFS) interface if implemented.
-[`TestFS`](/pkg/testing/fstest#TestFS) will no longer follow symlinks to avoid unbounded recursion.
+[`MapFS`](/pkg/testing/fstest#MapFS)는 새로운 [`io/fs.ReadLinkFS`](/pkg/io/fs#ReadLinkFS) 인터페이스를 구현합니다.
+[`TestFS`](/pkg/testing/fstest#TestFS)는 [`io/fs.ReadLinkFS`](/pkg/io/fs#ReadLinkFS) 인터페이스가 구현된 경우 해당 인터페이스의 기능을 검증합니다.
+[`TestFS`](/pkg/testing/fstest#TestFS)는 무한 재귀를 방지하기 위해 심볼릭 링크를 더 이상 따라가지 않습니다.
 
 #### [`unicode`](/pkg/unicode/)
 
-The new [`CategoryAliases`](/pkg/unicode#CategoryAliases) map provides access to category alias names, such as “Letter” for “L”.
+새로운 `CategoryAliases` 맵은 카테고리 별칭 이름에 접근할 수 있도록 제공합니다 (예: "Letter"는 "L"에 해당).
 
-The new categories [`Cn`](/pkg/unicode#Cn) and [`LC`](/pkg/unicode#LC) define unassigned codepoints and cased letters, respectively.
-These have always been defined by Unicode but were inadvertently omitted in earlier versions of Go.
-The [`C`](/pkg/unicode#C) category now includes [`Cn`](/pkg/unicode#Cn), meaning it has added all unassigned code points.
+새로운 카테고리 [`Cn`](/pkg/unicode#Cn) 및 [`LC`](/pkg/unicode#LC)는 각각 할당되지 않은 코드포인트와 대문자를 정의합니다.
+이들은 항상 유니코드에 정의되어 있었지만, 이전 Go 버전에서는 실수로 누락되었습니다.
+[`C`](/pkg/unicode#C) 카테고리에 이제 [`Cn`](/pkg/unicode#Cn)가 포함되어 있으며, 이는 모든 할당되지 않은 코드포인트를 포함함을 의미합니다.
 
 #### [`unique`](/pkg/unique/)
 
-The [`unique`](/pkg/unique) package now reclaims interned values more eagerly,
-more efficiently, and in parallel. As a consequence, applications using
-[`Make`](/pkg/unique#Make) are now less likely to experience memory blow-up when lots of
-truly unique values are interned.
+[`unique`](/pkg/unique) 패키지는 이제 더 적극적이고, 효율적이며, 병렬 방식으로 인터내팅된 값을 회수합니다. 그 결과, `Make`를 사용하는 애플리케이션은 많은 실제 고유 값이 인터내팅될 때 메모리 부족 문제를 겪을 가능성이 줄어들었습니다.
 
-Values passed to [`Make`](/pkg/unique#Make) containing [`Handle`](/pkg/unique#Handle)s previously required multiple
-garbage collection cycles to collect, proportional to the depth of the chain
-of [`Handle`](/pkg/unique#Handle) values. Now, once
-unused, they are collected promptly in a single cycle.
+`Make`에 전달되는 값 (특히 [`Handle`](/pkg/unique#Handle) 포함)이 이전에는 여러
+가비지 컬렉션 사이클을 거쳐 수집되었으며, 이는 [`Handle`](/pkg/unique#Handle) 값의 체인의 깊이에 비례했습니다. 이제, 사용되지 않게 되면, 즉시 단일 사이클에서 수집됩니다.
 
-## Ports {#ports}
+## 포트
 
-### Darwin
+### 다윈
 
 <!-- go.dev/issue/69839 -->
-As [announced](/doc/go1.24#darwin) in the Go 1.24 release notes, Go 1.25 requires macOS 12 Monterey or later.
-Support for previous versions has been discontinued.
+[공지](https://go.dev/doc/go1.24#darwin)된 바와 같이, Go 1.25는 macOS 12 Monterey 또는 이후 버전을 요구합니다.
+이전 버전 지원은 중단되었습니다.
 
 ### Windows
 
 <!-- go.dev/issue/71671 -->
-Go 1.25 is the last release that contains the [broken](/doc/go1.24#windows) 32-bit windows/arm port (`GOOS=windows` `GOARCH=arm`). It will be removed in Go 1.26.
+Go 1.25는 [비활성화된](/doc/go1.24#windows) 32비트 윈도우/ARM 포트(`GOOS=windows` `GOARCH=arm`)를 포함하는 마지막 릴리스입니다. Go 1.26에서 제거됩니다.
 
 ### AMD64
 
 <!-- go.dev/issue/71204 -->
-In `GOAMD64=v3` mode or higher, the compiler will now use fused
-multiply-add instructions to make floating-point arithmetic faster and
-more accurate. This may change the exact floating-point values that a
-program generates.
+`GOAMD64=v3` 모드 또는 그 이상의 모드에서는 컴파일러가 이제 fused multiply-add 명령어를 사용하여 부동 소수점 연산을 더 빠르고 정확하게 수행합니다. 이로 인해 프로그램이 생성하는 정확한 부동 소수점 값에 변경이 생길 수 있습니다.
 
-To avoid fusing use an explicit `float64` cast, like `float64(a*b)+c`.
+충분한 정밀도를 확보하기 위해 명시적인 `float64` 형 변환을 사용하세요. 예를 들어, `float64(a*b)+c`와 같이 사용합니다.
 
 ### Loong64
 
 <!-- CLs 533717, 533716, 543316, 604176 -->
-The linux/loong64 port now supports the race detector, gathering traceback information from C code
-using [`runtime.SetCgoTraceback`](/pkg/runtime#SetCgoTraceback), and linking cgo programs with the
-internal link mode.
+Linux/loong64 포트는 이제 race detector를 지원하며, C 코드에서 traceback 정보를 수집합니다.
+`runtime.SetCgoTraceback`을 사용하여, Cgo 프로그램을 내부 링크 모드로 연결합니다.
 
 ### RISC-V
 
 <!-- CL 420114 -->
-The linux/riscv64 port now supports the `plugin` build mode.
+리눅스/리스이64 포트는 이제 `plugin` 빌드 모드를 지원합니다.
 
 <!-- https://go.dev/issue/61476, CL 633417 -->
-The `GORISCV64` environment variable now accepts a new value `rva23u64`,
-which selects the RVA23U64 user-mode application profile.
+`GORISCV64` 환경 변수는 이제 새로운 값을 `rva23u64`를 지원하며, 이는 RVA23U64 사용자 모드 애플리케이션 프로필을 선택합니다.
 
 <!--
-Output from relnote todo that was generated and reviewed on 2025-05-23, plus summary info from bug/CL: -->
+relnote todo에서 생성 및 검토된 결과, 그리고 bug/CL:에서 추출한 요약 정보: -->
 
-<!-- Items that don't need to be mentioned in Go 1.25 release notes but are picked up by relnote todo
-Just updating old prposals
-accepted proposal https://go.dev/issue/30999 (from https://go.dev/cl/671795)
-accepted proposal https://go.dev/issue/36532 (from https://go.dev/cl/647555)
-accepted proposal https://go.dev/issue/48429 (from https://go.dev/cl/648577)
-accepted proposal https://go.dev/issue/51572 (from https://go.dev/cl/651996)
-accepted proposal https://go.dev/issue/51430 (from https://go.dev/cl/644997, https://go.dev/cl/646355)
-accepted proposal https://go.dev/issue/60905 (from https://go.dev/cl/645795)
-accepted proposal https://go.dev/issue/61716 (from https://go.dev/cl/644475)
-accepted proposal https://go.dev/issue/64876 (from https://go.dev/cl/649435)
-accepted proposal https://go.dev/issue/70123 (from https://go.dev/cl/657116)
-accepted proposal https://go.dev/issue/61901 (from https://go.dev/cl/647875)
-accepted proposal https://go.dev/issue/64207 (from https://go.dev/cl/647015, https://go.dev/cl/652235)
-accepted proposal https://go.dev/issue/70200 (from https://go.dev/cl/674916)
+<!-- 1.25 릴리스 노트에 언급할 필요 없는 항목이지만, relnote todo에 의해 캡처됨
+* 기존 제안 업데이트
+* 승인된 제안: https://go.dev/issue/30999 (https://go.dev/cl/671795)
+* 승인된 제안: https://go.dev/issue/36532 (https://go.dev/cl/647555)
+* 승인된 제안: https://go.dev/issue/48429 (https://go.dev/cl/648577)
+* 승인된 제안: https://go.dev/issue/51572 (https://go.dev/cl/651996)
+* 승인된 제안: https://go.dev/issue/51430 (https://go.dev/cl/644997, https://go.dev/cl/646355)
+* 승인된 제안: https://go.dev/issue/60905 (https://go.dev/cl/645795)
+* 승인된 제안: https://go.dev/issue/61716 (https://go.dev/cl/644475)
+* 승인된 제안: https://go.dev/issue/64876 (https://go.dev/cl/649435)
+* 승인된 제안: https://go.dev/issue/70123 (https://go.dev/cl/657116)
+* 승인된 제안: https://go.dev/issue/61901 (https://go.dev/cl/647875)
+* 승인된 제안: https://go.dev/issue/64207 (https://go.dev/cl/647015, https://go.dev/cl/652235)
+* 승인된 제안: https://go.dev/issue/70200 (https://go.dev/cl/674916)
 
 For subrepos:
-accepted proposal https://go.dev/issue/53757 (from https://go.dev/cl/644575)
-accepted proposal https://go.dev/issue/54743 (from https://go.dev/cl/532415)
-accepted proposal https://go.dev/issue/57792 (from https://go.dev/cl/649716, https://go.dev/cl/651737)
-accepted proposal https://go.dev/issue/58523 (from https://go.dev/cl/538235)
-accepted proposal https://go.dev/issue/61537 (from https://go.dev/cl/531935)
-accepted proposal https://go.dev/issue/61940 (from https://go.dev/cl/650235)
-accepted proposal https://go.dev/issue/67839 (from https://go.dev/cl/646535)
-accepted proposal https://go.dev/issue/68780 (from https://go.dev/cl/659835)
-accepted proposal https://go.dev/issue/69095 (from https://go.dev/cl/649320, https://go.dev/cl/649321, https://go.dev/cl/649337, https://go.dev/cl/649376, https://go.dev/cl/649377, https://go.dev/cl/649378, https://go.dev/cl/649379, https://go.dev/cl/649380, https://go.dev/cl/649397, https://go.dev/cl/649398, https://go.dev/cl/649419, https://go.dev/cl/649497, https://go.dev/cl/649498, https://go.dev/cl/649618, https://go.dev/cl/649675, https://go.dev/cl/649676, https://go.dev/cl/649677, https://go.dev/cl/649695, https://go.dev/cl/649696, https://go.dev/cl/649697, https://go.dev/cl/649698, https://go.dev/cl/649715, https://go.dev/cl/649717, https://go.dev/cl/649718, https://go.dev/cl/649755, https://go.dev/cl/649775, https://go.dev/cl/649795, https://go.dev/cl/649815, https://go.dev/cl/649835, https://go.dev/cl/651336, https://go.dev/cl/651736, https://go.dev/cl/651737, https://go.dev/cl/658018)
-accepted proposal https://go.dev/issue/70859 (from https://go.dev/cl/666056, https://go.dev/cl/670835, https://go.dev/cl/672015, https://go.dev/cl/672016, https://go.dev/cl/672017)
-accepted proposal https://go.dev/issue/32816 (from https://go.dev/cl/645155, https://go.dev/cl/645455, https://go.dev/cl/645955, https://go.dev/cl/646255, https://go.dev/cl/646455, https://go.dev/cl/646495, https://go.dev/cl/646655, https://go.dev/cl/646875, https://go.dev/cl/647298, https://go.dev/cl/647299, https://go.dev/cl/647736, https://go.dev/cl/648581, https://go.dev/cl/648715, https://go.dev/cl/648976, https://go.dev/cl/648995, https://go.dev/cl/649055, https://go.dev/cl/649056, https://go.dev/cl/649057, https://go.dev/cl/649456, https://go.dev/cl/649476, https://go.dev/cl/650755, https://go.dev/cl/651615, https://go.dev/cl/651617, https://go.dev/cl/651655, https://go.dev/cl/653436)
--->
+승인된 제안 https://go.dev/issue/53757 (https://go.dev/cl/644575)
+승인된 제안 https://go.dev/issue/54743 (https://go.dev/cl/532415)
+승인된 제안 https://go.dev/issue/57792 (https://go.dev/cl/649716, https://go.dev/cl/651737)
+승인된 제안 https://go.dev/issue/58523 (https://go.dev/cl/538235)
+승인된 제안 https://go.dev/issue/61537 (https://go.dev/cl/531935)
+승인된 제안 https://go.dev/issue/61940 (https://go.dev/cl/650235)
+승인된 제안 https://go.dev/issue/67839 (https://go.dev/cl/646535)
+승인된 제안 https://go.dev/issue/68780 (https://go.dev/cl/659835)
+승인된 제안 https://go.dev/issue/69095 (https://go.dev/cl/649320, https://go.dev/cl/649321, https://go.dev/cl/649337, https://go.dev/cl/649376, https://go.dev/cl/649377, https://go.dev/cl/649378, https://go.dev/cl/649379, https://go.dev/cl/649380, https://go.dev/cl/649397, https://go.dev/cl/649398, https://go.dev/cl/649419, https://go.dev/cl/649497, https://go.dev/cl/649498, https://go.dev/cl/649618, https://go.dev/cl/649675, https://go.dev/cl/649676, https://go.dev/cl/649677, https://go.dev/cl/649695, https://go.dev/cl/649696, https://go.dev/cl/649697, https://go.dev/cl/649698, https://go.dev/cl/649715, https://go.dev/cl/649717, https://go.dev/cl/649718, https://go.dev/cl/649755, https://go.dev/cl/649775, https://go.dev/cl/649795, https://go.dev/cl/649815, https://go.dev/cl/649835, https://go.dev/cl/651336, https://go.dev/cl/651736, https://go.dev/cl/651737, https://go.dev/cl/658018)
+승인된 제안 https://go.dev/issue/70859 (https://go.dev/cl/666056, https://go.dev/cl/670835, https://go.dev/cl/672015, https://go.dev/cl/672016, https://go.dev/cl/672017)
+승인된 제안 https://go.dev/issue/32816 (https://go.dev/cl/645155, https://go.dev/cl/645455, https://go.dev/cl/645955, https://go.dev/cl/646255, https://go.dev/cl/646455, https://go.dev/cl/646495, https://go.dev/cl/646655, https://go.dev/cl/646875, https://go.dev/cl/647298, https://go.dev/cl/647299, https://go.dev/cl/647736, https://go.dev/cl/648581, https://go.dev/cl/648715, https://go.dev/cl/648976, https://go.dev/cl/648995, https://go.dev/cl/649055, https://go.dev/cl/649056, https://go.dev/cl/649057, https://go.dev/cl/649456, https://go.dev/cl/649476, https://go.dev/cl/650755, https://go.dev/cl/651615, https://go.dev/cl/651617, https://go.dev/cl/651655, https://go.dev/cl/653436)
 [cross-site request forgery (csrf)]: https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/CSRF
 [sec-fetch-site]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Sec-Fetch-Site

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package hash provides interfaces for hash functions.
+패키지 해시는 해시 함수에 대한 인터페이스를 제공합니다.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package nettrace contains internal hooks for tracing activity in the net package.
+패키지 `nettrace`는 `net` 패키지 내에서 활동을 추적하기 위한 내부 훅을 포함합니다.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package profile represents a pprof profile as a directed graph.
+패키지 프로필은 pprof 프로필을 방향성 그래프로 나타냅니다.
 
 ## 원문 요약
 

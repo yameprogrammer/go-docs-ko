@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package flate implements the DEFLATE compressed data format, described in RFC 1951.
+패키지 `flate`는 RFC 1951에 설명된 DEFLATE 압축 데이터 형식을 구현합니다.
 
 ## 원문 요약
 

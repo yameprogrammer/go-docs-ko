@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package filepathlite implements a subset of path/filepath, only using packages which may be imported by "os".
+패키지 `filepathlite`는 `path/filepath`의 일부 기능을 구현하며, "os"에서 가져올 수 있는 패키지만 사용합니다.
 
 ## 원문 요약
 
