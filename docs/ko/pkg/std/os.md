@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 `os`는 운영 체제 기능에 대한 플랫폼 독립적인 인터페이스를 제공합니다.
+`os` 패키지는 운영 체제 기능에 대한 플랫폼 독립적인 인터페이스를 제공합니다.
 
 ## 원문 요약
 
@@ -82,8 +82,8 @@ const (
     Deprecated: Use io.SeekStart, io.SeekCurrent, and io.SeekEnd.
 
 const (
-	PathSeparator     = '\\' // OS-specific path separator
-	PathListSeparator = ';'  // OS-specific path list separator
+	PathSeparator     = '/' // OS-specific path separator
+	PathListSeparator = ':' // OS-specific path list separator
 )
 const (
 	// The single letters are the abbreviations
@@ -113,7 +113,7 @@ const (
     be used in wire protocols or disk representations: they must not be changed,
     although new bits might be added.
 
-const DevNull = "NUL"
+const DevNull = "/dev/null"
     DevNull is the name of the operating system's “null device.” On Unix-like
     systems, it is "/dev/null"; on Windows, "NUL".
 
@@ -413,8 +413,7 @@ func NewSyscallError(syscall string, err error) error
 
 func Pipe() (r *File, w *File, err error)
     Pipe returns a connected pair of Files; reads from r return bytes written to
-    w. It returns the files and an error, if any. The Windows handles underlying
-    the returned files are marked as inheritable by child processes.
+    w. It returns the files and an error, if any.
 
 func ReadFile(name string) ([]byte, error)
     ReadFile reads the named file and returns the contents. A successful call
@@ -430,8 +429,8 @@ func Readlink(name string) (string, error)
     without resolving it to an absolute one.
 
 func Remove(name string) error
-    Remove removes the named file or directory. If there is an error, it will be
-    of type *PathError.
+    Remove removes the named file or (empty) directory. If there is an error,
+    it will be of type *PathError.
 
 func RemoveAll(path string) error
     RemoveAll removes path and any children it contains. It removes everything
@@ -476,7 +475,8 @@ func TempDir() string
 
 func Truncate(name string, size int64) error
     Truncate changes the size of the named file. If the file is a symbolic link,
-    it changes the size of the link's target.
+    it changes the size of the link's target. If there is an error, it will be
+    of type *PathError.
 
 func Unsetenv(key string) error
     Unsetenv unsets a single environment variable.
@@ -756,7 +756,7 @@ func (f *File) SetWriteDeadline(t time.Time) error
     t means Write will not time out. Not all files support setting deadlines;
     see SetDeadline.
 
-func (file *File) Stat() (FileInfo, error)
+func (f *File) Stat() (FileInfo, error)
     Stat returns the FileInfo structure describing file. If there is an error,
     it will be of type *PathError.
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 `exec`은 외부 명령을 실행합니다.
+`exec` 패키지는 외부 명령어를 실행합니다.
 
 ## 원문 요약
 
@@ -108,7 +108,7 @@ var ErrDot = errors.New("cannot run executable found relative to current directo
     Code should use errors.Is(err, ErrDot), not err == ErrDot, to test whether a
     returned error err is due to this condition.
 
-var ErrNotFound = errors.New("executable file not found in %PATH%")
+var ErrNotFound = errors.New("executable file not found in $PATH")
     ErrNotFound is the error resulting if a path search failed to find an
     executable file.
 

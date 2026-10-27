@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 `testenv`는 Go 팀에서 실행되는 다양한 테스트 환경에서 어떤 기능이 사용 가능한지에 대한 정보를 제공합니다.
+`testenv` 패키지는 Go 팀이 운영하는 다양한 테스트 환경에서 어떤 기능들을 사용할 수 있는지에 대한 정보를 제공합니다.
 
 ## 원문 요약
 
@@ -24,9 +24,9 @@ test setup (on build.golang.org) and not fundamental to tests in general.
 
 VARIABLES
 
-var Sigquit = os.Kill
-    Sigquit is the signal to send to kill a hanging subprocess. On Unix we send
-    SIGQUIT, but on non-Unix we only have os.Kill.
+var Sigquit = syscall.SIGQUIT
+    Sigquit is the signal to send to kill a hanging subprocess. Send SIGQUIT to
+    get a stack trace.
 
 
 FUNCTIONS

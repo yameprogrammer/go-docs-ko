@@ -19,13 +19,11 @@ package execenv // import "internal/syscall/execenv"
 
 FUNCTIONS
 
-func Default(sys *syscall.SysProcAttr) (env []string, err error)
+func Default(sys *syscall.SysProcAttr) ([]string, error)
     Default will return the default environment variables based on the process
     attributes provided.
 
-    If the process attributes contain a token, then the environment variables
-    will be sourced from the defaults for that user token, otherwise they will
-    be sourced from syscall.Environ().
+    Defaults to syscall.Environ() on all platforms other than Windows.
 ~~~
 
 > 이 페이지는 비공식 한국어 미러 문서입니다. API의 권위 있는 원문은 pkg.go.dev 및 golang/go에 있습니다.

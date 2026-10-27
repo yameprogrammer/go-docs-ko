@@ -47,7 +47,59 @@ var (
 	ErrNoCgroup error = stringError("not in a cgroup")
 )
 
+FUNCTIONS
+
+func FindCPU(out []byte, scratch []byte) (int, Version, error)
+    FindCPU finds the path to the CPU cgroup that this process is a member of
+    and places it in out. scratch is a scratch buffer for internal use.
+
+    out must have length PathSize. scratch must have length ParseSize.
+
+    Returns the number of bytes written to out and the cgroup version (1 or 2).
+
+    Returns ErrNoCgroup if the process is not in a CPU cgroup.
+
+func FindCPUCgroup(out []byte, scratch []byte) (int, Version, error)
+    FindCPUCgroup finds the path to the CPU cgroup that this process is a member
+    of and places it in out. scratch is a scratch buffer for internal use.
+
+    out must have length PathSize. scratch must have length ParseSize.
+
+    Returns the number of bytes written to out and the cgroup version (1 or 2).
+
+    Returns ErrNoCgroup if the process is not in a CPU cgroup.
+
+func FindCPUMountPoint(out, cgroup []byte, version Version, scratch []byte) (int, error)
+    FindCPUMountPoint finds the mount point containing the specified cgroup and
+    version with cpu controller, and compose the full path to the cgroup in out.
+    scratch is a scratch buffer for internal use.
+
+    out must have length PathSize, may overlap with cgroup. scratch must have
+    length ParseSize.
+
+    Returns the number of bytes written to out.
+
+    Returns ErrNoCgroup if no matching mount point is found.
+
+func OpenCPU(scratch []byte) (CPU, error)
+    OpenCPU returns a CPU for the CPU cgroup containing the current process,
+    or ErrNoCgroup if the process is not in a CPU cgroup.
+
+    scratch must have length ScratchSize.
+
+func ReadCPULimit(c CPU) (float64, bool, error)
+    Returns average CPU throughput limit from the cgroup, or ok false if there
+    is no limit.
+
+
 TYPES
+
+type CPU struct {
+	// Has unexported fields.
+}
+    CPU owns the FDs required to read the CPU limit from a cgroup.
+
+func (c CPU) Close()
 
 type Version int
     Version indicates the cgroup version.

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 `time`는 시간 측정 및 표시 기능을 제공합니다.
+`time` 패키지는 시간을 측정하고 표시하는 기능을 제공합니다.
 
 ## 원문 요약
 
@@ -902,12 +902,6 @@ const (
 )
 func (d Weekday) String() string
     String returns the English name of the day ("Sunday", "Monday", ...).
-
-
-BUG: On Windows, the operating system does not provide complete
-time zone information.
-The implementation assumes that this year's rules for daylight savings
-time apply to all previous and future years as well.
 ~~~
 
 > 이 페이지는 비공식 한국어 미러 문서입니다. API의 권위 있는 원문은 pkg.go.dev 및 golang/go에 있습니다.

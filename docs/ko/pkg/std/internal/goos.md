@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 `goos`는 `GOOS`-특이한 상수들을 포함합니다.
+`goos` 패키지는 GOOS 전용 상수를 포함합니다.
 
 ## 원문 요약
 
@@ -20,7 +20,7 @@ package goos contains GOOS-specific constants.
 
 CONSTANTS
 
-const GOOS = `windows`
+const GOOS = `linux`
 const IsAix = 0
 const IsAndroid = 0
 const IsDarwin = 0
@@ -30,15 +30,15 @@ const IsHurd = 0
 const IsIllumos = 0
 const IsIos = 0
 const IsJs = 0
-const IsLinux = 0
+const IsLinux = 1
 const IsNacl = 0
 const IsNetbsd = 0
 const IsOpenbsd = 0
 const IsPlan9 = 0
 const IsSolaris = 0
-const IsUnix = false
+const IsUnix = true
 const IsWasip1 = 0
-const IsWindows = 1
+const IsWindows = 0
 const IsZos = 0
 ~~~
 

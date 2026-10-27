@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 `smtp`는 RFC 5321에서 정의된 Simple Mail Transfer Protocol을 구현합니다.
+`smtp` 패키지는 RFC 5321에 정의된 Simple Mail Transfer Protocol을 구현합니다.
 
 ## 원문 요약
 

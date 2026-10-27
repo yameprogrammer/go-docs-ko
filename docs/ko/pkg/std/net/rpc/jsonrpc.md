@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 jsonrpc는 rpc 패키지를 위한 JSON-RPC 1.0 클라이언트 및 서버 코드 구현을 제공합니다.
+`jsonrpc` 패키지는 `rpc` 패키지를 위한 JSON-RPC 1.0 `ClientCodec` 및 `ServerCodec`을 구현합니다.
 
 ## 원문 요약
 

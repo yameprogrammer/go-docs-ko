@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 `sql`은 SQL (또는 SQL과 유사한) 데이터베이스를 위한 일반적인 인터페이스를 제공합니다.
+`sql` 패키지는 SQL(또는 SQL 유사) 데이터베이스를 위한 일반적인 인터페이스를 제공합니다.
 
 ## 원문 요약
 
@@ -689,9 +689,11 @@ func (rs *Rows) Scan(dest ...any) error
         *uint, *uint8, *uint16, *uint32, *uint64
         *bool
         *float32, *float64
-        *interface{}
+        *any
         *RawBytes
         *Rows (cursor value)
+        *time.Time
+        *uuid.UUID
         any type implementing Scanner (see Scanner docs)
 
     In the most simple case, if the type of the value from the source column
@@ -713,7 +715,7 @@ func (rs *Rows) Scan(dest ...any) error
     *RawBytes instead; see the documentation for RawBytes for restrictions on
     its use.
 
-    If an argument has type *interface{}, Scan copies the value provided by the
+    If an argument has type *any, Scan copies the value provided by the
     underlying driver without conversion. When scanning from a source value of
     type []byte to *interface{}, a copy of the slice is made and the caller owns
     the result.
@@ -721,6 +723,10 @@ func (rs *Rows) Scan(dest ...any) error
     Source values of type time.Time may be scanned into values of type
     *time.Time, *interface{}, *string, or *[]byte. When converting to the latter
     two, time.RFC3339Nano is used.
+
+    Source values of type string and byte may be scanned into values of type
+    *uuid.UUID. The source may contain the string representation of a UUID,
+    or a 16-byte []byte.
 
     Source values of type bool may be scanned into types *bool, *interface{},
     *string, *[]byte, or *RawBytes.

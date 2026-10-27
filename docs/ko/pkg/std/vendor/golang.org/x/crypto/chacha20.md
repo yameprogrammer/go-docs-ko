@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 chacha20는 RFC 8439 및 draft-irtf-cfrg-xchacha-01에 명시된 ChaCha20 및 XChaCha20 암호화 알고리즘을 구현합니다.
+package chacha20는 RFC 8439 및 draft-irtf-cfrg-xchacha-01에 명시된 ChaCha20 및 XChaCha20 암호화 알고리즘을 구현합니다.
 
 ## 원문 요약
 

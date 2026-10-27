@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 `obscuretestdata`는 테스트가 테스트 데이터를 더 쉽게 사용하도록 설계되었으며, 특히 golang.org/issue/34986에 따라 테스트 데이터를 숨기는 데 사용되는 기능을 포함합니다.
+`obscuretestdata` 패키지는 주로 golang.org/issue/34986로 인해 반드시 익명화(obscure)되어야 하는 테스트 데이터(testdata)를 테스트에서 더 쉽게 다루기 위해 사용되는 기능을 제공합니다.
 
 ## 원문 요약
 

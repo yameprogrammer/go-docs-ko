@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-패키지 `syscall`은 저수준 운영체제 기본 기능을 사용할 수 있는 인터페이스를 제공합니다.
+`syscall` 패키지는 저수준 운영체제 프리미티브(primitives)에 대한 인터페이스를 제공합니다.
 
 ## 원문 요약
 
@@ -37,681 +37,2002 @@ possible. See https://golang.org/s/go1.4-syscall for more information.
 CONSTANTS
 
 const (
-	STANDARD_RIGHTS_REQUIRED = 0xf0000
-	STANDARD_RIGHTS_READ     = 0x20000
-	STANDARD_RIGHTS_WRITE    = 0x20000
-	STANDARD_RIGHTS_EXECUTE  = 0x20000
-	STANDARD_RIGHTS_ALL      = 0x1F0000
+	CLONE_VM             = 0x00000100 // set if VM shared between processes
+	CLONE_FS             = 0x00000200 // set if fs info shared between processes
+	CLONE_FILES          = 0x00000400 // set if open files shared between processes
+	CLONE_SIGHAND        = 0x00000800 // set if signal handlers and blocked signals shared
+	CLONE_PIDFD          = 0x00001000 // set if a pidfd should be placed in parent
+	CLONE_PTRACE         = 0x00002000 // set if we want to let tracing continue on the child too
+	CLONE_VFORK          = 0x00004000 // set if the parent wants the child to wake it up on mm_release
+	CLONE_PARENT         = 0x00008000 // set if we want to have the same parent as the cloner
+	CLONE_THREAD         = 0x00010000 // Same thread group?
+	CLONE_NEWNS          = 0x00020000 // New mount namespace group
+	CLONE_SYSVSEM        = 0x00040000 // share system V SEM_UNDO semantics
+	CLONE_SETTLS         = 0x00080000 // create a new TLS for the child
+	CLONE_PARENT_SETTID  = 0x00100000 // set the TID in the parent
+	CLONE_CHILD_CLEARTID = 0x00200000 // clear the TID in the child
+	CLONE_DETACHED       = 0x00400000 // Unused, ignored
+	CLONE_UNTRACED       = 0x00800000 // set if the tracing process can't force CLONE_PTRACE on this clone
+	CLONE_CHILD_SETTID   = 0x01000000 // set the TID in the child
+	CLONE_NEWCGROUP      = 0x02000000 // New cgroup namespace
+	CLONE_NEWUTS         = 0x04000000 // New utsname namespace
+	CLONE_NEWIPC         = 0x08000000 // New ipc namespace
+	CLONE_NEWUSER        = 0x10000000 // New user namespace
+	CLONE_NEWPID         = 0x20000000 // New pid namespace
+	CLONE_NEWNET         = 0x40000000 // New network namespace
+	CLONE_IO             = 0x80000000 // Clone io context
+
+	CLONE_CLEAR_SIGHAND = 0x100000000 // Clear any signal handler and reset to SIG_DFL.
+	CLONE_INTO_CGROUP   = 0x200000000 // Clone into a specific cgroup given the right permissions.
+
+	CLONE_NEWTIME = 0x00000080 // New time namespace
 )
-const (
-	NameUnknown          = 0
-	NameFullyQualifiedDN = 1
-	NameSamCompatible    = 2
-	NameDisplay          = 3
-	NameUniqueId         = 6
-	NameCanonical        = 7
-	NameUserPrincipal    = 8
-	NameCanonicalEx      = 9
-	NameServicePrincipal = 10
-	NameDnsDomain        = 12
-)
-const (
-	// do not reorder
-	NetSetupUnknownStatus = iota
-	NetSetupUnjoined
-	NetSetupWorkgroupName
-	NetSetupDomainName
-)
-const (
-	// do not reorder
-	SidTypeUser = 1 + iota
-	SidTypeGroup
-	SidTypeDomain
-	SidTypeAlias
-	SidTypeWellKnownGroup
-	SidTypeDeletedAccount
-	SidTypeInvalid
-	SidTypeUnknown
-	SidTypeComputer
-	SidTypeLabel
-)
-const (
-	// do not reorder
-	TOKEN_ASSIGN_PRIMARY = 1 << iota
-	TOKEN_DUPLICATE
-	TOKEN_IMPERSONATE
-	TOKEN_QUERY
-	TOKEN_QUERY_SOURCE
-	TOKEN_ADJUST_PRIVILEGES
-	TOKEN_ADJUST_GROUPS
-	TOKEN_ADJUST_DEFAULT
-	TOKEN_ADJUST_SESSIONID
-
-	TOKEN_ALL_ACCESS = STANDARD_RIGHTS_REQUIRED |
-		TOKEN_ASSIGN_PRIMARY |
-		TOKEN_DUPLICATE |
-		TOKEN_IMPERSONATE |
-		TOKEN_QUERY |
-		TOKEN_QUERY_SOURCE |
-		TOKEN_ADJUST_PRIVILEGES |
-		TOKEN_ADJUST_GROUPS |
-		TOKEN_ADJUST_DEFAULT |
-		TOKEN_ADJUST_SESSIONID
-	TOKEN_READ  = STANDARD_RIGHTS_READ | TOKEN_QUERY
-	TOKEN_WRITE = STANDARD_RIGHTS_WRITE |
-		TOKEN_ADJUST_PRIVILEGES |
-		TOKEN_ADJUST_GROUPS |
-		TOKEN_ADJUST_DEFAULT
-	TOKEN_EXECUTE = STANDARD_RIGHTS_EXECUTE
-)
-const (
-	// do not reorder
-	TokenUser = 1 + iota
-	TokenGroups
-	TokenPrivileges
-	TokenOwner
-	TokenPrimaryGroup
-	TokenDefaultDacl
-	TokenSource
-	TokenType
-	TokenImpersonationLevel
-	TokenStatistics
-	TokenRestrictedSids
-	TokenSessionId
-	TokenGroupsAndPrivileges
-	TokenSessionReference
-	TokenSandBoxInert
-	TokenAuditPolicy
-	TokenOrigin
-	TokenElevationType
-	TokenLinkedToken
-	TokenElevation
-	TokenHasRestrictions
-	TokenAccessInformation
-	TokenVirtualizationAllowed
-	TokenVirtualizationEnabled
-	TokenIntegrityLevel
-	TokenUIAccess
-	TokenMandatoryPolicy
-	TokenLogonSid
-	MaxTokenInfoClass
-)
-const (
-	// Invented values to support what package os expects.
-	O_RDONLY   = 0x00000
-	O_WRONLY   = 0x00001
-	O_RDWR     = 0x00002
-	O_CREAT    = 0x00040
-	O_EXCL     = 0x00080
-	O_NOCTTY   = 0x00100
-	O_TRUNC    = 0x00200
-	O_NONBLOCK = 0x00800
-	O_APPEND   = 0x00400
-	O_SYNC     = 0x01000
-	O_ASYNC    = 0x02000
-
-	O_CLOEXEC = 0x80000
-)
-const (
-	// More invented values for signals
-	SIGHUP  = Signal(0x1)
-	SIGINT  = Signal(0x2)
-	SIGQUIT = Signal(0x3)
-	SIGILL  = Signal(0x4)
-	SIGTRAP = Signal(0x5)
-	SIGABRT = Signal(0x6)
-	SIGBUS  = Signal(0x7)
-	SIGFPE  = Signal(0x8)
-	SIGKILL = Signal(0x9)
-	SIGSEGV = Signal(0xb)
-	SIGPIPE = Signal(0xd)
-	SIGALRM = Signal(0xe)
-	SIGTERM = Signal(0xf)
-)
-const (
-	GENERIC_READ    = 0x80000000
-	GENERIC_WRITE   = 0x40000000
-	GENERIC_EXECUTE = 0x20000000
-	GENERIC_ALL     = 0x10000000
-
-	FILE_LIST_DIRECTORY = 0x00000001
-	FILE_APPEND_DATA    = 0x00000004
-
-	FILE_WRITE_ATTRIBUTES = 0x00000100
-
-	FILE_SHARE_READ              = 0x00000001
-	FILE_SHARE_WRITE             = 0x00000002
-	FILE_SHARE_DELETE            = 0x00000004
-	FILE_ATTRIBUTE_READONLY      = 0x00000001
-	FILE_ATTRIBUTE_HIDDEN        = 0x00000002
-	FILE_ATTRIBUTE_SYSTEM        = 0x00000004
-	FILE_ATTRIBUTE_DIRECTORY     = 0x00000010
-	FILE_ATTRIBUTE_ARCHIVE       = 0x00000020
-	FILE_ATTRIBUTE_NORMAL        = 0x00000080
-	FILE_ATTRIBUTE_REPARSE_POINT = 0x00000400
-
-	INVALID_FILE_ATTRIBUTES = 0xffffffff
-
-	CREATE_NEW        = 1
-	CREATE_ALWAYS     = 2
-	OPEN_EXISTING     = 3
-	OPEN_ALWAYS       = 4
-	TRUNCATE_EXISTING = 5
-
-	FILE_FLAG_OPEN_REPARSE_POINT = 0x00200000
-
-	FILE_FLAG_BACKUP_SEMANTICS = 0x02000000
-
-	FILE_FLAG_OVERLAPPED = 0x40000000
-
-	HANDLE_FLAG_INHERIT    = 0x00000001
-	STARTF_USESTDHANDLES   = 0x00000100
-	STARTF_USESHOWWINDOW   = 0x00000001
-	DUPLICATE_CLOSE_SOURCE = 0x00000001
-	DUPLICATE_SAME_ACCESS  = 0x00000002
-
-	STD_INPUT_HANDLE  = -10
-	STD_OUTPUT_HANDLE = -11
-	STD_ERROR_HANDLE  = -12
-
-	FILE_BEGIN   = 0
-	FILE_CURRENT = 1
-	FILE_END     = 2
-
-	LANG_ENGLISH       = 0x09
-	SUBLANG_ENGLISH_US = 0x01
-
-	FORMAT_MESSAGE_ALLOCATE_BUFFER = 256
-	FORMAT_MESSAGE_IGNORE_INSERTS  = 512
-	FORMAT_MESSAGE_FROM_STRING     = 1024
-	FORMAT_MESSAGE_FROM_HMODULE    = 2048
-	FORMAT_MESSAGE_FROM_SYSTEM     = 4096
-	FORMAT_MESSAGE_ARGUMENT_ARRAY  = 8192
-	FORMAT_MESSAGE_MAX_WIDTH_MASK  = 255
-
-	MAX_PATH      = 260
-	MAX_LONG_PATH = 32768
-
-	MAX_COMPUTERNAME_LENGTH = 15
-
-	TIME_ZONE_ID_UNKNOWN  = 0
-	TIME_ZONE_ID_STANDARD = 1
-
-	TIME_ZONE_ID_DAYLIGHT = 2
-	IGNORE                = 0
-	INFINITE              = 0xffffffff
-
-	WAIT_TIMEOUT   = 258
-	WAIT_ABANDONED = 0x00000080
-	WAIT_OBJECT_0  = 0x00000000
-	WAIT_FAILED    = 0xFFFFFFFF
-
-	CREATE_NEW_PROCESS_GROUP   = 0x00000200
-	CREATE_UNICODE_ENVIRONMENT = 0x00000400
-
-	PROCESS_TERMINATE         = 1
-	PROCESS_QUERY_INFORMATION = 0x00000400
-	SYNCHRONIZE               = 0x00100000
-
-	PAGE_READONLY          = 0x02
-	PAGE_READWRITE         = 0x04
-	PAGE_WRITECOPY         = 0x08
-	PAGE_EXECUTE_READ      = 0x20
-	PAGE_EXECUTE_READWRITE = 0x40
-	PAGE_EXECUTE_WRITECOPY = 0x80
-
-	FILE_MAP_COPY    = 0x01
-	FILE_MAP_WRITE   = 0x02
-	FILE_MAP_READ    = 0x04
-	FILE_MAP_EXECUTE = 0x20
-
-	CTRL_C_EVENT        = 0
-	CTRL_BREAK_EVENT    = 1
-	CTRL_CLOSE_EVENT    = 2
-	CTRL_LOGOFF_EVENT   = 5
-	CTRL_SHUTDOWN_EVENT = 6
-)
-const (
-	// flags for CreateToolhelp32Snapshot
-	TH32CS_SNAPHEAPLIST = 0x01
-	TH32CS_SNAPPROCESS  = 0x02
-	TH32CS_SNAPTHREAD   = 0x04
-	TH32CS_SNAPMODULE   = 0x08
-	TH32CS_SNAPMODULE32 = 0x10
-	TH32CS_SNAPALL      = TH32CS_SNAPHEAPLIST | TH32CS_SNAPMODULE | TH32CS_SNAPPROCESS | TH32CS_SNAPTHREAD
-	TH32CS_INHERIT      = 0x80000000
-)
-const (
-	// do not reorder
-	FILE_NOTIFY_CHANGE_FILE_NAME = 1 << iota
-	FILE_NOTIFY_CHANGE_DIR_NAME
-	FILE_NOTIFY_CHANGE_ATTRIBUTES
-	FILE_NOTIFY_CHANGE_SIZE
-	FILE_NOTIFY_CHANGE_LAST_WRITE
-	FILE_NOTIFY_CHANGE_LAST_ACCESS
-	FILE_NOTIFY_CHANGE_CREATION
-)
-const (
-	// do not reorder
-	FILE_ACTION_ADDED = iota + 1
-	FILE_ACTION_REMOVED
-	FILE_ACTION_MODIFIED
-	FILE_ACTION_RENAMED_OLD_NAME
-	FILE_ACTION_RENAMED_NEW_NAME
-)
-const (
-	// wincrypt.h
-	PROV_RSA_FULL                    = 1
-	PROV_RSA_SIG                     = 2
-	PROV_DSS                         = 3
-	PROV_FORTEZZA                    = 4
-	PROV_MS_EXCHANGE                 = 5
-	PROV_SSL                         = 6
-	PROV_RSA_SCHANNEL                = 12
-	PROV_DSS_DH                      = 13
-	PROV_EC_ECDSA_SIG                = 14
-	PROV_EC_ECNRA_SIG                = 15
-	PROV_EC_ECDSA_FULL               = 16
-	PROV_EC_ECNRA_FULL               = 17
-	PROV_DH_SCHANNEL                 = 18
-	PROV_SPYRUS_LYNKS                = 20
-	PROV_RNG                         = 21
-	PROV_INTEL_SEC                   = 22
-	PROV_REPLACE_OWF                 = 23
-	PROV_RSA_AES                     = 24
-	CRYPT_VERIFYCONTEXT              = 0xF0000000
-	CRYPT_NEWKEYSET                  = 0x00000008
-	CRYPT_DELETEKEYSET               = 0x00000010
-	CRYPT_MACHINE_KEYSET             = 0x00000020
-	CRYPT_SILENT                     = 0x00000040
-	CRYPT_DEFAULT_CONTAINER_OPTIONAL = 0x00000080
-
-	USAGE_MATCH_TYPE_AND = 0
-	USAGE_MATCH_TYPE_OR  = 1
-
-	X509_ASN_ENCODING   = 0x00000001
-	PKCS_7_ASN_ENCODING = 0x00010000
-
-	CERT_STORE_PROV_MEMORY = 2
-
-	CERT_STORE_ADD_ALWAYS = 4
-
-	CERT_STORE_DEFER_CLOSE_UNTIL_LAST_FREE_FLAG = 0x00000004
-
-	CERT_TRUST_NO_ERROR                          = 0x00000000
-	CERT_TRUST_IS_NOT_TIME_VALID                 = 0x00000001
-	CERT_TRUST_IS_REVOKED                        = 0x00000004
-	CERT_TRUST_IS_NOT_SIGNATURE_VALID            = 0x00000008
-	CERT_TRUST_IS_NOT_VALID_FOR_USAGE            = 0x00000010
-	CERT_TRUST_IS_UNTRUSTED_ROOT                 = 0x00000020
-	CERT_TRUST_REVOCATION_STATUS_UNKNOWN         = 0x00000040
-	CERT_TRUST_IS_CYCLIC                         = 0x00000080
-	CERT_TRUST_INVALID_EXTENSION                 = 0x00000100
-	CERT_TRUST_INVALID_POLICY_CONSTRAINTS        = 0x00000200
-	CERT_TRUST_INVALID_BASIC_CONSTRAINTS         = 0x00000400
-	CERT_TRUST_INVALID_NAME_CONSTRAINTS          = 0x00000800
-	CERT_TRUST_HAS_NOT_SUPPORTED_NAME_CONSTRAINT = 0x00001000
-	CERT_TRUST_HAS_NOT_DEFINED_NAME_CONSTRAINT   = 0x00002000
-	CERT_TRUST_HAS_NOT_PERMITTED_NAME_CONSTRAINT = 0x00004000
-	CERT_TRUST_HAS_EXCLUDED_NAME_CONSTRAINT      = 0x00008000
-	CERT_TRUST_IS_OFFLINE_REVOCATION             = 0x01000000
-	CERT_TRUST_NO_ISSUANCE_CHAIN_POLICY          = 0x02000000
-	CERT_TRUST_IS_EXPLICIT_DISTRUST              = 0x04000000
-	CERT_TRUST_HAS_NOT_SUPPORTED_CRITICAL_EXT    = 0x08000000
-
-	CERT_CHAIN_POLICY_BASE              = 1
-	CERT_CHAIN_POLICY_AUTHENTICODE      = 2
-	CERT_CHAIN_POLICY_AUTHENTICODE_TS   = 3
-	CERT_CHAIN_POLICY_SSL               = 4
-	CERT_CHAIN_POLICY_BASIC_CONSTRAINTS = 5
-	CERT_CHAIN_POLICY_NT_AUTH           = 6
-	CERT_CHAIN_POLICY_MICROSOFT_ROOT    = 7
-	CERT_CHAIN_POLICY_EV                = 8
-
-	CERT_E_EXPIRED       = 0x800B0101
-	CERT_E_ROLE          = 0x800B0103
-	CERT_E_PURPOSE       = 0x800B0106
-	CERT_E_UNTRUSTEDROOT = 0x800B0109
-	CERT_E_CN_NO_MATCH   = 0x800B010F
-
-	AUTHTYPE_CLIENT = 1
-	AUTHTYPE_SERVER = 2
-)
-const (
-	GetFileExInfoStandard = 0
-	GetFileExMaxInfoLevel = 1
-)
-const (
-	// winuser.h
-	SW_HIDE            = 0
-	SW_NORMAL          = 1
-	SW_SHOWNORMAL      = 1
-	SW_SHOWMINIMIZED   = 2
-	SW_SHOWMAXIMIZED   = 3
-	SW_MAXIMIZE        = 3
-	SW_SHOWNOACTIVATE  = 4
-	SW_SHOW            = 5
-	SW_MINIMIZE        = 6
-	SW_SHOWMINNOACTIVE = 7
-	SW_SHOWNA          = 8
-	SW_RESTORE         = 9
-	SW_SHOWDEFAULT     = 10
-	SW_FORCEMINIMIZE   = 11
-)
-    ShowWindow constants
+    Linux unshare/clone/clone2/clone3 flags, architecture-independent, copied
+    from linux/sched.h.
 
 const (
-	AF_UNSPEC  = 0
-	AF_UNIX    = 1
-	AF_INET    = 2
-	AF_INET6   = 23
-	AF_NETBIOS = 17
-
-	SOCK_STREAM    = 1
-	SOCK_DGRAM     = 2
-	SOCK_RAW       = 3
-	SOCK_SEQPACKET = 5
-
-	IPPROTO_IP   = 0
-	IPPROTO_IPV6 = 0x29
-	IPPROTO_TCP  = 6
-	IPPROTO_UDP  = 17
-
-	SOL_SOCKET                = 0xffff
-	SO_REUSEADDR              = 4
-	SO_KEEPALIVE              = 8
-	SO_DONTROUTE              = 16
-	SO_BROADCAST              = 32
-	SO_LINGER                 = 128
-	SO_RCVBUF                 = 0x1002
-	SO_SNDBUF                 = 0x1001
-	SO_UPDATE_ACCEPT_CONTEXT  = 0x700b
-	SO_UPDATE_CONNECT_CONTEXT = 0x7010
-
-	IOC_OUT                            = 0x40000000
-	IOC_IN                             = 0x80000000
-	IOC_VENDOR                         = 0x18000000
-	IOC_INOUT                          = IOC_IN | IOC_OUT
-	IOC_WS2                            = 0x08000000
-	SIO_GET_EXTENSION_FUNCTION_POINTER = IOC_INOUT | IOC_WS2 | 6
-	SIO_KEEPALIVE_VALS                 = IOC_IN | IOC_VENDOR | 4
-	SIO_UDP_CONNRESET                  = IOC_IN | IOC_VENDOR | 12
-
-	IP_TOS             = 0x3
-	IP_TTL             = 0x4
-	IP_MULTICAST_IF    = 0x9
-	IP_MULTICAST_TTL   = 0xa
-	IP_MULTICAST_LOOP  = 0xb
-	IP_ADD_MEMBERSHIP  = 0xc
-	IP_DROP_MEMBERSHIP = 0xd
-
-	IPV6_V6ONLY         = 0x1b
-	IPV6_UNICAST_HOPS   = 0x4
-	IPV6_MULTICAST_IF   = 0x9
-	IPV6_MULTICAST_HOPS = 0xa
-	IPV6_MULTICAST_LOOP = 0xb
-	IPV6_JOIN_GROUP     = 0xc
-	IPV6_LEAVE_GROUP    = 0xd
-
-	SOMAXCONN = 0x7fffffff
-
-	TCP_NODELAY = 1
-
-	SHUT_RD   = 0
-	SHUT_WR   = 1
-	SHUT_RDWR = 2
-
-	WSADESCRIPTION_LEN = 256
-	WSASYS_STATUS_LEN  = 128
+	AF_ALG                           = 0x26
+	AF_APPLETALK                     = 0x5
+	AF_ASH                           = 0x12
+	AF_ATMPVC                        = 0x8
+	AF_ATMSVC                        = 0x14
+	AF_AX25                          = 0x3
+	AF_BLUETOOTH                     = 0x1f
+	AF_BRIDGE                        = 0x7
+	AF_CAIF                          = 0x25
+	AF_CAN                           = 0x1d
+	AF_DECnet                        = 0xc
+	AF_ECONET                        = 0x13
+	AF_FILE                          = 0x1
+	AF_IEEE802154                    = 0x24
+	AF_INET                          = 0x2
+	AF_INET6                         = 0xa
+	AF_IPX                           = 0x4
+	AF_IRDA                          = 0x17
+	AF_ISDN                          = 0x22
+	AF_IUCV                          = 0x20
+	AF_KEY                           = 0xf
+	AF_LLC                           = 0x1a
+	AF_LOCAL                         = 0x1
+	AF_MAX                           = 0x27
+	AF_NETBEUI                       = 0xd
+	AF_NETLINK                       = 0x10
+	AF_NETROM                        = 0x6
+	AF_PACKET                        = 0x11
+	AF_PHONET                        = 0x23
+	AF_PPPOX                         = 0x18
+	AF_RDS                           = 0x15
+	AF_ROSE                          = 0xb
+	AF_ROUTE                         = 0x10
+	AF_RXRPC                         = 0x21
+	AF_SECURITY                      = 0xe
+	AF_SNA                           = 0x16
+	AF_TIPC                          = 0x1e
+	AF_UNIX                          = 0x1
+	AF_UNSPEC                        = 0x0
+	AF_WANPIPE                       = 0x19
+	AF_X25                           = 0x9
+	ARPHRD_ADAPT                     = 0x108
+	ARPHRD_APPLETLK                  = 0x8
+	ARPHRD_ARCNET                    = 0x7
+	ARPHRD_ASH                       = 0x30d
+	ARPHRD_ATM                       = 0x13
+	ARPHRD_AX25                      = 0x3
+	ARPHRD_BIF                       = 0x307
+	ARPHRD_CHAOS                     = 0x5
+	ARPHRD_CISCO                     = 0x201
+	ARPHRD_CSLIP                     = 0x101
+	ARPHRD_CSLIP6                    = 0x103
+	ARPHRD_DDCMP                     = 0x205
+	ARPHRD_DLCI                      = 0xf
+	ARPHRD_ECONET                    = 0x30e
+	ARPHRD_EETHER                    = 0x2
+	ARPHRD_ETHER                     = 0x1
+	ARPHRD_EUI64                     = 0x1b
+	ARPHRD_FCAL                      = 0x311
+	ARPHRD_FCFABRIC                  = 0x313
+	ARPHRD_FCPL                      = 0x312
+	ARPHRD_FCPP                      = 0x310
+	ARPHRD_FDDI                      = 0x306
+	ARPHRD_FRAD                      = 0x302
+	ARPHRD_HDLC                      = 0x201
+	ARPHRD_HIPPI                     = 0x30c
+	ARPHRD_HWX25                     = 0x110
+	ARPHRD_IEEE1394                  = 0x18
+	ARPHRD_IEEE802                   = 0x6
+	ARPHRD_IEEE80211                 = 0x321
+	ARPHRD_IEEE80211_PRISM           = 0x322
+	ARPHRD_IEEE80211_RADIOTAP        = 0x323
+	ARPHRD_IEEE802154                = 0x324
+	ARPHRD_IEEE802154_PHY            = 0x325
+	ARPHRD_IEEE802_TR                = 0x320
+	ARPHRD_INFINIBAND                = 0x20
+	ARPHRD_IPDDP                     = 0x309
+	ARPHRD_IPGRE                     = 0x30a
+	ARPHRD_IRDA                      = 0x30f
+	ARPHRD_LAPB                      = 0x204
+	ARPHRD_LOCALTLK                  = 0x305
+	ARPHRD_LOOPBACK                  = 0x304
+	ARPHRD_METRICOM                  = 0x17
+	ARPHRD_NETROM                    = 0x0
+	ARPHRD_NONE                      = 0xfffe
+	ARPHRD_PIMREG                    = 0x30b
+	ARPHRD_PPP                       = 0x200
+	ARPHRD_PRONET                    = 0x4
+	ARPHRD_RAWHDLC                   = 0x206
+	ARPHRD_ROSE                      = 0x10e
+	ARPHRD_RSRVD                     = 0x104
+	ARPHRD_SIT                       = 0x308
+	ARPHRD_SKIP                      = 0x303
+	ARPHRD_SLIP                      = 0x100
+	ARPHRD_SLIP6                     = 0x102
+	ARPHRD_TUNNEL                    = 0x300
+	ARPHRD_TUNNEL6                   = 0x301
+	ARPHRD_VOID                      = 0xffff
+	ARPHRD_X25                       = 0x10f
+	BPF_A                            = 0x10
+	BPF_ABS                          = 0x20
+	BPF_ADD                          = 0x0
+	BPF_ALU                          = 0x4
+	BPF_AND                          = 0x50
+	BPF_B                            = 0x10
+	BPF_DIV                          = 0x30
+	BPF_H                            = 0x8
+	BPF_IMM                          = 0x0
+	BPF_IND                          = 0x40
+	BPF_JA                           = 0x0
+	BPF_JEQ                          = 0x10
+	BPF_JGE                          = 0x30
+	BPF_JGT                          = 0x20
+	BPF_JMP                          = 0x5
+	BPF_JSET                         = 0x40
+	BPF_K                            = 0x0
+	BPF_LD                           = 0x0
+	BPF_LDX                          = 0x1
+	BPF_LEN                          = 0x80
+	BPF_LSH                          = 0x60
+	BPF_MAJOR_VERSION                = 0x1
+	BPF_MAXINSNS                     = 0x1000
+	BPF_MEM                          = 0x60
+	BPF_MEMWORDS                     = 0x10
+	BPF_MINOR_VERSION                = 0x1
+	BPF_MISC                         = 0x7
+	BPF_MSH                          = 0xa0
+	BPF_MUL                          = 0x20
+	BPF_NEG                          = 0x80
+	BPF_OR                           = 0x40
+	BPF_RET                          = 0x6
+	BPF_RSH                          = 0x70
+	BPF_ST                           = 0x2
+	BPF_STX                          = 0x3
+	BPF_SUB                          = 0x10
+	BPF_TAX                          = 0x0
+	BPF_TXA                          = 0x80
+	BPF_W                            = 0x0
+	BPF_X                            = 0x8
+	DT_BLK                           = 0x6
+	DT_CHR                           = 0x2
+	DT_DIR                           = 0x4
+	DT_FIFO                          = 0x1
+	DT_LNK                           = 0xa
+	DT_REG                           = 0x8
+	DT_SOCK                          = 0xc
+	DT_UNKNOWN                       = 0x0
+	DT_WHT                           = 0xe
+	EPOLLERR                         = 0x8
+	EPOLLET                          = -0x80000000
+	EPOLLHUP                         = 0x10
+	EPOLLIN                          = 0x1
+	EPOLLMSG                         = 0x400
+	EPOLLONESHOT                     = 0x40000000
+	EPOLLOUT                         = 0x4
+	EPOLLPRI                         = 0x2
+	EPOLLRDBAND                      = 0x80
+	EPOLLRDHUP                       = 0x2000
+	EPOLLRDNORM                      = 0x40
+	EPOLLWRBAND                      = 0x200
+	EPOLLWRNORM                      = 0x100
+	EPOLL_CLOEXEC                    = 0x80000
+	EPOLL_CTL_ADD                    = 0x1
+	EPOLL_CTL_DEL                    = 0x2
+	EPOLL_CTL_MOD                    = 0x3
+	EPOLL_NONBLOCK                   = 0x800
+	ETH_P_1588                       = 0x88f7
+	ETH_P_8021Q                      = 0x8100
+	ETH_P_802_2                      = 0x4
+	ETH_P_802_3                      = 0x1
+	ETH_P_AARP                       = 0x80f3
+	ETH_P_ALL                        = 0x3
+	ETH_P_AOE                        = 0x88a2
+	ETH_P_ARCNET                     = 0x1a
+	ETH_P_ARP                        = 0x806
+	ETH_P_ATALK                      = 0x809b
+	ETH_P_ATMFATE                    = 0x8884
+	ETH_P_ATMMPOA                    = 0x884c
+	ETH_P_AX25                       = 0x2
+	ETH_P_BPQ                        = 0x8ff
+	ETH_P_CAIF                       = 0xf7
+	ETH_P_CAN                        = 0xc
+	ETH_P_CONTROL                    = 0x16
+	ETH_P_CUST                       = 0x6006
+	ETH_P_DDCMP                      = 0x6
+	ETH_P_DEC                        = 0x6000
+	ETH_P_DIAG                       = 0x6005
+	ETH_P_DNA_DL                     = 0x6001
+	ETH_P_DNA_RC                     = 0x6002
+	ETH_P_DNA_RT                     = 0x6003
+	ETH_P_DSA                        = 0x1b
+	ETH_P_ECONET                     = 0x18
+	ETH_P_EDSA                       = 0xdada
+	ETH_P_FCOE                       = 0x8906
+	ETH_P_FIP                        = 0x8914
+	ETH_P_HDLC                       = 0x19
+	ETH_P_IEEE802154                 = 0xf6
+	ETH_P_IEEEPUP                    = 0xa00
+	ETH_P_IEEEPUPAT                  = 0xa01
+	ETH_P_IP                         = 0x800
+	ETH_P_IPV6                       = 0x86dd
+	ETH_P_IPX                        = 0x8137
+	ETH_P_IRDA                       = 0x17
+	ETH_P_LAT                        = 0x6004
+	ETH_P_LINK_CTL                   = 0x886c
+	ETH_P_LOCALTALK                  = 0x9
+	ETH_P_LOOP                       = 0x60
+	ETH_P_MOBITEX                    = 0x15
+	ETH_P_MPLS_MC                    = 0x8848
+	ETH_P_MPLS_UC                    = 0x8847
+	ETH_P_PAE                        = 0x888e
+	ETH_P_PAUSE                      = 0x8808
+	ETH_P_PHONET                     = 0xf5
+	ETH_P_PPPTALK                    = 0x10
+	ETH_P_PPP_DISC                   = 0x8863
+	ETH_P_PPP_MP                     = 0x8
+	ETH_P_PPP_SES                    = 0x8864
+	ETH_P_PUP                        = 0x200
+	ETH_P_PUPAT                      = 0x201
+	ETH_P_RARP                       = 0x8035
+	ETH_P_SCA                        = 0x6007
+	ETH_P_SLOW                       = 0x8809
+	ETH_P_SNAP                       = 0x5
+	ETH_P_TEB                        = 0x6558
+	ETH_P_TIPC                       = 0x88ca
+	ETH_P_TRAILER                    = 0x1c
+	ETH_P_TR_802_2                   = 0x11
+	ETH_P_WAN_PPP                    = 0x7
+	ETH_P_WCCP                       = 0x883e
+	ETH_P_X25                        = 0x805
+	FD_CLOEXEC                       = 0x1
+	FD_SETSIZE                       = 0x400
+	F_DUPFD                          = 0x0
+	F_DUPFD_CLOEXEC                  = 0x406
+	F_EXLCK                          = 0x4
+	F_GETFD                          = 0x1
+	F_GETFL                          = 0x3
+	F_GETLEASE                       = 0x401
+	F_GETLK                          = 0x5
+	F_GETLK64                        = 0x5
+	F_GETOWN                         = 0x9
+	F_GETOWN_EX                      = 0x10
+	F_GETPIPE_SZ                     = 0x408
+	F_GETSIG                         = 0xb
+	F_LOCK                           = 0x1
+	F_NOTIFY                         = 0x402
+	F_OK                             = 0x0
+	F_RDLCK                          = 0x0
+	F_SETFD                          = 0x2
+	F_SETFL                          = 0x4
+	F_SETLEASE                       = 0x400
+	F_SETLK                          = 0x6
+	F_SETLK64                        = 0x6
+	F_SETLKW                         = 0x7
+	F_SETLKW64                       = 0x7
+	F_SETOWN                         = 0x8
+	F_SETOWN_EX                      = 0xf
+	F_SETPIPE_SZ                     = 0x407
+	F_SETSIG                         = 0xa
+	F_SHLCK                          = 0x8
+	F_TEST                           = 0x3
+	F_TLOCK                          = 0x2
+	F_ULOCK                          = 0x0
+	F_UNLCK                          = 0x2
+	F_WRLCK                          = 0x1
+	ICMPV6_FILTER                    = 0x1
+	IFA_F_DADFAILED                  = 0x8
+	IFA_F_DEPRECATED                 = 0x20
+	IFA_F_HOMEADDRESS                = 0x10
+	IFA_F_NODAD                      = 0x2
+	IFA_F_OPTIMISTIC                 = 0x4
+	IFA_F_PERMANENT                  = 0x80
+	IFA_F_SECONDARY                  = 0x1
+	IFA_F_TEMPORARY                  = 0x1
+	IFA_F_TENTATIVE                  = 0x40
+	IFA_MAX                          = 0x7
+	IFF_ALLMULTI                     = 0x200
+	IFF_AUTOMEDIA                    = 0x4000
+	IFF_BROADCAST                    = 0x2
+	IFF_DEBUG                        = 0x4
+	IFF_DYNAMIC                      = 0x8000
+	IFF_LOOPBACK                     = 0x8
+	IFF_MASTER                       = 0x400
+	IFF_MULTICAST                    = 0x1000
+	IFF_NOARP                        = 0x80
+	IFF_NOTRAILERS                   = 0x20
+	IFF_NO_PI                        = 0x1000
+	IFF_ONE_QUEUE                    = 0x2000
+	IFF_POINTOPOINT                  = 0x10
+	IFF_PORTSEL                      = 0x2000
+	IFF_PROMISC                      = 0x100
+	IFF_RUNNING                      = 0x40
+	IFF_SLAVE                        = 0x800
+	IFF_TAP                          = 0x2
+	IFF_TUN                          = 0x1
+	IFF_TUN_EXCL                     = 0x8000
+	IFF_UP                           = 0x1
+	IFF_VNET_HDR                     = 0x4000
+	IFNAMSIZ                         = 0x10
+	IN_ACCESS                        = 0x1
+	IN_ALL_EVENTS                    = 0xfff
+	IN_ATTRIB                        = 0x4
+	IN_CLASSA_HOST                   = 0xffffff
+	IN_CLASSA_MAX                    = 0x80
+	IN_CLASSA_NET                    = 0xff000000
+	IN_CLASSA_NSHIFT                 = 0x18
+	IN_CLASSB_HOST                   = 0xffff
+	IN_CLASSB_MAX                    = 0x10000
+	IN_CLASSB_NET                    = 0xffff0000
+	IN_CLASSB_NSHIFT                 = 0x10
+	IN_CLASSC_HOST                   = 0xff
+	IN_CLASSC_NET                    = 0xffffff00
+	IN_CLASSC_NSHIFT                 = 0x8
+	IN_CLOEXEC                       = 0x80000
+	IN_CLOSE                         = 0x18
+	IN_CLOSE_NOWRITE                 = 0x10
+	IN_CLOSE_WRITE                   = 0x8
+	IN_CREATE                        = 0x100
+	IN_DELETE                        = 0x200
+	IN_DELETE_SELF                   = 0x400
+	IN_DONT_FOLLOW                   = 0x2000000
+	IN_EXCL_UNLINK                   = 0x4000000
+	IN_IGNORED                       = 0x8000
+	IN_ISDIR                         = 0x40000000
+	IN_LOOPBACKNET                   = 0x7f
+	IN_MASK_ADD                      = 0x20000000
+	IN_MODIFY                        = 0x2
+	IN_MOVE                          = 0xc0
+	IN_MOVED_FROM                    = 0x40
+	IN_MOVED_TO                      = 0x80
+	IN_MOVE_SELF                     = 0x800
+	IN_NONBLOCK                      = 0x800
+	IN_ONESHOT                       = 0x80000000
+	IN_ONLYDIR                       = 0x1000000
+	IN_OPEN                          = 0x20
+	IN_Q_OVERFLOW                    = 0x4000
+	IN_UNMOUNT                       = 0x2000
+	IPPROTO_AH                       = 0x33
+	IPPROTO_COMP                     = 0x6c
+	IPPROTO_DCCP                     = 0x21
+	IPPROTO_DSTOPTS                  = 0x3c
+	IPPROTO_EGP                      = 0x8
+	IPPROTO_ENCAP                    = 0x62
+	IPPROTO_ESP                      = 0x32
+	IPPROTO_FRAGMENT                 = 0x2c
+	IPPROTO_GRE                      = 0x2f
+	IPPROTO_HOPOPTS                  = 0x0
+	IPPROTO_ICMP                     = 0x1
+	IPPROTO_ICMPV6                   = 0x3a
+	IPPROTO_IDP                      = 0x16
+	IPPROTO_IGMP                     = 0x2
+	IPPROTO_IP                       = 0x0
+	IPPROTO_IPIP                     = 0x4
+	IPPROTO_IPV6                     = 0x29
+	IPPROTO_MTP                      = 0x5c
+	IPPROTO_NONE                     = 0x3b
+	IPPROTO_PIM                      = 0x67
+	IPPROTO_PUP                      = 0xc
+	IPPROTO_RAW                      = 0xff
+	IPPROTO_ROUTING                  = 0x2b
+	IPPROTO_RSVP                     = 0x2e
+	IPPROTO_SCTP                     = 0x84
+	IPPROTO_TCP                      = 0x6
+	IPPROTO_TP                       = 0x1d
+	IPPROTO_UDP                      = 0x11
+	IPPROTO_UDPLITE                  = 0x88
+	IPV6_2292DSTOPTS                 = 0x4
+	IPV6_2292HOPLIMIT                = 0x8
+	IPV6_2292HOPOPTS                 = 0x3
+	IPV6_2292PKTINFO                 = 0x2
+	IPV6_2292PKTOPTIONS              = 0x6
+	IPV6_2292RTHDR                   = 0x5
+	IPV6_ADDRFORM                    = 0x1
+	IPV6_ADD_MEMBERSHIP              = 0x14
+	IPV6_AUTHHDR                     = 0xa
+	IPV6_CHECKSUM                    = 0x7
+	IPV6_DROP_MEMBERSHIP             = 0x15
+	IPV6_DSTOPTS                     = 0x3b
+	IPV6_HOPLIMIT                    = 0x34
+	IPV6_HOPOPTS                     = 0x36
+	IPV6_IPSEC_POLICY                = 0x22
+	IPV6_JOIN_ANYCAST                = 0x1b
+	IPV6_JOIN_GROUP                  = 0x14
+	IPV6_LEAVE_ANYCAST               = 0x1c
+	IPV6_LEAVE_GROUP                 = 0x15
+	IPV6_MTU                         = 0x18
+	IPV6_MTU_DISCOVER                = 0x17
+	IPV6_MULTICAST_HOPS              = 0x12
+	IPV6_MULTICAST_IF                = 0x11
+	IPV6_MULTICAST_LOOP              = 0x13
+	IPV6_NEXTHOP                     = 0x9
+	IPV6_PKTINFO                     = 0x32
+	IPV6_PMTUDISC_DO                 = 0x2
+	IPV6_PMTUDISC_DONT               = 0x0
+	IPV6_PMTUDISC_PROBE              = 0x3
+	IPV6_PMTUDISC_WANT               = 0x1
+	IPV6_RECVDSTOPTS                 = 0x3a
+	IPV6_RECVERR                     = 0x19
+	IPV6_RECVHOPLIMIT                = 0x33
+	IPV6_RECVHOPOPTS                 = 0x35
+	IPV6_RECVPKTINFO                 = 0x31
+	IPV6_RECVRTHDR                   = 0x38
+	IPV6_RECVTCLASS                  = 0x42
+	IPV6_ROUTER_ALERT                = 0x16
+	IPV6_RTHDR                       = 0x39
+	IPV6_RTHDRDSTOPTS                = 0x37
+	IPV6_RTHDR_LOOSE                 = 0x0
+	IPV6_RTHDR_STRICT                = 0x1
+	IPV6_RTHDR_TYPE_0                = 0x0
+	IPV6_RXDSTOPTS                   = 0x3b
+	IPV6_RXHOPOPTS                   = 0x36
+	IPV6_TCLASS                      = 0x43
+	IPV6_UNICAST_HOPS                = 0x10
+	IPV6_V6ONLY                      = 0x1a
+	IPV6_XFRM_POLICY                 = 0x23
+	IP_ADD_MEMBERSHIP                = 0x23
+	IP_ADD_SOURCE_MEMBERSHIP         = 0x27
+	IP_BLOCK_SOURCE                  = 0x26
+	IP_DEFAULT_MULTICAST_LOOP        = 0x1
+	IP_DEFAULT_MULTICAST_TTL         = 0x1
+	IP_DF                            = 0x4000
+	IP_DROP_MEMBERSHIP               = 0x24
+	IP_DROP_SOURCE_MEMBERSHIP        = 0x28
+	IP_FREEBIND                      = 0xf
+	IP_HDRINCL                       = 0x3
+	IP_IPSEC_POLICY                  = 0x10
+	IP_MAXPACKET                     = 0xffff
+	IP_MAX_MEMBERSHIPS               = 0x14
+	IP_MF                            = 0x2000
+	IP_MINTTL                        = 0x15
+	IP_MSFILTER                      = 0x29
+	IP_MSS                           = 0x240
+	IP_MTU                           = 0xe
+	IP_MTU_DISCOVER                  = 0xa
+	IP_MULTICAST_IF                  = 0x20
+	IP_MULTICAST_LOOP                = 0x22
+	IP_MULTICAST_TTL                 = 0x21
+	IP_OFFMASK                       = 0x1fff
+	IP_OPTIONS                       = 0x4
+	IP_ORIGDSTADDR                   = 0x14
+	IP_PASSSEC                       = 0x12
+	IP_PKTINFO                       = 0x8
+	IP_PKTOPTIONS                    = 0x9
+	IP_PMTUDISC                      = 0xa
+	IP_PMTUDISC_DO                   = 0x2
+	IP_PMTUDISC_DONT                 = 0x0
+	IP_PMTUDISC_PROBE                = 0x3
+	IP_PMTUDISC_WANT                 = 0x1
+	IP_RECVERR                       = 0xb
+	IP_RECVOPTS                      = 0x6
+	IP_RECVORIGDSTADDR               = 0x14
+	IP_RECVRETOPTS                   = 0x7
+	IP_RECVTOS                       = 0xd
+	IP_RECVTTL                       = 0xc
+	IP_RETOPTS                       = 0x7
+	IP_RF                            = 0x8000
+	IP_ROUTER_ALERT                  = 0x5
+	IP_TOS                           = 0x1
+	IP_TRANSPARENT                   = 0x13
+	IP_TTL                           = 0x2
+	IP_UNBLOCK_SOURCE                = 0x25
+	IP_XFRM_POLICY                   = 0x11
+	LINUX_REBOOT_CMD_CAD_OFF         = 0x0
+	LINUX_REBOOT_CMD_CAD_ON          = 0x89abcdef
+	LINUX_REBOOT_CMD_HALT            = 0xcdef0123
+	LINUX_REBOOT_CMD_KEXEC           = 0x45584543
+	LINUX_REBOOT_CMD_POWER_OFF       = 0x4321fedc
+	LINUX_REBOOT_CMD_RESTART         = 0x1234567
+	LINUX_REBOOT_CMD_RESTART2        = 0xa1b2c3d4
+	LINUX_REBOOT_CMD_SW_SUSPEND      = 0xd000fce2
+	LINUX_REBOOT_MAGIC1              = 0xfee1dead
+	LINUX_REBOOT_MAGIC2              = 0x28121969
+	LOCK_EX                          = 0x2
+	LOCK_NB                          = 0x4
+	LOCK_SH                          = 0x1
+	LOCK_UN                          = 0x8
+	MADV_DOFORK                      = 0xb
+	MADV_DONTFORK                    = 0xa
+	MADV_DONTNEED                    = 0x4
+	MADV_HUGEPAGE                    = 0xe
+	MADV_HWPOISON                    = 0x64
+	MADV_MERGEABLE                   = 0xc
+	MADV_NOHUGEPAGE                  = 0xf
+	MADV_NORMAL                      = 0x0
+	MADV_RANDOM                      = 0x1
+	MADV_REMOVE                      = 0x9
+	MADV_SEQUENTIAL                  = 0x2
+	MADV_UNMERGEABLE                 = 0xd
+	MADV_WILLNEED                    = 0x3
+	MAP_32BIT                        = 0x40
+	MAP_ANON                         = 0x20
+	MAP_ANONYMOUS                    = 0x20
+	MAP_DENYWRITE                    = 0x800
+	MAP_EXECUTABLE                   = 0x1000
+	MAP_FILE                         = 0x0
+	MAP_FIXED                        = 0x10
+	MAP_GROWSDOWN                    = 0x100
+	MAP_HUGETLB                      = 0x40000
+	MAP_LOCKED                       = 0x2000
+	MAP_NONBLOCK                     = 0x10000
+	MAP_NORESERVE                    = 0x4000
+	MAP_POPULATE                     = 0x8000
+	MAP_PRIVATE                      = 0x2
+	MAP_SHARED                       = 0x1
+	MAP_STACK                        = 0x20000
+	MAP_TYPE                         = 0xf
+	MCL_CURRENT                      = 0x1
+	MCL_FUTURE                       = 0x2
+	MNT_DETACH                       = 0x2
+	MNT_EXPIRE                       = 0x4
+	MNT_FORCE                        = 0x1
+	MSG_CMSG_CLOEXEC                 = 0x40000000
+	MSG_CONFIRM                      = 0x800
+	MSG_CTRUNC                       = 0x8
+	MSG_DONTROUTE                    = 0x4
+	MSG_DONTWAIT                     = 0x40
+	MSG_EOR                          = 0x80
+	MSG_ERRQUEUE                     = 0x2000
+	MSG_FASTOPEN                     = 0x20000000
+	MSG_FIN                          = 0x200
+	MSG_MORE                         = 0x8000
+	MSG_NOSIGNAL                     = 0x4000
+	MSG_OOB                          = 0x1
+	MSG_PEEK                         = 0x2
+	MSG_PROXY                        = 0x10
+	MSG_RST                          = 0x1000
+	MSG_SYN                          = 0x400
+	MSG_TRUNC                        = 0x20
+	MSG_TRYHARD                      = 0x4
+	MSG_WAITALL                      = 0x100
+	MSG_WAITFORONE                   = 0x10000
+	MS_ACTIVE                        = 0x40000000
+	MS_ASYNC                         = 0x1
+	MS_BIND                          = 0x1000
+	MS_DIRSYNC                       = 0x80
+	MS_INVALIDATE                    = 0x2
+	MS_I_VERSION                     = 0x800000
+	MS_KERNMOUNT                     = 0x400000
+	MS_MANDLOCK                      = 0x40
+	MS_MGC_MSK                       = 0xffff0000
+	MS_MGC_VAL                       = 0xc0ed0000
+	MS_MOVE                          = 0x2000
+	MS_NOATIME                       = 0x400
+	MS_NODEV                         = 0x4
+	MS_NODIRATIME                    = 0x800
+	MS_NOEXEC                        = 0x8
+	MS_NOSUID                        = 0x2
+	MS_NOUSER                        = -0x80000000
+	MS_POSIXACL                      = 0x10000
+	MS_PRIVATE                       = 0x40000
+	MS_RDONLY                        = 0x1
+	MS_REC                           = 0x4000
+	MS_RELATIME                      = 0x200000
+	MS_REMOUNT                       = 0x20
+	MS_RMT_MASK                      = 0x800051
+	MS_SHARED                        = 0x100000
+	MS_SILENT                        = 0x8000
+	MS_SLAVE                         = 0x80000
+	MS_STRICTATIME                   = 0x1000000
+	MS_SYNC                          = 0x4
+	MS_SYNCHRONOUS                   = 0x10
+	MS_UNBINDABLE                    = 0x20000
+	NAME_MAX                         = 0xff
+	NETLINK_ADD_MEMBERSHIP           = 0x1
+	NETLINK_AUDIT                    = 0x9
+	NETLINK_BROADCAST_ERROR          = 0x4
+	NETLINK_CONNECTOR                = 0xb
+	NETLINK_DNRTMSG                  = 0xe
+	NETLINK_DROP_MEMBERSHIP          = 0x2
+	NETLINK_ECRYPTFS                 = 0x13
+	NETLINK_FIB_LOOKUP               = 0xa
+	NETLINK_FIREWALL                 = 0x3
+	NETLINK_GENERIC                  = 0x10
+	NETLINK_INET_DIAG                = 0x4
+	NETLINK_IP6_FW                   = 0xd
+	NETLINK_ISCSI                    = 0x8
+	NETLINK_KOBJECT_UEVENT           = 0xf
+	NETLINK_NETFILTER                = 0xc
+	NETLINK_NFLOG                    = 0x5
+	NETLINK_NO_ENOBUFS               = 0x5
+	NETLINK_PKTINFO                  = 0x3
+	NETLINK_ROUTE                    = 0x0
+	NETLINK_SCSITRANSPORT            = 0x12
+	NETLINK_SELINUX                  = 0x7
+	NETLINK_UNUSED                   = 0x1
+	NETLINK_USERSOCK                 = 0x2
+	NETLINK_XFRM                     = 0x6
+	NLA_ALIGNTO                      = 0x4
+	NLA_F_NESTED                     = 0x8000
+	NLA_F_NET_BYTEORDER              = 0x4000
+	NLA_HDRLEN                       = 0x4
+	NLMSG_ALIGNTO                    = 0x4
+	NLMSG_DONE                       = 0x3
+	NLMSG_ERROR                      = 0x2
+	NLMSG_HDRLEN                     = 0x10
+	NLMSG_MIN_TYPE                   = 0x10
+	NLMSG_NOOP                       = 0x1
+	NLMSG_OVERRUN                    = 0x4
+	NLM_F_ACK                        = 0x4
+	NLM_F_APPEND                     = 0x800
+	NLM_F_ATOMIC                     = 0x400
+	NLM_F_CREATE                     = 0x400
+	NLM_F_DUMP                       = 0x300
+	NLM_F_ECHO                       = 0x8
+	NLM_F_EXCL                       = 0x200
+	NLM_F_MATCH                      = 0x200
+	NLM_F_MULTI                      = 0x2
+	NLM_F_REPLACE                    = 0x100
+	NLM_F_REQUEST                    = 0x1
+	NLM_F_ROOT                       = 0x100
+	O_ACCMODE                        = 0x3
+	O_APPEND                         = 0x400
+	O_ASYNC                          = 0x2000
+	O_CLOEXEC                        = 0x80000
+	O_CREAT                          = 0x40
+	O_DIRECT                         = 0x4000
+	O_DIRECTORY                      = 0x10000
+	O_DSYNC                          = 0x1000
+	O_EXCL                           = 0x80
+	O_FSYNC                          = 0x101000
+	O_LARGEFILE                      = 0x0
+	O_NDELAY                         = 0x800
+	O_NOATIME                        = 0x40000
+	O_NOCTTY                         = 0x100
+	O_NOFOLLOW                       = 0x20000
+	O_NONBLOCK                       = 0x800
+	O_RDONLY                         = 0x0
+	O_RDWR                           = 0x2
+	O_RSYNC                          = 0x101000
+	O_SYNC                           = 0x101000
+	O_TRUNC                          = 0x200
+	O_WRONLY                         = 0x1
+	PACKET_ADD_MEMBERSHIP            = 0x1
+	PACKET_BROADCAST                 = 0x1
+	PACKET_DROP_MEMBERSHIP           = 0x2
+	PACKET_FASTROUTE                 = 0x6
+	PACKET_HOST                      = 0x0
+	PACKET_LOOPBACK                  = 0x5
+	PACKET_MR_ALLMULTI               = 0x2
+	PACKET_MR_MULTICAST              = 0x0
+	PACKET_MR_PROMISC                = 0x1
+	PACKET_MULTICAST                 = 0x2
+	PACKET_OTHERHOST                 = 0x3
+	PACKET_OUTGOING                  = 0x4
+	PACKET_RECV_OUTPUT               = 0x3
+	PACKET_RX_RING                   = 0x5
+	PACKET_STATISTICS                = 0x6
+	PRIO_PGRP                        = 0x1
+	PRIO_PROCESS                     = 0x0
+	PRIO_USER                        = 0x2
+	PROT_EXEC                        = 0x4
+	PROT_GROWSDOWN                   = 0x1000000
+	PROT_GROWSUP                     = 0x2000000
+	PROT_NONE                        = 0x0
+	PROT_READ                        = 0x1
+	PROT_WRITE                       = 0x2
+	PR_CAPBSET_DROP                  = 0x18
+	PR_CAPBSET_READ                  = 0x17
+	PR_ENDIAN_BIG                    = 0x0
+	PR_ENDIAN_LITTLE                 = 0x1
+	PR_ENDIAN_PPC_LITTLE             = 0x2
+	PR_FPEMU_NOPRINT                 = 0x1
+	PR_FPEMU_SIGFPE                  = 0x2
+	PR_FP_EXC_ASYNC                  = 0x2
+	PR_FP_EXC_DISABLED               = 0x0
+	PR_FP_EXC_DIV                    = 0x10000
+	PR_FP_EXC_INV                    = 0x100000
+	PR_FP_EXC_NONRECOV               = 0x1
+	PR_FP_EXC_OVF                    = 0x20000
+	PR_FP_EXC_PRECISE                = 0x3
+	PR_FP_EXC_RES                    = 0x80000
+	PR_FP_EXC_SW_ENABLE              = 0x80
+	PR_FP_EXC_UND                    = 0x40000
+	PR_GET_DUMPABLE                  = 0x3
+	PR_GET_ENDIAN                    = 0x13
+	PR_GET_FPEMU                     = 0x9
+	PR_GET_FPEXC                     = 0xb
+	PR_GET_KEEPCAPS                  = 0x7
+	PR_GET_NAME                      = 0x10
+	PR_GET_PDEATHSIG                 = 0x2
+	PR_GET_SECCOMP                   = 0x15
+	PR_GET_SECUREBITS                = 0x1b
+	PR_GET_TIMERSLACK                = 0x1e
+	PR_GET_TIMING                    = 0xd
+	PR_GET_TSC                       = 0x19
+	PR_GET_UNALIGN                   = 0x5
+	PR_MCE_KILL                      = 0x21
+	PR_MCE_KILL_CLEAR                = 0x0
+	PR_MCE_KILL_DEFAULT              = 0x2
+	PR_MCE_KILL_EARLY                = 0x1
+	PR_MCE_KILL_GET                  = 0x22
+	PR_MCE_KILL_LATE                 = 0x0
+	PR_MCE_KILL_SET                  = 0x1
+	PR_SET_DUMPABLE                  = 0x4
+	PR_SET_ENDIAN                    = 0x14
+	PR_SET_FPEMU                     = 0xa
+	PR_SET_FPEXC                     = 0xc
+	PR_SET_KEEPCAPS                  = 0x8
+	PR_SET_NAME                      = 0xf
+	PR_SET_PDEATHSIG                 = 0x1
+	PR_SET_PTRACER                   = 0x59616d61
+	PR_SET_SECCOMP                   = 0x16
+	PR_SET_SECUREBITS                = 0x1c
+	PR_SET_TIMERSLACK                = 0x1d
+	PR_SET_TIMING                    = 0xe
+	PR_SET_TSC                       = 0x1a
+	PR_SET_UNALIGN                   = 0x6
+	PR_TASK_PERF_EVENTS_DISABLE      = 0x1f
+	PR_TASK_PERF_EVENTS_ENABLE       = 0x20
+	PR_TIMING_STATISTICAL            = 0x0
+	PR_TIMING_TIMESTAMP              = 0x1
+	PR_TSC_ENABLE                    = 0x1
+	PR_TSC_SIGSEGV                   = 0x2
+	PR_UNALIGN_NOPRINT               = 0x1
+	PR_UNALIGN_SIGBUS                = 0x2
+	PTRACE_ARCH_PRCTL                = 0x1e
+	PTRACE_ATTACH                    = 0x10
+	PTRACE_CONT                      = 0x7
+	PTRACE_DETACH                    = 0x11
+	PTRACE_EVENT_CLONE               = 0x3
+	PTRACE_EVENT_EXEC                = 0x4
+	PTRACE_EVENT_EXIT                = 0x6
+	PTRACE_EVENT_FORK                = 0x1
+	PTRACE_EVENT_VFORK               = 0x2
+	PTRACE_EVENT_VFORK_DONE          = 0x5
+	PTRACE_GETEVENTMSG               = 0x4201
+	PTRACE_GETFPREGS                 = 0xe
+	PTRACE_GETFPXREGS                = 0x12
+	PTRACE_GETREGS                   = 0xc
+	PTRACE_GETREGSET                 = 0x4204
+	PTRACE_GETSIGINFO                = 0x4202
+	PTRACE_GET_THREAD_AREA           = 0x19
+	PTRACE_KILL                      = 0x8
+	PTRACE_OLDSETOPTIONS             = 0x15
+	PTRACE_O_MASK                    = 0x7f
+	PTRACE_O_TRACECLONE              = 0x8
+	PTRACE_O_TRACEEXEC               = 0x10
+	PTRACE_O_TRACEEXIT               = 0x40
+	PTRACE_O_TRACEFORK               = 0x2
+	PTRACE_O_TRACESYSGOOD            = 0x1
+	PTRACE_O_TRACEVFORK              = 0x4
+	PTRACE_O_TRACEVFORKDONE          = 0x20
+	PTRACE_PEEKDATA                  = 0x2
+	PTRACE_PEEKTEXT                  = 0x1
+	PTRACE_PEEKUSR                   = 0x3
+	PTRACE_POKEDATA                  = 0x5
+	PTRACE_POKETEXT                  = 0x4
+	PTRACE_POKEUSR                   = 0x6
+	PTRACE_SETFPREGS                 = 0xf
+	PTRACE_SETFPXREGS                = 0x13
+	PTRACE_SETOPTIONS                = 0x4200
+	PTRACE_SETREGS                   = 0xd
+	PTRACE_SETREGSET                 = 0x4205
+	PTRACE_SETSIGINFO                = 0x4203
+	PTRACE_SET_THREAD_AREA           = 0x1a
+	PTRACE_SINGLEBLOCK               = 0x21
+	PTRACE_SINGLESTEP                = 0x9
+	PTRACE_SYSCALL                   = 0x18
+	PTRACE_SYSEMU                    = 0x1f
+	PTRACE_SYSEMU_SINGLESTEP         = 0x20
+	PTRACE_TRACEME                   = 0x0
+	RLIMIT_AS                        = 0x9
+	RLIMIT_CORE                      = 0x4
+	RLIMIT_CPU                       = 0x0
+	RLIMIT_DATA                      = 0x2
+	RLIMIT_FSIZE                     = 0x1
+	RLIMIT_NOFILE                    = 0x7
+	RLIMIT_STACK                     = 0x3
+	RLIM_INFINITY                    = -0x1
+	RTAX_ADVMSS                      = 0x8
+	RTAX_CWND                        = 0x7
+	RTAX_FEATURES                    = 0xc
+	RTAX_FEATURE_ALLFRAG             = 0x8
+	RTAX_FEATURE_ECN                 = 0x1
+	RTAX_FEATURE_SACK                = 0x2
+	RTAX_FEATURE_TIMESTAMP           = 0x4
+	RTAX_HOPLIMIT                    = 0xa
+	RTAX_INITCWND                    = 0xb
+	RTAX_INITRWND                    = 0xe
+	RTAX_LOCK                        = 0x1
+	RTAX_MAX                         = 0xe
+	RTAX_MTU                         = 0x2
+	RTAX_REORDERING                  = 0x9
+	RTAX_RTO_MIN                     = 0xd
+	RTAX_RTT                         = 0x4
+	RTAX_RTTVAR                      = 0x5
+	RTAX_SSTHRESH                    = 0x6
+	RTAX_UNSPEC                      = 0x0
+	RTAX_WINDOW                      = 0x3
+	RTA_ALIGNTO                      = 0x4
+	RTA_MAX                          = 0x10
+	RTCF_DIRECTSRC                   = 0x4000000
+	RTCF_DOREDIRECT                  = 0x1000000
+	RTCF_LOG                         = 0x2000000
+	RTCF_MASQ                        = 0x400000
+	RTCF_NAT                         = 0x800000
+	RTCF_VALVE                       = 0x200000
+	RTF_ADDRCLASSMASK                = 0xf8000000
+	RTF_ADDRCONF                     = 0x40000
+	RTF_ALLONLINK                    = 0x20000
+	RTF_BROADCAST                    = 0x10000000
+	RTF_CACHE                        = 0x1000000
+	RTF_DEFAULT                      = 0x10000
+	RTF_DYNAMIC                      = 0x10
+	RTF_FLOW                         = 0x2000000
+	RTF_GATEWAY                      = 0x2
+	RTF_HOST                         = 0x4
+	RTF_INTERFACE                    = 0x40000000
+	RTF_IRTT                         = 0x100
+	RTF_LINKRT                       = 0x100000
+	RTF_LOCAL                        = 0x80000000
+	RTF_MODIFIED                     = 0x20
+	RTF_MSS                          = 0x40
+	RTF_MTU                          = 0x40
+	RTF_MULTICAST                    = 0x20000000
+	RTF_NAT                          = 0x8000000
+	RTF_NOFORWARD                    = 0x1000
+	RTF_NONEXTHOP                    = 0x200000
+	RTF_NOPMTUDISC                   = 0x4000
+	RTF_POLICY                       = 0x4000000
+	RTF_REINSTATE                    = 0x8
+	RTF_REJECT                       = 0x200
+	RTF_STATIC                       = 0x400
+	RTF_THROW                        = 0x2000
+	RTF_UP                           = 0x1
+	RTF_WINDOW                       = 0x80
+	RTF_XRESOLVE                     = 0x800
+	RTM_BASE                         = 0x10
+	RTM_DELACTION                    = 0x31
+	RTM_DELADDR                      = 0x15
+	RTM_DELADDRLABEL                 = 0x49
+	RTM_DELLINK                      = 0x11
+	RTM_DELNEIGH                     = 0x1d
+	RTM_DELQDISC                     = 0x25
+	RTM_DELROUTE                     = 0x19
+	RTM_DELRULE                      = 0x21
+	RTM_DELTCLASS                    = 0x29
+	RTM_DELTFILTER                   = 0x2d
+	RTM_F_CLONED                     = 0x200
+	RTM_F_EQUALIZE                   = 0x400
+	RTM_F_NOTIFY                     = 0x100
+	RTM_F_PREFIX                     = 0x800
+	RTM_GETACTION                    = 0x32
+	RTM_GETADDR                      = 0x16
+	RTM_GETADDRLABEL                 = 0x4a
+	RTM_GETANYCAST                   = 0x3e
+	RTM_GETDCB                       = 0x4e
+	RTM_GETLINK                      = 0x12
+	RTM_GETMULTICAST                 = 0x3a
+	RTM_GETNEIGH                     = 0x1e
+	RTM_GETNEIGHTBL                  = 0x42
+	RTM_GETQDISC                     = 0x26
+	RTM_GETROUTE                     = 0x1a
+	RTM_GETRULE                      = 0x22
+	RTM_GETTCLASS                    = 0x2a
+	RTM_GETTFILTER                   = 0x2e
+	RTM_MAX                          = 0x4f
+	RTM_NEWACTION                    = 0x30
+	RTM_NEWADDR                      = 0x14
+	RTM_NEWADDRLABEL                 = 0x48
+	RTM_NEWLINK                      = 0x10
+	RTM_NEWNDUSEROPT                 = 0x44
+	RTM_NEWNEIGH                     = 0x1c
+	RTM_NEWNEIGHTBL                  = 0x40
+	RTM_NEWPREFIX                    = 0x34
+	RTM_NEWQDISC                     = 0x24
+	RTM_NEWROUTE                     = 0x18
+	RTM_NEWRULE                      = 0x20
+	RTM_NEWTCLASS                    = 0x28
+	RTM_NEWTFILTER                   = 0x2c
+	RTM_NR_FAMILIES                  = 0x10
+	RTM_NR_MSGTYPES                  = 0x40
+	RTM_SETDCB                       = 0x4f
+	RTM_SETLINK                      = 0x13
+	RTM_SETNEIGHTBL                  = 0x43
+	RTNH_ALIGNTO                     = 0x4
+	RTNH_F_DEAD                      = 0x1
+	RTNH_F_ONLINK                    = 0x4
+	RTNH_F_PERVASIVE                 = 0x2
+	RTN_MAX                          = 0xb
+	RTPROT_BIRD                      = 0xc
+	RTPROT_BOOT                      = 0x3
+	RTPROT_DHCP                      = 0x10
+	RTPROT_DNROUTED                  = 0xd
+	RTPROT_GATED                     = 0x8
+	RTPROT_KERNEL                    = 0x2
+	RTPROT_MRT                       = 0xa
+	RTPROT_NTK                       = 0xf
+	RTPROT_RA                        = 0x9
+	RTPROT_REDIRECT                  = 0x1
+	RTPROT_STATIC                    = 0x4
+	RTPROT_UNSPEC                    = 0x0
+	RTPROT_XORP                      = 0xe
+	RTPROT_ZEBRA                     = 0xb
+	RT_CLASS_DEFAULT                 = 0xfd
+	RT_CLASS_LOCAL                   = 0xff
+	RT_CLASS_MAIN                    = 0xfe
+	RT_CLASS_MAX                     = 0xff
+	RT_CLASS_UNSPEC                  = 0x0
+	RUSAGE_CHILDREN                  = -0x1
+	RUSAGE_SELF                      = 0x0
+	RUSAGE_THREAD                    = 0x1
+	SCM_CREDENTIALS                  = 0x2
+	SCM_RIGHTS                       = 0x1
+	SCM_TIMESTAMP                    = 0x1d
+	SCM_TIMESTAMPING                 = 0x25
+	SCM_TIMESTAMPNS                  = 0x23
+	SHUT_RD                          = 0x0
+	SHUT_RDWR                        = 0x2
+	SHUT_WR                          = 0x1
+	SIOCADDDLCI                      = 0x8980
+	SIOCADDMULTI                     = 0x8931
+	SIOCADDRT                        = 0x890b
+	SIOCATMARK                       = 0x8905
+	SIOCDARP                         = 0x8953
+	SIOCDELDLCI                      = 0x8981
+	SIOCDELMULTI                     = 0x8932
+	SIOCDELRT                        = 0x890c
+	SIOCDEVPRIVATE                   = 0x89f0
+	SIOCDIFADDR                      = 0x8936
+	SIOCDRARP                        = 0x8960
+	SIOCGARP                         = 0x8954
+	SIOCGIFADDR                      = 0x8915
+	SIOCGIFBR                        = 0x8940
+	SIOCGIFBRDADDR                   = 0x8919
+	SIOCGIFCONF                      = 0x8912
+	SIOCGIFCOUNT                     = 0x8938
+	SIOCGIFDSTADDR                   = 0x8917
+	SIOCGIFENCAP                     = 0x8925
+	SIOCGIFFLAGS                     = 0x8913
+	SIOCGIFHWADDR                    = 0x8927
+	SIOCGIFINDEX                     = 0x8933
+	SIOCGIFMAP                       = 0x8970
+	SIOCGIFMEM                       = 0x891f
+	SIOCGIFMETRIC                    = 0x891d
+	SIOCGIFMTU                       = 0x8921
+	SIOCGIFNAME                      = 0x8910
+	SIOCGIFNETMASK                   = 0x891b
+	SIOCGIFPFLAGS                    = 0x8935
+	SIOCGIFSLAVE                     = 0x8929
+	SIOCGIFTXQLEN                    = 0x8942
+	SIOCGPGRP                        = 0x8904
+	SIOCGRARP                        = 0x8961
+	SIOCGSTAMP                       = 0x8906
+	SIOCGSTAMPNS                     = 0x8907
+	SIOCPROTOPRIVATE                 = 0x89e0
+	SIOCRTMSG                        = 0x890d
+	SIOCSARP                         = 0x8955
+	SIOCSIFADDR                      = 0x8916
+	SIOCSIFBR                        = 0x8941
+	SIOCSIFBRDADDR                   = 0x891a
+	SIOCSIFDSTADDR                   = 0x8918
+	SIOCSIFENCAP                     = 0x8926
+	SIOCSIFFLAGS                     = 0x8914
+	SIOCSIFHWADDR                    = 0x8924
+	SIOCSIFHWBROADCAST               = 0x8937
+	SIOCSIFLINK                      = 0x8911
+	SIOCSIFMAP                       = 0x8971
+	SIOCSIFMEM                       = 0x8920
+	SIOCSIFMETRIC                    = 0x891e
+	SIOCSIFMTU                       = 0x8922
+	SIOCSIFNAME                      = 0x8923
+	SIOCSIFNETMASK                   = 0x891c
+	SIOCSIFPFLAGS                    = 0x8934
+	SIOCSIFSLAVE                     = 0x8930
+	SIOCSIFTXQLEN                    = 0x8943
+	SIOCSPGRP                        = 0x8902
+	SIOCSRARP                        = 0x8962
+	SOCK_CLOEXEC                     = 0x80000
+	SOCK_DCCP                        = 0x6
+	SOCK_DGRAM                       = 0x2
+	SOCK_NONBLOCK                    = 0x800
+	SOCK_PACKET                      = 0xa
+	SOCK_RAW                         = 0x3
+	SOCK_RDM                         = 0x4
+	SOCK_SEQPACKET                   = 0x5
+	SOCK_STREAM                      = 0x1
+	SOL_AAL                          = 0x109
+	SOL_ATM                          = 0x108
+	SOL_DECNET                       = 0x105
+	SOL_ICMPV6                       = 0x3a
+	SOL_IP                           = 0x0
+	SOL_IPV6                         = 0x29
+	SOL_IRDA                         = 0x10a
+	SOL_PACKET                       = 0x107
+	SOL_RAW                          = 0xff
+	SOL_SOCKET                       = 0x1
+	SOL_TCP                          = 0x6
+	SOL_X25                          = 0x106
+	SOMAXCONN                        = 0x80
+	SO_ACCEPTCONN                    = 0x1e
+	SO_ATTACH_FILTER                 = 0x1a
+	SO_BINDTODEVICE                  = 0x19
+	SO_BROADCAST                     = 0x6
+	SO_BSDCOMPAT                     = 0xe
+	SO_DEBUG                         = 0x1
+	SO_DETACH_FILTER                 = 0x1b
+	SO_DOMAIN                        = 0x27
+	SO_DONTROUTE                     = 0x5
+	SO_ERROR                         = 0x4
+	SO_KEEPALIVE                     = 0x9
+	SO_LINGER                        = 0xd
+	SO_MARK                          = 0x24
+	SO_NO_CHECK                      = 0xb
+	SO_OOBINLINE                     = 0xa
+	SO_PASSCRED                      = 0x10
+	SO_PASSSEC                       = 0x22
+	SO_PEERCRED                      = 0x11
+	SO_PEERNAME                      = 0x1c
+	SO_PEERSEC                       = 0x1f
+	SO_PRIORITY                      = 0xc
+	SO_PROTOCOL                      = 0x26
+	SO_RCVBUF                        = 0x8
+	SO_RCVBUFFORCE                   = 0x21
+	SO_RCVLOWAT                      = 0x12
+	SO_RCVTIMEO                      = 0x14
+	SO_REUSEADDR                     = 0x2
+	SO_RXQ_OVFL                      = 0x28
+	SO_SECURITY_AUTHENTICATION       = 0x16
+	SO_SECURITY_ENCRYPTION_NETWORK   = 0x18
+	SO_SECURITY_ENCRYPTION_TRANSPORT = 0x17
+	SO_SNDBUF                        = 0x7
+	SO_SNDBUFFORCE                   = 0x20
+	SO_SNDLOWAT                      = 0x13
+	SO_SNDTIMEO                      = 0x15
+	SO_TIMESTAMP                     = 0x1d
+	SO_TIMESTAMPING                  = 0x25
+	SO_TIMESTAMPNS                   = 0x23
+	SO_TYPE                          = 0x3
+	S_BLKSIZE                        = 0x200
+	S_IEXEC                          = 0x40
+	S_IFBLK                          = 0x6000
+	S_IFCHR                          = 0x2000
+	S_IFDIR                          = 0x4000
+	S_IFIFO                          = 0x1000
+	S_IFLNK                          = 0xa000
+	S_IFMT                           = 0xf000
+	S_IFREG                          = 0x8000
+	S_IFSOCK                         = 0xc000
+	S_IREAD                          = 0x100
+	S_IRGRP                          = 0x20
+	S_IROTH                          = 0x4
+	S_IRUSR                          = 0x100
+	S_IRWXG                          = 0x38
+	S_IRWXO                          = 0x7
+	S_IRWXU                          = 0x1c0
+	S_ISGID                          = 0x400
+	S_ISUID                          = 0x800
+	S_ISVTX                          = 0x200
+	S_IWGRP                          = 0x10
+	S_IWOTH                          = 0x2
+	S_IWRITE                         = 0x80
+	S_IWUSR                          = 0x80
+	S_IXGRP                          = 0x8
+	S_IXOTH                          = 0x1
+	S_IXUSR                          = 0x40
+	TCIFLUSH                         = 0x0
+	TCIOFLUSH                        = 0x2
+	TCOFLUSH                         = 0x1
+	TCP_CONGESTION                   = 0xd
+	TCP_CORK                         = 0x3
+	TCP_DEFER_ACCEPT                 = 0x9
+	TCP_INFO                         = 0xb
+	TCP_KEEPCNT                      = 0x6
+	TCP_KEEPIDLE                     = 0x4
+	TCP_KEEPINTVL                    = 0x5
+	TCP_LINGER2                      = 0x8
+	TCP_MAXSEG                       = 0x2
+	TCP_MAXWIN                       = 0xffff
+	TCP_MAX_WINSHIFT                 = 0xe
+	TCP_MD5SIG                       = 0xe
+	TCP_MD5SIG_MAXKEYLEN             = 0x50
+	TCP_MSS                          = 0x200
+	TCP_NODELAY                      = 0x1
+	TCP_QUICKACK                     = 0xc
+	TCP_SYNCNT                       = 0x7
+	TCP_WINDOW_CLAMP                 = 0xa
+	TIOCCBRK                         = 0x5428
+	TIOCCONS                         = 0x541d
+	TIOCEXCL                         = 0x540c
+	TIOCGDEV                         = 0x80045432
+	TIOCGETD                         = 0x5424
+	TIOCGICOUNT                      = 0x545d
+	TIOCGLCKTRMIOS                   = 0x5456
+	TIOCGPGRP                        = 0x540f
+	TIOCGPTN                         = 0x80045430
+	TIOCGRS485                       = 0x542e
+	TIOCGSERIAL                      = 0x541e
+	TIOCGSID                         = 0x5429
+	TIOCGSOFTCAR                     = 0x5419
+	TIOCGWINSZ                       = 0x5413
+	TIOCINQ                          = 0x541b
+	TIOCLINUX                        = 0x541c
+	TIOCMBIC                         = 0x5417
+	TIOCMBIS                         = 0x5416
+	TIOCMGET                         = 0x5415
+	TIOCMIWAIT                       = 0x545c
+	TIOCMSET                         = 0x5418
+	TIOCM_CAR                        = 0x40
+	TIOCM_CD                         = 0x40
+	TIOCM_CTS                        = 0x20
+	TIOCM_DSR                        = 0x100
+	TIOCM_DTR                        = 0x2
+	TIOCM_LE                         = 0x1
+	TIOCM_RI                         = 0x80
+	TIOCM_RNG                        = 0x80
+	TIOCM_RTS                        = 0x4
+	TIOCM_SR                         = 0x10
+	TIOCM_ST                         = 0x8
+	TIOCNOTTY                        = 0x5422
+	TIOCNXCL                         = 0x540d
+	TIOCOUTQ                         = 0x5411
+	TIOCPKT                          = 0x5420
+	TIOCPKT_DATA                     = 0x0
+	TIOCPKT_DOSTOP                   = 0x20
+	TIOCPKT_FLUSHREAD                = 0x1
+	TIOCPKT_FLUSHWRITE               = 0x2
+	TIOCPKT_IOCTL                    = 0x40
+	TIOCPKT_NOSTOP                   = 0x10
+	TIOCPKT_START                    = 0x8
+	TIOCPKT_STOP                     = 0x4
+	TIOCSBRK                         = 0x5427
+	TIOCSCTTY                        = 0x540e
+	TIOCSERCONFIG                    = 0x5453
+	TIOCSERGETLSR                    = 0x5459
+	TIOCSERGETMULTI                  = 0x545a
+	TIOCSERGSTRUCT                   = 0x5458
+	TIOCSERGWILD                     = 0x5454
+	TIOCSERSETMULTI                  = 0x545b
+	TIOCSERSWILD                     = 0x5455
+	TIOCSER_TEMT                     = 0x1
+	TIOCSETD                         = 0x5423
+	TIOCSIG                          = 0x40045436
+	TIOCSLCKTRMIOS                   = 0x5457
+	TIOCSPGRP                        = 0x5410
+	TIOCSPTLCK                       = 0x40045431
+	TIOCSRS485                       = 0x542f
+	TIOCSSERIAL                      = 0x541f
+	TIOCSSOFTCAR                     = 0x541a
+	TIOCSTI                          = 0x5412
+	TIOCSWINSZ                       = 0x5414
+	TUNATTACHFILTER                  = 0x401054d5
+	TUNDETACHFILTER                  = 0x401054d6
+	TUNGETFEATURES                   = 0x800454cf
+	TUNGETIFF                        = 0x800454d2
+	TUNGETSNDBUF                     = 0x800454d3
+	TUNGETVNETHDRSZ                  = 0x800454d7
+	TUNSETDEBUG                      = 0x400454c9
+	TUNSETGROUP                      = 0x400454ce
+	TUNSETIFF                        = 0x400454ca
+	TUNSETLINK                       = 0x400454cd
+	TUNSETNOCSUM                     = 0x400454c8
+	TUNSETOFFLOAD                    = 0x400454d0
+	TUNSETOWNER                      = 0x400454cc
+	TUNSETPERSIST                    = 0x400454cb
+	TUNSETSNDBUF                     = 0x400454d4
+	TUNSETTXFILTER                   = 0x400454d1
+	TUNSETVNETHDRSZ                  = 0x400454d8
+	WALL                             = 0x40000000
+	WCLONE                           = 0x80000000
+	WCONTINUED                       = 0x8
+	WEXITED                          = 0x4
+	WNOHANG                          = 0x1
+	WNOTHREAD                        = 0x20000000
+	WNOWAIT                          = 0x1000000
+	WORDSIZE                         = 0x40
+	WSTOPPED                         = 0x2
+	WUNTRACED                        = 0x2
 )
 const (
-	S_IFMT   = 0x1f000
-	S_IFIFO  = 0x1000
-	S_IFCHR  = 0x2000
-	S_IFDIR  = 0x4000
-	S_IFBLK  = 0x6000
-	S_IFREG  = 0x8000
-	S_IFLNK  = 0xa000
-	S_IFSOCK = 0xc000
-	S_ISUID  = 0x800
-	S_ISGID  = 0x400
-	S_ISVTX  = 0x200
-	S_IRUSR  = 0x100
-	S_IWRITE = 0x80
-	S_IWUSR  = 0x80
-	S_IXUSR  = 0x40
+	E2BIG           = Errno(0x7)
+	EACCES          = Errno(0xd)
+	EADDRINUSE      = Errno(0x62)
+	EADDRNOTAVAIL   = Errno(0x63)
+	EADV            = Errno(0x44)
+	EAFNOSUPPORT    = Errno(0x61)
+	EAGAIN          = Errno(0xb)
+	EALREADY        = Errno(0x72)
+	EBADE           = Errno(0x34)
+	EBADF           = Errno(0x9)
+	EBADFD          = Errno(0x4d)
+	EBADMSG         = Errno(0x4a)
+	EBADR           = Errno(0x35)
+	EBADRQC         = Errno(0x38)
+	EBADSLT         = Errno(0x39)
+	EBFONT          = Errno(0x3b)
+	EBUSY           = Errno(0x10)
+	ECANCELED       = Errno(0x7d)
+	ECHILD          = Errno(0xa)
+	ECHRNG          = Errno(0x2c)
+	ECOMM           = Errno(0x46)
+	ECONNABORTED    = Errno(0x67)
+	ECONNREFUSED    = Errno(0x6f)
+	ECONNRESET      = Errno(0x68)
+	EDEADLK         = Errno(0x23)
+	EDEADLOCK       = Errno(0x23)
+	EDESTADDRREQ    = Errno(0x59)
+	EDOM            = Errno(0x21)
+	EDOTDOT         = Errno(0x49)
+	EDQUOT          = Errno(0x7a)
+	EEXIST          = Errno(0x11)
+	EFAULT          = Errno(0xe)
+	EFBIG           = Errno(0x1b)
+	EHOSTDOWN       = Errno(0x70)
+	EHOSTUNREACH    = Errno(0x71)
+	EIDRM           = Errno(0x2b)
+	EILSEQ          = Errno(0x54)
+	EINPROGRESS     = Errno(0x73)
+	EINTR           = Errno(0x4)
+	EINVAL          = Errno(0x16)
+	EIO             = Errno(0x5)
+	EISCONN         = Errno(0x6a)
+	EISDIR          = Errno(0x15)
+	EISNAM          = Errno(0x78)
+	EKEYEXPIRED     = Errno(0x7f)
+	EKEYREJECTED    = Errno(0x81)
+	EKEYREVOKED     = Errno(0x80)
+	EL2HLT          = Errno(0x33)
+	EL2NSYNC        = Errno(0x2d)
+	EL3HLT          = Errno(0x2e)
+	EL3RST          = Errno(0x2f)
+	ELIBACC         = Errno(0x4f)
+	ELIBBAD         = Errno(0x50)
+	ELIBEXEC        = Errno(0x53)
+	ELIBMAX         = Errno(0x52)
+	ELIBSCN         = Errno(0x51)
+	ELNRNG          = Errno(0x30)
+	ELOOP           = Errno(0x28)
+	EMEDIUMTYPE     = Errno(0x7c)
+	EMFILE          = Errno(0x18)
+	EMLINK          = Errno(0x1f)
+	EMSGSIZE        = Errno(0x5a)
+	EMULTIHOP       = Errno(0x48)
+	ENAMETOOLONG    = Errno(0x24)
+	ENAVAIL         = Errno(0x77)
+	ENETDOWN        = Errno(0x64)
+	ENETRESET       = Errno(0x66)
+	ENETUNREACH     = Errno(0x65)
+	ENFILE          = Errno(0x17)
+	ENOANO          = Errno(0x37)
+	ENOBUFS         = Errno(0x69)
+	ENOCSI          = Errno(0x32)
+	ENODATA         = Errno(0x3d)
+	ENODEV          = Errno(0x13)
+	ENOENT          = Errno(0x2)
+	ENOEXEC         = Errno(0x8)
+	ENOKEY          = Errno(0x7e)
+	ENOLCK          = Errno(0x25)
+	ENOLINK         = Errno(0x43)
+	ENOMEDIUM       = Errno(0x7b)
+	ENOMEM          = Errno(0xc)
+	ENOMSG          = Errno(0x2a)
+	ENONET          = Errno(0x40)
+	ENOPKG          = Errno(0x41)
+	ENOPROTOOPT     = Errno(0x5c)
+	ENOSPC          = Errno(0x1c)
+	ENOSR           = Errno(0x3f)
+	ENOSTR          = Errno(0x3c)
+	ENOSYS          = Errno(0x26)
+	ENOTBLK         = Errno(0xf)
+	ENOTCONN        = Errno(0x6b)
+	ENOTDIR         = Errno(0x14)
+	ENOTEMPTY       = Errno(0x27)
+	ENOTNAM         = Errno(0x76)
+	ENOTRECOVERABLE = Errno(0x83)
+	ENOTSOCK        = Errno(0x58)
+	ENOTSUP         = Errno(0x5f)
+	ENOTTY          = Errno(0x19)
+	ENOTUNIQ        = Errno(0x4c)
+	ENXIO           = Errno(0x6)
+	EOPNOTSUPP      = Errno(0x5f)
+	EOVERFLOW       = Errno(0x4b)
+	EOWNERDEAD      = Errno(0x82)
+	EPERM           = Errno(0x1)
+	EPFNOSUPPORT    = Errno(0x60)
+	EPIPE           = Errno(0x20)
+	EPROTO          = Errno(0x47)
+	EPROTONOSUPPORT = Errno(0x5d)
+	EPROTOTYPE      = Errno(0x5b)
+	ERANGE          = Errno(0x22)
+	EREMCHG         = Errno(0x4e)
+	EREMOTE         = Errno(0x42)
+	EREMOTEIO       = Errno(0x79)
+	ERESTART        = Errno(0x55)
+	ERFKILL         = Errno(0x84)
+	EROFS           = Errno(0x1e)
+	ESHUTDOWN       = Errno(0x6c)
+	ESOCKTNOSUPPORT = Errno(0x5e)
+	ESPIPE          = Errno(0x1d)
+	ESRCH           = Errno(0x3)
+	ESRMNT          = Errno(0x45)
+	ESTALE          = Errno(0x74)
+	ESTRPIPE        = Errno(0x56)
+	ETIME           = Errno(0x3e)
+	ETIMEDOUT       = Errno(0x6e)
+	ETOOMANYREFS    = Errno(0x6d)
+	ETXTBSY         = Errno(0x1a)
+	EUCLEAN         = Errno(0x75)
+	EUNATCH         = Errno(0x31)
+	EUSERS          = Errno(0x57)
+	EWOULDBLOCK     = Errno(0xb)
+	EXDEV           = Errno(0x12)
+	EXFULL          = Errno(0x36)
 )
-    Invented values to support what package os expects.
+    Errors
 
 const (
-	FILE_TYPE_CHAR    = 0x0002
-	FILE_TYPE_DISK    = 0x0001
-	FILE_TYPE_PIPE    = 0x0003
-	FILE_TYPE_REMOTE  = 0x8000
-	FILE_TYPE_UNKNOWN = 0x0000
+	SIGABRT   = Signal(0x6)
+	SIGALRM   = Signal(0xe)
+	SIGBUS    = Signal(0x7)
+	SIGCHLD   = Signal(0x11)
+	SIGCLD    = Signal(0x11)
+	SIGCONT   = Signal(0x12)
+	SIGFPE    = Signal(0x8)
+	SIGHUP    = Signal(0x1)
+	SIGILL    = Signal(0x4)
+	SIGINT    = Signal(0x2)
+	SIGIO     = Signal(0x1d)
+	SIGIOT    = Signal(0x6)
+	SIGKILL   = Signal(0x9)
+	SIGPIPE   = Signal(0xd)
+	SIGPOLL   = Signal(0x1d)
+	SIGPROF   = Signal(0x1b)
+	SIGPWR    = Signal(0x1e)
+	SIGQUIT   = Signal(0x3)
+	SIGSEGV   = Signal(0xb)
+	SIGSTKFLT = Signal(0x10)
+	SIGSTOP   = Signal(0x13)
+	SIGSYS    = Signal(0x1f)
+	SIGTERM   = Signal(0xf)
+	SIGTRAP   = Signal(0x5)
+	SIGTSTP   = Signal(0x14)
+	SIGTTIN   = Signal(0x15)
+	SIGTTOU   = Signal(0x16)
+	SIGUNUSED = Signal(0x1f)
+	SIGURG    = Signal(0x17)
+	SIGUSR1   = Signal(0xa)
+	SIGUSR2   = Signal(0xc)
+	SIGVTALRM = Signal(0x1a)
+	SIGWINCH  = Signal(0x1c)
+	SIGXCPU   = Signal(0x18)
+	SIGXFSZ   = Signal(0x19)
 )
-const (
-	DNS_TYPE_A       = 0x0001
-	DNS_TYPE_NS      = 0x0002
-	DNS_TYPE_MD      = 0x0003
-	DNS_TYPE_MF      = 0x0004
-	DNS_TYPE_CNAME   = 0x0005
-	DNS_TYPE_SOA     = 0x0006
-	DNS_TYPE_MB      = 0x0007
-	DNS_TYPE_MG      = 0x0008
-	DNS_TYPE_MR      = 0x0009
-	DNS_TYPE_NULL    = 0x000a
-	DNS_TYPE_WKS     = 0x000b
-	DNS_TYPE_PTR     = 0x000c
-	DNS_TYPE_HINFO   = 0x000d
-	DNS_TYPE_MINFO   = 0x000e
-	DNS_TYPE_MX      = 0x000f
-	DNS_TYPE_TEXT    = 0x0010
-	DNS_TYPE_RP      = 0x0011
-	DNS_TYPE_AFSDB   = 0x0012
-	DNS_TYPE_X25     = 0x0013
-	DNS_TYPE_ISDN    = 0x0014
-	DNS_TYPE_RT      = 0x0015
-	DNS_TYPE_NSAP    = 0x0016
-	DNS_TYPE_NSAPPTR = 0x0017
-	DNS_TYPE_SIG     = 0x0018
-	DNS_TYPE_KEY     = 0x0019
-	DNS_TYPE_PX      = 0x001a
-	DNS_TYPE_GPOS    = 0x001b
-	DNS_TYPE_AAAA    = 0x001c
-	DNS_TYPE_LOC     = 0x001d
-	DNS_TYPE_NXT     = 0x001e
-	DNS_TYPE_EID     = 0x001f
-	DNS_TYPE_NIMLOC  = 0x0020
-	DNS_TYPE_SRV     = 0x0021
-	DNS_TYPE_ATMA    = 0x0022
-	DNS_TYPE_NAPTR   = 0x0023
-	DNS_TYPE_KX      = 0x0024
-	DNS_TYPE_CERT    = 0x0025
-	DNS_TYPE_A6      = 0x0026
-	DNS_TYPE_DNAME   = 0x0027
-	DNS_TYPE_SINK    = 0x0028
-	DNS_TYPE_OPT     = 0x0029
-	DNS_TYPE_DS      = 0x002B
-	DNS_TYPE_RRSIG   = 0x002E
-	DNS_TYPE_NSEC    = 0x002F
-	DNS_TYPE_DNSKEY  = 0x0030
-	DNS_TYPE_DHCID   = 0x0031
-	DNS_TYPE_UINFO   = 0x0064
-	DNS_TYPE_UID     = 0x0065
-	DNS_TYPE_GID     = 0x0066
-	DNS_TYPE_UNSPEC  = 0x0067
-	DNS_TYPE_ADDRS   = 0x00f8
-	DNS_TYPE_TKEY    = 0x00f9
-	DNS_TYPE_TSIG    = 0x00fa
-	DNS_TYPE_IXFR    = 0x00fb
-	DNS_TYPE_AXFR    = 0x00fc
-	DNS_TYPE_MAILB   = 0x00fd
-	DNS_TYPE_MAILA   = 0x00fe
-	DNS_TYPE_ALL     = 0x00ff
-	DNS_TYPE_ANY     = 0x00ff
-	DNS_TYPE_WINS    = 0xff01
-	DNS_TYPE_WINSR   = 0xff02
-	DNS_TYPE_NBSTAT  = 0xff01
-)
-const (
-	// flags inside DNSRecord.Dw
-	DnsSectionQuestion   = 0x0000
-	DnsSectionAnswer     = 0x0001
-	DnsSectionAuthority  = 0x0002
-	DnsSectionAdditional = 0x0003
-)
-const (
-	TF_DISCONNECT         = 1
-	TF_REUSE_SOCKET       = 2
-	TF_WRITE_BEHIND       = 4
-	TF_USE_DEFAULT_WORKER = 0
-	TF_USE_SYSTEM_THREAD  = 16
-	TF_USE_KERNEL_APC     = 32
-)
-const (
-	IFF_UP           = 1
-	IFF_BROADCAST    = 2
-	IFF_LOOPBACK     = 4
-	IFF_POINTTOPOINT = 8
-	IFF_MULTICAST    = 16
-)
-const (
-	// do not reorder
-	HKEY_CLASSES_ROOT = 0x80000000 + iota
-	HKEY_CURRENT_USER
-	HKEY_LOCAL_MACHINE
-	HKEY_USERS
-	HKEY_PERFORMANCE_DATA
-	HKEY_CURRENT_CONFIG
-	HKEY_DYN_DATA
-
-	KEY_QUERY_VALUE        = 1
-	KEY_SET_VALUE          = 2
-	KEY_CREATE_SUB_KEY     = 4
-	KEY_ENUMERATE_SUB_KEYS = 8
-	KEY_NOTIFY             = 16
-	KEY_CREATE_LINK        = 32
-	KEY_WRITE              = 0x20006
-	KEY_EXECUTE            = 0x20019
-	KEY_READ               = 0x20019
-	KEY_WOW64_64KEY        = 0x0100
-	KEY_WOW64_32KEY        = 0x0200
-	KEY_ALL_ACCESS         = 0xf003f
-)
-const (
-	// do not reorder
-	REG_NONE = iota
-	REG_SZ
-	REG_EXPAND_SZ
-	REG_BINARY
-	REG_DWORD_LITTLE_ENDIAN
-	REG_DWORD_BIG_ENDIAN
-	REG_LINK
-	REG_MULTI_SZ
-	REG_RESOURCE_LIST
-	REG_FULL_RESOURCE_DESCRIPTOR
-	REG_RESOURCE_REQUIREMENTS_LIST
-	REG_QWORD_LITTLE_ENDIAN
-	REG_DWORD = REG_DWORD_LITTLE_ENDIAN
-	REG_QWORD = REG_QWORD_LITTLE_ENDIAN
-)
-const (
-	AI_PASSIVE     = 1
-	AI_CANONNAME   = 2
-	AI_NUMERICHOST = 4
-)
-const (
-	FILE_SKIP_COMPLETION_PORT_ON_SUCCESS = 1
-	FILE_SKIP_SET_EVENT_ON_HANDLE        = 2
-)
-const (
-	WSAPROTOCOL_LEN    = 255
-	MAX_PROTOCOL_CHAIN = 7
-	BASE_PROTOCOL      = 1
-	LAYERED_PROTOCOL   = 0
-
-	XP1_CONNECTIONLESS           = 0x00000001
-	XP1_GUARANTEED_DELIVERY      = 0x00000002
-	XP1_GUARANTEED_ORDER         = 0x00000004
-	XP1_MESSAGE_ORIENTED         = 0x00000008
-	XP1_PSEUDO_STREAM            = 0x00000010
-	XP1_GRACEFUL_CLOSE           = 0x00000020
-	XP1_EXPEDITED_DATA           = 0x00000040
-	XP1_CONNECT_DATA             = 0x00000080
-	XP1_DISCONNECT_DATA          = 0x00000100
-	XP1_SUPPORT_BROADCAST        = 0x00000200
-	XP1_SUPPORT_MULTIPOINT       = 0x00000400
-	XP1_MULTIPOINT_CONTROL_PLANE = 0x00000800
-	XP1_MULTIPOINT_DATA_PLANE    = 0x00001000
-	XP1_QOS_SUPPORTED            = 0x00002000
-	XP1_UNI_SEND                 = 0x00008000
-	XP1_UNI_RECV                 = 0x00010000
-	XP1_IFS_HANDLES              = 0x00020000
-	XP1_PARTIAL_MESSAGE          = 0x00040000
-	XP1_SAN_SUPPORT_SDP          = 0x00080000
-
-	PFL_MULTIPLE_PROTO_ENTRIES  = 0x00000001
-	PFL_RECOMMENDED_PROTO_ENTRY = 0x00000002
-	PFL_HIDDEN                  = 0x00000004
-	PFL_MATCHES_PROTOCOL_ZERO   = 0x00000008
-	PFL_NETWORKDIRECT_PROVIDER  = 0x00000010
-)
-const (
-	FSCTL_GET_REPARSE_POINT          = 0x900A8
-	MAXIMUM_REPARSE_DATA_BUFFER_SIZE = 16 * 1024
-
-	IO_REPARSE_TAG_SYMLINK       = 0xA000000C
-	SYMBOLIC_LINK_FLAG_DIRECTORY = 0x1
-)
-const APPLICATION_ERROR = 1 << 29
-    Windows reserves errors >= 1<<29 for application use.
+    Signals
 
 const (
-	DNS_INFO_NO_RECORDS = 0x251D
+	SYS_READ                   = 0
+	SYS_WRITE                  = 1
+	SYS_OPEN                   = 2
+	SYS_CLOSE                  = 3
+	SYS_STAT                   = 4
+	SYS_FSTAT                  = 5
+	SYS_LSTAT                  = 6
+	SYS_POLL                   = 7
+	SYS_LSEEK                  = 8
+	SYS_MMAP                   = 9
+	SYS_MPROTECT               = 10
+	SYS_MUNMAP                 = 11
+	SYS_BRK                    = 12
+	SYS_RT_SIGACTION           = 13
+	SYS_RT_SIGPROCMASK         = 14
+	SYS_RT_SIGRETURN           = 15
+	SYS_IOCTL                  = 16
+	SYS_PREAD64                = 17
+	SYS_PWRITE64               = 18
+	SYS_READV                  = 19
+	SYS_WRITEV                 = 20
+	SYS_ACCESS                 = 21
+	SYS_PIPE                   = 22
+	SYS_SELECT                 = 23
+	SYS_SCHED_YIELD            = 24
+	SYS_MREMAP                 = 25
+	SYS_MSYNC                  = 26
+	SYS_MINCORE                = 27
+	SYS_MADVISE                = 28
+	SYS_SHMGET                 = 29
+	SYS_SHMAT                  = 30
+	SYS_SHMCTL                 = 31
+	SYS_DUP                    = 32
+	SYS_DUP2                   = 33
+	SYS_PAUSE                  = 34
+	SYS_NANOSLEEP              = 35
+	SYS_GETITIMER              = 36
+	SYS_ALARM                  = 37
+	SYS_SETITIMER              = 38
+	SYS_GETPID                 = 39
+	SYS_SENDFILE               = 40
+	SYS_SOCKET                 = 41
+	SYS_CONNECT                = 42
+	SYS_ACCEPT                 = 43
+	SYS_SENDTO                 = 44
+	SYS_RECVFROM               = 45
+	SYS_SENDMSG                = 46
+	SYS_RECVMSG                = 47
+	SYS_SHUTDOWN               = 48
+	SYS_BIND                   = 49
+	SYS_LISTEN                 = 50
+	SYS_GETSOCKNAME            = 51
+	SYS_GETPEERNAME            = 52
+	SYS_SOCKETPAIR             = 53
+	SYS_SETSOCKOPT             = 54
+	SYS_GETSOCKOPT             = 55
+	SYS_CLONE                  = 56
+	SYS_FORK                   = 57
+	SYS_VFORK                  = 58
+	SYS_EXECVE                 = 59
+	SYS_EXIT                   = 60
+	SYS_WAIT4                  = 61
+	SYS_KILL                   = 62
+	SYS_UNAME                  = 63
+	SYS_SEMGET                 = 64
+	SYS_SEMOP                  = 65
+	SYS_SEMCTL                 = 66
+	SYS_SHMDT                  = 67
+	SYS_MSGGET                 = 68
+	SYS_MSGSND                 = 69
+	SYS_MSGRCV                 = 70
+	SYS_MSGCTL                 = 71
+	SYS_FCNTL                  = 72
+	SYS_FLOCK                  = 73
+	SYS_FSYNC                  = 74
+	SYS_FDATASYNC              = 75
+	SYS_TRUNCATE               = 76
+	SYS_FTRUNCATE              = 77
+	SYS_GETDENTS               = 78
+	SYS_GETCWD                 = 79
+	SYS_CHDIR                  = 80
+	SYS_FCHDIR                 = 81
+	SYS_RENAME                 = 82
+	SYS_MKDIR                  = 83
+	SYS_RMDIR                  = 84
+	SYS_CREAT                  = 85
+	SYS_LINK                   = 86
+	SYS_UNLINK                 = 87
+	SYS_SYMLINK                = 88
+	SYS_READLINK               = 89
+	SYS_CHMOD                  = 90
+	SYS_FCHMOD                 = 91
+	SYS_CHOWN                  = 92
+	SYS_FCHOWN                 = 93
+	SYS_LCHOWN                 = 94
+	SYS_UMASK                  = 95
+	SYS_GETTIMEOFDAY           = 96
+	SYS_GETRLIMIT              = 97
+	SYS_GETRUSAGE              = 98
+	SYS_SYSINFO                = 99
+	SYS_TIMES                  = 100
+	SYS_PTRACE                 = 101
+	SYS_GETUID                 = 102
+	SYS_SYSLOG                 = 103
+	SYS_GETGID                 = 104
+	SYS_SETUID                 = 105
+	SYS_SETGID                 = 106
+	SYS_GETEUID                = 107
+	SYS_GETEGID                = 108
+	SYS_SETPGID                = 109
+	SYS_GETPPID                = 110
+	SYS_GETPGRP                = 111
+	SYS_SETSID                 = 112
+	SYS_SETREUID               = 113
+	SYS_SETREGID               = 114
+	SYS_GETGROUPS              = 115
+	SYS_SETGROUPS              = 116
+	SYS_SETRESUID              = 117
+	SYS_GETRESUID              = 118
+	SYS_SETRESGID              = 119
+	SYS_GETRESGID              = 120
+	SYS_GETPGID                = 121
+	SYS_SETFSUID               = 122
+	SYS_SETFSGID               = 123
+	SYS_GETSID                 = 124
+	SYS_CAPGET                 = 125
+	SYS_CAPSET                 = 126
+	SYS_RT_SIGPENDING          = 127
+	SYS_RT_SIGTIMEDWAIT        = 128
+	SYS_RT_SIGQUEUEINFO        = 129
+	SYS_RT_SIGSUSPEND          = 130
+	SYS_SIGALTSTACK            = 131
+	SYS_UTIME                  = 132
+	SYS_MKNOD                  = 133
+	SYS_USELIB                 = 134
+	SYS_PERSONALITY            = 135
+	SYS_USTAT                  = 136
+	SYS_STATFS                 = 137
+	SYS_FSTATFS                = 138
+	SYS_SYSFS                  = 139
+	SYS_GETPRIORITY            = 140
+	SYS_SETPRIORITY            = 141
+	SYS_SCHED_SETPARAM         = 142
+	SYS_SCHED_GETPARAM         = 143
+	SYS_SCHED_SETSCHEDULER     = 144
+	SYS_SCHED_GETSCHEDULER     = 145
+	SYS_SCHED_GET_PRIORITY_MAX = 146
+	SYS_SCHED_GET_PRIORITY_MIN = 147
+	SYS_SCHED_RR_GET_INTERVAL  = 148
+	SYS_MLOCK                  = 149
+	SYS_MUNLOCK                = 150
+	SYS_MLOCKALL               = 151
+	SYS_MUNLOCKALL             = 152
+	SYS_VHANGUP                = 153
+	SYS_MODIFY_LDT             = 154
+	SYS_PIVOT_ROOT             = 155
+	SYS__SYSCTL                = 156
+	SYS_PRCTL                  = 157
+	SYS_ARCH_PRCTL             = 158
+	SYS_ADJTIMEX               = 159
+	SYS_SETRLIMIT              = 160
+	SYS_CHROOT                 = 161
+	SYS_SYNC                   = 162
+	SYS_ACCT                   = 163
+	SYS_SETTIMEOFDAY           = 164
+	SYS_MOUNT                  = 165
+	SYS_UMOUNT2                = 166
+	SYS_SWAPON                 = 167
+	SYS_SWAPOFF                = 168
+	SYS_REBOOT                 = 169
+	SYS_SETHOSTNAME            = 170
+	SYS_SETDOMAINNAME          = 171
+	SYS_IOPL                   = 172
+	SYS_IOPERM                 = 173
+	SYS_CREATE_MODULE          = 174
+	SYS_INIT_MODULE            = 175
+	SYS_DELETE_MODULE          = 176
+	SYS_GET_KERNEL_SYMS        = 177
+	SYS_QUERY_MODULE           = 178
+	SYS_QUOTACTL               = 179
+	SYS_NFSSERVCTL             = 180
+	SYS_GETPMSG                = 181
+	SYS_PUTPMSG                = 182
+	SYS_AFS_SYSCALL            = 183
+	SYS_TUXCALL                = 184
+	SYS_SECURITY               = 185
+	SYS_GETTID                 = 186
+	SYS_READAHEAD              = 187
+	SYS_SETXATTR               = 188
+	SYS_LSETXATTR              = 189
+	SYS_FSETXATTR              = 190
+	SYS_GETXATTR               = 191
+	SYS_LGETXATTR              = 192
+	SYS_FGETXATTR              = 193
+	SYS_LISTXATTR              = 194
+	SYS_LLISTXATTR             = 195
+	SYS_FLISTXATTR             = 196
+	SYS_REMOVEXATTR            = 197
+	SYS_LREMOVEXATTR           = 198
+	SYS_FREMOVEXATTR           = 199
+	SYS_TKILL                  = 200
+	SYS_TIME                   = 201
+	SYS_FUTEX                  = 202
+	SYS_SCHED_SETAFFINITY      = 203
+	SYS_SCHED_GETAFFINITY      = 204
+	SYS_SET_THREAD_AREA        = 205
+	SYS_IO_SETUP               = 206
+	SYS_IO_DESTROY             = 207
+	SYS_IO_GETEVENTS           = 208
+	SYS_IO_SUBMIT              = 209
+	SYS_IO_CANCEL              = 210
+	SYS_GET_THREAD_AREA        = 211
+	SYS_LOOKUP_DCOOKIE         = 212
+	SYS_EPOLL_CREATE           = 213
+	SYS_EPOLL_CTL_OLD          = 214
+	SYS_EPOLL_WAIT_OLD         = 215
+	SYS_REMAP_FILE_PAGES       = 216
+	SYS_GETDENTS64             = 217
+	SYS_SET_TID_ADDRESS        = 218
+	SYS_RESTART_SYSCALL        = 219
+	SYS_SEMTIMEDOP             = 220
+	SYS_FADVISE64              = 221
+	SYS_TIMER_CREATE           = 222
+	SYS_TIMER_SETTIME          = 223
+	SYS_TIMER_GETTIME          = 224
+	SYS_TIMER_GETOVERRUN       = 225
+	SYS_TIMER_DELETE           = 226
+	SYS_CLOCK_SETTIME          = 227
+	SYS_CLOCK_GETTIME          = 228
+	SYS_CLOCK_GETRES           = 229
+	SYS_CLOCK_NANOSLEEP        = 230
+	SYS_EXIT_GROUP             = 231
+	SYS_EPOLL_WAIT             = 232
+	SYS_EPOLL_CTL              = 233
+	SYS_TGKILL                 = 234
+	SYS_UTIMES                 = 235
+	SYS_VSERVER                = 236
+	SYS_MBIND                  = 237
+	SYS_SET_MEMPOLICY          = 238
+	SYS_GET_MEMPOLICY          = 239
+	SYS_MQ_OPEN                = 240
+	SYS_MQ_UNLINK              = 241
+	SYS_MQ_TIMEDSEND           = 242
+	SYS_MQ_TIMEDRECEIVE        = 243
+	SYS_MQ_NOTIFY              = 244
+	SYS_MQ_GETSETATTR          = 245
+	SYS_KEXEC_LOAD             = 246
+	SYS_WAITID                 = 247
+	SYS_ADD_KEY                = 248
+	SYS_REQUEST_KEY            = 249
+	SYS_KEYCTL                 = 250
+	SYS_IOPRIO_SET             = 251
+	SYS_IOPRIO_GET             = 252
+	SYS_INOTIFY_INIT           = 253
+	SYS_INOTIFY_ADD_WATCH      = 254
+	SYS_INOTIFY_RM_WATCH       = 255
+	SYS_MIGRATE_PAGES          = 256
+	SYS_OPENAT                 = 257
+	SYS_MKDIRAT                = 258
+	SYS_MKNODAT                = 259
+	SYS_FCHOWNAT               = 260
+	SYS_FUTIMESAT              = 261
+	SYS_NEWFSTATAT             = 262
+	SYS_UNLINKAT               = 263
+	SYS_RENAMEAT               = 264
+	SYS_LINKAT                 = 265
+	SYS_SYMLINKAT              = 266
+	SYS_READLINKAT             = 267
+	SYS_FCHMODAT               = 268
+	SYS_FACCESSAT              = 269
+	SYS_PSELECT6               = 270
+	SYS_PPOLL                  = 271
+	SYS_UNSHARE                = 272
+	SYS_SET_ROBUST_LIST        = 273
+	SYS_GET_ROBUST_LIST        = 274
+	SYS_SPLICE                 = 275
+	SYS_TEE                    = 276
+	SYS_SYNC_FILE_RANGE        = 277
+	SYS_VMSPLICE               = 278
+	SYS_MOVE_PAGES             = 279
+	SYS_UTIMENSAT              = 280
+	SYS_EPOLL_PWAIT            = 281
+	SYS_SIGNALFD               = 282
+	SYS_TIMERFD_CREATE         = 283
+	SYS_EVENTFD                = 284
+	SYS_FALLOCATE              = 285
+	SYS_TIMERFD_SETTIME        = 286
+	SYS_TIMERFD_GETTIME        = 287
+	SYS_ACCEPT4                = 288
+	SYS_SIGNALFD4              = 289
+	SYS_EVENTFD2               = 290
+	SYS_EPOLL_CREATE1          = 291
+	SYS_DUP3                   = 292
+	SYS_PIPE2                  = 293
+	SYS_INOTIFY_INIT1          = 294
+	SYS_PREADV                 = 295
+	SYS_PWRITEV                = 296
+	SYS_RT_TGSIGQUEUEINFO      = 297
+	SYS_PERF_EVENT_OPEN        = 298
+	SYS_RECVMMSG               = 299
+	SYS_FANOTIFY_INIT          = 300
+	SYS_FANOTIFY_MARK          = 301
+	SYS_PRLIMIT64              = 302
+)
+const (
+	PathMax = 0x1000
+)
+const (
+	SizeofSockaddrInet4     = 0x10
+	SizeofSockaddrInet6     = 0x1c
+	SizeofSockaddrAny       = 0x70
+	SizeofSockaddrUnix      = 0x6e
+	SizeofSockaddrLinklayer = 0x14
+	SizeofSockaddrNetlink   = 0xc
+	SizeofLinger            = 0x8
+	SizeofIPMreq            = 0x8
+	SizeofIPMreqn           = 0xc
+	SizeofIPv6Mreq          = 0x14
+	SizeofMsghdr            = 0x38
+	SizeofCmsghdr           = 0x10
+	SizeofInet4Pktinfo      = 0xc
+	SizeofInet6Pktinfo      = 0x14
+	SizeofIPv6MTUInfo       = 0x20
+	SizeofICMPv6Filter      = 0x20
+	SizeofUcred             = 0xc
+	SizeofTCPInfo           = 0x68
+)
+const (
+	IFA_UNSPEC          = 0x0
+	IFA_ADDRESS         = 0x1
+	IFA_LOCAL           = 0x2
+	IFA_LABEL           = 0x3
+	IFA_BROADCAST       = 0x4
+	IFA_ANYCAST         = 0x5
+	IFA_CACHEINFO       = 0x6
+	IFA_MULTICAST       = 0x7
+	IFLA_UNSPEC         = 0x0
+	IFLA_ADDRESS        = 0x1
+	IFLA_BROADCAST      = 0x2
+	IFLA_IFNAME         = 0x3
+	IFLA_MTU            = 0x4
+	IFLA_LINK           = 0x5
+	IFLA_QDISC          = 0x6
+	IFLA_STATS          = 0x7
+	IFLA_COST           = 0x8
+	IFLA_PRIORITY       = 0x9
+	IFLA_MASTER         = 0xa
+	IFLA_WIRELESS       = 0xb
+	IFLA_PROTINFO       = 0xc
+	IFLA_TXQLEN         = 0xd
+	IFLA_MAP            = 0xe
+	IFLA_WEIGHT         = 0xf
+	IFLA_OPERSTATE      = 0x10
+	IFLA_LINKMODE       = 0x11
+	IFLA_LINKINFO       = 0x12
+	IFLA_NET_NS_PID     = 0x13
+	IFLA_IFALIAS        = 0x14
+	IFLA_MAX            = 0x1d
+	RT_SCOPE_UNIVERSE   = 0x0
+	RT_SCOPE_SITE       = 0xc8
+	RT_SCOPE_LINK       = 0xfd
+	RT_SCOPE_HOST       = 0xfe
+	RT_SCOPE_NOWHERE    = 0xff
+	RT_TABLE_UNSPEC     = 0x0
+	RT_TABLE_COMPAT     = 0xfc
+	RT_TABLE_DEFAULT    = 0xfd
+	RT_TABLE_MAIN       = 0xfe
+	RT_TABLE_LOCAL      = 0xff
+	RT_TABLE_MAX        = 0xffffffff
+	RTA_UNSPEC          = 0x0
+	RTA_DST             = 0x1
+	RTA_SRC             = 0x2
+	RTA_IIF             = 0x3
+	RTA_OIF             = 0x4
+	RTA_GATEWAY         = 0x5
+	RTA_PRIORITY        = 0x6
+	RTA_PREFSRC         = 0x7
+	RTA_METRICS         = 0x8
+	RTA_MULTIPATH       = 0x9
+	RTA_FLOW            = 0xb
+	RTA_CACHEINFO       = 0xc
+	RTA_TABLE           = 0xf
+	RTN_UNSPEC          = 0x0
+	RTN_UNICAST         = 0x1
+	RTN_LOCAL           = 0x2
+	RTN_BROADCAST       = 0x3
+	RTN_ANYCAST         = 0x4
+	RTN_MULTICAST       = 0x5
+	RTN_BLACKHOLE       = 0x6
+	RTN_UNREACHABLE     = 0x7
+	RTN_PROHIBIT        = 0x8
+	RTN_THROW           = 0x9
+	RTN_NAT             = 0xa
+	RTN_XRESOLVE        = 0xb
+	RTNLGRP_NONE        = 0x0
+	RTNLGRP_LINK        = 0x1
+	RTNLGRP_NOTIFY      = 0x2
+	RTNLGRP_NEIGH       = 0x3
+	RTNLGRP_TC          = 0x4
+	RTNLGRP_IPV4_IFADDR = 0x5
+	RTNLGRP_IPV4_MROUTE = 0x6
+	RTNLGRP_IPV4_ROUTE  = 0x7
+	RTNLGRP_IPV4_RULE   = 0x8
+	RTNLGRP_IPV6_IFADDR = 0x9
+	RTNLGRP_IPV6_MROUTE = 0xa
+	RTNLGRP_IPV6_ROUTE  = 0xb
+	RTNLGRP_IPV6_IFINFO = 0xc
+	RTNLGRP_IPV6_PREFIX = 0x12
+	RTNLGRP_IPV6_RULE   = 0x13
+	RTNLGRP_ND_USEROPT  = 0x14
+	SizeofNlMsghdr      = 0x10
+	SizeofNlMsgerr      = 0x14
+	SizeofRtGenmsg      = 0x1
+	SizeofNlAttr        = 0x4
+	SizeofRtAttr        = 0x4
+	SizeofIfInfomsg     = 0x10
+	SizeofIfAddrmsg     = 0x8
+	SizeofRtMsg         = 0xc
+	SizeofRtNexthop     = 0x8
+)
+const (
+	SizeofSockFilter = 0x8
+	SizeofSockFprog  = 0x10
+)
+const (
+	VINTR    = 0x0
+	VQUIT    = 0x1
+	VERASE   = 0x2
+	VKILL    = 0x3
+	VEOF     = 0x4
+	VTIME    = 0x5
+	VMIN     = 0x6
+	VSWTC    = 0x7
+	VSTART   = 0x8
+	VSTOP    = 0x9
+	VSUSP    = 0xa
+	VEOL     = 0xb
+	VREPRINT = 0xc
+	VDISCARD = 0xd
+	VWERASE  = 0xe
+	VLNEXT   = 0xf
+	VEOL2    = 0x10
+	IGNBRK   = 0x1
+	BRKINT   = 0x2
+	IGNPAR   = 0x4
+	PARMRK   = 0x8
+	INPCK    = 0x10
+	ISTRIP   = 0x20
+	INLCR    = 0x40
+	IGNCR    = 0x80
+	ICRNL    = 0x100
+	IUCLC    = 0x200
+	IXON     = 0x400
+	IXANY    = 0x800
+	IXOFF    = 0x1000
+	IMAXBEL  = 0x2000
+	IUTF8    = 0x4000
+	OPOST    = 0x1
+	OLCUC    = 0x2
+	ONLCR    = 0x4
+	OCRNL    = 0x8
+	ONOCR    = 0x10
+	ONLRET   = 0x20
+	OFILL    = 0x40
+	OFDEL    = 0x80
+	B0       = 0x0
+	B50      = 0x1
+	B75      = 0x2
+	B110     = 0x3
+	B134     = 0x4
+	B150     = 0x5
+	B200     = 0x6
+	B300     = 0x7
+	B600     = 0x8
+	B1200    = 0x9
+	B1800    = 0xa
+	B2400    = 0xb
+	B4800    = 0xc
+	B9600    = 0xd
+	B19200   = 0xe
+	B38400   = 0xf
+	CSIZE    = 0x30
+	CS5      = 0x0
+	CS6      = 0x10
+	CS7      = 0x20
+	CS8      = 0x30
+	CSTOPB   = 0x40
+	CREAD    = 0x80
+	PARENB   = 0x100
+	PARODD   = 0x200
+	HUPCL    = 0x400
+	CLOCAL   = 0x800
+	B57600   = 0x1001
+	B115200  = 0x1002
+	B230400  = 0x1003
+	B460800  = 0x1004
+	B500000  = 0x1005
+	B576000  = 0x1006
+	B921600  = 0x1007
+	B1000000 = 0x1008
+	B1152000 = 0x1009
+	B1500000 = 0x100a
+	B2000000 = 0x100b
+	B2500000 = 0x100c
+	B3000000 = 0x100d
+	B3500000 = 0x100e
+	B4000000 = 0x100f
+	ISIG     = 0x1
+	ICANON   = 0x2
+	XCASE    = 0x4
+	ECHO     = 0x8
+	ECHOE    = 0x10
+	ECHOK    = 0x20
+	ECHONL   = 0x40
+	NOFLSH   = 0x80
+	TOSTOP   = 0x100
+	ECHOCTL  = 0x200
+	ECHOPRT  = 0x400
+	ECHOKE   = 0x800
+	FLUSHO   = 0x1000
+	PENDIN   = 0x4000
+	IEXTEN   = 0x8000
+	TCGETS   = 0x5401
+	TCSETS   = 0x5402
 )
 const ImplementsGetwd = true
-const InvalidHandle = ^Handle(0)
-const MAXLEN_IFDESCR = 256
-const MAXLEN_PHYSADDR = 8
-const MAX_ADAPTER_ADDRESS_LENGTH = 8
-const MAX_ADAPTER_DESCRIPTION_LENGTH = 128
-const MAX_ADAPTER_NAME_LENGTH = 256
-const MAX_INTERFACE_NAME_LEN = 256
-const SIO_GET_INTERFACE_LIST = 0x4004747F
-const UNIX_PATH_MAX = 108 // defined in afunix.h
+const SizeofInotifyEvent = 0x10
 
 VARIABLES
 
 var (
-	Stdin  = getStdHandle(STD_INPUT_HANDLE)
-	Stdout = getStdHandle(STD_OUTPUT_HANDLE)
-	Stderr = getStdHandle(STD_ERROR_HANDLE)
-)
-var (
-	OID_PKIX_KP_SERVER_AUTH = []byte("1.3.6.1.5.5.7.3.1\x00")
-	OID_SERVER_GATED_CRYPTO = []byte("1.3.6.1.4.1.311.10.3.3\x00")
-	OID_SGC_NETSCAPE        = []byte("2.16.840.1.113730.4.1\x00")
+	Stdin  = 0
+	Stdout = 1
+	Stderr = 2
 )
 var ForkLock sync.RWMutex
-    ForkLock is not used on Windows.
+    ForkLock is used to synchronize creation of new file descriptors with fork.
+
+    We want the child in a fork/exec sequence to inherit only the file
+    descriptors we intend. To do that, we mark all file descriptors
+    close-on-exec and then, in the child, explicitly unmark the ones we want the
+    exec'ed program to keep. Unix doesn't make this easy: there is, in general,
+    no way to allocate a new file descriptor close-on-exec. Instead you have to
+    allocate the descriptor and then mark it close-on-exec. If a fork happens
+    between those two events, the child's exec will inherit an unwanted file
+    descriptor.
+
+    This lock solves that race: the create new fd/mark close-on-exec operation
+    is done holding ForkLock for reading, and the fork itself is done
+    holding ForkLock for writing. At least, that's the idea. There are some
+    complications.
+
+    Some system calls that create new file descriptors can block for arbitrarily
+    long times: open on a hung NFS server or named pipe, accept on a socket,
+    and so on. We can't reasonably grab the lock across those operations.
+
+    It is worse to inherit some file descriptors than others. If a non-malicious
+    child accidentally inherits an open ordinary file, that's not a big deal.
+    On the other hand, if a long-lived child accidentally inherits the write end
+    of a pipe, then the reader of that pipe will not see EOF until that child
+    exits, potentially causing the parent program to hang. This is a common
+    problem in threaded C programs that use popen.
+
+    Luckily, the file descriptors that are most important not to inherit
+    are not the ones that can take an arbitrarily long time to create: pipe
+    returns instantly, and the net package uses non-blocking I/O to accept on a
+    listening socket. The rules for which file descriptor-creating operations
+    use the ForkLock are as follows:
+
+      - Pipe. Use pipe2 if available. Otherwise, does not block, so use
+        ForkLock.
+      - Socket. Use SOCK_CLOEXEC if available. Otherwise, does not block,
+        so use ForkLock.
+      - Open. Use O_CLOEXEC if available. Otherwise, may block, so live with the
+        race.
+      - Dup. Use F_DUPFD_CLOEXEC or dup3 if available. Otherwise, does not
+        block, so use ForkLock.
 
 var SocketDisableIPv6 bool
     For testing: clients can set this flag to force creation of IPv6 sockets to
     return EAFNOSUPPORT.
 
-var WSAID_CONNECTEX = GUID{
-	0x25a207b9,
-	0xddf3,
-	0x4660,
-	[8]byte{0x8e, 0xe9, 0x76, 0xe5, 0x8c, 0x74, 0x06, 0x3e},
-}
 
 FUNCTIONS
 
-func Accept(fd Handle) (nfd Handle, sa Sockaddr, err error)
-func AcceptEx(ls Handle, as Handle, buf *byte, rxdatalen uint32, laddrlen uint32, raddrlen uint32, recvd *uint32, overlapped *Overlapped) (err error)
-func Bind(fd Handle, sa Sockaddr) (err error)
+func Accept(fd int) (nfd int, sa Sockaddr, err error)
+func Accept4(fd int, flags int) (nfd int, sa Sockaddr, err error)
+func Access(path string, mode uint32) (err error)
+func Acct(path string) (err error)
+func Adjtimex(buf *Timex) (state int, err error)
+func AllThreadsSyscall(trap, a1, a2, a3 uintptr) (r1, r2 uintptr, err Errno)
+    AllThreadsSyscall performs a syscall on each OS thread of the Go runtime.
+    It first invokes the syscall on one thread. Should that invocation fail,
+    it returns immediately with the error status. Otherwise, it invokes the
+    syscall on all of the remaining threads in parallel. It will terminate the
+    program if it observes any invoked syscall's return value differs from that
+    of the first invocation.
+
+    AllThreadsSyscall is intended for emulating simultaneous process-wide state
+    changes that require consistently modifying per-thread state of the Go
+    runtime.
+
+    AllThreadsSyscall is unaware of any threads that are launched explicitly by
+    cgo linked code, so the function always returns ENOTSUP in binaries that use
+    cgo.
+
+func AllThreadsSyscall6(trap, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err Errno)
+    AllThreadsSyscall6 is like AllThreadsSyscall, but extended to six arguments.
+
+func AttachLsf(fd int, i []SockFilter) error
+    Deprecated: Use golang.org/x/net/bpf instead.
+
+func Bind(fd int, sa Sockaddr) (err error)
+func BindToDevice(fd int, device string) (err error)
+    BindToDevice binds the socket associated with fd to device.
+
 func BytePtrFromString(s string) (*byte, error)
     BytePtrFromString returns a pointer to a NUL-terminated array of bytes
     containing the text of s. If s contains a NUL byte at any location,
@@ -722,276 +2043,257 @@ func ByteSliceFromString(s string) ([]byte, error)
     the text of s. If s contains a NUL byte at any location, it returns (nil,
     EINVAL).
 
-func CancelIo(s Handle) (err error)
-func CancelIoEx(s Handle, o *Overlapped) (err error)
-func CertAddCertificateContextToStore(store Handle, certContext *CertContext, addDisposition uint32, storeContext **CertContext) (err error)
-func CertCloseStore(store Handle, flags uint32) (err error)
-func CertCreateCertificateContext(certEncodingType uint32, certEncoded *byte, encodedLen uint32) (context *CertContext, err error)
-func CertEnumCertificatesInStore(store Handle, prevContext *CertContext) (context *CertContext, err error)
-func CertFreeCertificateChain(ctx *CertChainContext)
-func CertFreeCertificateContext(ctx *CertContext) (err error)
-func CertGetCertificateChain(engine Handle, leaf *CertContext, time *Filetime, additionalStore Handle, para *CertChainPara, flags uint32, reserved uintptr, chainCtx **CertChainContext) (err error)
-func CertOpenStore(storeProvider uintptr, msgAndCertEncodingType uint32, cryptProv uintptr, flags uint32, para uintptr) (handle Handle, err error)
-func CertOpenSystemStore(hprov Handle, name *uint16) (store Handle, err error)
-func CertVerifyCertificateChainPolicy(policyOID uintptr, chain *CertChainContext, para *CertChainPolicyPara, status *CertChainPolicyStatus) (err error)
 func Chdir(path string) (err error)
 func Chmod(path string, mode uint32) (err error)
 func Chown(path string, uid int, gid int) (err error)
+func Chroot(path string) (err error)
 func Clearenv()
-func Close(fd Handle) (err error)
-func CloseHandle(handle Handle) (err error)
-func CloseOnExec(fd Handle)
-func Closesocket(s Handle) (err error)
-func CommandLineToArgv(cmd *uint16, argc *int32) (argv *[8192]*[8192]uint16, err error)
-func ComputerName() (name string, err error)
-func Connect(fd Handle, sa Sockaddr) (err error)
-func ConnectEx(fd Handle, sa Sockaddr, sendBuf *byte, sendDataLen uint32, bytesSent *uint32, overlapped *Overlapped) error
-func ConvertSidToStringSid(sid *SID, stringSid **uint16) (err error)
-func ConvertStringSidToSid(stringSid *uint16, sid **SID) (err error)
-func CopySid(destSidLen uint32, destSid *SID, srcSid *SID) (err error)
-func CreateDirectory(path *uint16, sa *SecurityAttributes) (err error)
-func CreateFile(name *uint16, access uint32, mode uint32, sa *SecurityAttributes, createmode uint32, attrs uint32, templatefile int32) (handle Handle, err error)
-func CreateFileMapping(fhandle Handle, sa *SecurityAttributes, prot uint32, maxSizeHigh uint32, maxSizeLow uint32, name *uint16) (handle Handle, err error)
-func CreateHardLink(filename *uint16, existingfilename *uint16, reserved uintptr) (err error)
-func CreateIoCompletionPort(filehandle Handle, cphandle Handle, key uint32, threadcnt uint32) (Handle, error)
-    Deprecated: CreateIoCompletionPort has the wrong function signature.
-    Use x/sys/windows.CreateIoCompletionPort.
+func Close(fd int) (err error)
+func CloseOnExec(fd int)
+func CmsgLen(datalen int) int
+    CmsgLen returns the value to store in the Len field of the Cmsghdr
+    structure, taking into account any necessary alignment.
 
-func CreatePipe(readhandle *Handle, writehandle *Handle, sa *SecurityAttributes, size uint32) (err error)
-func CreateProcess(appName *uint16, commandLine *uint16, procSecurity *SecurityAttributes, threadSecurity *SecurityAttributes, inheritHandles bool, creationFlags uint32, env *uint16, currentDir *uint16, startupInfo *StartupInfo, outProcInfo *ProcessInformation) (err error)
-func CreateProcessAsUser(token Token, appName *uint16, commandLine *uint16, procSecurity *SecurityAttributes, threadSecurity *SecurityAttributes, inheritHandles bool, creationFlags uint32, env *uint16, currentDir *uint16, startupInfo *StartupInfo, outProcInfo *ProcessInformation) (err error)
-func CreateSymbolicLink(symlinkfilename *uint16, targetfilename *uint16, flags uint32) (err error)
-func CreateToolhelp32Snapshot(flags uint32, processId uint32) (handle Handle, err error)
-func CryptAcquireContext(provhandle *Handle, container *uint16, provider *uint16, provtype uint32, flags uint32) (err error)
-func CryptGenRandom(provhandle Handle, buflen uint32, buf *byte) (err error)
-func CryptReleaseContext(provhandle Handle, flags uint32) (err error)
-func DeleteFile(path *uint16) (err error)
-func DeviceIoControl(handle Handle, ioControlCode uint32, inBuffer *byte, inBufferSize uint32, outBuffer *byte, outBufferSize uint32, bytesReturned *uint32, overlapped *Overlapped) (err error)
-func DnsNameCompare(name1 *uint16, name2 *uint16) (same bool)
-func DnsQuery(name string, qtype uint16, options uint32, extra *byte, qrs **DNSRecord, pr *byte) (status error)
-func DnsRecordListFree(rl *DNSRecord, freetype uint32)
-func DuplicateHandle(hSourceProcessHandle Handle, hSourceHandle Handle, hTargetProcessHandle Handle, lpTargetHandle *Handle, dwDesiredAccess uint32, bInheritHandle bool, dwOptions uint32) (err error)
+func CmsgSpace(datalen int) int
+    CmsgSpace returns the number of bytes an ancillary element with payload of
+    the passed data length occupies.
+
+func Connect(fd int, sa Sockaddr) (err error)
+func Creat(path string, mode uint32) (fd int, err error)
+func DetachLsf(fd int) error
+    Deprecated: Use golang.org/x/net/bpf instead.
+
+func Dup(oldfd int) (fd int, err error)
+func Dup2(oldfd int, newfd int) (err error)
+func Dup3(oldfd int, newfd int, flags int) (err error)
 func Environ() []string
-func EscapeArg(s string) string
-    EscapeArg rewrites command line argument s as prescribed in
-    https://msdn.microsoft.com/en-us/library/ms880421. This function returns ""
-    (2 double quotes) if s is empty. Alternatively, these transformations are
-    done:
-      - every back slash (\) is doubled, but only if immediately followed by
-        double quote (");
-      - every double quote (") is escaped by back slash (\);
-      - finally, s is wrapped with double quotes (arg -> "arg"), but only if
-        there is space or tab inside s.
-
+func EpollCreate(size int) (fd int, err error)
+func EpollCreate1(flag int) (fd int, err error)
+func EpollCtl(epfd int, op int, fd int, event *EpollEvent) (err error)
+func EpollWait(epfd int, events []EpollEvent, msec int) (n int, err error)
 func Exec(argv0 string, argv []string, envv []string) (err error)
+    Exec invokes the execve(2) system call.
+
 func Exit(code int)
-func ExitProcess(exitcode uint32)
-func Fchdir(fd Handle) (err error)
-func Fchmod(fd Handle, mode uint32) (err error)
-func Fchown(fd Handle, uid int, gid int) (err error)
-func FindClose(handle Handle) (err error)
-func FindFirstFile(name *uint16, data *Win32finddata) (handle Handle, err error)
-func FindNextFile(handle Handle, data *Win32finddata) (err error)
-func FlushFileBuffers(handle Handle) (err error)
-func FlushViewOfFile(addr uintptr, length uintptr) (err error)
-func FormatMessage(flags uint32, msgsrc uint32, msgid uint32, langid uint32, buf []uint16, args *byte) (n uint32, err error)
-    FormatMessage is deprecated (msgsrc should be uintptr, not uint32, but can
-    not be changed due to the Go 1 compatibility guarantee).
+func Faccessat(dirfd int, path string, mode uint32, flags int) (err error)
+func Fallocate(fd int, mode uint32, off int64, len int64) (err error)
+func Fchdir(fd int) (err error)
+func Fchmod(fd int, mode uint32) (err error)
+func Fchmodat(dirfd int, path string, mode uint32, flags int) error
+func Fchown(fd int, uid int, gid int) (err error)
+func Fchownat(dirfd int, path string, uid int, gid int, flags int) (err error)
+func FcntlFlock(fd uintptr, cmd int, lk *Flock_t) error
+    FcntlFlock performs a fcntl syscall for the F_GETLK, F_SETLK or F_SETLKW
+    command.
 
-    Deprecated: Use FormatMessage from golang.org/x/sys/windows instead.
+func Fdatasync(fd int) (err error)
+func Flock(fd int, how int) (err error)
+func ForkExec(argv0 string, argv []string, attr *ProcAttr) (pid int, err error)
+    Combination of fork and exec, careful to be thread safe.
 
-func FreeAddrInfoW(addrinfo *AddrinfoW)
-func FreeEnvironmentStrings(envs *uint16) (err error)
-func FreeLibrary(handle Handle) (err error)
-func Fsync(fd Handle) (err error)
-func Ftruncate(fd Handle, length int64) (err error)
-func FullPath(name string) (path string, err error)
-    FullPath retrieves the full path of the specified file.
-
-func GetAcceptExSockaddrs(buf *byte, rxdatalen uint32, laddrlen uint32, raddrlen uint32, lrsa **RawSockaddrAny, lrsalen *int32, rrsa **RawSockaddrAny, rrsalen *int32)
-func GetAdaptersInfo(ai *IpAdapterInfo, ol *uint32) (errcode error)
-func GetAddrInfoW(nodename *uint16, servicename *uint16, hints *AddrinfoW, result **AddrinfoW) (sockerr error)
-func GetCommandLine() (cmd *uint16)
-func GetComputerName(buf *uint16, n *uint32) (err error)
-func GetConsoleMode(console Handle, mode *uint32) (err error)
-func GetCurrentDirectory(buflen uint32, buf *uint16) (n uint32, err error)
-func GetCurrentProcess() (pseudoHandle Handle, err error)
-func GetEnvironmentStrings() (envs *uint16, err error)
-func GetEnvironmentVariable(name *uint16, buffer *uint16, size uint32) (n uint32, err error)
-func GetExitCodeProcess(handle Handle, exitcode *uint32) (err error)
-func GetFileAttributes(name *uint16) (attrs uint32, err error)
-func GetFileAttributesEx(name *uint16, level uint32, info *byte) (err error)
-func GetFileInformationByHandle(handle Handle, data *ByHandleFileInformation) (err error)
-func GetFileType(filehandle Handle) (n uint32, err error)
-func GetFullPathName(path *uint16, buflen uint32, buf *uint16, fname **uint16) (n uint32, err error)
-func GetHostByName(name string) (h *Hostent, err error)
-func GetIfEntry(pIfRow *MibIfRow) (errcode error)
-func GetLastError() (lasterr error)
-func GetLengthSid(sid *SID) (len uint32)
-func GetLongPathName(path *uint16, buf *uint16, buflen uint32) (n uint32, err error)
-func GetProcAddress(module Handle, procname string) (proc uintptr, err error)
-func GetProcessTimes(handle Handle, creationTime *Filetime, exitTime *Filetime, kernelTime *Filetime, userTime *Filetime) (err error)
-func GetProtoByName(name string) (p *Protoent, err error)
-func GetQueuedCompletionStatus(cphandle Handle, qty *uint32, key *uint32, overlapped **Overlapped, timeout uint32) error
-    Deprecated: GetQueuedCompletionStatus has the wrong function signature.
-    Use x/sys/windows.GetQueuedCompletionStatus.
-
-func GetServByName(name string, proto string) (s *Servent, err error)
-func GetShortPathName(longpath *uint16, shortpath *uint16, buflen uint32) (n uint32, err error)
-func GetStartupInfo(startupInfo *StartupInfo) error
-func GetStdHandle(stdhandle int) (handle Handle, err error)
-func GetSystemTimeAsFileTime(time *Filetime)
-func GetTempPath(buflen uint32, buf *uint16) (n uint32, err error)
-func GetTimeZoneInformation(tzi *Timezoneinformation) (rc uint32, err error)
-func GetTokenInformation(t Token, infoClass uint32, info *byte, infoLen uint32, returnedLen *uint32) (err error)
-func GetUserNameEx(nameFormat uint32, nameBuffre *uint16, nSize *uint32) (err error)
-func GetUserProfileDirectory(t Token, dir *uint16, dirLen *uint32) (err error)
-func GetVersion() (ver uint32, err error)
+func Fstat(fd int, stat *Stat_t) (err error)
+func Fstatfs(fd int, buf *Statfs_t) (err error)
+func Fsync(fd int) (err error)
+func Ftruncate(fd int, length int64) (err error)
+func Futimes(fd int, tv []Timeval) (err error)
+func Futimesat(dirfd int, path string, tv []Timeval) (err error)
+func Getcwd(buf []byte) (n int, err error)
+func Getdents(fd int, buf []byte) (n int, err error)
 func Getegid() (egid int)
 func Getenv(key string) (value string, found bool)
 func Geteuid() (euid int)
 func Getgid() (gid int)
 func Getgroups() (gids []int, err error)
 func Getpagesize() int
-func Getpeername(fd Handle) (sa Sockaddr, err error)
+func Getpeername(fd int) (sa Sockaddr, err error)
+func Getpgid(pid int) (pgid int, err error)
+func Getpgrp() (pid int)
 func Getpid() (pid int)
 func Getppid() (ppid int)
-func Getsockname(fd Handle) (sa Sockaddr, err error)
-func Getsockopt(s Handle, level int32, optname int32, optval *byte, optlen *int32) (err error)
-func GetsockoptInt(fd Handle, level, opt int) (int, error)
+func Getpriority(which int, who int) (prio int, err error)
+func Getrlimit(resource int, rlim *Rlimit) (err error)
+func Getrusage(who int, rusage *Rusage) (err error)
+func Getsockname(fd int) (sa Sockaddr, err error)
+func GetsockoptICMPv6Filter(fd, level, opt int) (*ICMPv6Filter, error)
+func GetsockoptIPMreq(fd, level, opt int) (*IPMreq, error)
+func GetsockoptIPMreqn(fd, level, opt int) (*IPMreqn, error)
+func GetsockoptIPv6MTUInfo(fd, level, opt int) (*IPv6MTUInfo, error)
+func GetsockoptIPv6Mreq(fd, level, opt int) (*IPv6Mreq, error)
+func GetsockoptInet4Addr(fd, level, opt int) (value [4]byte, err error)
+func GetsockoptInt(fd, level, opt int) (value int, err error)
+func GetsockoptUcred(fd, level, opt int) (*Ucred, error)
+func Gettid() (tid int)
 func Gettimeofday(tv *Timeval) (err error)
 func Getuid() (uid int)
 func Getwd() (wd string, err error)
+func Getxattr(path string, attr string, dest []byte) (sz int, err error)
+func InotifyAddWatch(fd int, pathname string, mask uint32) (watchdesc int, err error)
+func InotifyInit() (fd int, err error)
+func InotifyInit1(flags int) (fd int, err error)
+func InotifyRmWatch(fd int, watchdesc uint32) (success int, err error)
+func Ioperm(from int, num int, on int) (err error)
+func Iopl(level int) (err error)
+func Kill(pid int, sig Signal) (err error)
+func Klogctl(typ int, buf []byte) (n int, err error)
 func Lchown(path string, uid int, gid int) (err error)
-func Link(oldpath, newpath string) (err error)
-    TODO(brainman): fix all needed for os
+func Link(oldpath string, newpath string) (err error)
+func Listen(s int, n int) (err error)
+func Listxattr(path string, dest []byte) (sz int, err error)
+func LsfSocket(ifindex, proto int) (int, error)
+    Deprecated: Use golang.org/x/net/bpf instead.
 
-func Listen(s Handle, n int) (err error)
-func LoadCancelIoEx() error
-func LoadConnectEx() error
-func LoadCreateSymbolicLink() error
-func LoadDLL(name string) (*DLL, error)
-    LoadDLL loads the named DLL file into memory.
-
-    If name is not an absolute path and is not a known system DLL used by Go,
-    Windows will search for the named DLL in many locations, causing potential
-    DLL preloading attacks.
-
-    Use LazyDLL in golang.org/x/sys/windows for a secure way to load system
-    DLLs.
-
-func LoadGetAddrInfo() error
-func LoadLibrary(libname string) (handle Handle, err error)
-func LoadSetFileCompletionNotificationModes() error
-func LocalFree(hmem Handle) (handle Handle, err error)
-func LookupAccountName(systemName *uint16, accountName *uint16, sid *SID, sidLen *uint32, refdDomainName *uint16, refdDomainNameLen *uint32, use *uint32) (err error)
-func LookupAccountSid(systemName *uint16, sid *SID, name *uint16, nameLen *uint32, refdDomainName *uint16, refdDomainNameLen *uint32, use *uint32) (err error)
-func LookupSID(system, account string) (sid *SID, domain string, accType uint32, err error)
-    LookupSID retrieves a security identifier sid for the account and the name
-    of the domain on which the account was found. System specify target computer
-    to search.
-
-func MapViewOfFile(handle Handle, access uint32, offsetHigh uint32, offsetLow uint32, length uintptr) (addr uintptr, err error)
+func Lstat(path string, stat *Stat_t) (err error)
+func Madvise(b []byte, advice int) (err error)
 func Mkdir(path string, mode uint32) (err error)
-func MoveFile(from *uint16, to *uint16) (err error)
-func NetApiBufferFree(buf *byte) (neterr error)
-func NetGetJoinInformation(server *uint16, name **uint16, bufType *uint32) (neterr error)
-func NetUserGetInfo(serverName *uint16, userName *uint16, level uint32, buf **byte) (neterr error)
-func NewCallback(fn any) uintptr
-    NewCallback converts a Go function to a function pointer conforming to the
-    stdcall calling convention. This is useful when interoperating with Windows
-    code requiring callbacks. The argument is expected to be a function with
-    one uintptr-sized result. The function must not have arguments with size
-    larger than the size of uintptr. Only a limited number of callbacks may be
-    created in a single Go process, and any memory allocated for these callbacks
-    is never released. Between NewCallback and NewCallbackCDecl, at least 1024
-    callbacks can always be created.
+func Mkdirat(dirfd int, path string, mode uint32) (err error)
+func Mkfifo(path string, mode uint32) (err error)
+func Mknod(path string, mode uint32, dev int) (err error)
+func Mknodat(dirfd int, path string, mode uint32, dev int) (err error)
+func Mlock(b []byte) (err error)
+func Mlockall(flags int) (err error)
+func Mmap(fd int, offset int64, length int, prot int, flags int) (data []byte, err error)
+func Mount(source string, target string, fstype string, flags uintptr, data string) (err error)
+func Mprotect(b []byte, prot int) (err error)
+func Munlock(b []byte) (err error)
+func Munlockall() (err error)
+func Munmap(b []byte) (err error)
+func Nanosleep(time *Timespec, leftover *Timespec) (err error)
+func NetlinkRIB(proto, family int) ([]byte, error)
+    NetlinkRIB returns routing information base, as known as RIB, which consists
+    of network facility information, states and parameters.
 
-func NewCallbackCDecl(fn any) uintptr
-    NewCallbackCDecl converts a Go function to a function pointer conforming
-    to the cdecl calling convention. This is useful when interoperating with
-    Windows code requiring callbacks. The argument is expected to be a function
-    with one uintptr-sized result. The function must not have arguments with
-    size larger than the size of uintptr. Only a limited number of callbacks
-    may be created in a single Go process, and any memory allocated for these
-    callbacks is never released. Between NewCallback and NewCallbackCDecl,
-    at least 1024 callbacks can always be created.
+func Open(path string, mode int, perm uint32) (fd int, err error)
+func Openat(dirfd int, path string, flags int, mode uint32) (fd int, err error)
+func ParseDirent(buf []byte, max int, names []string) (consumed int, count int, newnames []string)
+    ParseDirent parses up to max directory entries in buf, appending the names
+    to names. It returns the number of bytes consumed from buf, the number of
+    entries added to names, and the new names slice.
 
-func Ntohs(netshort uint16) (u uint16)
-func Open(name string, flag int, perm uint32) (fd Handle, err error)
-func OpenCurrentProcessToken() (Token, error)
-    OpenCurrentProcessToken opens the access token associated with current
-    process.
+func ParseNetlinkMessage(b []byte) ([]NetlinkMessage, error)
+    ParseNetlinkMessage parses b as an array of netlink messages and returns the
+    slice containing the NetlinkMessage structures.
 
-func OpenProcess(da uint32, inheritHandle bool, pid uint32) (handle Handle, err error)
-func OpenProcessToken(h Handle, access uint32, token *Token) (err error)
-func Pipe(p []Handle) (err error)
-func PostQueuedCompletionStatus(cphandle Handle, qty uint32, key uint32, overlapped *Overlapped) error
-    Deprecated: PostQueuedCompletionStatus has the wrong function signature.
-    Use x/sys/windows.PostQueuedCompletionStatus.
+func ParseNetlinkRouteAttr(m *NetlinkMessage) ([]NetlinkRouteAttr, error)
+    ParseNetlinkRouteAttr parses m's payload as an array of netlink route
+    attributes and returns the slice containing the NetlinkRouteAttr structures.
 
-func Process32First(snapshot Handle, procEntry *ProcessEntry32) (err error)
-func Process32Next(snapshot Handle, procEntry *ProcessEntry32) (err error)
-func Read(fd Handle, p []byte) (n int, err error)
-func ReadConsole(console Handle, buf *uint16, toread uint32, read *uint32, inputControl *byte) (err error)
-func ReadDirectoryChanges(handle Handle, buf *byte, buflen uint32, watchSubTree bool, mask uint32, retlen *uint32, overlapped *Overlapped, completionRoutine uintptr) (err error)
-func ReadFile(fd Handle, p []byte, done *uint32, overlapped *Overlapped) error
+func ParseSocketControlMessage(b []byte) ([]SocketControlMessage, error)
+    ParseSocketControlMessage parses b as an array of socket control messages.
+
+func ParseUnixCredentials(m *SocketControlMessage) (*Ucred, error)
+    ParseUnixCredentials decodes a socket control message that contains
+    credentials in a Ucred structure. To receive such a message, the SO_PASSCRED
+    option must be enabled on the socket.
+
+func ParseUnixRights(m *SocketControlMessage) ([]int, error)
+    ParseUnixRights decodes a socket control message that contains an integer
+    array of open file descriptors from another process.
+
+func Pause() (err error)
+func Pipe(p []int) error
+func Pipe2(p []int, flags int) error
+func PivotRoot(newroot string, putold string) (err error)
+func Pread(fd int, p []byte, offset int64) (n int, err error)
+func PtraceAttach(pid int) (err error)
+func PtraceCont(pid int, signal int) (err error)
+func PtraceDetach(pid int) (err error)
+func PtraceGetEventMsg(pid int) (msg uint, err error)
+func PtraceGetRegs(pid int, regsout *PtraceRegs) (err error)
+func PtracePeekData(pid int, addr uintptr, out []byte) (count int, err error)
+func PtracePeekText(pid int, addr uintptr, out []byte) (count int, err error)
+func PtracePokeData(pid int, addr uintptr, data []byte) (count int, err error)
+func PtracePokeText(pid int, addr uintptr, data []byte) (count int, err error)
+func PtraceSetOptions(pid int, options int) (err error)
+func PtraceSetRegs(pid int, regs *PtraceRegs) (err error)
+func PtraceSingleStep(pid int) (err error)
+func PtraceSyscall(pid int, signal int) (err error)
+func Pwrite(fd int, p []byte, offset int64) (n int, err error)
+func RawSyscall(trap, a1, a2, a3 uintptr) (r1, r2 uintptr, err Errno)
+func RawSyscall6(trap, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err Errno)
+func Read(fd int, p []byte) (n int, err error)
+func ReadDirent(fd int, buf []byte) (n int, err error)
 func Readlink(path string, buf []byte) (n int, err error)
-    Readlink returns the destination of the named symbolic link.
+func Reboot(cmd int) (err error)
+func Recvfrom(fd int, p []byte, flags int) (n int, from Sockaddr, err error)
+func Recvmsg(fd int, p, oob []byte, flags int) (n, oobn int, recvflags int, from Sockaddr, err error)
+func Removexattr(path string, attr string) (err error)
+func Rename(oldpath string, newpath string) (err error)
+func Renameat(olddirfd int, oldpath string, newdirfd int, newpath string) (err error)
+func Rmdir(path string) error
+func Seek(fd int, offset int64, whence int) (off int64, err error)
+func Select(nfd int, r *FdSet, w *FdSet, e *FdSet, timeout *Timeval) (n int, err error)
+func Sendfile(outfd int, infd int, offset *int64, count int) (written int, err error)
+    Sendfile copies up to count bytes from file descriptor infd to file
+    descriptor outfd.
 
-func Recvfrom(fd Handle, p []byte, flags int) (n int, from Sockaddr, err error)
-func RegCloseKey(key Handle) (regerrno error)
-func RegEnumKeyEx(key Handle, index uint32, name *uint16, nameLen *uint32, reserved *uint32, class *uint16, classLen *uint32, lastWriteTime *Filetime) (regerrno error)
-    RegEnumKeyEx enumerates the subkeys of an open registry key. Each call
-    retrieves information about one subkey. name is a buffer that should
-    be large enough to hold the name of the subkey plus a null terminating
-    character. nameLen is its length. On return, nameLen will contain the actual
-    length of the subkey.
+    It wraps the sendfile system call. The behavior varies by operating system,
+    particularly regarding the offset argument and how partial writes are
+    reported.
 
-    Should name not be large enough to hold the subkey, this function will
-    return ERROR_MORE_DATA, and must be called again with an appropriately sized
-    buffer.
+    On Linux, if offset is nil, Sendfile uses and updates the current file
+    position of infd. If offset is non-nil, the current file position is
+    unchanged, and the offset pointer is updated to reflect the bytes written.
+    A non-nil error typically implies that no bytes were written.
 
-    reserved must be nil. class and classLen behave like name and nameLen but
-    for the class of the subkey, except that they are optional. lastWriteTime,
-    if not nil, will be populated with the time the subkey was last written.
+    On BSD-derived systems (including macOS), if offset is nil, Sendfile panics.
+    The offset argument is not updated by the system call; the caller must
+    manually update the offset using the number of bytes written. These systems
+    may return a non-zero byte count together with an error (for example,
+    EAGAIN).
 
-    The caller must enumerate all subkeys in order. That is RegEnumKeyEx
-    must be called with index starting at 0, incrementing the index until the
-    function returns ERROR_NO_MORE_ITEMS, or with the index of the last subkey
-    (obtainable from RegQueryInfoKey), decrementing until index 0 is enumerated.
+    For precise semantics, see the system documentation (e.g., man 2 sendfile).
 
-    Successive calls to this API must happen on the same OS thread, so call
-    runtime.LockOSThread before calling this function.
+func Sendmsg(fd int, p, oob []byte, to Sockaddr, flags int) (err error)
+func SendmsgN(fd int, p, oob []byte, to Sockaddr, flags int) (n int, err error)
+func Sendto(fd int, p []byte, flags int, to Sockaddr) (err error)
+func SetLsfPromisc(name string, m bool) error
+    Deprecated: Use golang.org/x/net/bpf instead.
 
-func RegOpenKeyEx(key Handle, subkey *uint16, options uint32, desiredAccess uint32, result *Handle) (regerrno error)
-func RegQueryInfoKey(key Handle, class *uint16, classLen *uint32, reserved *uint32, subkeysLen *uint32, maxSubkeyLen *uint32, maxClassLen *uint32, valuesLen *uint32, maxValueNameLen *uint32, maxValueLen *uint32, saLen *uint32, lastWriteTime *Filetime) (regerrno error)
-func RegQueryValueEx(key Handle, name *uint16, reserved *uint32, valtype *uint32, buf *byte, buflen *uint32) (regerrno error)
-func RemoveDirectory(path *uint16) (err error)
-func Rename(oldpath, newpath string) (err error)
-func Rmdir(path string) (err error)
-func Seek(fd Handle, offset int64, whence int) (newoffset int64, err error)
-func Sendto(fd Handle, p []byte, flags int, to Sockaddr) (err error)
-func SetCurrentDirectory(path *uint16) (err error)
-func SetEndOfFile(handle Handle) (err error)
-func SetEnvironmentVariable(name *uint16, value *uint16) (err error)
-func SetFileAttributes(name *uint16, attrs uint32) (err error)
-func SetFileCompletionNotificationModes(handle Handle, flags uint8) (err error)
-func SetFilePointer(handle Handle, lowoffset int32, highoffsetptr *int32, whence uint32) (newlowoffset uint32, err error)
-func SetFileTime(handle Handle, ctime *Filetime, atime *Filetime, wtime *Filetime) (err error)
-func SetHandleInformation(handle Handle, mask uint32, flags uint32) (err error)
-func SetNonblock(fd Handle, nonblocking bool) (err error)
+func SetNonblock(fd int, nonblocking bool) (err error)
+func Setdomainname(p []byte) (err error)
+func Setegid(egid int) (err error)
 func Setenv(key, value string) error
-func Setsockopt(s Handle, level int32, optname int32, optval *byte, optlen int32) (err error)
-func SetsockoptIPMreq(fd Handle, level, opt int, mreq *IPMreq) (err error)
-func SetsockoptIPv6Mreq(fd Handle, level, opt int, mreq *IPv6Mreq) (err error)
-func SetsockoptInet4Addr(fd Handle, level, opt int, value [4]byte) (err error)
-func SetsockoptInt(fd Handle, level, opt int, value int) (err error)
-func SetsockoptLinger(fd Handle, level, opt int, l *Linger) (err error)
-func SetsockoptTimeval(fd Handle, level, opt int, tv *Timeval) (err error)
-func Shutdown(fd Handle, how int) (err error)
-func Socket(domain, typ, proto int) (fd Handle, err error)
+func Seteuid(euid int) (err error)
+func Setfsgid(gid int) (err error)
+func Setfsuid(uid int) (err error)
+func Setgid(gid int) (err error)
+func Setgroups(gids []int) (err error)
+func Sethostname(p []byte) (err error)
+func Setpgid(pid int, pgid int) (err error)
+func Setpriority(which int, who int, prio int) (err error)
+func Setregid(rgid, egid int) (err error)
+func Setresgid(rgid, egid, sgid int) (err error)
+func Setresuid(ruid, euid, suid int) (err error)
+func Setreuid(ruid, euid int) (err error)
+func Setrlimit(resource int, rlim *Rlimit) error
+func Setsid() (pid int, err error)
+func SetsockoptByte(fd, level, opt int, value byte) (err error)
+func SetsockoptICMPv6Filter(fd, level, opt int, filter *ICMPv6Filter) error
+func SetsockoptIPMreq(fd, level, opt int, mreq *IPMreq) (err error)
+func SetsockoptIPMreqn(fd, level, opt int, mreq *IPMreqn) (err error)
+func SetsockoptIPv6Mreq(fd, level, opt int, mreq *IPv6Mreq) (err error)
+func SetsockoptInet4Addr(fd, level, opt int, value [4]byte) (err error)
+func SetsockoptInt(fd, level, opt int, value int) (err error)
+func SetsockoptLinger(fd, level, opt int, l *Linger) (err error)
+func SetsockoptString(fd, level, opt int, s string) (err error)
+func SetsockoptTimeval(fd, level, opt int, tv *Timeval) (err error)
+func Settimeofday(tv *Timeval) (err error)
+func Setuid(uid int) (err error)
+func Setxattr(path string, attr string, data []byte, flags int) (err error)
+func Shutdown(fd int, how int) (err error)
+func SlicePtrFromStrings(ss []string) ([]*byte, error)
+    SlicePtrFromStrings converts a slice of strings to a slice of pointers to
+    NUL-terminated byte arrays. If any string contains a NUL byte, it returns
+    (nil, EINVAL).
+
+func Socket(domain, typ, proto int) (fd int, err error)
+func Socketpair(domain, typ, proto int) (fd [2]int, err error)
+func Splice(rfd int, roff *int64, wfd int, woff *int64, len int, flags int) (n int64, err error)
 func StartProcess(argv0 string, argv []string, attr *ProcAttr) (pid int, handle uintptr, err error)
+    StartProcess wraps ForkExec for package os.
+
+func Stat(path string, stat *Stat_t) (err error)
+func Statfs(path string, buf *Statfs_t) (err error)
 func StringBytePtr(s string) *byte
     StringBytePtr returns a pointer to a NUL-terminated array of bytes. If s
     contains a NUL byte this function panics instead of returning an error.
@@ -1004,215 +2306,61 @@ func StringByteSlice(s string) []byte
 
     Deprecated: Use ByteSliceFromString instead.
 
-func StringToSid(s string) (*SID, error)
-    StringToSid converts a string-format security identifier sid into a valid,
-    functional sid.
-
-func StringToUTF16(s string) []uint16
-    StringToUTF16 returns the UTF-16 encoding of the UTF-8 string s, with a
-    terminating NUL added. If s contains a NUL byte this function panics instead
-    of returning an error.
-
-    Deprecated: Use UTF16FromString instead.
-
-func StringToUTF16Ptr(s string) *uint16
-    StringToUTF16Ptr returns pointer to the UTF-16 encoding of the UTF-8 string
-    s, with a terminating NUL added. If s contains a NUL byte this function
+func StringSlicePtr(ss []string) []*byte
+    StringSlicePtr converts a slice of strings to a slice of pointers to
+    NUL-terminated byte arrays. If any string contains a NUL byte this function
     panics instead of returning an error.
 
-    Deprecated: Use UTF16PtrFromString instead.
+    Deprecated: Use SlicePtrFromStrings instead.
 
-func Symlink(path, link string) (err error)
-func Syscall(trap, nargs, a1, a2, a3 uintptr) (r1, r2 uintptr, err Errno)
-    Deprecated: Use SyscallN instead.
-
-func Syscall12(trap, nargs, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12 uintptr) (r1, r2 uintptr, err Errno)
-    Deprecated: Use SyscallN instead.
-
-func Syscall15(trap, nargs, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15 uintptr) (r1, r2 uintptr, err Errno)
-    Deprecated: Use SyscallN instead.
-
-func Syscall18(trap, nargs, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18 uintptr) (r1, r2 uintptr, err Errno)
-    Deprecated: Use SyscallN instead.
-
-func Syscall6(trap, nargs, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err Errno)
-    Deprecated: Use SyscallN instead.
-
-func Syscall9(trap, nargs, a1, a2, a3, a4, a5, a6, a7, a8, a9 uintptr) (r1, r2 uintptr, err Errno)
-    Deprecated: Use SyscallN instead.
-
-func SyscallN(p uintptr, args ...uintptr) (r1, r2 uintptr, err Errno)
-    SyscallN executes procedure p with arguments args.
-
-    See Proc.Call for more information.
-
-func TerminateProcess(handle Handle, exitcode uint32) (err error)
+func Symlink(oldpath string, newpath string) (err error)
+func Sync()
+func SyncFileRange(fd int, off int64, n int64, flags int) (err error)
+func Syscall(trap, a1, a2, a3 uintptr) (r1, r2 uintptr, err Errno)
+func Syscall6(trap, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err Errno)
+func Sysinfo(info *Sysinfo_t) (err error)
+func Tee(rfd int, wfd int, len int, flags int) (n int64, err error)
+func Tgkill(tgid int, tid int, sig Signal) (err error)
+func Time(t *Time_t) (tt Time_t, err error)
+func Times(tms *Tms) (ticks uintptr, err error)
 func TimespecToNsec(ts Timespec) int64
-func TranslateAccountName(username string, from, to uint32, initSize int) (string, error)
-    TranslateAccountName converts a directory service object name from one
-    format to another.
+    TimespecToNsec returns the time stored in ts as nanoseconds.
 
-func TranslateName(accName *uint16, accNameFormat uint32, desiredNameFormat uint32, translatedName *uint16, nSize *uint32) (err error)
-func TransmitFile(s Handle, handle Handle, bytesToWrite uint32, bytsPerSend uint32, overlapped *Overlapped, transmitFileBuf *TransmitFileBuffers, flags uint32) (err error)
-func UTF16FromString(s string) ([]uint16, error)
-    UTF16FromString returns the UTF-16 encoding of the UTF-8 string s,
-    with a terminating NUL added. If s contains a NUL byte at any location,
-    it returns (nil, EINVAL). Unpaired surrogates are encoded using WTF-8.
+func TimevalToNsec(tv Timeval) int64
+    TimevalToNsec returns the time stored in tv as nanoseconds.
 
-func UTF16PtrFromString(s string) (*uint16, error)
-    UTF16PtrFromString returns pointer to the UTF-16 encoding of the UTF-8
-    string s, with a terminating NUL added. If s contains a NUL byte at any
-    location, it returns (nil, EINVAL). Unpaired surrogates are encoded using
-    WTF-8.
+func Truncate(path string, length int64) (err error)
+func Umask(mask int) (oldmask int)
+func Uname(buf *Utsname) (err error)
+func UnixCredentials(ucred *Ucred) []byte
+    UnixCredentials encodes credentials into a socket control message for
+    sending to another process. This can be used for authentication.
 
-func UTF16ToString(s []uint16) string
-    UTF16ToString returns the UTF-8 encoding of the UTF-16 sequence s, with a
-    terminating NUL removed. Unpaired surrogates are decoded using WTF-8 instead
-    of UTF-8 encoding.
+func UnixRights(fds ...int) []byte
+    UnixRights encodes a set of open file descriptors into a socket control
+    message for sending to another process.
 
-func Unlink(path string) (err error)
-func UnmapViewOfFile(addr uintptr) (err error)
+func Unlink(path string) error
+func Unlinkat(dirfd int, path string) error
+func Unmount(target string, flags int) (err error)
 func Unsetenv(key string) error
+func Unshare(flags int) (err error)
+func Ustat(dev int, ubuf *Ustat_t) (err error)
+func Utime(path string, buf *Utimbuf) (err error)
 func Utimes(path string, tv []Timeval) (err error)
 func UtimesNano(path string, ts []Timespec) (err error)
-func VirtualLock(addr uintptr, length uintptr) (err error)
-func VirtualUnlock(addr uintptr, length uintptr) (err error)
-func WSACleanup() (err error)
-func WSAEnumProtocols(protocols *int32, protocolBuffer *WSAProtocolInfo, bufferLength *uint32) (n int32, err error)
-func WSAIoctl(s Handle, iocc uint32, inbuf *byte, cbif uint32, outbuf *byte, cbob uint32, cbbr *uint32, overlapped *Overlapped, completionRoutine uintptr) (err error)
-func WSARecv(s Handle, bufs *WSABuf, bufcnt uint32, recvd *uint32, flags *uint32, overlapped *Overlapped, croutine *byte) (err error)
-func WSARecvFrom(s Handle, bufs *WSABuf, bufcnt uint32, recvd *uint32, flags *uint32, from *RawSockaddrAny, fromlen *int32, overlapped *Overlapped, croutine *byte) (err error)
-func WSASend(s Handle, bufs *WSABuf, bufcnt uint32, sent *uint32, flags uint32, overlapped *Overlapped, croutine *byte) (err error)
-func WSASendTo(s Handle, bufs *WSABuf, bufcnt uint32, sent *uint32, flags uint32, to *RawSockaddrAny, tolen int32, overlapped *Overlapped, croutine *byte) (err error)
-func WSASendto(s Handle, bufs *WSABuf, bufcnt uint32, sent *uint32, flags uint32, to Sockaddr, overlapped *Overlapped, croutine *byte) (err error)
-func WSAStartup(verreq uint32, data *WSAData) (sockerr error)
-func WaitForSingleObject(handle Handle, waitMilliseconds uint32) (event uint32, err error)
-func Write(fd Handle, p []byte) (n int, err error)
-func WriteConsole(console Handle, buf *uint16, towrite uint32, written *uint32, reserved *byte) (err error)
-func WriteFile(fd Handle, p []byte, done *uint32, overlapped *Overlapped) error
+func Wait4(pid int, wstatus *WaitStatus, options int, rusage *Rusage) (wpid int, err error)
+func Write(fd int, p []byte) (n int, err error)
 
 TYPES
 
-type AddrinfoW struct {
-	Flags     int32
-	Family    int32
-	Socktype  int32
-	Protocol  int32
-	Addrlen   uintptr
-	Canonname *uint16
-	Addr      Pointer
-	Next      *AddrinfoW
+type Cmsghdr struct {
+	Len   uint64
+	Level int32
+	Type  int32
 }
 
-type ByHandleFileInformation struct {
-	FileAttributes     uint32
-	CreationTime       Filetime
-	LastAccessTime     Filetime
-	LastWriteTime      Filetime
-	VolumeSerialNumber uint32
-	FileSizeHigh       uint32
-	FileSizeLow        uint32
-	NumberOfLinks      uint32
-	FileIndexHigh      uint32
-	FileIndexLow       uint32
-}
-
-type CertChainContext struct {
-	Size                       uint32
-	TrustStatus                CertTrustStatus
-	ChainCount                 uint32
-	Chains                     **CertSimpleChain
-	LowerQualityChainCount     uint32
-	LowerQualityChains         **CertChainContext
-	HasRevocationFreshnessTime uint32
-	RevocationFreshnessTime    uint32
-}
-
-type CertChainElement struct {
-	Size              uint32
-	CertContext       *CertContext
-	TrustStatus       CertTrustStatus
-	RevocationInfo    *CertRevocationInfo
-	IssuanceUsage     *CertEnhKeyUsage
-	ApplicationUsage  *CertEnhKeyUsage
-	ExtendedErrorInfo *uint16
-}
-
-type CertChainPara struct {
-	Size                         uint32
-	RequestedUsage               CertUsageMatch
-	RequstedIssuancePolicy       CertUsageMatch
-	URLRetrievalTimeout          uint32
-	CheckRevocationFreshnessTime uint32
-	RevocationFreshnessTime      uint32
-	CacheResync                  *Filetime
-}
-
-type CertChainPolicyPara struct {
-	Size            uint32
-	Flags           uint32
-	ExtraPolicyPara Pointer
-}
-
-type CertChainPolicyStatus struct {
-	Size              uint32
-	Error             uint32
-	ChainIndex        uint32
-	ElementIndex      uint32
-	ExtraPolicyStatus Pointer
-}
-
-type CertContext struct {
-	EncodingType uint32
-	EncodedCert  *byte
-	Length       uint32
-	CertInfo     *CertInfo
-	Store        Handle
-}
-
-type CertEnhKeyUsage struct {
-	Length           uint32
-	UsageIdentifiers **byte
-}
-
-type CertInfo struct {
-}
-
-type CertRevocationCrlInfo struct {
-}
-
-type CertRevocationInfo struct {
-	Size             uint32
-	RevocationResult uint32
-	RevocationOid    *byte
-	OidSpecificInfo  Pointer
-	HasFreshnessTime uint32
-	FreshnessTime    uint32
-	CrlInfo          *CertRevocationCrlInfo
-}
-
-type CertSimpleChain struct {
-	Size                       uint32
-	TrustStatus                CertTrustStatus
-	NumElements                uint32
-	Elements                   **CertChainElement
-	TrustListInfo              *CertTrustListInfo
-	HasRevocationFreshnessTime uint32
-	RevocationFreshnessTime    uint32
-}
-
-type CertTrustListInfo struct {
-}
-
-type CertTrustStatus struct {
-	ErrorStatus uint32
-	InfoStatus  uint32
-}
-
-type CertUsageMatch struct {
-	Type  uint32
-	Usage CertEnhKeyUsage
-}
+func (cmsg *Cmsghdr) SetLen(length int)
 
 type Conn interface {
 	// SyscallConn returns a raw network connection.
@@ -1221,246 +2369,45 @@ type Conn interface {
     Conn is implemented by some types in the net and os packages to provide
     access to the underlying file descriptor or handle.
 
-type DLL struct {
-	Name   string
-	Handle Handle
+type Credential struct {
+	Uid         uint32   // User ID.
+	Gid         uint32   // Group ID.
+	Groups      []uint32 // Supplementary group IDs.
+	NoSetGroups bool     // If true, don't set supplementary groups
 }
-    A DLL implements access to a single DLL.
+    Credential holds user and group identities to be assumed by a child process
+    started by StartProcess.
 
-func MustLoadDLL(name string) *DLL
-    MustLoadDLL is like LoadDLL but panics if load operation fails.
-
-func (d *DLL) FindProc(name string) (proc *Proc, err error)
-    FindProc searches DLL d for procedure named name and returns *Proc if found.
-    It returns an error if search fails.
-
-func (d *DLL) MustFindProc(name string) *Proc
-    MustFindProc is like DLL.FindProc but panics if search fails.
-
-func (d *DLL) Release() (err error)
-    Release unloads DLL d from memory.
-
-type DLLError struct {
-	Err     error
-	ObjName string
-	Msg     string
-}
-    DLLError describes reasons for DLL load failures.
-
-func (e *DLLError) Error() string
-
-func (e *DLLError) Unwrap() error
-
-type DNSMXData struct {
-	NameExchange *uint16
-	Preference   uint16
-	Pad          uint16
+type Dirent struct {
+	Ino       uint64
+	Off       int64
+	Reclen    uint16
+	Type      uint8
+	Name      [256]int8
+	Pad_cgo_0 [5]byte
 }
 
-type DNSPTRData struct {
-	Host *uint16
-}
-
-type DNSRecord struct {
-	Next     *DNSRecord
-	Name     *uint16
-	Type     uint16
-	Length   uint16
-	Dw       uint32
-	Ttl      uint32
-	Reserved uint32
-	Data     [40]byte
-}
-
-type DNSSRVData struct {
-	Target   *uint16
-	Priority uint16
-	Weight   uint16
-	Port     uint16
-	Pad      uint16
-}
-
-type DNSTXTData struct {
-	StringCount uint16
-	StringArray [1]*uint16
+type EpollEvent struct {
+	Events uint32
+	Fd     int32
+	Pad    int32
 }
 
 type Errno uintptr
-    Errno is the Windows error number.
+    An Errno is an unsigned number describing an error condition. It implements
+    the error interface. The zero Errno is by convention a non-error, so code to
+    convert from Errno to error should use:
+
+        err = nil
+        if errno != 0 {
+        	err = errno
+        }
 
     Errno values can be tested against error values using errors.Is. For
     example:
 
         _, _, err := syscall.Syscall(...)
         if errors.Is(err, fs.ErrNotExist) ...
-
-const (
-	// Windows errors.
-	ERROR_FILE_NOT_FOUND      Errno = 2
-	ERROR_PATH_NOT_FOUND      Errno = 3
-	ERROR_ACCESS_DENIED       Errno = 5
-	ERROR_NO_MORE_FILES       Errno = 18
-	ERROR_HANDLE_EOF          Errno = 38
-	ERROR_NETNAME_DELETED     Errno = 64
-	ERROR_FILE_EXISTS         Errno = 80
-	ERROR_BROKEN_PIPE         Errno = 109
-	ERROR_BUFFER_OVERFLOW     Errno = 111
-	ERROR_INSUFFICIENT_BUFFER Errno = 122
-	ERROR_MOD_NOT_FOUND       Errno = 126
-	ERROR_PROC_NOT_FOUND      Errno = 127
-	ERROR_DIR_NOT_EMPTY       Errno = 145
-	ERROR_ALREADY_EXISTS      Errno = 183
-	ERROR_ENVVAR_NOT_FOUND    Errno = 203
-	ERROR_MORE_DATA           Errno = 234
-	ERROR_OPERATION_ABORTED   Errno = 995
-	ERROR_IO_PENDING          Errno = 997
-	ERROR_NOT_FOUND           Errno = 1168
-	ERROR_PRIVILEGE_NOT_HELD  Errno = 1314
-	WSAEACCES                 Errno = 10013
-	WSAENOPROTOOPT            Errno = 10042
-	WSAECONNABORTED           Errno = 10053
-	WSAECONNRESET             Errno = 10054
-)
-const (
-	ENOENT  Errno = ERROR_FILE_NOT_FOUND
-	ENOTDIR Errno = ERROR_PATH_NOT_FOUND
-)
-    Go names for Windows errors.
-
-const (
-	E2BIG Errno = APPLICATION_ERROR + iota
-	EACCES
-	EADDRINUSE
-	EADDRNOTAVAIL
-	EADV
-	EAFNOSUPPORT
-	EAGAIN
-	EALREADY
-	EBADE
-	EBADF
-	EBADFD
-	EBADMSG
-	EBADR
-	EBADRQC
-	EBADSLT
-	EBFONT
-	EBUSY
-	ECANCELED
-	ECHILD
-	ECHRNG
-	ECOMM
-	ECONNABORTED
-	ECONNREFUSED
-	ECONNRESET
-	EDEADLK
-	EDEADLOCK
-	EDESTADDRREQ
-	EDOM
-	EDOTDOT
-	EDQUOT
-	EEXIST
-	EFAULT
-	EFBIG
-	EHOSTDOWN
-	EHOSTUNREACH
-	EIDRM
-	EILSEQ
-	EINPROGRESS
-	EINTR
-	EINVAL
-	EIO
-	EISCONN
-	EISDIR
-	EISNAM
-	EKEYEXPIRED
-	EKEYREJECTED
-	EKEYREVOKED
-	EL2HLT
-	EL2NSYNC
-	EL3HLT
-	EL3RST
-	ELIBACC
-	ELIBBAD
-	ELIBEXEC
-	ELIBMAX
-	ELIBSCN
-	ELNRNG
-	ELOOP
-	EMEDIUMTYPE
-	EMFILE
-	EMLINK
-	EMSGSIZE
-	EMULTIHOP
-	ENAMETOOLONG
-	ENAVAIL
-	ENETDOWN
-	ENETRESET
-	ENETUNREACH
-	ENFILE
-	ENOANO
-	ENOBUFS
-	ENOCSI
-	ENODATA
-	ENODEV
-	ENOEXEC
-	ENOKEY
-	ENOLCK
-	ENOLINK
-	ENOMEDIUM
-	ENOMEM
-	ENOMSG
-	ENONET
-	ENOPKG
-	ENOPROTOOPT
-	ENOSPC
-	ENOSR
-	ENOSTR
-	ENOSYS
-	ENOTBLK
-	ENOTCONN
-	ENOTEMPTY
-	ENOTNAM
-	ENOTRECOVERABLE
-	ENOTSOCK
-	ENOTSUP
-	ENOTTY
-	ENOTUNIQ
-	ENXIO
-	EOPNOTSUPP
-	EOVERFLOW
-	EOWNERDEAD
-	EPERM
-	EPFNOSUPPORT
-	EPIPE
-	EPROTO
-	EPROTONOSUPPORT
-	EPROTOTYPE
-	ERANGE
-	EREMCHG
-	EREMOTE
-	EREMOTEIO
-	ERESTART
-	EROFS
-	ESHUTDOWN
-	ESOCKTNOSUPPORT
-	ESPIPE
-	ESRCH
-	ESRMNT
-	ESTALE
-	ESTRPIPE
-	ETIME
-	ETIMEDOUT
-	ETOOMANYREFS
-	ETXTBSY
-	EUCLEAN
-	EUNATCH
-	EUSERS
-	EWOULDBLOCK
-	EXDEV
-	EXFULL
-	EWINDOWS
-)
-    Invented values to support what package os and others expects.
 
 func (e Errno) Error() string
 
@@ -1470,39 +2417,26 @@ func (e Errno) Temporary() bool
 
 func (e Errno) Timeout() bool
 
-type FileNotifyInformation struct {
-	NextEntryOffset uint32
-	Action          uint32
-	FileNameLength  uint32
-	FileName        uint16
+type FdSet struct {
+	Bits [16]int64
 }
 
-type Filetime struct {
-	LowDateTime  uint32
-	HighDateTime uint32
+type Flock_t struct {
+	Type      int16
+	Whence    int16
+	Pad_cgo_0 [4]byte
+	Start     int64
+	Len       int64
+	Pid       int32
+	Pad_cgo_1 [4]byte
 }
 
-func NsecToFiletime(nsec int64) (ft Filetime)
-
-func (ft *Filetime) Nanoseconds() int64
-    Nanoseconds returns Filetime ft in nanoseconds since Epoch (00:00:00 UTC,
-    January 1, 1970).
-
-type GUID struct {
-	Data1 uint32
-	Data2 uint16
-	Data3 uint16
-	Data4 [8]byte
+type Fsid struct {
+	X__val [2]int32
 }
 
-type Handle uintptr
-
-type Hostent struct {
-	Name     *byte
-	Aliases  **byte
-	AddrType uint16
-	Length   uint16
-	AddrList **byte
+type ICMPv6Filter struct {
+	Data [8]uint32
 }
 
 type IPMreq struct {
@@ -1510,207 +2444,163 @@ type IPMreq struct {
 	Interface [4]byte /* in_addr */
 }
 
+type IPMreqn struct {
+	Multiaddr [4]byte /* in_addr */
+	Address   [4]byte /* in_addr */
+	Ifindex   int32
+}
+
+type IPv6MTUInfo struct {
+	Addr RawSockaddrInet6
+	Mtu  uint32
+}
+
 type IPv6Mreq struct {
 	Multiaddr [16]byte /* in6_addr */
 	Interface uint32
 }
 
-type InterfaceInfo struct {
-	Flags            uint32
-	Address          SockaddrGen
-	BroadcastAddress SockaddrGen
-	Netmask          SockaddrGen
+type IfAddrmsg struct {
+	Family    uint8
+	Prefixlen uint8
+	Flags     uint8
+	Scope     uint8
+	Index     uint32
 }
 
-type IpAdapterInfo struct {
-	Next                *IpAdapterInfo
-	ComboIndex          uint32
-	AdapterName         [MAX_ADAPTER_NAME_LENGTH + 4]byte
-	Description         [MAX_ADAPTER_DESCRIPTION_LENGTH + 4]byte
-	AddressLength       uint32
-	Address             [MAX_ADAPTER_ADDRESS_LENGTH]byte
-	Index               uint32
-	Type                uint32
-	DhcpEnabled         uint32
-	CurrentIpAddress    *IpAddrString
-	IpAddressList       IpAddrString
-	GatewayList         IpAddrString
-	DhcpServer          IpAddrString
-	HaveWins            bool
-	PrimaryWinsServer   IpAddrString
-	SecondaryWinsServer IpAddrString
-	LeaseObtained       int64
-	LeaseExpires        int64
+type IfInfomsg struct {
+	Family     uint8
+	X__ifi_pad uint8
+	Type       uint16
+	Index      int32
+	Flags      uint32
+	Change     uint32
 }
 
-type IpAddrString struct {
-	Next      *IpAddrString
-	IpAddress IpAddressString
-	IpMask    IpMaskString
-	Context   uint32
+type Inet4Pktinfo struct {
+	Ifindex  int32
+	Spec_dst [4]byte /* in_addr */
+	Addr     [4]byte /* in_addr */
 }
 
-type IpAddressString struct {
-	String [16]byte
+type Inet6Pktinfo struct {
+	Addr    [16]byte /* in6_addr */
+	Ifindex uint32
 }
 
-type IpMaskString IpAddressString
-
-type LazyDLL struct {
-	Name string
-	// Has unexported fields.
+type InotifyEvent struct {
+	Wd     int32
+	Mask   uint32
+	Cookie uint32
+	Len    uint32
+	Name   [0]uint8
 }
-    A LazyDLL implements access to a single DLL. It will delay the load of
-    the DLL until the first call to its LazyDLL.Handle method or to one of its
-    LazyProc's Addr method.
 
-    LazyDLL is subject to the same DLL preloading attacks as documented on
-    LoadDLL.
-
-    Use LazyDLL in golang.org/x/sys/windows for a secure way to load system
-    DLLs.
-
-func NewLazyDLL(name string) *LazyDLL
-    NewLazyDLL creates new LazyDLL associated with DLL file.
-
-func (d *LazyDLL) Handle() uintptr
-    Handle returns d's module handle.
-
-func (d *LazyDLL) Load() error
-    Load loads DLL file d.Name into memory. It returns an error if fails.
-    Load will not try to load DLL, if it is already loaded into memory.
-
-func (d *LazyDLL) NewProc(name string) *LazyProc
-    NewProc returns a LazyProc for accessing the named procedure in the DLL d.
-
-type LazyProc struct {
-	Name string
-
-	// Has unexported fields.
+type Iovec struct {
+	Base *byte
+	Len  uint64
 }
-    A LazyProc implements access to a procedure inside a LazyDLL. It delays the
-    lookup until the LazyProc.Addr, LazyProc.Call, or LazyProc.Find method is
-    called.
 
-func (p *LazyProc) Addr() uintptr
-    Addr returns the address of the procedure represented by p. The return value
-    can be passed to Syscall to run the procedure.
-
-func (p *LazyProc) Call(a ...uintptr) (r1, r2 uintptr, lastErr error)
-    Call executes procedure p with arguments a. See the documentation of
-    Proc.Call for more information.
-
-func (p *LazyProc) Find() error
-    Find searches DLL for procedure named p.Name. It returns an error if search
-    fails. Find will not search procedure, if it is already found and loaded
-    into memory.
+func (iov *Iovec) SetLen(length int)
 
 type Linger struct {
 	Onoff  int32
 	Linger int32
 }
 
-type MibIfRow struct {
-	Name            [MAX_INTERFACE_NAME_LEN]uint16
-	Index           uint32
-	Type            uint32
-	Mtu             uint32
-	Speed           uint32
-	PhysAddrLen     uint32
-	PhysAddr        [MAXLEN_PHYSADDR]byte
-	AdminStatus     uint32
-	OperStatus      uint32
-	LastChange      uint32
-	InOctets        uint32
-	InUcastPkts     uint32
-	InNUcastPkts    uint32
-	InDiscards      uint32
-	InErrors        uint32
-	InUnknownProtos uint32
-	OutOctets       uint32
-	OutUcastPkts    uint32
-	OutNUcastPkts   uint32
-	OutDiscards     uint32
-	OutErrors       uint32
-	OutQLen         uint32
-	DescrLen        uint32
-	Descr           [MAXLEN_IFDESCR]byte
+type Msghdr struct {
+	Name       *byte
+	Namelen    uint32
+	Pad_cgo_0  [4]byte
+	Iov        *Iovec
+	Iovlen     uint64
+	Control    *byte
+	Controllen uint64
+	Flags      int32
+	Pad_cgo_1  [4]byte
 }
 
-type Overlapped struct {
-	Internal     uintptr
-	InternalHigh uintptr
-	Offset       uint32
-	OffsetHigh   uint32
-	HEvent       Handle
+func (msghdr *Msghdr) SetControllen(length int)
+
+type NetlinkMessage struct {
+	Header NlMsghdr
+	Data   []byte
+}
+    NetlinkMessage represents a netlink message.
+
+type NetlinkRouteAttr struct {
+	Attr  RtAttr
+	Value []byte
+}
+    NetlinkRouteAttr represents a netlink route attribute.
+
+type NetlinkRouteRequest struct {
+	Header NlMsghdr
+	Data   RtGenmsg
+}
+    NetlinkRouteRequest represents a request message to receive routing and link
+    states from the kernel.
+
+type NlAttr struct {
+	Len  uint16
+	Type uint16
 }
 
-type Pointer *struct{}
-    Pointer represents a pointer to an arbitrary Windows type.
-
-    Pointer-typed fields may point to one of many different types. It's up to
-    the caller to provide a pointer to the appropriate type, cast to Pointer.
-    The caller must obey the unsafe.Pointer rules while doing so.
-
-type Proc struct {
-	Dll  *DLL
-	Name string
-	// Has unexported fields.
+type NlMsgerr struct {
+	Error int32
+	Msg   NlMsghdr
 }
-    A Proc implements access to a procedure inside a DLL.
 
-func (p *Proc) Addr() uintptr
-    Addr returns the address of the procedure represented by p. The return value
-    can be passed to Syscall to run the procedure.
-
-func (p *Proc) Call(a ...uintptr) (uintptr, uintptr, error)
-    Call executes procedure p with arguments a.
-
-    The returned error is always non-nil, constructed from the result of
-    GetLastError. Callers must inspect the primary return value to decide
-    whether an error occurred (according to the semantics of the specific
-    function being called) before consulting the error. The error always has
-    type Errno.
-
-    On amd64, Call can pass and return floating-point values. To pass an
-    argument x with C type "float", use uintptr(math.Float32bits(x)).
-    To pass an argument with C type "double", use uintptr(math.Float64bits(x)).
-    Floating-point return values are returned in r2. The return value for C
-    type "float" is math.Float32frombits(uint32(r2)). For C type "double",
-    it is math.Float64frombits(uint64(r2)).
+type NlMsghdr struct {
+	Len   uint32
+	Type  uint16
+	Flags uint16
+	Seq   uint32
+	Pid   uint32
+}
 
 type ProcAttr struct {
-	Dir   string
-	Env   []string
-	Files []uintptr
+	Dir   string    // Current working directory.
+	Env   []string  // Environment.
+	Files []uintptr // File descriptors.
 	Sys   *SysProcAttr
 }
+    ProcAttr holds attributes that will be applied to a new process started by
+    StartProcess.
 
-type ProcessEntry32 struct {
-	Size            uint32
-	Usage           uint32
-	ProcessID       uint32
-	DefaultHeapID   uintptr
-	ModuleID        uint32
-	Threads         uint32
-	ParentProcessID uint32
-	PriClassBase    int32
-	Flags           uint32
-	ExeFile         [MAX_PATH]uint16
+type PtraceRegs struct {
+	R15      uint64
+	R14      uint64
+	R13      uint64
+	R12      uint64
+	Rbp      uint64
+	Rbx      uint64
+	R11      uint64
+	R10      uint64
+	R9       uint64
+	R8       uint64
+	Rax      uint64
+	Rcx      uint64
+	Rdx      uint64
+	Rsi      uint64
+	Rdi      uint64
+	Orig_rax uint64
+	Rip      uint64
+	Cs       uint64
+	Eflags   uint64
+	Rsp      uint64
+	Ss       uint64
+	Fs_base  uint64
+	Gs_base  uint64
+	Ds       uint64
+	Es       uint64
+	Fs       uint64
+	Gs       uint64
 }
 
-type ProcessInformation struct {
-	Process   Handle
-	Thread    Handle
-	ProcessId uint32
-	ThreadId  uint32
-}
+func (r *PtraceRegs) PC() uint64
 
-type Protoent struct {
-	Name    *byte
-	Aliases **byte
-	Proto   uint16
-}
+func (r *PtraceRegs) SetPC(pc uint64)
 
 type RawConn interface {
 	// Control invokes f on the underlying connection's file
@@ -1741,10 +2631,8 @@ type RawSockaddr struct {
 
 type RawSockaddrAny struct {
 	Addr RawSockaddr
-	Pad  [100]int8
+	Pad  [96]int8
 }
-
-func (rsa *RawSockaddrAny) Sockaddr() (Sockaddr, error)
 
 type RawSockaddrInet4 struct {
 	Family uint16
@@ -1761,74 +2649,110 @@ type RawSockaddrInet6 struct {
 	Scope_id uint32
 }
 
+type RawSockaddrLinklayer struct {
+	Family   uint16
+	Protocol uint16
+	Ifindex  int32
+	Hatype   uint16
+	Pkttype  uint8
+	Halen    uint8
+	Addr     [8]uint8
+}
+
+type RawSockaddrNetlink struct {
+	Family uint16
+	Pad    uint16
+	Pid    uint32
+	Groups uint32
+}
+
 type RawSockaddrUnix struct {
 	Family uint16
-	Path   [UNIX_PATH_MAX]int8
+	Path   [108]int8
+}
+
+type Rlimit struct {
+	Cur uint64
+	Max uint64
+}
+
+type RtAttr struct {
+	Len  uint16
+	Type uint16
+}
+
+type RtGenmsg struct {
+	Family uint8
+}
+
+type RtMsg struct {
+	Family   uint8
+	Dst_len  uint8
+	Src_len  uint8
+	Tos      uint8
+	Table    uint8
+	Protocol uint8
+	Scope    uint8
+	Type     uint8
+	Flags    uint32
+}
+
+type RtNexthop struct {
+	Len     uint16
+	Flags   uint8
+	Hops    uint8
+	Ifindex int32
 }
 
 type Rusage struct {
-	CreationTime Filetime
-	ExitTime     Filetime
-	KernelTime   Filetime
-	UserTime     Filetime
-}
-    Invented structures to support what package os expects.
-
-type SID struct{}
-    The security identifier (SID) structure is a variable-length structure used
-    to uniquely identify users or groups.
-
-func (sid *SID) Copy() (*SID, error)
-    Copy creates a duplicate of security identifier sid.
-
-func (sid *SID) Len() int
-    Len returns the length, in bytes, of a valid security identifier sid.
-
-func (sid *SID) LookupAccount(system string) (account, domain string, accType uint32, err error)
-    LookupAccount retrieves the name of the account for this sid and the name of
-    the first domain on which this sid is found. System specify target computer
-    to search for.
-
-func (sid *SID) String() (string, error)
-    String converts sid to a string format suitable for display, storage,
-    or transmission.
-
-type SIDAndAttributes struct {
-	Sid        *SID
-	Attributes uint32
-}
-
-type SSLExtraCertChainPolicyPara struct {
-	Size       uint32
-	AuthType   uint32
-	Checks     uint32
-	ServerName *uint16
-}
-
-type SecurityAttributes struct {
-	Length             uint32
-	SecurityDescriptor uintptr
-	InheritHandle      uint32
-}
-
-type Servent struct {
-	Name    *byte
-	Aliases **byte
-	Proto   *byte
-	Port    uint16
+	Utime    Timeval
+	Stime    Timeval
+	Maxrss   int64
+	Ixrss    int64
+	Idrss    int64
+	Isrss    int64
+	Minflt   int64
+	Majflt   int64
+	Nswap    int64
+	Inblock  int64
+	Oublock  int64
+	Msgsnd   int64
+	Msgrcv   int64
+	Nsignals int64
+	Nvcsw    int64
+	Nivcsw   int64
 }
 
 type Signal int
+    A Signal is a number describing a process signal. It implements the
+    os.Signal interface.
 
 func (s Signal) Signal()
 
 func (s Signal) String() string
 
+type SockFilter struct {
+	Code uint16
+	Jt   uint8
+	Jf   uint8
+	K    uint32
+}
+
+func LsfJump(code, k, jt, jf int) *SockFilter
+    Deprecated: Use golang.org/x/net/bpf instead.
+
+func LsfStmt(code, k int) *SockFilter
+    Deprecated: Use golang.org/x/net/bpf instead.
+
+type SockFprog struct {
+	Len       uint16
+	Pad_cgo_0 [6]byte
+	Filter    *SockFilter
+}
+
 type Sockaddr interface {
 	// Has unexported methods.
 }
-
-type SockaddrGen [24]byte
 
 type SockaddrInet4 struct {
 	Port int
@@ -1843,69 +2767,202 @@ type SockaddrInet6 struct {
 	// Has unexported fields.
 }
 
+type SockaddrLinklayer struct {
+	Protocol uint16
+	Ifindex  int
+	Hatype   uint16
+	Pkttype  uint8
+	Halen    uint8
+	Addr     [8]byte
+	// Has unexported fields.
+}
+
+type SockaddrNetlink struct {
+	Family uint16
+	Pad    uint16
+	Pid    uint32
+	Groups uint32
+	// Has unexported fields.
+}
+
 type SockaddrUnix struct {
 	Name string
 	// Has unexported fields.
 }
 
-type StartupInfo struct {
-	Cb uint32
+type SocketControlMessage struct {
+	Header Cmsghdr
+	Data   []byte
+}
+    SocketControlMessage represents a socket control message.
 
-	Desktop       *uint16
-	Title         *uint16
-	X             uint32
-	Y             uint32
-	XSize         uint32
-	YSize         uint32
-	XCountChars   uint32
-	YCountChars   uint32
-	FillAttribute uint32
-	Flags         uint32
-	ShowWindow    uint16
+type Stat_t struct {
+	Dev       uint64
+	Ino       uint64
+	Nlink     uint64
+	Mode      uint32
+	Uid       uint32
+	Gid       uint32
+	X__pad0   int32
+	Rdev      uint64
+	Size      int64
+	Blksize   int64
+	Blocks    int64
+	Atim      Timespec
+	Mtim      Timespec
+	Ctim      Timespec
+	X__unused [3]int64
+}
 
-	StdInput  Handle
-	StdOutput Handle
-	StdErr    Handle
-	// Has unexported fields.
+type Statfs_t struct {
+	Type    int64
+	Bsize   int64
+	Blocks  uint64
+	Bfree   uint64
+	Bavail  uint64
+	Files   uint64
+	Ffree   uint64
+	Fsid    Fsid
+	Namelen int64
+	Frsize  int64
+	Flags   int64
+	Spare   [4]int64
 }
 
 type SysProcAttr struct {
-	HideWindow                 bool
-	CmdLine                    string // used if non-empty, else the windows command line is built by escaping the arguments passed to StartProcess
-	CreationFlags              uint32
-	Token                      Token               // if set, runs new process in the security context represented by the token
-	ProcessAttributes          *SecurityAttributes // if set, applies these security attributes as the descriptor for the new process
-	ThreadAttributes           *SecurityAttributes // if set, applies these security attributes as the descriptor for the main thread of the new process
-	NoInheritHandles           bool                // if set, no handles are inherited by the new process, not even the standard handles, contained in ProcAttr.Files, nor the ones contained in AdditionalInheritedHandles
-	AdditionalInheritedHandles []Handle            // a list of additional handles, already marked as inheritable, that will be inherited by the new process
-	ParentProcess              Handle              // if non-zero, the new process regards the process given by this handle as its parent process, and AdditionalInheritedHandles, if set, should exist in this parent process
+	Chroot     string      // Chroot.
+	Credential *Credential // Credential.
+	// Ptrace tells the child to call ptrace(PTRACE_TRACEME).
+	// Call runtime.LockOSThread before starting a process with this set,
+	// and don't call UnlockOSThread until done with PtraceSyscall calls.
+	Ptrace bool
+	Setsid bool // Create session.
+	// Setpgid sets the process group ID of the child to Pgid,
+	// or, if Pgid == 0, to the new child's process ID.
+	Setpgid bool
+	// Setctty sets the controlling terminal of the child to
+	// file descriptor Ctty. Ctty must be a descriptor number
+	// in the child process: an index into ProcAttr.Files.
+	// This is only meaningful if Setsid is true.
+	Setctty bool
+	Noctty  bool // Detach fd 0 from controlling terminal.
+	Ctty    int  // Controlling TTY fd.
+	// Foreground places the child process group in the foreground.
+	// This implies Setpgid. The Ctty field must be set to
+	// the descriptor of the controlling TTY.
+	// Unlike Setctty, in this case Ctty must be a descriptor
+	// number in the parent process.
+	Foreground bool
+	Pgid       int // Child's process group ID if Setpgid.
+	// Pdeathsig, if non-zero, is a signal that the kernel will send to
+	// the child process when the creating thread dies. Note that the signal
+	// is sent on thread termination, which may happen before process termination.
+	// There are more details at https://go.dev/issue/27505.
+	Pdeathsig    Signal
+	Cloneflags   uintptr        // Flags for clone calls.
+	Unshareflags uintptr        // Flags for unshare calls.
+	UidMappings  []SysProcIDMap // User ID mappings for user namespaces.
+	GidMappings  []SysProcIDMap // Group ID mappings for user namespaces.
+	// GidMappingsEnableSetgroups enabling setgroups syscall.
+	// If false, then setgroups syscall will be disabled for the child process.
+	// This parameter is no-op if GidMappings == nil. Otherwise for unprivileged
+	// users this should be set to false for mappings work.
+	GidMappingsEnableSetgroups bool
+	AmbientCaps                []uintptr // Ambient capabilities.
+	UseCgroupFD                bool      // Whether to make use of the CgroupFD field.
+	CgroupFD                   int       // File descriptor of a cgroup to put the new process into.
+	// PidFD, if not nil, is used to store the pidfd of a child, if the
+	// functionality is supported by the kernel, or -1. Note *PidFD is
+	// changed only if the process starts successfully.
+	PidFD *int
 }
 
-type Systemtime struct {
-	Year         uint16
-	Month        uint16
-	DayOfWeek    uint16
-	Day          uint16
-	Hour         uint16
-	Minute       uint16
-	Second       uint16
-	Milliseconds uint16
+type SysProcIDMap struct {
+	ContainerID int // Container ID.
+	HostID      int // Host ID.
+	Size        int // Size.
+}
+    SysProcIDMap holds Container ID to Host ID mappings used for User Namespaces
+    in Linux. See user_namespaces(7).
+
+    Note that User Namespaces are not available on a number of popular Linux
+    versions (due to security issues), or are available but subject to AppArmor
+    restrictions like in Ubuntu 24.04.
+
+type Sysinfo_t struct {
+	Uptime    int64
+	Loads     [3]uint64
+	Totalram  uint64
+	Freeram   uint64
+	Sharedram uint64
+	Bufferram uint64
+	Totalswap uint64
+	Freeswap  uint64
+	Procs     uint16
+	Pad       uint16
+	Pad_cgo_0 [4]byte
+	Totalhigh uint64
+	Freehigh  uint64
+	Unit      uint32
+	X_f       [0]byte
+	Pad_cgo_1 [4]byte
 }
 
-type TCPKeepalive struct {
-	OnOff    uint32
-	Time     uint32
-	Interval uint32
+type TCPInfo struct {
+	State          uint8
+	Ca_state       uint8
+	Retransmits    uint8
+	Probes         uint8
+	Backoff        uint8
+	Options        uint8
+	Pad_cgo_0      [2]byte
+	Rto            uint32
+	Ato            uint32
+	Snd_mss        uint32
+	Rcv_mss        uint32
+	Unacked        uint32
+	Sacked         uint32
+	Lost           uint32
+	Retrans        uint32
+	Fackets        uint32
+	Last_data_sent uint32
+	Last_ack_sent  uint32
+	Last_data_recv uint32
+	Last_ack_recv  uint32
+	Pmtu           uint32
+	Rcv_ssthresh   uint32
+	Rtt            uint32
+	Rttvar         uint32
+	Snd_ssthresh   uint32
+	Snd_cwnd       uint32
+	Advmss         uint32
+	Reordering     uint32
+	Rcv_rtt        uint32
+	Rcv_space      uint32
+	Total_retrans  uint32
 }
+
+type Termios struct {
+	Iflag     uint32
+	Oflag     uint32
+	Cflag     uint32
+	Lflag     uint32
+	Line      uint8
+	Cc        [32]uint8
+	Pad_cgo_0 [3]byte
+	Ispeed    uint32
+	Ospeed    uint32
+}
+
+type Time_t int64
 
 type Timespec struct {
 	Sec  int64
 	Nsec int64
 }
-    Timespec is an invented structure on Windows, but here for consistency with
-    the syscall package for other operating systems.
 
-func NsecToTimespec(nsec int64) (ts Timespec)
+func NsecToTimespec(nsec int64) Timespec
+    NsecToTimespec converts a number of nanoseconds into a Timespec.
 
 func (ts *Timespec) Nano() int64
     Nano returns the time stored in ts as nanoseconds.
@@ -1914,122 +2971,83 @@ func (ts *Timespec) Unix() (sec int64, nsec int64)
     Unix returns the time stored in ts as seconds plus nanoseconds.
 
 type Timeval struct {
-	Sec  int32
-	Usec int32
+	Sec  int64
+	Usec int64
 }
-    Invented values to support what package os expects.
 
-func NsecToTimeval(nsec int64) (tv Timeval)
+func NsecToTimeval(nsec int64) Timeval
+    NsecToTimeval converts a number of nanoseconds into a Timeval.
 
 func (tv *Timeval) Nano() int64
     Nano returns the time stored in tv as nanoseconds.
 
-func (tv *Timeval) Nanoseconds() int64
-
 func (tv *Timeval) Unix() (sec int64, nsec int64)
     Unix returns the time stored in tv as seconds plus nanoseconds.
 
-type Timezoneinformation struct {
-	Bias         int32
-	StandardName [32]uint16
-	StandardDate Systemtime
-	StandardBias int32
-	DaylightName [32]uint16
-	DaylightDate Systemtime
-	DaylightBias int32
+type Timex struct {
+	Modes     uint32
+	Pad_cgo_0 [4]byte
+	Offset    int64
+	Freq      int64
+	Maxerror  int64
+	Esterror  int64
+	Status    int32
+	Pad_cgo_1 [4]byte
+	Constant  int64
+	Precision int64
+	Tolerance int64
+	Time      Timeval
+	Tick      int64
+	Ppsfreq   int64
+	Jitter    int64
+	Shift     int32
+	Pad_cgo_2 [4]byte
+	Stabil    int64
+	Jitcnt    int64
+	Calcnt    int64
+	Errcnt    int64
+	Stbcnt    int64
+	Tai       int32
+	Pad_cgo_3 [44]byte
 }
 
-type Token Handle
-    An access token contains the security information for a logon session.
-    The system creates an access token when a user logs on, and every process
-    executed on behalf of the user has a copy of the token. The token identifies
-    the user, the user's groups, and the user's privileges. The system uses the
-    token to control access to securable objects and to control the ability of
-    the user to perform various system-related operations on the local computer.
-
-func (t Token) Close() error
-    Close releases access to access token.
-
-func (t Token) GetTokenPrimaryGroup() (*Tokenprimarygroup, error)
-    GetTokenPrimaryGroup retrieves access token t primary group information.
-    A pointer to a SID structure representing a group that will become the
-    primary group of any objects created by a process using this access token.
-
-func (t Token) GetTokenUser() (*Tokenuser, error)
-    GetTokenUser retrieves access token t user account information.
-
-func (t Token) GetUserProfileDirectory() (string, error)
-    GetUserProfileDirectory retrieves path to the root directory of the access
-    token t user's profile.
-
-type Tokenprimarygroup struct {
-	PrimaryGroup *SID
+type Tms struct {
+	Utime  int64
+	Stime  int64
+	Cutime int64
+	Cstime int64
 }
 
-type Tokenuser struct {
-	User SIDAndAttributes
+type Ucred struct {
+	Pid int32
+	Uid uint32
+	Gid uint32
 }
 
-type TransmitFileBuffers struct {
-	Head       uintptr
-	HeadLength uint32
-	Tail       uintptr
-	TailLength uint32
+type Ustat_t struct {
+	Tfree     int32
+	Pad_cgo_0 [4]byte
+	Tinode    uint64
+	Fname     [6]int8
+	Fpack     [6]int8
+	Pad_cgo_1 [4]byte
 }
 
-type UserInfo10 struct {
-	Name       *uint16
-	Comment    *uint16
-	UsrComment *uint16
-	FullName   *uint16
+type Utimbuf struct {
+	Actime  int64
+	Modtime int64
 }
 
-type WSABuf struct {
-	Len uint32
-	Buf *byte
+type Utsname struct {
+	Sysname    [65]int8
+	Nodename   [65]int8
+	Release    [65]int8
+	Version    [65]int8
+	Machine    [65]int8
+	Domainname [65]int8
 }
 
-type WSAData struct {
-	Version      uint16
-	HighVersion  uint16
-	MaxSockets   uint16
-	MaxUdpDg     uint16
-	VendorInfo   *byte
-	Description  [WSADESCRIPTION_LEN + 1]byte
-	SystemStatus [WSASYS_STATUS_LEN + 1]byte
-}
-
-type WSAProtocolChain struct {
-	ChainLen     int32
-	ChainEntries [MAX_PROTOCOL_CHAIN]uint32
-}
-
-type WSAProtocolInfo struct {
-	ServiceFlags1     uint32
-	ServiceFlags2     uint32
-	ServiceFlags3     uint32
-	ServiceFlags4     uint32
-	ProviderFlags     uint32
-	ProviderId        GUID
-	CatalogEntryId    uint32
-	ProtocolChain     WSAProtocolChain
-	Version           int32
-	AddressFamily     int32
-	MaxSockAddr       int32
-	MinSockAddr       int32
-	SocketType        int32
-	Protocol          int32
-	ProtocolMaxOffset int32
-	NetworkByteOrder  int32
-	SecurityScheme    int32
-	MessageSize       uint32
-	ProviderReserved  uint32
-	ProtocolName      [WSAPROTOCOL_LEN + 1]uint16
-}
-
-type WaitStatus struct {
-	ExitCode uint32
-}
+type WaitStatus uint32
 
 func (w WaitStatus) Continued() bool
 
@@ -2048,33 +3066,6 @@ func (w WaitStatus) StopSignal() Signal
 func (w WaitStatus) Stopped() bool
 
 func (w WaitStatus) TrapCause() int
-
-type Win32FileAttributeData struct {
-	FileAttributes uint32
-	CreationTime   Filetime
-	LastAccessTime Filetime
-	LastWriteTime  Filetime
-	FileSizeHigh   uint32
-	FileSizeLow    uint32
-}
-
-type Win32finddata struct {
-	FileAttributes    uint32
-	CreationTime      Filetime
-	LastAccessTime    Filetime
-	LastWriteTime     Filetime
-	FileSizeHigh      uint32
-	FileSizeLow       uint32
-	Reserved0         uint32
-	Reserved1         uint32
-	FileName          [MAX_PATH - 1]uint16
-	AlternateFileName [13]uint16
-}
-
-
-BUG: The definition of Linger is not appropriate for direct use
-with Setsockopt and Getsockopt.
-Use SetsockoptLinger instead.
 ~~~
 
 > 이 페이지는 비공식 한국어 미러 문서입니다. API의 권위 있는 원문은 pkg.go.dev 및 golang/go에 있습니다.

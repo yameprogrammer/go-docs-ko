@@ -1,3 +1,3 @@
 <!--{
-	"이동": "/doc/install/source"
+	"Redirect": "/doc/install/source"
 }-->
