@@ -3,11 +3,16 @@ name: Sync Go docs to Korean
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 */6 * * *'
+    - cron: '0 0 */14 * *'  # every 2 weeks
+
+concurrency:
+  group: sync-go-docs-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   sync-go-docs:
     runs-on: ubuntu-latest
+    timeout-minutes: 180
     permissions:
       contents: write
       pull-requests: write
@@ -33,12 +38,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Check if upstream Go docs changed
         id: upstream_check
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
 
           latest_go_sha=$(git ls-remote "$SOURCE_REPO" "refs/heads/$SOURCE_BRANCH" | awk '{print $1}')
           latest_website_sha=$(git ls-remote "$WEBSITE_SOURCE_REPO" "refs/heads/$WEBSITE_SOURCE_BRANCH" | awk '{print $1}')
@@ -51,6 +58,11 @@ jobs:
 
           if [ -f .upstream-website-sha ]; then
             current_website_sha=$(cat .upstream-website-sha)
+          fi
+
+          if [ -z "$latest_go_sha" ] || [ -z "$latest_website_sha" ]; then
+            echo "Failed to resolve upstream branch HEAD." >&2
+            exit 1
           fi
 
           echo "latest_go_sha=$latest_go_sha"
@@ -85,7 +97,7 @@ jobs:
       - name: Sync and translate Go docs
         if: steps.upstream_check.outputs.UPSTREAM_CHANGED == 'true'
         run: |
-          set -e
+          set -euo pipefail
 
           python scripts/translate_docs.py \
             --source-repo "$SOURCE_REPO" \
@@ -105,6 +117,7 @@ jobs:
           if [ "$INCLUDE_STD_GO_DOC_ALL" = "true" ]; then
             std_flags+=(--include-go-doc-all)
           fi
+
           python scripts/generate_std_docs.py \
             --output-dir "$OUTPUT_DIR/pkg/std" \
             "${std_flags[@]}"
@@ -114,8 +127,25 @@ jobs:
           echo "$latest_go_sha" > .upstream-go-sha
           echo "$latest_website_sha" > .upstream-website-sha
 
-      - name: Create or update pull request
+      - name: Check whether generated content changed
         if: steps.upstream_check.outputs.UPSTREAM_CHANGED == 'true'
+        id: generated_diff
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if git diff --quiet -- . ':(exclude).upstream-go-sha' ':(exclude).upstream-website-sha'; then
+            echo "No generated file changes found. Skipping PR creation."
+            echo "HAS_GENERATED_CHANGES=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Generated file changes found."
+            echo "HAS_GENERATED_CHANGES=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create or update pull request
+        if: >
+          steps.upstream_check.outputs.UPSTREAM_CHANGED == 'true' &&
+          steps.generated_diff.outputs.HAS_GENERATED_CHANGES == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
           commit-message: 'docs: sync Go official docs to Korean'
