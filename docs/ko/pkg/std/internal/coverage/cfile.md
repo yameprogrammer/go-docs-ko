@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`cfile` 패키지는 커버리지 파일 관리를 구현합니다.
+Package cfile implements management of coverage files.
 
 ## 원문 요약
 

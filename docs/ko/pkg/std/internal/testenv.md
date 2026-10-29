@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`testenv` 패키지는 Go 팀이 운영하는 다양한 테스트 환경에서 어떤 기능들을 사용할 수 있는지에 대한 정보를 제공합니다.
+Package testenv provides information about what functionality is available in different testing environments run by the Go team.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`reflectlite` 패키지는 `runtime`, `unsafe`, 그리고 `internal/abi` 외의 다른 패키지를 사용하지 않는 `reflect` 패키지의 경량화 버전을 구현합니다.
+Package reflectlite implements lightweight version of reflect, not using any package except for "runtime", "unsafe", and "internal/abi"
 
 ## 원문 요약
 

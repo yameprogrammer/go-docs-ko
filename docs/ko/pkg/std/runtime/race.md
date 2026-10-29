@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-package race는 데이터 경합(data race) 감지 로직을 구현합니다.
+Package race implements data race detection logic.
 
 ## 원문 요약
 

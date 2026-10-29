@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`sha1` 패키지는 RFC 3174에 정의된 SHA-1 해시 알고리즘을 구현합니다.
+Package sha1 implements the SHA-1 hash algorithm as defined in RFC 3174.
 
 ## 원문 요약
 

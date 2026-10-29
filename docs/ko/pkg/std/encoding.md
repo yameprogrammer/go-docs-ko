@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`encoding` 패키지는 데이터를 바이트 수준 및 텍스트 표현으로 변환하거나 그 반대로 변환하는 다른 패키지들이 공유하는 인터페이스를 정의합니다.
+Package encoding defines interfaces shared by other packages that convert data to and from byte-level and textual representations.
 
 ## 원문 요약
 

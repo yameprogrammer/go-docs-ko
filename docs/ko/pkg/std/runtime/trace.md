@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`trace` 패키지는 프로그램이 Go 실행 트레이서(execution tracer)를 위한 트레이스를 생성할 수 있는 기능을 제공합니다.
+Package trace contains facilities for programs to generate traces for the Go execution tracer.
 
 ## 원문 요약
 

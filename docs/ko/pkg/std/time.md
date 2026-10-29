@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`time` 패키지는 시간을 측정하고 표시하는 기능을 제공합니다.
+Package time provides functionality for measuring and displaying time.
 
 ## 원문 요약
 

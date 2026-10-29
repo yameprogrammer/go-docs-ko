@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`bzip2` 패키지는 bzip2 압축 해제를 구현합니다.
+Package bzip2 implements bzip2 decompression.
 
 ## 원문 요약
 

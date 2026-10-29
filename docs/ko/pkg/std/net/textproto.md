@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`textproto` 패키지는 HTTP, NNTP, SMTP 스타일의 텍스트 기반 요청/응답 프로토콜에 대한 일반적인 지원을 구현합니다.
+Package textproto implements generic support for text-based request/response protocols in the style of HTTP, NNTP, and SMTP.
 
 ## 원문 요약
 

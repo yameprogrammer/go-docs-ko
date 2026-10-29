@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`cmplx` 패키지는 복소수를 위한 기본적인 상수와 수학 함수를 제공합니다.
+Package cmplx provides basic constants and mathematical functions for complex numbers.
 
 ## 원문 요약
 

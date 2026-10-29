@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`alias` 패키지는 메모리 에일리어싱(memory aliasing) 테스트를 구현합니다.
+Package alias implements memory aliasing tests.
 
 ## 원문 요약
 

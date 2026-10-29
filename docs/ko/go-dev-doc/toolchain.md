@@ -1,288 +1,447 @@
-## 소개 {#intro}
+## Introduction {#intro}
+
+Starting in Go 1.21, the Go distribution consists of a `go` command and a bundled Go toolchain,
+which is the standard library as well as the compiler, assembler, and other tools.
+The `go` command can use its bundled Go toolchain as well as other versions
+that it finds in the local `PATH` or downloads as needed.
+
+The choice of Go toolchain being used depends on the `GOTOOLCHAIN` environment setting
+and the `go` and `toolchain` lines in the main module's `go.mod` file or the current workspace's `go.work` file.
+As you move between different main modules and workspaces,
+the toolchain version being used can vary, just as module dependency versions do.
+
+In the standard configuration, the `go` command uses its own bundled toolchain
+when that toolchain is at least as new as the `go` or `toolchain` lines in the main module or workspace.
+For example, when using the `go` command bundled with Go 1.21.3 in a main module that says `go 1.21.0`,
+the `go` command uses Go 1.21.3.
+When the `go` or `toolchain` line is newer than the bundled toolchain,
+the `go` command runs the newer toolchain instead.
+For example, when using the `go` command bundled with Go 1.21.3 in a main module that says `go 1.21.9`,
+the `go` command finds and runs Go 1.21.9 instead.
+It first looks in the PATH for a program named `go1.21.9` and otherwise downloads and caches
+a copy of the Go 1.21.9 toolchain.
+This automatic toolchain switching can be disabled, but in that case,
+for more precise forwards compatibility,
+the `go` command will refuse to run in a main module or workspace in which the `go` line
+requires a newer version of Go.
+That is, the `go` line sets the minimum required Go version necessary to use a module or workspace.
+
+Modules that are dependencies of other modules may need to set a minimum Go version requirement
+lower than the preferred toolchain to use when working in that module directly.
+In this case, the `toolchain` line in `go.mod` or `go.work` sets a preferred toolchain
+that takes precedence over the `go` line when the `go` command is deciding
+which toolchain to use.
+
+The `go` and `toolchain` lines can be thought of as specifying the version requirements
+for the module's dependency on the Go toolchain itself, just as the `require` lines in `go.mod`
+specify the version requirements for dependencies on other modules.
+The `go get` command manages the Go toolchain dependency just as it
+manages dependencies on other modules.
+For example, `go get go@latest` updates the module to require the latest released Go toolchain.
+
+The `GOTOOLCHAIN` environment setting can force a specific Go version, overriding
+the `go` and `toolchain` lines. For example, to test a package with Go 1.21rc3:
+
+	GOTOOLCHAIN=go1.21rc3 go test
+
+The default `GOTOOLCHAIN` setting is `auto`, which enables the toolchain switching described earlier.
+The alternate form `<name>+auto` sets the default toolchain to use before deciding whether to
+switch further. For example `GOTOOLCHAIN=go1.21.3+auto` directs the `go` command to
+begin its decision with a default of using Go 1.21.3 but still use a newer toolchain if
+directed by `go` and `toolchain` lines.
+Because the default `GOTOOLCHAIN` setting can be changed with `go env -w`,
+if you have Go 1.21.0 or later installed, then
+
+	go env -w GOTOOLCHAIN=go1.21.3+auto
+
+is equivalent to replacing your Go 1.21.0 installation with Go 1.21.3.
+
+The rest of this document explains how Go toolchains are versioned, chosen, and managed in more detail.
+
+## Go versions {#version}
+
+Released versions of Go use the version syntax ‘1.*N*.*P*’, denoting the *P*th release of Go 1.*N*.
+The initial release is 1.*N*.0, like in ‘1.21.0’. Later releases like 1.*N*.9 are often referred to as patch releases.
+
+Go 1.*N* release candidates, which are issued before 1.*N*.0, use the version syntax ‘1.*N*rc*R*’.
+The first release candidate for Go 1.*N* has version 1.*N*rc1, like in `1.23rc1`.
+
+The syntax ‘1.*N*’ is called a “language version”. It denotes the overall family of Go releases
+implementing that version of the Go language and standard library.
+
+The language version for a Go version is the result of truncating everything after the *N*:
+1.21, 1.21rc2, and 1.21.3 all implement language version 1.21.
+
+Released Go toolchains such as Go 1.21.0 and Go 1.21rc1 report that specific version
+(for example, `go1.21.0` or `go1.21rc1`)
+from `go version` and [`runtime.Version`](/pkg/runtime/#Version).
+Unreleased (still in development) Go toolchains built from the Go development repository
+instead report only the language version (for example, `go1.21`).
+
+Any two Go versions can be compared to decide whether one is less than, greater than,
+or equal to the other. If the language versions are different, that decides the comparison:
+1.21.9 < 1.22. Within a language version, the ordering from least to greatest is:
+the language version itself, then release candidates ordered by *R*, then releases ordered by *P*.
+
+For example, 1.21 < 1.21rc1 < 1.21rc2 < 1.21.0 < 1.21.1 < 1.21.2.
+
+Before Go 1.21, the initial release of a Go toolchain was version 1.*N*, not 1.*N*.0,
+so for *N* < 21, the ordering is adjusted to place 1.*N* after the release candidates.
+
+For example, 1.20rc1 < 1.20rc2 < 1.20rc3 < 1.20 < 1.20.1.
+
+Earlier versions of Go had beta releases, with versions like 1.18beta2.
+Beta releases are placed immediately before release candidates in the version ordering.
+
+For example, 1.18beta1 < 1.18beta2 < 1.18rc1 < 1.18 < 1.18.1.
+
+<!-- Unpublished note: the download page also lists Go 1.9.2rc2, which does not respect
+this version syntax. That was created as a test of some potential release automation
+before Go 1.9.2 but is not considered a “real” toolchain. -->
+
+## Go toolchain names {#name}
+
+The standard Go toolchains are named <code>go<i>V</i></code> where *V* is a Go version
+denoting a beta release, release candidate, or release.
+For example, `go1.21rc1` and `go1.21.0` are toolchain names;
+`go1.21` and `go1.22` are not (the initial releases are `go1.21.0` and `go1.22.0`),
+but `go1.20` and `go1.19` are.
+
+Non-standard toolchains use names of the form <code>go<i>V</i>-<i>suffix</i></code>
+for any suffix.
+
+Toolchains are compared by comparing the version <code><i>V</i></code> embedded in the name
+(dropping the initial `go` and discarding off any suffix beginning with `-`).
+For example, `go1.21.0` and `go1.21.0-custom` compare equal for ordering purposes.
+
+## Module and workspace configuration {#config}
+
+Go modules and workspaces specify version-related configuration
+in their `go.mod` or `go.work` files.
+
+The `go` line declares the minimum required Go version for using
+the module or workspace.
+For compatibility reasons, if the `go` line is omitted from a `go.mod` file,
+the module is considered to have an implicit `go 1.16` line,
+and if the `go` line is omitted from a `go.work` file,
+the workspace is considered to have an implicit `go 1.18` line.
+
+The `toolchain` line declares a suggested toolchain to use with
+the module or workspace.
+As described in “[Go toolchain selection](#select)” below,
+the `go` command may run this specific toolchain when operating
+in that module or workspace
+if the default toolchain's version is less than the suggested toolchain's version.
+If the `toolchain` line is omitted,
+the module or workspace is considered to have an implicit
+<code>toolchain go<i>V</i></code> line,
+where *V* is the Go version from the `go` line.
+
+For example, a `go.mod` that says `go 1.21.0` with no `toolchain` line
+is interpreted as if it had a `toolchain go1.21.0` line.
+
+The Go toolchain refuses to load a module or workspace that declares
+a minimum required Go version greater than the toolchain's own version.
+
+For example, Go 1.21.2 will refuse to load a module or workspace
+with a `go 1.21.3` or `go 1.22` line.
+
+A module's `go` line must declare a version greater than or equal to
+the `go` version declared by each of the modules listed in `require` statements.
+A workspace's `go` line must declare a version greater than or equal to
+the `go` version declared by each of the modules listed in `use` statements.
+
+For example, if module *M* requires a dependency *D* with a `go.mod`
+that declares `go 1.22.0`, then *M*'s `go.mod` cannot say `go 1.21.3`.
+
+The `go` line for each module sets the language version the compiler
+enforces when compiling packages in that module.
+The language version can be changed on a per-file basis by using a
+[build constraint](/cmd/go#hdr-Build_constraints):
+if a build constraint is present and implies a minimum version of at least `go1.21`,
+the language version used when compiling that file will be that minimum version.
+
+For example, a module containing code that uses the Go 1.21 language version
+should have a `go.mod` file with a `go` line such as `go 1.21` or `go 1.21.3`.
+If a specific source file should be compiled only when using a newer Go toolchain,
+adding `//go:build go1.22` to that source file both ensures that only Go 1.22 and
+newer toolchains will compile the file and also changes the language version in that
+file to Go 1.22.
+
+The `go` and `toolchain` lines are most conveniently and safely modified
+by using `go get`; see the [section dedicated to `go get` below](#get).
+
+Before Go 1.21, Go toolchains treated the `go` line as an advisory requirement:
+if builds succeeded the toolchain assumed everything worked,
+and if not it printed a note about the potential version mismatch.
+Go 1.21 changed the `go` line to be a mandatory requirement instead.
+This behavior is partly backported to earlier language versions:
+Go 1.19 releases starting at Go 1.19.13 and Go 1.20 releases starting at Go 1.20.8,
+refuse to load workspaces or modules declaring version Go 1.22 or later.
+
+Before Go 1.21, toolchains did not require a module
+or workspace to have a `go` line greater than or equal to the
+`go` version required by each of its dependency modules.
+
+## The `GOTOOLCHAIN` setting {#GOTOOLCHAIN}
+
+The `go` command selects the Go toolchain to use based on the `GOTOOLCHAIN` setting.
+To find the `GOTOOLCHAIN` setting, the `go` command uses the standard rules for any
+Go environment setting:
+
+ - If `GOTOOLCHAIN` is set to a non-empty value in the process environment
+   (as queried by [`os.Getenv`](/pkg/os/#Getenv)), the `go` command uses that value.
+
+ - Otherwise, if `GOTOOLCHAIN` is set in the user's environment default file
+   (managed with
+   [`go env -w` and `go env -u`](/cmd/go/#hdr-Print_Go_environment_information)),
+   the `go` command uses that value.
+
+ - Otherwise, if `GOTOOLCHAIN` is set in the bundled Go toolchain's environment
+   default file (`$GOROOT/go.env`), the `go` command uses that value.
+
+In standard Go toolchains, the `$GOROOT/go.env` file sets the default `GOTOOLCHAIN=auto`,
+but repackaged Go toolchains may change this value.
+
+If the `$GOROOT/go.env` file is missing or does not set a default, the `go` command
+assumes `GOTOOLCHAIN=local`.
+
+Running `go env GOTOOLCHAIN` prints the `GOTOOLCHAIN` setting.
+
+## Go toolchain selection {#select}
+
+At startup, the `go` command selects which Go toolchain to use.
+It consults the `GOTOOLCHAIN` setting,
+which takes the form `<name>`, `<name>+auto`, or `<name>+path`.
+`GOTOOLCHAIN=auto` is shorthand for `GOTOOLCHAIN=local+auto`;
+similarly, `GOTOOLCHAIN=path` is shorthand for `GOTOOLCHAIN=local+path`.
+The `<name>` sets the default Go toolchain:
+`local` indicates the bundled Go toolchain
+(the one that shipped with the `go` command being run), and otherwise `<name>` must
+be a specific Go toolchain name, such as `go1.21.0`.
+The `go` command prefers to run the default Go toolchain.
+As noted above, starting in Go 1.21, Go toolchains refuse to run in
+workspaces or modules that require newer Go versions.
+Instead, they report an error and exit.
+
+When `GOTOOLCHAIN` is set to `local`, the `go` command always runs the bundled Go toolchain.
+
+When `GOTOOLCHAIN` is set to `<name>` (for example, `GOTOOLCHAIN=go1.21.0`),
+the `go` command always runs that specific Go toolchain.
+If a binary with that name is found in the system PATH, the `go` command uses it.
+Otherwise the `go` command uses a Go toolchain it downloads and verifies.
+
+When `GOTOOLCHAIN` is set to `<name>+auto` or `<name>+path` (or the shorthands `auto` or `path`),
+the `go` command selects and runs a newer Go version as needed.
+Specifically, it consults the `toolchain` and `go` lines in the current workspace's
+`go.work` file or, when there is no workspace,
+the main module's `go.mod` file.
+If the `go.work` or `go.mod` file has a `toolchain <tname>` line
+and `<tname>` is newer than the default Go toolchain,
+then the `go` command runs `<tname>` instead.
+If the file has a `toolchain default` line,
+then the `go` command runs the default Go toolchain,
+disabling any attempt at updating beyond `<name>`.
+Otherwise, if the file has a `go <version>` line
+and `<version>` is newer than the default Go toolchain,
+then the `go` command runs `go<version>` instead.
+
+To run a toolchain other than the bundled Go toolchain,
+the `go` command searches the process's executable path
+(`$PATH` on Unix and Plan 9, `%PATH%` on Windows)
+for a program with the given name (for example, `go1.21.3`) and runs that program.
+If no such program is found, the `go` command
+[downloads and runs the specified Go toolchain](#download).
+Using the `GOTOOLCHAIN` form `<name>+path` disables the download fallback,
+causing the `go` command to stop after searching the executable path.
+
+Running `go version` prints the selected Go toolchain's version
+(by running the selected toolchain's implementation of `go version`).
+
+Running `GOTOOLCHAIN=local go version` prints the bundled Go toolchain's version.
+
+Starting in Go 1.24, you can trace the `go` command's toolchain selection process
+by adding `toolchaintrace=1` to the `GODEBUG` environment variable when you run the
+`go` command.
+
+## Go toolchain switches {#switch}
+
+For most commands, the workspace's `go.work` or the main module's `go.mod`
+will have a `go` line that is at least as new as the `go` line in any module dependency,
+due to the version ordering [configuration requirements](#config).
+In this case, the startup toolchain selection runs a new enough Go toolchain
+to complete the command.
+
+Some commands incorporate new module versions as part of their operation:
+`go get` adds new module dependencies to the main module;
+`go work use` adds new local modules to the workspace;
+`go work sync` resynchronizes a workspace with local modules that may have been updated
+since the workspace was created;
+`go install package@version` and `go run package@version`
+effectively run in an empty main module and add `package@version` as a new dependency.
+All these commands may encounter a module with a `go.mod` `go` line
+requiring a newer Go version than the currently executed Go version.
+
+When a command encounters a module requiring a newer Go version
+and `GOTOOLCHAIN` permits running different toolchains
+(it is one of the `auto` or `path` forms),
+the `go` command chooses and switches to an appropriate newer toolchain
+to continue executing the current command.
+
+Any time the `go` command switches toolchains after startup toolchain selection,
+it prints a message explaining why. For example:
+
+	go: module example.com/widget@v1.2.3 requires go >= 1.24rc1; switching to go 1.27.9
+
+As shown in the example, the `go` command may switch to a toolchain
+newer than the discovered requirement.
+In general the `go` command aims to switch to a supported Go toolchain.
+
+To choose the toolchain, the `go` command first obtains a list of available toolchains.
+For the `auto` form, the `go` command downloads a list of available toolchains.
+For the `path` form, the `go` command scans the PATH for any executables
+named for valid toolchains and uses a list of all the toolchains it finds.
+Using that list of toolchains, the `go` command identifies up to three candidates:
+
+ - the latest release candidate of an unreleased Go language version (1.*N*₃rc*R*₃),
+ - the latest patch release of the most recently released Go language version (1.*N*₂.*P*₂), and
+ - the latest patch release of the previous Go language version (1.*N*₁.*P*₁).
+
+These are the supported Go releases according to Go's [release policy](/doc/devel/release#policy).
+Consistent with [minimal version selection](https://research.swtch.com/vgo-mvs),
+the `go` command then conservatively uses the candidate with the _minimum_ (oldest)
+version that satisfies the new requirement.
+
+For example, suppose `example.com/widget@v1.2.3` requires Go 1.24rc1 or later.
+The `go` command obtains the list of available toolchains
+and finds that the latest patch releases of the two most recent Go toolchains are
+Go 1.28.3 and Go 1.27.9,
+and the release candidate Go 1.29rc2 is also available.
+In this situation, the `go` command will choose Go 1.27.9.
+If `widget` had required Go 1.28 or later, the `go` command would choose Go 1.28.3,
+because Go 1.27.9 is too old.
+If `widget` had required Go 1.29 or later, the `go` command would choose Go 1.29rc2,
+because both Go 1.27.9 and Go 1.28.3 are too old.
+
+Commands that incorporate new module versions that require new Go versions
+write the new minimum `go` version requirement to the current workspace's `go.work` file
+or the main module's `go.mod` file, updating the `go` line.
+For [repeatability](https://research.swtch.com/vgo-principles#repeatability),
+any command that updates the `go` line also updates the `toolchain` line
+to record its own toolchain name.
+The next time the `go` command runs in that workspace or module,
+it will use that updated `toolchain` line during [toolchain selection](#select).
+
+For example, `go get example.com/widget@v1.2.3` may print a switching notice
+like above and switch to Go 1.27.9.
+Go 1.27.9 will complete the `go get` and update the `toolchain` line
+to say `toolchain go1.27.9`.
+The next `go` command run in that module or workspace will select `go1.27.9`
+during startup and will not print any switching message.
+
+In general, if any `go` command is run twice, if the first prints a switching
+message, the second will not, because the first also updated `go.work` or `go.mod`
+to select the right toolchain at startup.
+The exception is the `go install package@version` and `go run package@version` forms,
+which run in no workspace or main module and cannot write a `toolchain` line.
+They print a switching message every time they need to switch
+to a newer toolchain.
+
+## Downloading toolchains {#download}
+
+When using `GOTOOLCHAIN=auto` or `GOTOOLCHAIN=<name>+auto`, the Go command
+downloads newer toolchains as needed.
+These toolchains are packaged as special modules
+with module path `golang.org/toolchain`
+and version <code>v0.0.1-go<i>VERSION</i>.<i>GOOS</i>-<i>GOARCH</i></code>.
+Toolchains are downloaded like any other module,
+meaning that toolchain downloads can be proxied by setting `GOPROXY`
+and have their checksums checked by the Go checksum database.
+Because the specific toolchain used depends on the system's own
+default toolchain as well as the local operating system and architecture (GOOS and GOARCH),
+it is not practical to write toolchain module checksums to `go.sum`.
+Instead, toolchain downloads fail for lack of verification if `GOSUMDB=off`.
+`GOPRIVATE` and `GONOSUMDB` patterns do not apply to the toolchain downloads.
+
+## Managing Go version module requirements with `go get` {#get}
+
+In general the `go` command treats the `go` and `toolchain` lines
+as declaring versioned toolchain dependencies of the main module.
+The `go get` command can manage these lines just as it manages
+the `require` lines that specify versioned module dependencies.
+
+For example, `go get go@1.22.1 toolchain@1.24rc1` changes the main module's
+`go.mod` file to read `go 1.22.1` and `toolchain go1.24rc1`.
+
+The `go` command understands that the `go` dependency requires a `toolchain` dependency
+with a greater or equal Go version.
+
+Continuing the example, a later `go get go@1.25.0` will update
+the toolchain to `go1.25.0` as well.
+When the toolchain matches the `go` line exactly, it can be
+omitted and implied, so this `go get` will delete the `toolchain` line.
+
+The same requirement applies in reverse when downgrading:
+if the `go.mod` starts at `go 1.22.1` and `toolchain go1.24rc1`,
+then `go get toolchain@go1.22.9` will update only the `toolchain` line,
+but `go get toolchain@go1.21.3` will downgrade the `go` line to
+`go 1.21.3` as well.
+The effect will be to leave just `go 1.21.3` with no `toolchain` line.
+
+The special form `toolchain@none` means to remove any `toolchain` line,
+as in `go get toolchain@none` or `go get go@1.25.0 toolchain@none`.
+
+The `go` command understands the version syntax for
+`go` and `toolchain` dependencies as well as queries.
+
+For example, just as `go get example.com/widget@v1.2` uses
+the latest `v1.2` version of `example.com/widget` (perhaps `v1.2.3`),
+`go get go@1.22` uses the latest available release of the Go 1.22 language version
+(perhaps `1.22rc3`, or perhaps `1.22.3`).
+The same applies to `go get toolchain@go1.22`.
+
+The `go get` and `go mod tidy` commands maintain the `go` line to
+be greater than or equal to the `go` line of any required dependency module.
+
+For example, if the main module has `go 1.22.1` and we run
+`go get example.com/widget@v1.2.3` which declares `go 1.24rc1`,
+then `go get` will update the main module's `go` line to `go 1.24rc1`.
+
+Continuing the example, a later `go get go@1.22.1` will
+downgrade `example.com/widget` to a version compatible with Go 1.22.1
+or else remove the requirement entirely,
+just as it would when downgrading any other dependency of `example.com/widget`.
+
+Before Go 1.21, the suggested way to update a module to a new Go version (say, Go 1.22)
+was `go mod tidy -go=1.22`, to make sure that any adjustments
+specific to Go 1.22 were made to the `go.mod` at the same time that the
+`go` line is updated.
+That form is still valid, but the simpler `go get go@1.22` is now preferred.
+
+When `go get` is run in a module in a directory contained in a workspace root,
+`go get` mostly ignores the workspace,
+but it does update the `go.work` file to upgrade the `go` line
+when the workspace would otherwise be left with too old a `go` line.
+
+## Managing Go version workspace requirements with `go work` {#work}
+
+As noted in the previous section, `go get` run in a directory
+inside a workspace root will take care to update the `go.work` file's `go` line
+as needed to be greater than or equal to any module inside that root.
+However, workspaces can also refer to modules outside the root directory;
+running `go get` in those directories may result in an invalid workspace
+configuration, one in which the `go` version declared in `go.work` is less
+than one or more of the modules in the `use` directives.
+
+The command `go work use`, which adds new `use` directives, also checks
+that the `go` version in the `go.work` file is new enough for all the
+existing `use` directives.
+To update a workspace that has gotten its `go` version out of sync
+with its modules, run `go work use` with no arguments.
+
+The commands `go work init` and `go work sync` also update the `go`
+version as needed.
+
+To remove the `toolchain` line from a `go.work` file, use
+`go work edit -toolchain=none`.
 
-Go 1.21부터 Go 배포판은 `go` 명령어와 번들로 제공되는 Go 툴체인으로 구성됩니다. 이 툴체인에는 표준 라이브러리뿐만 아니라 컴파일러, 어셈블러 및 기타 도구들이 포함되어 있습니다.
-`go` 명령어는 번들로 제공된 Go 툴체인뿐만 아니라, 로컬 `PATH`에서 찾은 다른 버전이나 필요에 따라 다운로드한 다른 버전을 사용할 수 있습니다.
-
-사용되는 Go 툴체인의 선택은 `GOTOOLCHAIN` 환경 설정과 메인 모듈의 `go.mod` 파일 또는 현재 워크스페이스의 `go.work` 파일에 있는 `go` 및 `toolchain` 라인에 따라 결정됩니다.
-서로 다른 메인 모듈과 워크스페이스 사이를 이동함에 따라, 모듈 의존성 버전이 변하는 것과 마찬가지로 사용되는 툴체인 버전도 달라질 수 있습니다.
-
-표준 설정에서 `go` 명령어는 번들된 툴체인이 메인 모듈이나 워크스페이스의 `go` 또는 `toolchain` 라인에 명시된 버전과 같거나 더 최신일 때 자체 번들 툴체인을 사용합니다.
-예를 들어, `go 1.21.0`이라고 명시된 메인 모듈에서 Go 1.21.3에 번들된 `go` 명령어를 사용할 때, `go` 명령어는 Go 1.21.3을 사용합니다.
-`go` 또는 `toolchain` 라인이 번들된 툴체인보다 최신 버전일 때, `go` 명령어는 대신 더 최신 툴체인을 실행합니다.
-예를 들어, `go 1.21.9`라고 명시된 메인 모듈에서 Go 1.21.3에 번들된 `go` 명령어를 사용할 때, `go` 명령어는 대신 Go 1.21.9를 찾아 실행합니다.
-이때 먼저 PATH에서 `go1.21.9`라는 이름의 프로그램을 찾고, 그렇지 않으면 Go 1.21.9 툴체인의 복사본을 다운로드하여 캐싱합니다.
-이러한 자동 툴체인 전환 기능은 비활성화할 수 있지만, 이 경우 더 정확한 전방 호환성을 위해 `go` 라인이 더 최신 버전의 Go를 요구하는 메인 모듈이나 워크스페이스에서는 `go` 명령어 실행이 거부됩니다.
-즉, `go` 라인은 모듈이나 워크스페이스를 사용하는 데 필요한 최소 Go 버전을 설정합니다.
-
-다른 모듈의 의존성인 모듈은 해당 모듈에서 직접 작업할 때 사용하려는 선호 툴체인보다 더 낮은 최소 Go 버전 요구사항을 설정해야 할 수도 있습니다.
-이 경우, `go.mod` 또는 `go.work`의 `toolchain` 라인은 `go` 명령어가 어떤 툴체인을 사용할지 결정할 때 `go` 라인보다 우선순위를 갖는 선호 툴체인을 설정합니다.
-
-`go` 및 `toolchain` 라인은 `go.mod`의 `require` 라인이 다른 모듈에 대한 의존성 버전 요구사항을 지정하는 것과 마찬가지로, 모듈이 Go 툴체인 자체에 대해 가지는 버전 요구사항을 지정하는 것으로 생각할 수 있습니다.
-`go get` 명령어는 다른 모듈에 대한 의존성을 관리하는 것과 동일한 방식으로 Go 툴체인 의존성을 관리합니다.
-예를 들어, `go get go@latest`는 해당 모듈이 최신 릴리스 버전의 Go 툴체인을 요구하도록 업데이트합니다.
-
-`GOTOOLCHAIN` 환경 설정은 `go` 및 `toolchain` 라인을 무시하고 특정 Go 버전을 강제로 사용하게 할 수 있습니다. 예를 들어, Go 1.21rc3로 패키지를 테스트하려면 다음과 같이 합니다:
-
-`GOTOOLCHAIN=go1.21rc3 go test`
-
-기본 `GOTOOLCHAIN` 설정은 `auto`이며, 이는 앞서 설명한 툴체인 전환 기능을 활성화합니다.
-대체 형식인 `<name>+auto`는 추가 전환 여부를 결정하기 전에 사용할 기본 툴체인을 설정합니다. 예를 들어 `GOTOOLCHAIN=go1.21.3+auto`는 `go` 명령어가 Go 1.21.3을 사용하는 것을 기본으로 결정을 시작하되, `go` 및 `toolchain` 라인에 의해 지시되는 경우 여전히 더 최신 툴체인을 사용하도록 합니다.
-기본 `GOTOOLCHAIN` 설정은 `go env -w`로 변경할 수 있으므로, Go 1.21.0 이상이 설치되어 있다면 다음과 같이 하십시오.
-
-`go env -w GOTOOLCHAIN=go1.21.3+auto`
-
-Go 1.21.0 설치를 Go 1.21.3으로 교체하는 것과 동일합니다.
-
-이 문서의 나머지 부분에서는 Go 툴체인의 버전 관리, 선택 및 관리 방법에 대해 더 자세히 설명합니다.
-
-## Go 버전 {#version}
-
-출시된 Go 버전은 ‘1.*N*.*P*’ 버전 구문을 사용하며, 이는 Go 1.*N*의 *P*번째 릴리스를 나타냅니다.
-초기 릴리스는 ‘1.21.0’과 같이 1.*N*.0이며, 1.*N*.9와 같은 이후 릴리스는 흔히 패치 릴리스(patch releases)라고 부릅니다.
-
-1.*N*.0 이전에 발행되는 Go 1.*N* 릴리스 후보(release candidates)는 ‘1.*N*rc*R*’ 버전 구문을 사용합니다.
-Go 1.*N*의 첫 번째 릴리스 후보 버전은 `1.23rc1`과 같이 1.*N*rc1이 됩니다.
-
-‘1.*N*’ 구문은 “언어 버전(language version)”이라고 불립니다. 이는 해당 버전의 Go 언어와 표준 라이브러리를 구현하는 Go 릴리스의 전체 제품군을 나타냅니다.
-
-Go 버전의 언어 버전은 *N* 이후의 모든 내용을 절삭한 결과입니다:
-1.21, 1.21rc2, 1.21.3은 모두 언어 버전 1.21을 구현합니다.
-
-Go 1.21.0 및 Go 1.21rc1과 같이 출시된 Go 툴체인은 `go version` 및 [`runtime.Version`](/pkg/runtime/#Version)에서 특정 버전(예: `go1.21.0` 또는 `go1.21rc1`)을 보고합니다. 반면 Go 개발 저장소에서 빌드되어 아직 출시되지 않은(개발 중인) Go 툴체인은 언어 버전(예: `go1.21`)만 보고합니다.
-
-어떠한 두 개의 Go 버전이라도 서로 비교하여 어느 쪽이 더 작은지, 큰지, 또는 동일한지 결정할 수 있습니다. 언어 버전이 서로 다르면 그에 따라 비교 결과가 결정됩니다: `1.21.9 < 1.22`. 동일한 언어 버전 내에서 가장 작은 것부터 큰 것 순의 정렬 순서는 다음과 같습니다: 언어 버전 자체, 그다음은 *R*에 따라 정렬된 릴리스 후보(release candidates), 마지막으로 *P*에 따라 정렬된 릴리스(releases) 순입니다.
-
-예를 들어, 1.21 < 1.21rc1 < 1.21rc2 < 1.21.0 < 1.21.1 < 1.21.2입니다.
-
-Go 1.21 이전에는 Go 툴체인의 최초 릴리스 버전이 1.*N*.0이 아니라 1.*N*이었으므로, *N* < 21인 경우 1.*N*이 릴리스 후보(release candidates) 뒤에 오도록 순서가 조정되었습니다.
-
-예를 들어, 1.20rc1 < 1.20rc2 < 1.20rc3 < 1.20 < 1.20.1입니다.
-
-이전 버전의 Go에는 1.18beta2와 같은 베타 릴리스가 있었습니다.
-베타 릴리스는 버전 순서상 릴리스 후보(release candidates) 바로 앞에 위치합니다.
-
-예를 들어, 1.18beta1 < 1.18beta2 < 1.18rc1 < 1.18 < 1.18.1입니다.
-
-<!-- 미발표 노트: 다운로드 페이지에는 이 버전 구문을 따르지 않는 Go 1.9.2rc2도 나열되어 있습니다. 이는 Go 1.9.2 이전의 잠재적인 릴리스 자동화를 테스트하기 위해 생성된 것이며, "실제" 툴체인으로 간주되지 않습니다. -->
-
-## Go 툴체인 이름 {#name}
-
-표준 Go 툴체인은 `go`<i>V</i> 형태로 명명되며, 여기서 *V*는 베타 릴리스, 릴리스 후보(release candidate) 또는 정식 릴리스를 나타내는 Go 버전을 의미합니다.
-예를 들어, `go1.21rc1`과 `go1.21.0`은 툴체인 이름입니다.
-`go1.21`과 `go1.22`는 툴체인 이름이 아니지만(초기 릴리스는 `go1.21.0`과 `go1.22.0`입니다), `go1.20`과 `go1.19`는 툴체인 이름에 해당합니다.
-
-비표준 툴체인은 모든 접미사에 대해 `go<i>V</i>-<i>suffix</i>` 형태의 이름을 사용합니다.
-
-툴체인은 이름에 포함된 버전 `<code><i>V</i></code>`를 비교하여 비교합니다
-(앞의 `go`를 제외하고 `-`로 시작하는 모든 접미사를 버립니다).
-예를 들어, 정렬 목적으로 `go1.21.0`과 `go1.21.0-custom`은 동일하게 비교됩니다.
-
-## 모듈 및 워크스페이스 설정 {#config}
-
-Go 모듈과 워크스페이스는 `go.mod` 또는 `go.work` 파일에 버전 관련 설정을 지정합니다.
-
-`go` 라인은 모듈이나 워크스페이스를 사용하는 데 필요한 최소 Go 버전을 선언합니다.
-호환성 이유로, `go.mod` 파일에서 `go` 라인이 생략된 경우 해당 모듈은 암시적인 `go 1.16` 라인을 가진 것으로 간주하며, `go.work` 파일에서 `go` 라인이 생략된 경우 해당 워크스페이스는 암시적인 `go 1.18` 라인을 가진 것으로 간주합니다.
-
-`toolchain` 라인은 모듈 또는 워크스페이스에서 사용할 권장 툴체인을 선언합니다.
-아래의 “[Go toolchain selection](#select)”에서 설명한 바와 같이, 기본 툴체인의 버전이 권장 툴체인의 버전보다 낮은 경우, `go` 명령은 해당 모듈 또는 워크스페이스에서 작업할 때 이 특정 툴체인을 실행할 수 있습니다.
-`toolchain` 라인이 생략되면, 모듈 또는 워크스페이스는 암시적인 `<code>toolchain go<i>V</i></code>` 라인을 가진 것으로 간주하며, 여기서 *V*는 `go` 라인에 명시된 Go 버전입니다.
-
-예를 들어, `toolchain` 라인이 없고 `go 1.21.0`이라고 적힌 `go.mod` 파일은 `toolchain go1.21.0` 라인이 있는 것과 동일하게 해석됩니다.
-
-Go 툴체인은 툴체인 자체의 버전보다 더 높은 최소 요구 Go 버전을 선언한 모듈이나 워크스페이스의 로드를 거부합니다.
-
-예를 들어, Go 1.21.2는 `go 1.21.3` 또는 `go 1.22` 라인이 포함된 모듈이나 워크스페이스의 로드를 거부합니다.
-
-모듈의 `go` 라인은 `require` 문에 나열된 각 모듈에 선언된 `go` 버전보다 크거나 같은 버전을 선언해야 합니다.
-워크스페이스의 `go` 라인은 `use` 문에 나열된 각 모듈에 선언된 `go` 버전보다 크거나 같은 버전을 선언해야 합니다.
-
-예를 들어, 모듈 *M*이 `go 1.22.0`을 선언하는 `go.mod` 파일을 가진 의존성 *D*를 필요로 한다면, *M*의 `go.mod`에는 `go 1.21.3`이라고 명시할 수 없습니다.
-
-각 모듈의 `go` 라인은 해당 모듈 내의 패키지를 컴파일할 때 컴파일러가 강제하는 언어 버전을 설정합니다.
-언어 버전은 [빌드 제약 조건](/cmd/go#hdr-Build_constraints)을 사용하여 파일별로 변경할 수 있습니다.
-빌드 제약 조건이 존재하고 최소 버전이 `go1.21` 이상임을 의미한다면, 해당 파일을 컴파일할 때 사용되는 언어 버전은 그 최소 버전이 됩니다.
-
-예를 들어, Go 1.21 언어 버전을 사용하는 코드가 포함된 모듈은 `go 1.21` 또는 `go 1.21.3`과 같은 `go` 라인이 포함된 `go.mod` 파일을 가져야 합니다.
-특정 소스 파일을 최신 Go 툴체인을 사용할 때만 컴파일해야 하는 경우, 해당 소스 파일에 `//go:build go1.22`를 추가하면 Go 1.22 및 그 이후 버전의 툴체인만 해당 파일을 컴파일하도록 보장하며, 동시에 해당 파일의 언어 버전을 Go 1.22로 변경합니다.
-
-`go` 및 `toolchain` 라인은 `go get`을 사용하여 수정하는 것이 가장 편리하고 안전합니다. 자세한 내용은 [아래의 `go get` 전용 섹션](#get)을 참조하십시오.
-
-Go 1.21 이전에는 Go 툴체인이 `go` 라인을 권장 사항으로 처리했습니다.
-빌드에 성공하면 툴체인은 모든 것이 정상적으로 작동한다고 가정했으며,
-실패할 경우 버전 불일치 가능성에 대한 참고 사항을 출력했습니다.
-Go 1.21부터는 `go` 라인이 필수 요구 사항으로 변경되었습니다.
-이 동작은 이전 언어 버전에도 부분적으로 백포팅되었습니다.
-Go 1.19.13부터의 Go 1.19 릴리스와 Go 1.20.8부터의 Go 1.20 릴리스는
-Go 1.22 이상의 버전을 선언하는 워크스페이스나 모듈의 로드를 거부합니다.
-
-Go 1.21 이전에는 툴체인이 모듈이나 워크스페이스의 `go` 라인이 각 종속성 모듈에서 요구하는 `go` 버전보다 크거나 같을 것을 요구하지 않았습니다.
-
-## `GOTOOLCHAIN` 설정 {#GOTOOLCHAIN}
-
-`go` 명령어는 `GOTOOLCHAIN` 설정에 따라 사용할 Go 툴체인을 선택합니다.
-`GOTOOLCHAIN` 설정을 찾기 위해, `go` 명령어는 모든 Go 환경 설정에 적용되는 표준 규칙을 사용합니다:
-
-- 프로세스 환경 변수([`os.Getenv`](/pkg/os/#Getenv)로 조회됨)에서 `GOTOOLCHAIN`이 빈 값이 아닌 값으로 설정되어 있는 경우, `go` 커맨드는 해당 값을 사용합니다.
-
-- 그 외에, 사용자의 환경 설정 기본 파일([`go env -w` 및 `go env -u`](/cmd/go/#hdr-Print_Go_environment_information)로 관리됨)에 `GOTOOLCHAIN`이 설정되어 있다면, `go` 명령어는 해당 값을 사용합니다.
-
-- 그렇지 않고, 번들된 Go 툴체인의 환경 기본 설정 파일(`$GOROOT/go.env`)에 `GOTOOLCHAIN`이 설정되어 있다면, `go` 커맨드는 해당 값을 사용합니다.
-
-표준 Go 툴체인에서 `$GOROOT/go.env` 파일은 기본값으로 `GOTOOLCHAIN=auto`를 설정하지만, 재패키징된 Go 툴체인의 경우 이 값이 변경될 수 있습니다.
-
-`$GOROOT/go.env` 파일이 없거나 기본값이 설정되지 않은 경우, `go` 명령은 `GOTOOLCHAIN=local`로 가정합니다.
-
-`go env GOTOOLCHAIN`을 실행하면 `GOTOOLCHAIN` 설정 값이 출력됩니다.
-
-## Go 툴체인 선택 {#select}
-
-시작 시, `go` 명령은 어떤 Go 툴체인을 사용할지 선택합니다.
-이때 `<name>`, `<name>+auto`, 또는 `<name>+path` 형태의 `GOTOOLCHAIN` 설정을 참조합니다.
-`GOTOOLCHAIN=auto`는 `GOTOOLCHAIN=local+auto`의 약칭이며,
-마찬가지로 `GOTOOLCHAIN=path`는 `GOTOOLCHAIN=local+path`의 약칭입니다.
-`<name>`은 기본 Go 툴체인을 설정합니다:
-`local`는 번들된 Go 툴체인(현재 실행 중인 `go` 명령과 함께 제공된 툴체인)을 나타내며, 그 외의 경우 `<name>`은 `go1.21.0`과 같이 특정 Go 툴체인 이름이어야 합니다.
-`go` 명령은 기본 Go 툴체인을 실행하는 것을 선호합니다.
-위에서 언급했듯이, Go 1.21부터 Go 툴체인은 더 최신 버전의 Go를 요구하는 워크스페이스나 모듈에서 실행되는 것을 거부합니다.
-대신, 에러를 보고하고 종료합니다.
-
-`GOTOOLCHAIN`이 `local`로 설정되면, `go` 명령어는 항상 번들로 제공되는 Go 툴체인을 실행합니다.
-
-`GOTOOLCHAIN`이 `<name>`으로 설정되면 (예: `GOTOOLCHAIN=go1.21.0`),
-`go` 커맨드는 항상 해당 특정 Go 툴체인을 실행합니다.
-시스템 PATH에서 해당 이름의 바이너리가 발견되면 `go` 커맨드는 이를 사용합니다.
-그렇지 않으면 `go` 커맨드는 직접 다운로드하고 검증한 Go 툴체인을 사용합니다.
-
-`GOTOOLCHAIN`이 `<name>+auto` 또는 `<name>+path` (또는 약어인 `auto` 또는 `path`)로 설정된 경우, `go` 커맨드는 필요에 따라 더 최신 버전의 Go를 선택하여 실행합니다. 구체적으로, 현재 워크스페이스의 `go.work` 파일에 있는 `toolchain` 및 `go` 라인을 참조하며, 워크스페이스가 없는 경우에는 메인 모듈의 `go.mod` 파일을 참조합니다.
-
-`go.work` 또는 `go.mod` 파일에 `toolchain <tname>` 라인이 있고 `<tname>`이 기본 Go 툴체인보다 최신 버전인 경우, `go` 커맨드는 대신 `<tname>`을 실행합니다. 만약 파일에 `toolchain default` 라인이 있다면, `go` 커맨드는 기본 Go 툴체인을 실행하며 `<name>` 이상의 버전으로 업데이트하려는 모든 시도를 비활성화합니다. 그 외의 경우, 파일에 `go <version>` 라인이 있고 `<version>`이 기본 Go 툴체인보다 최신 버전이라면, `go` 커맨드는 대신 `go<version>`을 실행합니다.
-
-번들된 Go 툴체인 외의 다른 툴체인을 실행하려면, `go` 명령어는 프로세스의 실행 경로(Unix 및 Plan 9에서는 `$PATH`, Windows에서는 `%PATH%`)에서 지정된 이름(예: `go1.21.3`)의 프로그램을 찾아 해당 프로그램을 실행합니다. 만약 그러한 프로그램을 찾지 못하면, `go` 명령어는 [지정된 Go 툴체인을 다운로드하고 실행합니다](#download). `GOTOOLCHAIN` 형식을 `<name>+path`로 사용하면 다운로드 폴백(fallback) 기능이 비활성화되어, `go` 명령어가 실행 경로를 검색한 후 종료됩니다.
-
-`go version`을 실행하면 선택된 Go 툴체인의 버전이 출력됩니다
-(선택된 툴체인의 `go version` 구현체를 실행함으로써 출력됩니다).
-
-`GOTOOLCHAIN=local go version`을 실행하면 번들된 Go 툴체인의 버전이 출력됩니다.
-
-Go 1.24부터는 `go` 명령어를 실행할 때 `GODEBUG` 환경 변수에 `toolchaintrace=1`을 추가하여 `go` 명령어의 툴체인 선택 과정을 추적할 수 있습니다.
-
-## Go 툴체인 전환 {#switch}
-
-대부분의 명령의 경우, 버전 순서 지정 [설정 요구 사항](#config)으로 인해 워크스페이스의 `go.work` 또는 메인 모듈의 `go.mod`에 있는 `go` 라인은 모든 모듈 의존성의 `go` 라인보다 최신이거나 동일한 버전이 됩니다. 이 경우, 시작 툴체인 선택 과정에서 명령을 완료하기에 충분히 최신 버전의 Go 툴체인을 실행합니다.
-
-일부 명령은 동작 과정의 일부로 새로운 모듈 버전을 포함합니다:
-`go get`은 메인 모듈에 새로운 모듈 의존성을 추가합니다;
-`go work use`는 워크스페이스에 새로운 로컬 모듈을 추가합니다;
-`go work sync`는 워크스페이스가 생성된 이후 업데이트되었을 수 있는 로컬 모듈과 워크스페이스를 다시 동기화합니다;
-`go install package@version` 및 `go run package@version`은 사실상 빈 메인 모듈에서 실행되며 `package@version`을 새로운 의존성으로 추가합니다.
-이 모든 명령은 현재 실행 중인 Go 버전보다 더 최신 버전의 Go를 요구하는 `go.mod` 파일의 `go` 라인을 가진 모듈을 만날 수 있습니다.
-
-명령어가 더 최신 버전의 Go를 요구하는 모듈을 발견하고,
-`GOTOOLCHAIN`이 다른 툴체인 실행을 허용하는 경우
-(`auto` 또는 `path` 형태 중 하나인 경우),
-`go` 명령어는 현재 명령어를 계속 실행하기 위해 적절한 최신 툴체인을 선택하고 전환합니다.
-
-`go` 명령어가 시작 시 툴체인을 선택한 후 툴체인을 전환할 때마다, 그 이유를 설명하는 메시지를 출력합니다. 예를 들면 다음과 같습니다:
-
-go: module example.com/widget@v1.2.3 requires go >= 1.24rc1; switching to go 1.27.9
-
-예시에서 볼 수 있듯이, `go` 명령은 발견된 요구 사항보다 더 최신 버전의 툴체인으로 전환할 수 있습니다.
-일반적으로 `go` 명령은 지원되는 Go 툴체인으로 전환하는 것을 목표로 합니다.
-
-툴체인을 선택하기 위해, `go` 명령어는 먼저 사용 가능한 툴체인 목록을 가져옵니다.
-`auto` 형태의 경우, `go` 명령어는 사용 가능한 툴체인 목록을 다운로드합니다.
-`path` 형태의 경우, `go` 명령어는 PATH를 스캔하여 유효한 툴체인 이름으로 된 실행 파일이 있는지 확인하고, 찾은 모든 툴체인 목록을 사용합니다.
-이 툴체인 목록을 사용하여, `go` 명령어는 최대 세 개의 후보를 식별합니다.
-
-- 아직 출시되지 않은 Go 언어 버전의 최신 릴리스 후보(1.*N*₃rc*R*₃),
-- 가장 최근에 출시된 Go 언어 버전의 최신 패치 릴리스(1.*N*₂.*P*₂), 그리고
-- 이전 Go 언어 버전의 최신 패치 릴리스(1.*N*₁.*P*₁).
-
-Go의 [릴리스 정책](/doc/devel/release#policy)에 따른 지원 대상 Go 릴리스는 다음과 같습니다.
-[최소 버전 선택(minimal version selection)](https://research.swtch.com/vgo-mvs) 방식에 따라,
-`go` 커맨드는 새로운 요구 사항을 충족하는 _최소_(가장 오래된) 버전의 후보를 보수적으로 사용합니다.
-
-예를 들어, `example.com/widget@v1.2.3`이 Go 1.24rc1 이상 버전을 요구한다고 가정해 보겠습니다.
-`go` 명령어는 사용 가능한 툴체인 목록을 가져오며, 가장 최근의 Go 툴체인 두 가지의 최신 패치 릴리스가
-Go 1.28.3 및 Go 1.27.9이고,
-릴리스 후보인 Go 1.29rc2 또한 사용 가능함을 확인합니다.
-이 상황에서 `go` 명령어는 Go 1.27.9를 선택합니다.
-만약 `widget`이 Go 1.28 이상을 요구했다면, Go 1.27.9는 너무 오래되었으므로
-`go` 명령어는 Go 1.28.3을 선택할 것입니다.
-만약 `widget`이 Go 1.29 이상을 요구했다면, Go 1.27.9와 Go 1.28.3 모두 너무 오래되었으므로
-`go` 명령어는 Go 1.29rc2를 선택할 것입니다.
-
-새로운 Go 버전이 필요한 새로운 모듈 버전을 포함하는 명령은
-현재 워크스페이스의 `go.work` 파일이나 메인 모듈의 `go.mod` 파일에 있는 `go` 라인을 업데이트하여 새로운 최소 `go` 버전 요구 사항을 기록합니다.
-[재현성](https://research.swtch.com/vgo-principles#repeatability)을 위해,
-`go` 라인을 업데이트하는 모든 명령은 자신의 툴체인 이름을 기록하기 위해 `toolchain` 라인도 함께 업데이트합니다.
-해당 워크스페이스나 모듈에서 다음에 `go` 명령이 실행될 때,
-[툴체인 선택](#select) 과정에서 업데이트된 `toolchain` 라인을 사용하게 됩니다.
-
-예를 들어, `go get example.com/widget@v1.2.3` 명령을 실행하면 위와 같은 전환 공지가 출력되며 Go 1.27.9로 전환될 수 있습니다.
-Go 1.27.9는 `go get` 작업을 완료하고 `toolchain` 라인을 `toolchain go1.27.9`로 업데이트합니다.
-해당 모듈 또는 워크스페이스에서 다음에 실행되는 `go` 명령은 시작 단계에서 `go1.27.9`를 선택하며, 전환 메시지를 출력하지 않습니다.
-
-일반적으로 어떤 `go` 명령어를 두 번 실행했을 때, 첫 번째 실행에서 전환(switching) 메시지가 출력되었다면 두 번째 실행에서는 출력되지 않습니다. 이는 첫 번째 실행 시 시작 단계에서 적절한 툴체인을 선택하도록 `go.work` 또는 `go.mod`를 업데이트했기 때문입니다.
-
-예외는 `go install package@version` 및 `go run package@version` 형태입니다. 이 명령어들은 워크스페이스나 메인 모듈 없이 실행되므로 `toolchain` 라인을 작성할 수 없습니다. 따라서 더 최신 툴체인으로 전환해야 할 때마다 매번 전환 메시지를 출력합니다.
-
-## 툴체인 다운로드 {#download}
-
-`GOTOOLCHAIN=auto` 또는 `GOTOOLCHAIN=<name>+auto`를 사용할 때, Go 커맨드는 필요에 따라 더 최신 버전의 툴체인을 다운로드합니다.
-이러한 툴체인들은 모듈 경로 `golang.org/toolchain` 및 버전 `v0.0.1-go<i>VERSION</i>.<i>GOOS</i>-<i>GOARCH</i>`를 가진 특수 모듈로 패키징되어 있습니다.
-툴체인은 다른 일반 모듈과 동일하게 다운로드되므로, `GOPROXY` 설정을 통해 툴체인 다운로드를 프록시할 수 있으며 Go 체크섬 데이터베이스를 통해 체크섬 확인이 가능합니다.
-사용되는 구체적인 툴체인은 시스템의 기본 툴체인뿐만 아니라 로컬 운영 체제 및 아키텍처(GOOS 및 GOARCH)에 따라 달라지기 때문에, 툴체인 모듈 체크섬을 `go.sum`에 기록하는 것은 실용적이지 않습니다.
-대신, `GOSUMDB=off`인 경우 검증 부족으로 인해 툴체인 다운로드가 실패합니다.
-`GOPRIVATE` 및 `GONOSUMDB` 패턴은 툴체인 다운로드에 적용되지 않습니다.
-
-## `go get`을 사용하여 Go 버전 모듈 요구사항 관리하기 {#get}
-
-일반적으로 `go` 명령어는 `go`와 `toolchain` 라인을 메인 모듈의 버전화된 툴체인 의존성 선언으로 처리합니다. `go get` 명령어는 버전화된 모듈 의존성을 지정하는 `require` 라인을 관리하는 것과 마찬가지로 이 라인들을 관리할 수 있습니다.
-
-예를 들어, `go get go@1.22.1 toolchain@1.24rc1`은 메인 모듈의 `go.mod` 파일을 `go 1.22.1` 및 `toolchain go1.24rc1`로 읽도록 변경합니다.
-
-`go` 명령어는 `go` 의존성이 그보다 크거나 같은 Go 버전의 `toolchain` 의존성을 필요로 한다는 점을 이해합니다.
-
-예제를 계속해서, 이후에 `go get go@1.25.0`을 실행하면 툴체인 또한 `go1.25.0`으로 업데이트됩니다.
-툴체인이 `go` 라인과 정확히 일치할 때는 생략 및 암시될 수 있으므로, 이 `go get`은 `toolchain` 라인을 삭제합니다.
-
-다운그레이드 시에도 동일한 요구 사항이 역으로 적용됩니다:
-`go.mod`가 `go 1.22.1` 및 `toolchain go1.24rc1`로 시작하는 경우,
-`go get toolchain@go1.22.9`는 `toolchain` 라인만 업데이트하지만,
-`go get toolchain@go1.21.3`은 `go` 라인 또한 `go 1.21.3`으로 다운그레이드합니다.
-그 결과 `toolchain` 라인 없이 `go 1.21.3`만 남게 됩니다.
-
-특수 형태인 `toolchain@none`은 `go get toolchain@none` 또는 `go get go@1.25.0 toolchain@none`에서와 같이 모든 `toolchain` 라인을 제거하는 것을 의미합니다.
-
-`go` 명령어는 `go` 및 `toolchain` 의존성과 쿼리에 대한 버전 구문을 이해합니다.
-
-예를 들어, `go get example.com/widget@v1.2`가 `example.com/widget`의 최신 `v1.2` 버전(아마도 `v1.2.3`)을 사용하는 것과 마찬가지로, `go get go@1.22`는 Go 1.22 언어 버전의 최신 가용 릴리스(아마도 `1.22rc3` 또는 `1.22.3`)를 사용합니다.
-이는 `go get toolchain@go1.22`에도 동일하게 적용됩니다.
-
-`go get` 및 `go mod tidy` 명령은 `go` 라인이 필요한 모든 의존성 모듈의 `go` 라인보다 크거나 같게 유지합니다.
-
-예를 들어, 메인 모듈에 `go 1.22.1`이 설정되어 있고, `go 1.24rc1`을 선언하는 `go get example.com/widget@v1.2.3`을 실행하면, `go get`은 메인 모듈의 `go` 라인을 `go 1.24rc1`로 업데이트합니다.
-
-예제를 계속해서 살펴보면, 이후에 `go get go@1.22.1`을 실행하면 `example.com/widget`을 Go 1.22.1과 호환되는 버전으로 다운그레이드하거나, 그렇지 않으면 요구 사항을 완전히 제거합니다. 이는 `example.com/widget`의 다른 의존성을 다운그레이드할 때와 동일하게 작동합니다.
-
-Go 1.21 이전에는 모듈을 새로운 Go 버전(예: Go 1.22)으로 업데이트하는 권장 방법이 `go mod tidy -go=1.22`였습니다. 이는 `go` 라인이 업데이트됨과 동시에 Go 1.22에 특화된 조정 사항들이 `go.mod`에 함께 반영되도록 하기 위함이었습니다.
-
-해당 방식은 여전히 유효하지만, 이제는 더 간단한 `go get go@1.22` 방식이 권장됩니다.
-
-워크스페이스 루트에 포함된 디렉토리의 모듈에서 `go get`을 실행하면,
-`go get`은 대부분의 경우 워크스페이스를 무시합니다.
-하지만 워크스페이스의 `go` 라인이 너무 오래되어 방치될 상황이라면,
-`go get`은 `go.work` 파일의 `go` 라인을 업데이트합니다.
-
-## `go work`를 통한 Go 버전 워크스페이스 요구사항 관리 {#work}
-
-이전 섹션에서 언급했듯이, 워크스페이스 루트 내부의 디렉토리에서 `go get`을 실행하면 `go.work` 파일의 `go` 라인이 해당 루트 내의 모든 모듈보다 크거나 같도록 필요에 따라 업데이트됩니다. 하지만 워크스페이스는 루트 디렉토리 외부의 모듈도 참조할 수 있습니다. 이러한 외부 디렉토리에서 `go get`을 실행하면 `go.work`에 선언된 `go` 버전이 `use` 지시문에 포함된 하나 이상의 모듈 버전보다 낮은, 유효하지 않은 워크스페이스 설정이 발생할 수 있습니다.
-
-새로운 `use` 지시문을 추가하는 `go work use` 명령은 `go.work` 파일의 `go` 버전이 모든 기존 `use` 지시문에 대해 충분히 최신 버전인지도 함께 확인합니다.
-모듈들과 `go` 버전이 일치하지 않게 된 워크스페이스를 업데이트하려면, 인자 없이 `go work use`를 실행하십시오.
-
-`go work init` 및 `go work sync` 명령은 필요한 경우 `go` 버전 또한 업데이트합니다.
-
-`go.work` 파일에서 `toolchain` 라인을 제거하려면 `go work edit -toolchain=none`을 사용하세요.

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-package zlib은 RFC 1950에 정의된 zlib 형식의 압축 데이터 읽기 및 쓰기를 구현합니다.
+Package zlib implements reading and writing of zlib format compressed data, as specified in RFC 1950.
 
 ## 원문 요약
 

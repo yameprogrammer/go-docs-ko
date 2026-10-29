@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`template` 패키지는 텍스트 출력을 생성하기 위한 데이터 기반 템플릿을 구현합니다.
+Package template implements data-driven templates for generating textual output.
 
 ## 원문 요약
 

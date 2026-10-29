@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`gif` 패키지는 GIF 이미지 디코더 및 인코더를 구현합니다.
+Package gif implements a GIF image decoder and encoder.
 
 ## 원문 요약
 

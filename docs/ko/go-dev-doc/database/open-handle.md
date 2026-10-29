@@ -1,78 +1,120 @@
 <!--{
-  "Title": "데이터베이스 핸들 열기",
+  "Title": "Opening a database handle",
   "Breadcrumb": true
 }-->
 
-[`database/sql`](https://pkg.go.dev/database/sql) 패키지는 연결 관리의 필요성을 줄여 데이터베이스 액세스를 간소화합니다. 많은 데이터 액세스 API와 달리, `database/sql`에서는 명시적으로 연결을 열고 작업을 수행한 뒤 연결을 닫지 않습니다. 대신, 코드가 연결 풀을 나타내는 데이터베이스 핸들을 열고, 이 핸들을 통해 데이터 액세스 작업을 수행하며, 조회된 행(rows)이나 준비된 문장(prepared statement)이 보유한 리소스와 같이 리소스를 해제해야 할 때에만 `Close` 메서드를 호출합니다.
+The [`database/sql`](https://pkg.go.dev/database/sql) package simplifies
+database access by reducing the need
+for you to manage connections. Unlike many data access APIs, with
+`database/sql` you don't explicitly open a connection, do work, then close
+the connection. Instead, your code opens a database handle that represents
+a connection pool, then executes data access operations with the handle,
+calling a `Close` method only when needed to free resources, such as those
+held by retrieved rows or a prepared statement.
 
-다시 말해, [`sql.DB`](https://pkg.go.dev/database/sql#DB)로 표현되는 데이터베이스 핸들이 연결을 관리하며, 코드 대신 연결을 열고 닫는 역할을 합니다. 코드가 이 핸들을 사용하여 데이터베이스 작업을 수행하면, 해당 작업들은 데이터베이스에 동시 접근(concurrent access)하게 됩니다. 자세한 내용은 [Managing connections](/doc/database/manage-connections)을 참조하세요.
+In other words, it's the database handle, represented by an
+[`sql.DB`](https://pkg.go.dev/database/sql#DB), that
+handles connections, opening and closing them on your code's behalf. As your
+code uses the handle to execute database operations, those operations have
+concurrent access to the database. For more, see
+[Managing connections](/doc/database/manage-connections).
 
-**참고:** 데이터베이스 연결을 예약할 수도 있습니다. 자세한 내용은 [전용 연결 사용하기](/doc/database/manage-connections#dedicated_connections)를 참조하세요.
+**Note:** You can also reserve a database connection. For more
+information, see
+[Using dedicated connections](/doc/database/manage-connections#dedicated_connections).
 
-`database/sql` 패키지에서 제공하는 API 외에도, Go 커뮤니티는 가장 일반적인(그리고 많은 드문) 모든 데이터베이스 관리 시스템(DBMS)을 위한 드라이버를 개발해 왔습니다.
+In addition to the APIs available in the `database/sql` package, the Go
+community has developed drivers for all of the most common (and many uncommon)
+database management systems (DBMSes).
 
-데이터베이스 핸들을 열 때, 다음과 같은 상위 수준의 단계를 따릅니다:
+When opening a database handle, you follow these high-level steps:
 
-1. 드라이버를 찾습니다.
+1. Locate a driver.
 
-드라이버는 Go 코드와 데이터베이스 사이에서 요청과 응답을 변환합니다. 자세한 내용은 [데이터베이스 드라이버 찾기 및 가져오기](#database_driver)를 참조하세요.
+    A driver translates requests and responses between your Go code and the
+    database. For more, see [Locating and importing a database driver](#database_driver).
 
-2. 데이터베이스 핸들을 엽니다.
+2. Open a database handle.
 
-드라이버를 임포트한 후, 특정 데이터베이스에 대한 핸들을 열 수 있습니다. 자세한 내용은 [데이터베이스 핸들 열기](#opening_handle)를 참조하세요.
+    After you've imported the driver, you can open a handle for a specific
+    database. For more, see [Opening a database handle](#opening_handle).
 
-3. 연결을 확인합니다.
+3. Confirm a connection.
 
-데이터베이스 핸들을 열면, 코드를 통해 연결 가능 여부를 확인할 수 있습니다. 자세한 내용은 [연결 확인](#confirm_connection)을 참조하십시오.
+    Once you've opened a database handle, your code can check that a
+    connection is available. For more, see [Confirming a connection](#confirm_connection).
 
-일반적으로 코드에서 데이터베이스 연결을 명시적으로 열거나 닫지 않습니다. 이 작업은 데이터베이스 핸들이 처리합니다. 하지만 쿼리 결과가 포함된 `sql.Rows`와 같이 작업 과정에서 획득한 리소스는 코드를 통해 해제해야 합니다. 자세한 내용은 [리소스 해제](#free_resources)를 참조하십시오.
+Your code typically won’t explicitly open or close database connections -- that's
+done by the database handle. However, your code should free resources it
+obtains along the way, such as an `sql.Rows` containing query results. For
+more, see [Freeing resources](#free_resources).
 
-### 데이터베이스 드라이버 찾기 및 가져오기 {#database_driver}
+### Locating and importing a database driver {#database_driver}
 
-사용 중인 DBMS를 지원하는 데이터베이스 드라이버가 필요합니다. 사용 중인 데이터베이스에 맞는 드라이버를 찾으려면 [SQLDrivers](/wiki/SQLDrivers)를 참조하세요.
+You'll need a database driver that supports the DBMS you're using. To locate
+a driver for your database, see [SQLDrivers](/wiki/SQLDrivers).
 
-드라이버를 코드에서 사용할 수 있게 하려면, 다른 Go 패키지를 가져오는 것과 동일하게 import 하면 됩니다. 다음은 예시입니다:
+To make the driver available to your code, you import it as you would
+another Go package. Here's an example:
 
 ```
 import "github.com/go-sql-driver/mysql"
 ```
 
-`sql` 패키지에 의해 암시적으로 사용되는 경우처럼 드라이버 패키지에서 함수를 직접 호출하지 않는 경우에는, 임포트 경로 앞에 언더스코어(`_`)를 붙이는 blank import를 사용해야 합니다:
+Note that if you're not calling any functions directly from the driver
+package –- such as when it's being used implicitly by the `sql` package --
+you'll need to use a blank import, which prefixes the import path with an
+underscore:
 
-```go
+
+```
 import _ "github.com/go-sql-driver/mysql"
 ```
 
-**참고:** 권장 사항으로, 데이터베이스 작업을 위해 데이터베이스 드라이버 자체의 API를 사용하는 것을 지양하십시오. 대신 `database/sql` 패키지의 함수들을 사용하십시오. 이렇게 하면 코드가 DBMS와 느슨하게 결합되어, 필요한 경우 다른 DBMS로 더 쉽게 전환할 수 있습니다.
+**Note:** As a best practice, avoid using the database driver's own API
+for database operations. Instead, use functions in the `database/sql`
+package. This will help keep your code loosely coupled with the DBMS,
+making it easier to switch to a different DBMS if you need to.
 
-### 데이터베이스 핸들 열기 {#opening_handle}
+### Opening a database handle {#opening_handle}
 
-`sql.DB` 데이터베이스 핸들은 개별적으로 또는 트랜잭션 내에서 데이터베이스에 읽고 쓸 수 있는 기능을 제공합니다.
+An `sql.DB` database handle provides the ability to read from and write to a
+database, either individually or in a transaction.
 
-`sql.Open`(연결 문자열을 받음) 또는 `sql.OpenDB`(`driver.Connector`를 받음)를 호출하여 데이터베이스 핸들을 얻을 수 있습니다. 두 함수 모두 [`sql.DB`](https://pkg.go.dev/database/sql#DB)에 대한 포인터를 반환합니다.
+You can get a database handle by calling either `sql.Open` (which takes a
+connection string) or `sql.OpenDB` (which takes a `driver.Connector`). Both
+return a pointer to an [`sql.DB`](https://pkg.go.dev/database/sql#DB).
 
-**참고:** 데이터베이스 인증 정보가 Go 소스 코드에 포함되지 않도록 주의하십시오.
-자세한 내용은 [데이터베이스 인증 정보 저장하기](#store_credentials)를 참조하십시오.
+**Note:** Be sure to keep your database credentials out of your Go source.
+For more, see [Storing database credentials](#store_credentials).
 
-#### 연결 문자열로 열기 {#open_connection_string}
+#### Opening with a connection string {#open_connection_string}
 
-연결 문자열을 사용하여 연결하려는 경우 [`sql.Open` 함수](https://pkg.go.dev/database/sql#Open)를 사용하십시오. 문자열의 형식은 사용하는 드라이버에 따라 다릅니다.
+Use the [`sql.Open` function](https://pkg.go.dev/database/sql#Open) when you
+want to connect using a connection string. The format for the string will vary
+depending on the driver you're using. 
 
-MySQL의 예시는 다음과 같습니다:
+Here's an example for MySQL:
 
-```go
+```
 db, err = sql.Open("mysql", "username:password@tcp(127.0.0.1:3306)/jazzrecords")
 if err != nil {
 	log.Fatal(err)
 }
 ```
 
-하지만 연결 속성을 더 구조적인 방식으로 캡처하는 것이 코드의 가독성을 높여준다는 점을 알게 되실 것입니다. 세부 사항은 드라이버마다 다를 수 있습니다.
+However, you'll likely find that capturing connection properties in a more
+structured way gives you code that's more readable. The details will vary by
+driver.
 
-예를 들어, 이전 예제를 다음과 같이 변경할 수 있습니다. 이 방식은 MySQL 드라이버의 [`Config`](https://pkg.go.dev/github.com/go-sql-driver/mysql#Config)를 사용하여 속성을 지정하고, [`FormatDSN 메서드`](https://pkg.go.dev/github.com/go-sql-driver/mysql#Config.FormatDSN)를 사용하여 연결 문자열을 생성합니다.
+For example, you could replace the preceding example with the following, which
+uses the MySQL driver's [`Config`](https://pkg.go.dev/github.com/go-sql-driver/mysql#Config)
+to specify properties and its
+[`FormatDSN method`](https://pkg.go.dev/github.com/go-sql-driver/mysql#Config.FormatDSN)
+to build a connection string.
 
-```go
-// 연결 속성을 지정합니다.
+```
+// Specify connection properties.
 cfg := mysql.NewConfig()
 cfg.User = username
 cfg.Passwd = password
@@ -80,21 +122,26 @@ cfg.Net = "tcp"
 cfg.Addr = "127.0.0.1:3306"
 cfg.DBName = "jazzrecords"
 
-// 데이터베이스 핸들을 가져옵니다.
+// Get a database handle.
 db, err = sql.Open("mysql", cfg.FormatDSN())
 if err != nil {
 	log.Fatal(err)
 }
 ```
 
-#### 커넥터로 열기 {#open_connector}
+#### Opening with a Connector {#open_connector}
 
-연결 문자열(connection string)에서는 사용할 수 없는 드라이버 전용 연결 기능을 활용하려는 경우 [`sql.OpenDB function`](https://pkg.go.dev/database/sql#OpenDB)을 사용하십시오. 각 드라이버는 고유한 연결 속성 세트를 지원하며, 대개 DBMS에 특화된 연결 요청을 사용자 정의하는 방법을 제공합니다.
+Use the [`sql.OpenDB function`](https://pkg.go.dev/database/sql#OpenDB) when
+you want to take advantage of driver-specific connection features that aren't
+available in a connection string. Each driver supports its own set of
+connection properties, often providing ways to customize the connection request
+specific to the DBMS.
 
-앞선 `sql.Open` 예제를 `sql.OpenDB`를 사용하도록 수정하면, 다음과 같은 코드로 핸들을 생성할 수 있습니다.
+Adapting the preceding `sql.Open` example to use `sql.OpenDB`, you could
+create a handle with code such as the following:
 
-```go
-// 연결 속성을 지정합니다.
+```
+// Specify connection properties.
 cfg := mysql.NewConfig()
 cfg.User = username
 cfg.Passwd = password
@@ -102,62 +149,83 @@ cfg.Net = "tcp"
 cfg.Addr = "127.0.0.1:3306"
 cfg.DBName = "jazzrecords"
 
-// 드라이버 전용 커넥터를 가져옵니다.
+// Get a driver-specific connector.
 connector, err := mysql.NewConnector(&cfg)
 if err != nil {
 	log.Fatal(err)
 }
 
-// 데이터베이스 핸들을 가져옵니다.
+// Get a database handle.
 db = sql.OpenDB(connector)
 ```
 
-#### 에러 처리 {#handle_errors}
+#### Handling errors {#handle_errors}
 
-코드는 `sql.Open`과 같이 핸들을 생성하려는 시도에서 발생하는 에러를 확인해야 합니다. 이는 연결 에러(connection error)가 아닙니다. 대신, `sql.Open`이 핸들을 초기화할 수 없는 경우 에러가 발생합니다. 예를 들어, 지정한 DSN을 파싱할 수 없는 경우에 이런 일이 발생할 수 있습니다.
+Your code should check for an error from attempting to create a handle, such
+as with `sql.Open`. This won't be a connection error. Instead, you'll get an
+error if `sql.Open` was unable to initialize the handle. This could happen,
+for example, if it's unable to parse the DSN you specified.
 
-### 연결 확인 {#confirm_connection}
+### Confirming a connection {#confirm_connection}
 
-데이터베이스 핸들을 열 때, `sql` 패키지는 즉시 새로운 데이터베이스 연결을 생성하지 않을 수 있습니다. 대신, 코드에서 연결이 필요할 때 연결을 생성할 수 있습니다. 데이터베이스를 즉시 사용하지 않지만 연결이 성공적으로 수립될 수 있는지 확인하고 싶다면, [`Ping`](https://pkg.go.dev/database/sql#DB.Ping) 또는 [`PingContext`](https://pkg.go.dev/database/sql#DB.PingContext)를 호출하십시오.
+When you open a database handle, the `sql` package may not create a new
+database connection itself right away. Instead, it may create the connection
+when your code needs it. If you won't be using the database right away and
+want to confirm that a connection could be established, call
+[`Ping`](https://pkg.go.dev/database/sql#DB.Ping) or
+[`PingContext`](https://pkg.go.dev/database/sql#DB.PingContext).
 
-다음 예제의 코드는 데이터베이스에 ping을 보내 연결을 확인합니다.
+Code in the following example pings the database to confirm a connection.
 
-```go
+```
 db, err = sql.Open("mysql", connString)
 
-// 연결 성공 여부를 확인합니다.
+// Confirm a successful connection.
 if err := db.Ping(); err != nil {
 	log.Fatal(err)
 }
 ```
 
-### 데이터베이스 자격 증명 저장하기 {#store_credentials}
+### Storing database credentials {#store_credentials}
 
-데이터베이스 자격 증명을 Go 소스 코드에 저장하지 마세요. 이는 데이터베이스의 내용이 타인에게 노출될 위험이 있습니다. 대신, 코드 외부의 위치에 저장하되 코드에서 접근할 수 있는 방법을 찾으십시오. 예를 들어, 자격 증명을 저장하고 코드가 DBMS 인증을 위해 자격 증명을 검색하는 데 사용할 수 있는 API를 제공하는 시크릿 키퍼(secret keeper) 앱을 고려해 보십시오.
+Avoid storing database credentials in your Go source, which could expose the
+contents of your database to others. Instead, find a way to store them in a
+location outside your code but available to it. For example, consider a
+secret keeper app that stores credentials and provides an API your code can
+use to retrieve credentials for authenticating with your DBMS.
 
-인기 있는 접근 방식 중 하나는 프로그램이 시작되기 전에(아마도 시크릿 매니저에서 로드하여) 환경 변수에 시크릿을 저장하고, Go 프로그램에서 [`os.Getenv`](https://pkg.go.dev/os#Getenv)를 사용하여 이를 읽는 것입니다.
+One popular approach is to store the secrets in the environment before the
+program starts, perhaps loaded from a secret manager, and then your Go program
+can read them using [`os.Getenv`](https://pkg.go.dev/os#Getenv):
 
-```go
+```
 username := os.Getenv("DB_USER")
 password := os.Getenv("DB_PASS")
 ```
 
-이 방식은 로컬 테스트를 위해 환경 변수를 직접 설정할 수 있게 해줍니다.
+This approach also lets you set the environment variables yourself for local
+testing. 
 
-### 리소스 해제 {#free_resources}
+### Freeing resources {#free_resources}
 
-`database/sql` 패키지를 사용할 때 연결(connection)을 명시적으로 관리하거나 닫지는 않지만, 더 이상 필요하지 않은 리소스는 코드를 통해 해제해야 합니다. 여기에는 쿼리 결과 데이터를 나타내는 `sql.Rows`나 준비된 문장(prepared statement)을 나타내는 `sql.Stmt`가 보유한 리소스가 포함될 수 있습니다.
+Although you don't manage or close connections explicitly with the
+`database/sql` package, your code should free resources it has obtained when
+they're no longer needed. Those can include resources held by an `sql.Rows`
+representing data returned from a query or an `sql.Stmt` representing a
+prepared statement.
 
-일반적으로 `Close` 함수 호출을 `defer`하여 리소스가 닫히도록 함으로써, 리소스를 감싸고 있는 함수가 종료되기 전에 해당 리소스들이 해제되도록 합니다.
+Typically, you close resources by deferring a call to a `Close` function so
+that resources are released before the enclosing function exits.
 
-다음 예제의 코드는 [`sql.Rows`](https://pkg.go.dev/database/sql#Rows)가 보유한 리소스를 해제하기 위해 `Close`를 defer 합니다.
+Code in the following example defers `Close` to free the resource held by
+[`sql.Rows`](https://pkg.go.dev/database/sql#Rows).
 
-```go
+```
 rows, err := db.Query("SELECT * FROM album WHERE artist = ?", artist)
 if err != nil {
 	log.Fatal(err)
 }
 defer rows.Close()
 
-// 반환된 행들을 루프하며 처리합니다.
+// Loop through returned rows.
 ```

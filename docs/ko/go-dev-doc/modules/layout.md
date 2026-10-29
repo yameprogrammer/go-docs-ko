@@ -1,14 +1,23 @@
 <!--{
-  "Title": "Go 모듈 구성하기"
+  "Title": "Organizing a Go module"
 }-->
 
-Go를 처음 접하는 개발자들이 공통적으로 갖는 질문 중 하나는 파일과 폴더 구성 측면에서 "Go 프로젝트를 어떻게 조직해야 하는가?"입니다. 이 문서의 목표는 이 질문에 답하는 데 도움이 될 몇 가지 가이드라인을 제공하는 것입니다. 이 문서를 최대한 활용하시려면 [튜토리얼](/doc/tutorial/create-module)과 [모듈 소스 관리](/doc/modules/managing-source)를 읽고 Go 모듈의 기본 개념에 익숙해지시기 바랍니다.
+A common question developers new to Go have is "How do I organize my Go
+project?", in terms of the layout of files and folders. The goal of this
+document is to provide some guidelines that will help answer this question. To
+make the most of this document, make sure you're familiar with the basics of Go
+modules by reading [the tutorial](/doc/tutorial/create-module) and
+[managing module source](/doc/modules/managing-source).
 
-Go 프로젝트는 패키지, 커맨드라인 프로그램 또는 이 둘의 조합을 포함할 수 있습니다. 이 가이드는 프로젝트 유형별로 구성되어 있습니다.
+Go projects can include packages, command-line programs or a combination of the
+two. This guide is organized by project type.
 
-### 기본 패키지
+### Basic package
 
-기본적인 Go 패키지는 모든 코드가 프로젝트의 루트 디렉토리에 위치합니다. 프로젝트는 단일 모듈로 구성되며, 이 모듈은 다시 단일 패키지로 구성됩니다. 패키지 이름은 모듈 이름의 마지막 경로 구성 요소와 일치합니다. 단일 Go 파일만 필요한 매우 간단한 패키지의 경우, 프로젝트 구조는 다음과 같습니다:
+A basic Go package has all its code in the project's root directory. The project
+consists of a single module, which consists of a single package. The package
+name matches the last path component of the module name. For a very simple
+package requiring a single Go file, the project structure is:
 
 ```
 project-root-directory/
@@ -17,25 +26,28 @@ project-root-directory/
   modname_test.go
 ```
 
-_[이 문서 전반에 걸쳐 파일/패키지 이름은 완전히 임의로 지정되었습니다]_
+_[throughout this document, file/package names are entirely arbitrary]_
 
-이 디렉토리가 `github.com/someuser/modname`에 있는 GitHub 저장소에 업로드되었다고 가정하면, `go.mod` 파일의 `module` 라인은 `module github.com/someuser/modname`이라고 작성해야 합니다.
+Assuming this directory is uploaded to a GitHub repository at
+`github.com/someuser/modname`, the `module` line in the `go.mod` file should say
+`module github.com/someuser/modname`.
 
-`modname.go` 파일의 코드는 다음과 같이 패키지를 선언합니다:
+The code in `modname.go` declares the package with:
 
 ```
 package modname
 
-// ... 패키지 코드가 여기에 위치합니다
+// ... package code here
 ```
 
-사용자는 이제 Go 코드에서 다음과 같이 해당 패키지를 `import` 하여 사용할 수 있습니다:
+Users can then rely on this package by `import`-ing it in their Go code with:
 
 ```
 import "github.com/someuser/modname"
 ```
 
-Go 패키지는 모두 동일한 디렉토리에 위치하는 여러 개의 파일로 나눌 수 있습니다. 예시는 다음과 같습니다.
+A Go package can be split into multiple files, all residing within the same
+directory, e.g.:
 
 ```
 project-root-directory/
@@ -48,11 +60,14 @@ project-root-directory/
   hash_test.go
 ```
 
-디렉토리의 모든 파일이 `package modname`을 선언하고 있습니다.
+All the files in the directory declare `package modname`.
 
-### 기본 명령어
+### Basic command
 
-기본적인 실행 프로그램(또는 명령줄 도구)은 복잡성과 코드 크기에 따라 구조화됩니다. 가장 단순한 프로그램은 `func main`이 정의된 단일 Go 파일로 구성될 수 있습니다. 더 큰 프로그램은 모든 파일이 `package main`을 선언하면서 코드를 여러 파일로 나눌 수 있습니다.
+A basic executable program (or command-line tool) is structured according to its
+complexity and code size. The simplest program can consist of a single Go file
+where `func main` is defined. Larger programs can have their code split across
+multiple files, all declaring `package main`:
 
 ```
 project-root-directory/
@@ -63,23 +78,35 @@ project-root-directory/
   main.go
 ```
 
-여기 `main.go` 파일에 `func main`이 포함되어 있지만, 이는 단지 관례일 뿐입니다. "main" 파일은 `modname.go`(`modname`에 적절한 값을 사용) 또는 다른 이름으로 부를 수도 있습니다.
+Here the `main.go` file contains `func main`, but this is just a convention. The
+"main" file can also be called `modname.go` (for an appropriate value of
+`modname`) or anything else.
 
-이 디렉토리가 `github.com/someuser/modname`에 있는 GitHub 저장소에 업로드된다고 가정하면, `go.mod` 파일의 `module` 라인은 다음과 같아야 합니다:
+Assuming this directory is uploaded to a GitHub repository at
+`github.com/someuser/modname`, the `module` line in the `go.mod` file should
+say:
 
 ```
 module github.com/someuser/modname
 ```
 
-사용자는 다음 명령어로 자신의 머신에 설치할 수 있습니다:
+And a user should be able to install it on their machine with:
 
 ```
 $ go install github.com/someuser/modname@latest
 ```
 
-### 패키지 또는 지원 패키지가 포함된 명령어
+### Package or command with supporting packages
 
-규모가 큰 패키지나 명령어는 일부 기능을 지원 패키지로 분리하는 것이 유리할 수 있습니다. 처음에는 이러한 패키지들을 `internal`이라는 이름의 디렉토리에 배치하는 것을 권장합니다. [이렇게 하면](https://pkg.go.dev/cmd/go#hdr-Internal_Directories) 외부 사용을 위해 반드시 노출하고 지원할 필요가 없는 패키지에 다른 모듈이 의존하는 것을 방지할 수 있습니다. 다른 프로젝트에서 우리의 `internal` 디렉토리에 있는 코드를 임포트할 수 없으므로, 외부 사용자에게 영향을 주지 않고 자유롭게 API를 리팩토링하거나 전반적인 구조를 변경할 수 있습니다. 따라서 패키지의 프로젝트 구조는 다음과 같습니다.
+Larger packages or commands may benefit from splitting off some functionality
+into supporting packages. Initially, it's recommended placing such packages into
+a directory named `internal`;
+[this prevents](https://pkg.go.dev/cmd/go#hdr-Internal_Directories) other
+modules from depending on packages we don't necessarily want to expose and
+support for external uses. Since other projects cannot import code from our
+`internal` directory, we're free to refactor its API and generally move things
+around without breaking external users. The project structure for a package is
+thus:
 
 ```
 project-root-directory/
@@ -95,17 +122,22 @@ project-root-directory/
   modname_test.go
 ```
 
-`modname.go` 파일은 `package modname`을 선언하고, `auth.go` 파일은 `package auth` 등을 선언합니다. `modname.go`는 다음과 같이 `auth` 패키지를 import 할 수 있습니다:
+The `modname.go` file declares `package modname`, `auth.go` declares `package
+auth` and so on. `modname.go` can import the `auth` package as follows:
 
 ```
 import "github.com/someuser/modname/internal/auth"
 ```
 
-`internal` 디렉터리에 지원 패키지가 포함된 커맨드의 레이아웃은 매우 유사하지만, 루트 디렉터리의 파일(들)이 `package main`을 선언한다는 점이 다릅니다.
+The layout for a command with supporting packages in an `internal` directory is
+very similar, except that the file(s) in the root directory declare `package
+main`.
 
-### 여러 패키지
+### Multiple packages
 
-모듈은 여러 개의 임포트 가능한 패키지로 구성될 수 있습니다. 각 패키지는 자체 디렉토리를 가지며, 계층적으로 구조화될 수 있습니다. 다음은 샘플 프로젝트 구조입니다:
+A module can consist of multiple importable packages; each package has its own
+directory, and can be structured hierarchically. Here's a sample project
+structure:
 
 ```
 project-root-directory/
@@ -125,19 +157,20 @@ project-root-directory/
       trace.go
 ```
 
-참고로, `go.mod` 파일의 `module` 라인이 다음과 같다고 가정합니다.
+As a reminder, we assume that the `module` line in `go.mod` says:
 
 ```
 module github.com/someuser/modname
 ```
 
-`modname` 패키지는 루트 디렉토리에 위치하며, `package modname`을 선언합니다. 사용자는 다음과 같이 임포트하여 사용할 수 있습니다:
+The `modname` package resides in the root directory, declares `package modname`
+and can be imported by users with:
 
 ```
 import "github.com/someuser/modname"
 ```
 
-사용자는 다음과 같이 서브 패키지를 임포트할 수 있습니다:
+Sub-packages can be imported by users as follows:
 
 ```
 import "github.com/someuser/modname/auth"
@@ -145,37 +178,45 @@ import "github.com/someuser/modname/auth/token"
 import "github.com/someuser/modname/hash"
 ```
 
-`internal/trace`에 위치한 `trace` 패키지는 이 모듈 외부에서 임포트할 수 없습니다. 패키지는 가능한 한 `internal` 내에 유지하는 것이 권장됩니다.
+Package `trace` that resides in `internal/trace` cannot be imported outside this
+module. It's recommended to keep packages in `internal` as much as possible.
 
-### 여러 명령어
+### Multiple commands
 
-동일한 리포지토리에 있는 여러 프로그램은 일반적으로 별도의 디렉토리를 갖습니다:
+Multiple programs in the same repository will typically have separate directories:
 
 ```
 project-root-directory/
   go.mod
   internal/
-    ... 공유 내부 패키지(shared internal packages)
+    ... shared internal packages
   prog1/
     main.go
   prog2/
     main.go
 ```
 
-각 디렉토리에서 프로그램의 Go 파일들은 `package main`을 선언합니다. 최상위 `internal` 디렉토리는 저장소의 모든 커맨드에서 사용하는 공유 패키지들을 포함할 수 있습니다.
+In each directory, the program's Go files declare `package main`. A top-level
+`internal` directory can contain shared packages used by all commands in the
+repository.
 
-사용자는 다음과 같이 이 프로그램들을 설치할 수 있습니다:
+Users can install these programs as follows:
 
 ```
 $ go install github.com/someuser/modname/prog1@latest
 $ go install github.com/someuser/modname/prog2@latest
 ```
 
-일반적인 관례는 리포지토리의 모든 명령어를 `cmd` 디렉토리에 배치하는 것입니다. 명령어만으로 구성된 리포지토리에서는 이것이 엄격하게 필수적인 것은 아니지만, 다음에 논의할 내용처럼 명령어와 임포트 가능한 패키지가 모두 포함된 혼합 리포지토리에서는 매우 유용합니다.
+A common convention is placing all commands in a repository into a `cmd`
+directory; while this isn't strictly necessary in a repository that consists
+only of commands, it's very useful in a mixed repository that has both commands
+and importable packages, as we will discuss next.
 
-### 동일한 리포지토리 내의 패키지와 커맨드
+### Packages and commands in the same repository
 
-때로는 저장소가 가져와 사용할 수 있는 패키지(importable packages)와 관련 기능을 가진 설치 가능한 명령어(installable commands)를 모두 제공하는 경우가 있습니다. 이러한 저장소의 샘플 프로젝트 구조는 다음과 같습니다.
+Sometimes a repository will provide both importable packages and installable
+commands with related functionality. Here's a sample project structure for such
+a repository:
 
 ```
 project-root-directory/
@@ -194,25 +235,35 @@ project-root-directory/
       main.go
 ```
 
-이 모듈의 이름이 `github.com/someuser/modname`이라고 가정하면, 이제 사용자는 다음과 같이 모듈 내의 패키지를 임포트할 수 있습니다.
+Assuming this module is called `github.com/someuser/modname`, users can now both
+import packages from it:
 
 ```
 import "github.com/someuser/modname"
 import "github.com/someuser/modname/auth"
 ```
 
-그리고 이를 통해 프로그램을 설치하세요:
+And install programs from it:
 
 ```
 $ go install github.com/someuser/modname/cmd/prog1@latest
 $ go install github.com/someuser/modname/cmd/prog2@latest
 ```
 
-### 서버 프로젝트
+### Server project
 
-Go는 *서버*를 구현할 때 흔히 선택되는 언어입니다. 프로토콜(REST? gRPC?), 배포, 프론트엔드 파일, 컨테이너화, 스크립트 등 서버 개발의 다양한 측면으로 인해 이러한 프로젝트의 구조는 매우 다양합니다. 여기서는 프로젝트에서 Go로 작성된 부분에 집중하여 안내하겠습니다.
+Go is a common language choice for implementing *servers*. There is a very large
+variance in the structure of such projects, given the many aspects of server
+development: protocols (REST? gRPC?), deployments, front-end files,
+containerization, scripts and so on. We will focus our guidance here on the
+parts of the project written in Go.
 
-서버 프로젝트는 일반적으로 서버가 단일 바이너리(또는 바이너리 그룹)로 구성된 독립적인 형태이므로, 외부로 내보낼 패키지가 없는 경우가 많습니다. 따라서 서버 로직을 구현하는 Go 패키지들은 `internal` 디렉토리에 유지하는 것이 권장됩니다. 또한, 프로젝트에 Go 파일이 아닌 다른 파일들이 포함된 디렉토리가 많을 가능성이 높으므로, 모든 Go 명령어를 `cmd` 디렉토리에 모아두는 것이 좋습니다.
+Server projects typically won't have packages for export, since a server is
+usually a self-contained binary (or a group of binaries). Therefore, it's
+recommended to keep the Go packages implementing the server's logic in the
+`internal` directory. Moreover, since the project is likely to have many other
+directories with non-Go files, it's a good idea to keep all Go commands together
+in a `cmd` directory:
 
 ```
 project-root-directory/
@@ -230,7 +281,8 @@ project-root-directory/
     metrics-analyzer/
       main.go
     ...
-  ... Go 코드가 아닌 프로젝트의 다른 디렉토리들
+  ... the project's other directories with non-Go code
 ```
 
-서버 저장소의 패키지가 성장하여 다른 프로젝트와 공유하기에 유용해지는 경우, 이를 별도의 모듈로 분리하는 것이 가장 좋습니다.
+In case the server repository grows packages that become useful for sharing with
+other projects, it's best to split these off to separate modules.

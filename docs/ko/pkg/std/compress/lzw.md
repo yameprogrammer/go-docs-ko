@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`lzw` 패키지는 T. A. Welch, “A Technique for High-Performance Data Compression”, Computer, 17(6) (June 1984), pp 8-19에 기술된 Lempel-Ziv-Welch 압축 데이터 형식을 구현합니다.
+Package lzw implements the Lempel-Ziv-Welch compressed data format, described in T. A. Welch, “A Technique for High-Performance Data Compression”, Computer, 17(6) (June 1984), pp 8-19.
 
 ## 원문 요약
 

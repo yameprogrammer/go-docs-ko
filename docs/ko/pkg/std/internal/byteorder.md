@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`byteorder` 패키지는 바이트 슬라이스로부터 리틀 엔디안(little endian) 및 빅 엔디안(big endian) 정수 타입을 디코딩하고 인코딩하는 함수들을 제공합니다.
+Package byteorder provides functions for decoding and encoding little and big endian integer types from/to byte slices.
 
 ## 원문 요약
 

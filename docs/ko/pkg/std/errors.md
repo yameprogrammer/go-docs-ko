@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-package errors는 에러를 조작하는 함수들을 구현합니다.
+Package errors implements functions to manipulate errors.
 
 ## 원문 요약
 

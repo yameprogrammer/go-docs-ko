@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`parse` 패키지는 `text/template` 및 `html/template`에 정의된 템플릿의 파스 트리(parse tree)를 생성합니다.
+Package parse builds parse trees for templates as defined by text/template and html/template.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`tabwriter` 패키지는 입력된 탭 구분 컬럼을 적절하게 정렬된 텍스트로 변환하는 쓰기 필터(`tabwriter.Writer`)를 구현합니다.
+Package tabwriter implements a write filter (tabwriter.Writer) that translates tabbed columns in input into properly aligned text.
 
 ## 원문 요약
 

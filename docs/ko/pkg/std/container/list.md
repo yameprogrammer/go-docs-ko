@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`list` 패키지는 이중 연결 리스트(doubly linked list)를 구현합니다.
+Package list implements a doubly linked list.
 
 ## 원문 요약
 

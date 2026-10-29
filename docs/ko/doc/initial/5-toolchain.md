@@ -2,4 +2,4 @@
 
 ## Assembler {#assembler}
 
-## Linker {#linker}
+## 링커 (Linker) {#linker}

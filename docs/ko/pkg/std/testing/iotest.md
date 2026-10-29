@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`iotest` 패키지는 주로 테스트에 유용한 Reader와 Writer를 구현합니다.
+Package iotest implements Readers and Writers useful mainly for testing.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`heap` 패키지는 `heap.Interface`를 구현하는 모든 타입에 대해 힙 연산을 제공합니다.
+Package heap provides heap operations for any type that implements heap.Interface.
 
 ## 원문 요약
 

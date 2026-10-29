@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`draw` 패키지는 이미지 합성 함수를 제공합니다.
+Package draw provides image composition functions.
 
 ## 원문 요약
 

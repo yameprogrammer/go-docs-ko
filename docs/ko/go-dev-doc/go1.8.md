@@ -1,36 +1,38 @@
 <!--
-참고: 이 문서 및 이 디렉터리의 다른 문서에서는
-`hello` `world`와 같이 고정폭 구문을 비고정폭 공백으로 설정하는 것이 관례입니다.
-이러한 구문에서 내부 태그를 제거하는 CL을 보내지 마십시오.
+NOTE: In this document and others in this directory, the convention is to
+set fixed-width phrases with non-fixed-width spaces, as in
+`hello` `world`.
+Do not send CLs removing the interior tags from such phrases.
 -->
 
 <style>
   main ul li { margin: 0.5em 0; }
 </style>
 
-## Go 1.8 소개 {#introduction}
+## Introduction to Go 1.8 {#introduction}
 
-최신 Go 릴리스인 버전 1.8가 [Go 1.7](go1.7) 출시 6개월 만에 공개되었습니다.
-변경 사항의 대부분은 툴체인, 런타임 및 라이브러리의 구현에 집중되어 있습니다.
-언어 사양에는 [두 가지의 사소한 변경 사항](#language)이 있습니다.
-언제나 그렇듯, 이번 릴리스에서도 Go 1 [호환성 약속](/doc/go1compat.html)을 유지합니다.
-거의 모든 Go 프로그램이 이전과 동일하게 컴파일되고 실행될 것으로 예상합니다.
+The latest Go release, version 1.8, arrives six months after [Go 1.7](go1.7).
+Most of its changes are in the implementation of the toolchain, runtime, and libraries.
+There are [two minor changes](#language) to the language specification.
+As always, the release maintains the Go 1 [promise of compatibility](/doc/go1compat.html).
+We expect almost all Go programs to continue to compile and run as before.
 
-이번 릴리스에서는 [32비트 MIPS 지원이 추가되었으며](#ports),
-더 효율적인 코드를 생성하도록 [컴파일러 백엔드가 업데이트되었고](#compiler),
-stop-the-world 스택 재스캔을 제거하여 [GC 일시 중단 시간이 단축되었으며](#gc),
-[HTTP/2 Push 지원이 추가되었고](#h2push),
-[HTTP graceful shutdown 기능이 추가되었으며](#http_shutdown),
-[더 많은 context 지원이 추가되었고](#more_context),
-[뮤텍스 프로파일링이 활성화되었으며](#mutex_prof),
-[슬라이스 정렬 방식이 간소화되었습니다](#sort_slice).
+The release [adds support for 32-bit MIPS](#ports),
+[updates the compiler back end](#compiler) to generate more efficient code,
+[reduces GC pauses](#gc) by eliminating stop-the-world stack rescanning,
+[adds HTTP/2 Push support](#h2push),
+[adds HTTP graceful shutdown](#http_shutdown),
+[adds more context support](#more_context),
+[enables profiling mutexes](#mutex_prof),
+and [simplifies sorting slices](#sort_slice).
 
-## 언어 변경 사항 {#language}
+## Changes to the language {#language}
 
-하나의 구조체 타입을 다른 구조체 타입으로 명시적으로 변환할 때, Go 1.8부터는 태그가 무시됩니다. 따라서 태그만 서로 다른 두 구조체는 서로 간에 변환이 가능합니다:
+When explicitly converting a value from one struct type to another,
+as of Go 1.8 the tags are ignored. Thus two structs that differ
+only in their tags may be converted from one to the other:
 
-```go
-func example() {
+	func example() {
 		type T1 struct {
 			X int `json:"foo"`
 		}
@@ -39,58 +41,76 @@ func example() {
 		}
 		var v1 T1
 		var v2 T2
-		v1 = T1(v2) // 이제 유효함
+		v1 = T1(v2) // now legal
 	}
-```
 
 <!-- CL 17711 -->
-이제 언어 명세에서는 구현체가 부동 소수점 상수의 지수를 최대 16비트까지 지원하도록만 요구합니다. 이는 “[`gc`](/cmd/compile/)” 및 `gccgo` 컴파일러 모두에 영향을 주지 않으며, 두 컴파일러 모두 여전히 32비트 지수를 지원합니다.
+The language specification now only requires that implementations
+support up to 16-bit exponents in floating-point constants. This does not affect
+either the “[`gc`](/cmd/compile/)” or
+`gccgo` compilers, both of
+which still support 32-bit exponents.
 
-## 포트 {#ports}
+## Ports {#ports}
 
-Go는 이제 FPU 또는 커널 FPU 에뮬레이션을 구현하고 MIPS32r1 명령어 집합을 사용하는 빅 엔디안(`linux/mips`) 및 리틀 엔디안(`linux/mipsle`) 머신 모두에 대해 Linux 상의 32비트 MIPS를 지원합니다. 일반적인 많은 MIPS 기반 라우터에는 FPU가 없으며, 커널 FPU 에뮬레이션을 활성화하지 않은 펌웨어를 사용한다는 점에 유의하십시오. Go는 이러한 머신에서는 실행되지 않습니다.
+Go now supports 32-bit MIPS on Linux for both big-endian
+(`linux/mips`) and little-endian machines
+(`linux/mipsle`) that implement the MIPS32r1 instruction set with FPU
+or kernel FPU emulation. Note that many common MIPS-based routers lack an FPU and
+have firmware that doesn't enable kernel FPU emulation; Go won't run on such machines.
 
-DragonFly BSD에서 Go는 이제 DragonFly 4.4.4 또는 그 이후 버전이 필요합니다. <!-- CL 29491, CL 29971 -->
+On DragonFly BSD, Go now requires DragonFly 4.4.4 or later. <!-- CL 29491, CL 29971 -->
 
-OpenBSD에서 Go는 이제 OpenBSD 5.9 이상 버전이 필요합니다. <!-- CL 34093 -->
+On OpenBSD, Go now requires OpenBSD 5.9 or later. <!-- CL 34093 -->
 
-Plan 9 포트의 네트워킹 지원이 이제 훨씬 더 완벽해졌으며, 데드라인(deadline) 및 취소(cancellation)와 관련하여 Unix 및 Windows의 동작과 일치합니다. Plan 9 커널 요구 사항은 [Plan 9 위키 페이지](/wiki/Plan9)를 참조하십시오.
+The Plan 9 port's networking support is now much more complete
+and matches the behavior of Unix and Windows with respect to deadlines
+and cancellation. For Plan 9 kernel requirements, see the
+[Plan 9 wiki page](/wiki/Plan9).
 
-Go 1.8는 이제 OS X 10.8 또는 그 이후 버전만 지원합니다. 이번 릴리스가 10.8을 지원하는 마지막 Go 릴리스가 될 가능성이 높습니다. 이전 OS X 버전에서 Go를 컴파일하거나 바이너리를 실행하는 것은 테스트되지 않았습니다.
+Go 1.8 now only supports OS X 10.8 or later. This is likely the last
+Go release to support 10.8. Compiling Go or running
+binaries on older OS X versions is untested.
 
-Go 1.8는 ARMv5E 및 ARMv6 프로세서 기반의 Linux를 지원하는 마지막 릴리스가 됩니다.
-Go 1.9는 (Raspberry Pi 1에서 볼 수 있는) ARMv6K 또는 그 이후 버전을 요구할 가능성이 높습니다.
-Linux 시스템이 ARMv6K 이상인지 확인하려면 다음을 실행하십시오:
+Go 1.8 will be the last release to support Linux on ARMv5E and ARMv6 processors:
+Go 1.9 will likely require the ARMv6K (as found in the Raspberry Pi 1) or later.
+To identify whether a Linux system is ARMv6K or later, run
 “`go` `tool` `dist` `-check-armv6k`”
-(테스트를 용이하게 하기 위해, Go 1.8 전체를 설치하지 않고 `dist` 명령만 시스템으로 복사하는 것도 가능합니다)
-프로그램이 "ARMv6K supported."라는 출력과 함께 종료되면 해당 시스템은 ARMv6K 또는 그 이후 버전을 구현한 것입니다.
-non-Linux ARM 시스템의 Go는 이미 ARMv6K 또는 그 이후 버전을 요구하고 있습니다.
+(to facilitate testing, it is also possible to just copy the `dist` command to the
+system without installing a full copy of Go 1.8)
+and if the program terminates with output "ARMv6K supported." then the system
+implements ARMv6K or later.
+Go on non-Linux ARM systems already requires ARMv6K or later.
 
 <!-- CL 31596, go.dev/issue/17528 -->
-이제 `GOOS`의 인식 가능한 값으로 `zos`가 추가되었으며, 이는 z/OS 운영체제를 위해 예약되었습니다.
+`zos` is now a recognized value for `GOOS`,
+reserved for the z/OS operating system.
 
-### 알려진 문제 {#known_issues}
+### Known Issues {#known_issues}
 
-FreeBSD 및 NetBSD에서 알려져 있지만 아직 원인이 파악되지 않은 일부 불안정성 문제가 있습니다.
-이는 드문 경우지만 프로그램 충돌로 이어질 수 있습니다.
-[issue 15658](/issue/15658) 및 [issue 16511](/issue/16511)을 참조하십시오.
-이 문제들을 해결하는 데 도움을 주신다면 감사하겠습니다.
+There are some instabilities on FreeBSD and NetBSD that are known but not understood.
+These can lead to program crashes in rare cases.
+See
+[issue 15658](/issue/15658) and
+[issue 16511](/issue/16511).
+Any help in solving these issues would be appreciated.
 
-## 도구 {#tools}
+## Tools {#tools}
 
 ### Assembler {#cmd_asm}
 
-64비트 x86 시스템을 위해 다음 명령어들이 추가되었습니다:
+For 64-bit x86 systems, the following instructions have been added:
 `VBROADCASTSD`,
 `BROADCASTSS`,
 `MOVDDUP`,
 `MOVSHDUP`,
 `MOVSLDUP`,
 `VMOVDDUP`,
-`VMOVSHDUP`, 및
+`VMOVSHDUP`, and
 `VMOVSLDUP`.
 
-64비트 PPC 시스템을 위해 다음과 같은 공통 벡터 스칼라(vector scalar) 명령어들이 추가되었습니다:
+For 64-bit PPC systems, the common vector scalar instructions have been
+added:
 `LXS`,
 `LXSDX`,
 `LXSI`,
@@ -168,155 +188,242 @@ FreeBSD 및 NetBSD에서 알려져 있지만 아직 원인이 파악되지 않�
 `XXSEL`,
 `XXSI`,
 `XXSLDWI`,
-`XXSPLT`, 및
+`XXSPLT`, and
 `XXSPLTW`.
 
 ### Yacc {#tool_yacc}
 
 <!-- CL 27324, CL 27325 -->
-`yacc` 도구(이전에는 “`go` `tool` `yacc`”를 실행하여 사용 가능)가 제거되었습니다.
-Go 1.7부터 Go 컴파일러에서 더 이상 사용되지 않았습니다.
-이 도구는 “tools” 저장소로 이동되었으며, 이제 [`golang.org/x/tools/cmd/goyacc`](https://godoc.org/golang.org/x/tools/cmd/goyacc)에서 사용할 수 있습니다.
+The `yacc` tool (previously available by running
+“`go` `tool` `yacc`”) has been removed.
+As of Go 1.7 it was no longer used by the Go compiler.
+It has moved to the “tools” repository and is now available at
+[`golang.org/x/tools/cmd/goyacc`](https://godoc.org/golang.org/x/tools/cmd/goyacc).
 
 ### Fix {#tool_fix}
 
 <!-- CL 28872 -->
-`fix` 도구에 “`context`” 관련 새로운 수정 사항이 추가되었습니다.
-이 수정 사항은 임포트를 “`golang.org/x/net/context`”에서
-“[`context`](/pkg/context/)”로 변경합니다.
+The `fix` tool has a new “`context`”
+fix to change imports from “`golang.org/x/net/context`”
+to “[`context`](/pkg/context/)”.
 
 ### Pprof {#tool_pprof}
 
 <!-- CL 33157 -->
-이제 `pprof` 도구는 “`https+insecure`” URL 스킴을 사용하여 TLS 서버를 프로파일링하고 인증서 검증을 건너뛸 수 있습니다.
+The `pprof` tool can now profile TLS servers
+and skip certificate validation by using the “`https+insecure`”
+URL scheme.
 
 <!-- CL 23781 -->
-이제 callgrind 출력에 명령어 수준(instruction-level)의 세분성이 적용됩니다.
+The callgrind output now has instruction-level granularity.
 
 ### Trace {#tool_trace}
 
 <!-- CL 23324 -->
-`trace` 도구에 실행 트레이스(execution trace)로부터 pprof 호환 블로킹(blocking) 및 레이턴시(latency) 프로파일을 생성하는 새로운 `-pprof` 플래그가 추가되었습니다.
+The `trace` tool has a new `-pprof` flag for
+producing pprof-compatible blocking and latency profiles from an
+execution trace.
 
 <!-- CL 30017, CL 30702 -->
-이제 실행 트레이스 뷰어(execution trace viewer)에서 가비지 컬렉션(garbage collection) 이벤트가 더 명확하게 표시됩니다. 가비지 컬렉션 활동은 별도의 행에 표시되며, GC 헬퍼 고루틴(helper goroutines)에는 각자의 역할이 주석으로 표시됩니다.
+Garbage collection events are now shown more clearly in the
+execution trace viewer. Garbage collection activity is shown on its
+own row and GC helper goroutines are annotated with their roles.
 
 ### Vet {#tool_vet}
 
-Vet은 어떤 면에서는 더 엄격해졌고, 이전에 오탐(false positives)을 유발했던 부분에서는 더 완화되었습니다.
+Vet is stricter in some ways and looser where it
+previously caused false positives.
 
-Vet는 이제 다음과 같은 사항들을 검사합니다:
-* 락(lock) 배열의 복사
-* 중복된 JSON 및 XML 구조체 필드 태그
-* 공백으로 구분되지 않은 구조체 태그
-* 에러 확인 전의 HTTP `Response.Body.Close` 지연 호출(deferred calls)
-* `Printf` 내의 인덱싱된 인자(indexed arguments)
+Vet now checks for copying an array of locks,
+duplicate JSON and XML struct field tags,
+non-space-separated struct tags,
+deferred calls to HTTP `Response.Body.Close`
+before checking errors, and
+indexed arguments in `Printf`.
+It also improves existing checks.
 
-또한 기존 검사 기능들이 개선되었습니다.
 
-### 컴파일러 툴체인 {#compiler}
+### Compiler Toolchain {#compiler}
 
-Go 1.7에서는 64비트 x86 시스템을 위한 새로운 컴파일러 백엔드가 도입되었습니다.
-Go 1.8에서는 해당 백엔드가 더욱 발전하여 이제 모든 아키텍처에서 사용됩니다.
+Go 1.7 introduced a new compiler back end for 64-bit x86 systems.
+In Go 1.8, that back end has been developed further and is now used for
+all architectures.
 
-[정적 단일 할당 형식](https://en.wikipedia.org/wiki/Static_single_assignment_form) (SSA)를 기반으로 하는 새로운 백엔드는 더 간결하고 효율적인 코드를 생성하며, 경계 검사 제거(bounds check elimination)와 같은 최적화를 위한 더 나은 플랫폼을 제공합니다.
+The new back end, based on
+[static single assignment form](https://en.wikipedia.org/wiki/Static_single_assignment_form) (SSA),
+generates more compact, more efficient code
+and provides a better platform for optimizations
+such as bounds check elimination.
+The new back end reduces the CPU time required by
+our benchmark programs by 20-30%
+on 32-bit ARM systems. For 64-bit x86 systems, which already used the SSA back end in
+Go 1.7, the gains are a more modest 0-10%. Other architectures will likely
+see improvements closer to the 32-bit ARM numbers.
 
-새로운 백엔드는 32비트 ARM 시스템에서 벤치마크 프로그램에 필요한 CPU 시간을 20-30% 줄여줍니다. Go 1.7에서 이미 SSA 백엔드를 사용했던 64비트 x86 시스템의 경우, 성능 향상은 0-10%로 보다 완만합니다. 다른 아키텍처들은 32비트 ARM 수치에 가까운 개선 효과를 볼 가능성이 높습니다.
+The temporary `-ssa=0` compiler flag introduced in Go 1.7
+to disable the new back end has been removed in Go 1.8.
 
-새로운 백엔드를 비활성화하기 위해 Go 1.7에서 도입되었던 임시 컴파일러 플래그 `-ssa=0`이 Go 1.8에서 제거되었습니다.
+In addition to enabling the new compiler back end for all systems,
+Go 1.8 also introduces a new compiler front end. The new compiler
+front end should not be noticeable to users but is the foundation for
+future performance work.
 
-모든 시스템에 대해 새로운 컴파일러 백엔드를 활성화하는 것 외에도, Go 1.8은 새로운 컴파일러 프런트엔드를 도입합니다. 새로운 컴파일러 프런트엔드는 사용자가 체감하기 어렵겠지만, 향후 성능 개선 작업을 위한 기반이 됩니다.
-
-컴파일러와 링커가 최적화되어 이번 릴리스에서는 Go 1.7보다 더 빠르게 실행됩니다. 비록 여전히 저희가 원하는 수준보다는 느리지만, 향후 릴리스에서 계속해서 최적화될 예정입니다.
-이전 릴리스와 비교하여 Go 1.8은 [약 15% 더 빠릅니다](https://dave.cheney.net/2016/11/19/go-1-8-toolchain-improvements).
+The compiler and linker have been optimized and run faster in this
+release than in Go 1.7, although they are still slower than we would
+like and will continue to be optimized in future releases.
+Compared to the previous release, Go 1.8 is
+[about 15% faster](https://dave.cheney.net/2016/11/19/go-1-8-toolchain-improvements).
 
 ### Cgo {#cmd_cgo}
 
 <!-- CL 31141 -->
-이제 Go 도구는 `make.bash` 중에 설정된 `CGO_ENABLED` 환경 변수 값을 기억하며, 이슈 [#12808](/issue/12808)을 해결하기 위해 기본적으로 이후의 모든 컴파일에 이 값을 적용합니다.
-네이티브 컴파일을 수행할 때, `make.bash`가 올바른 설정을 자동으로 감지하므로 `CGO_ENABLED` 환경 변수를 명시적으로 설정해야 하는 경우는 드뭅니다. `CGO_ENABLED` 환경 변수를 명시적으로 설정해야 하는 주된 이유는 환경이 cgo를 지원하지만 명시적으로 cgo 지원을 원하지 않는 경우이며, 이 경우 `make.bash` 또는 `all.bash` 중에 `CGO_ENABLED=0`으로 설정하십시오.
+The Go tool now remembers the value of the `CGO_ENABLED` environment
+variable set during `make.bash` and applies it to all future compilations
+by default to fix issue [#12808](/issue/12808).
+When doing native compilation, it is rarely necessary to explicitly set
+the `CGO_ENABLED` environment variable as `make.bash`
+will detect the correct setting automatically. The main reason to explicitly
+set the `CGO_ENABLED` environment variable is when your environment
+supports cgo, but you explicitly do not want cgo support, in which case, set
+`CGO_ENABLED=0` during `make.bash` or `all.bash`.
 
 <!-- CL 29991 -->
-이제 환경 변수 `PKG_CONFIG`를 사용하여 `#cgo` `pkg-config` 지시문을 처리하는 데 실행할 프로그램을 설정할 수 있습니다. 기본값은 이전 릴리스에서 항상 사용되었던 `pkg-config` 프로그램입니다. 이는 [cgo](/cmd/cgo/) 코드를 교차 컴파일(cross-compile)하는 것을 더 쉽게 만들기 위한 것입니다.
+The environment variable `PKG_CONFIG` may now be used to
+set the program to run to handle `#cgo` `pkg-config`
+directives. The default is `pkg-config`, the program
+always used by earlier releases. This is intended to make it easier
+to cross-compile
+[cgo](/cmd/cgo/) code.
 
 <!-- CL 32354 -->
-이제 [cgo](/cmd/cgo/) 도구가 [go](/cmd/go/) 명령에서 사용하는 `-srcdir` 옵션을 지원합니다.
+The [cgo](/cmd/cgo/) tool now supports a `-srcdir`
+option, which is used by the [go](/cmd/go/) command.
 
 <!-- CL 31768, 31811 -->
-[cgo](/cmd/cgo/) 코드가 `C.malloc`을 호출하고 `malloc`이 `NULL`을 반환하면, 이제 프로그램은 메모리 부족(out of memory) 오류와 함께 충돌합니다.
-`C.malloc`은 절대 `nil`을 반환하지 않습니다.
-대부분의 C 함수와 달리, `C.malloc`은 errno 값을 반환하는 두 개의 결과값 형태(two-result form)로 사용할 수 없습니다.
+If [cgo](/cmd/cgo/) code calls `C.malloc`, and
+`malloc` returns `NULL`, the program will now
+crash with an out of memory error.
+`C.malloc` will never return `nil`.
+Unlike most C functions, `C.malloc` may not be used in a
+two-result form returning an errno value.
 
 <!-- CL 33237 -->
-[cgo](/cmd/cgo/)를 사용하여 C union에 대한 포인터를 전달하며 C 함수를 호출할 때, 해당 C union이 포인터 값을 포함할 수 있고 [cgo pointer checking](/cmd/cgo/#hdr-Passing_pointers)이 활성화되어 있다면(기본값), 이제 union 값에 대해 Go 포인터 검사가 수행됩니다.
+If [cgo](/cmd/cgo/) is used to call a C function passing a
+pointer to a C union, and if the C union can contain any pointer
+values, and if [cgo pointer
+checking](/cmd/cgo/#hdr-Passing_pointers) is enabled (as it is by default), the union value is now
+checked for Go pointers.
 
 ### Gccgo {#gccgo}
 
-Go의 반기별 릴리스 일정과 GCC의 연간 릴리스 일정의 정렬로 인해,
-GCC 릴리스 6에는 gccgo의 Go 1.6.1 버전이 포함되어 있습니다.
-다음 릴리스인 GCC 7에는 gccgo의 Go 1.8 버전이 포함될 것으로 예상합니다.
+Due to the alignment of Go's semiannual release schedule with GCC's
+annual release schedule,
+GCC release 6 contains the Go 1.6.1 version of gccgo.
+We expect that the next release, GCC 7, will contain the Go 1.8
+version of gccgo.
 
-### 기본 GOPATH {#gopath}
+### Default GOPATH {#gopath}
 
+The
 [`GOPATH`
-환경 변수](/cmd/go/#hdr-GOPATH_environment_variable)가 설정되지 않은 경우 이제 기본값이 적용됩니다. Unix에서는 `$HOME/go`, Windows에서는 `%USERPROFILE%/go`가 기본값으로 설정됩니다.
+environment variable](/cmd/go/#hdr-GOPATH_environment_variable) now has a default value if it
+is unset. It defaults to
+`$HOME/go` on Unix and
+`%USERPROFILE%/go` on Windows.
 
 ### Go get {#go_get}
 
 <!-- CL 34818 -->
-이제 “`go` `get`” 명령은 <code style="white-space:nowrap">-insecure</code> 플래그 사용 여부와 관계없이 항상 HTTP 프록시 환경 변수를 준수합니다. 이전 릴리스에서는 <code style="white-space:nowrap">-insecure</code> 플래그를 사용하면 프록시를 사용하지 않는 부수 효과가 있었습니다.
+The “`go` `get`” command now always respects
+HTTP proxy environment variables, regardless of whether
+the <code style="white-space:nowrap">-insecure</code> flag is used. In previous releases, the
+<code style="white-space:nowrap">-insecure</code> flag had the side effect of not using proxies.
 
-### Go 버그 {#go_bug}
+### Go bug {#go_bug}
 
-새로운 “[`go` `bug`](/cmd/go/#hdr-Print_information_for_bug_reports)” 명령어는 현재 시스템에 대한 정보가 미리 채워진 상태로 GitHub에 버그 리포트를 시작합니다.
+The new
+“[`go` `bug`](/cmd/go/#hdr-Print_information_for_bug_reports)”
+command starts a bug report on GitHub, prefilled
+with information about the current system.
 
 ### Go doc {#cmd_doc}
 
 <!-- CL 25419 -->
-이제 “[`go` `doc`](/cmd/go/#hdr-Show_documentation_for_package_or_symbol)”
-명령어가 [`godoc`](/cmd/godoc/)의 동작을 따라 상수와 변수를 해당 타입과 함께 그룹화하여 표시합니다.
+The
+“[`go` `doc`](/cmd/go/#hdr-Show_documentation_for_package_or_symbol)”
+command now groups constants and variables with their type,
+following the behavior of
+[`godoc`](/cmd/godoc/).
 
 <!-- CL 25420 -->
-`doc` 출력의 가독성을 높이기 위해, 1레벨 항목의 각 요약(summary)은 반드시 한 줄을 차지하도록 보장됩니다.
+In order to improve the readability of `doc`'s
+output, each summary of the first-level items is guaranteed to
+occupy a single line.
 
 <!-- CL 31852 -->
-이제 “`go` `doc` `net.Conn.SetDeadline`”과 같이 인터페이스 정의 내의 특정 메서드에 대한 문서를 요청할 수 있습니다.
+Documentation for a specific method in an interface definition can
+now be requested, as in
+“`go` `doc` `net.Conn.SetDeadline`”.
 
-### 플러그인 {#plugin}
+### Plugins {#plugin}
 
-Go는 이제 Go로 작성된 플러그인을 생성하기 위한 “`plugin`” 빌드 모드와, 이러한 플러그인을 런타임에 로드하기 위한 새로운 [`plugin`](/pkg/plugin/) 패키지를 통해 플러그인에 대한 초기 지원을 제공합니다. 플러그인 지원은 현재 Linux에서만 가능합니다. 문제가 발생하면 보고해 주세요.
+Go now provides early support for plugins with a “`plugin`”
+build mode for generating plugins written in Go, and a
+new [`plugin`](/pkg/plugin/) package for
+loading such plugins at run time. Plugin support is currently only
+available on Linux. Please report any issues.
 
 ## Runtime {#runtime}
 
-### 인자 활성 상태 (Argument Liveness) {#liveness}
+### Argument Liveness {#liveness}
 
 <!-- Issue 15843 -->
-가비지 컬렉터는 더 이상 함수 전체 범위에서 인수가 live 상태라고 간주하지 않습니다. 더 자세한 정보와 변수를 계속 live 상태로 유지하는 방법에 대해서는 Go 1.7에서 추가된 [`runtime.KeepAlive`](/pkg/runtime/#KeepAlive) 함수를 참조하십시오.
+The garbage collector no longer considers
+arguments live throughout the entirety of a function. For more
+information, and for how to force a variable to remain live, see
+the [`runtime.KeepAlive`](/pkg/runtime/#KeepAlive)
+function added in Go 1.7.
 
-_업데이트:_
-할당된 객체에 finalizer를 설정하는 코드는 해당 객체를 사용하는 함수나 메서드에 `runtime.KeepAlive` 호출을 추가해야 할 수도 있습니다.
-자세한 내용은 [`KeepAlive` 문서](/pkg/runtime/#KeepAlive)와 해당 예제를 읽어보시기 바랍니다.
+_Updating:_
+Code that sets a finalizer on an allocated object may need to add
+calls to `runtime.KeepAlive` in functions or methods
+using that object.
+Read the
+[`KeepAlive`
+documentation](/pkg/runtime/#KeepAlive) and its example for more details.
 
 ### Concurrent Map Misuse {#mapiter}
 
-Go 1.6에서 런타임은 [맵의 동시성 오용에 대한 가벼운 베스트 에포트(best-effort) 감지 기능을 추가](/doc/go1.6#runtime)했습니다. 이번 릴리스에서는 맵에 동시에 쓰기와 반복문(iterate)을 수행하는 프로그램을 감지하는 기능을 지원하여 해당 감지기를 개선했습니다.
+In Go 1.6, the runtime
+[added lightweight,
+best-effort detection of concurrent misuse of maps](/doc/go1.6#runtime). This release
+improves that detector with support for detecting programs that
+concurrently write to and iterate over a map.
 
-언제나 그렇듯이, 한 고루틴(goroutine)이 맵(map)에 데이터를 쓰고 있다면, 다른 어떤 고루틴도 동시에 해당 맵을 읽거나(반복문 포함) 써서는 안 됩니다.
-런타임이 이러한 상황을 감지하면 진단 내용을 출력하고 프로그램을 충돌(crash)시킵니다.
-이 문제에 대해 더 자세히 알아보는 가장 좋은 방법은 [race detector](/blog/race-detector)를 사용하여 프로그램을 실행하는 것이며, 이를 통해 레이스 컨디션(race)을 더 확실하게 식별하고 더 상세한 정보를 얻을 수 있습니다.
+As always, if one goroutine is writing to a map, no other goroutine should be
+reading (which includes iterating) or writing the map concurrently.
+If the runtime detects this condition, it prints a diagnosis and crashes the program.
+The best way to find out more about the problem is to run the program
+under the
+[race detector](/blog/race-detector),
+which will more reliably identify the race
+and give more detail.
 
-### MemStats 문서 {#memstats}
+### MemStats Documentation {#memstats}
 
 <!-- CL 28972 -->
-[`runtime.MemStats`](/pkg/runtime/#MemStats)
-타입에 대한 문서화가 더 상세하게 이루어졌습니다.
+The [`runtime.MemStats`](/pkg/runtime/#MemStats)
+type has been more thoroughly documented.
 
-## 성능 {#performance}
+## Performance {#performance}
 
-언제나 그렇듯, 변경 사항이 매우 광범위하고 다양하여 성능에 대해 정확한 진술을 하기는 어렵습니다.
-가비지 컬렉터의 속도 향상과 표준 라이브러리의 최적화 덕분에 대부분의 프로그램이 약간 더 빠르게 실행될 것입니다.
+As always, the changes are so general and varied that precise statements
+about performance are difficult to make.
+Most programs should run a bit faster,
+due to speedups in the garbage collector and
+optimizations in the standard library.
 
-다음 패키지들의 구현에 최적화가 이루어졌습니다:
+There have been optimizations to implementations in the
 [`bytes`](/pkg/bytes/),
 [`crypto/aes`](/pkg/crypto/aes/),
 [`crypto/cipher`](/pkg/crypto/cipher/),
@@ -338,577 +445,872 @@ Go 1.6에서 런타임은 [맵의 동시성 오용에 대한 가벼운 베스트
 [`strconv`](/pkg/strconv/),
 [`strings`](/pkg/strings/),
 [`syscall`](/pkg/syscall/),
-[`text/template`](/pkg/text/template/), 및
-[`unicode/utf8`](/pkg/unicode/utf8/).
+[`text/template`](/pkg/text/template/), and
+[`unicode/utf8`](/pkg/unicode/utf8/)
+packages.
 
-### 가비지 컬렉터 (Garbage Collector) {#gc}
+### Garbage Collector {#gc}
 
-가비지 컬렉션(Garbage collection) 일시 중지 시간은 Go 1.7보다 상당히 짧아져야 하며, 보통 100 마이크로초 미만, 때로는 10 마이크로초까지 낮아집니다.
-
-자세한 내용은 [stop-the-world 스택 재스캔 제거에 관한 문서](https://github.com/golang/proposal/blob/master/design/17503-eliminate-rescan.md)를 참조하십시오. Go 1.9를 위한 추가 작업이 남아 있습니다.
+Garbage collection pauses should be significantly shorter than they
+were in Go 1.7, usually under 100 microseconds and often as low as
+10 microseconds.
+See the
+[document on eliminating stop-the-world stack re-scanning](https://github.com/golang/proposal/blob/master/design/17503-eliminate-rescan.md)
+for details. More work remains for Go 1.9.
 
 ### Defer {#defer}
 
 <!-- CL 29656, CL 29656 -->
 
-[지연 함수 호출](/ref/spec/#Defer_statements)의 오버헤드가 약 절반으로 줄어들었습니다.
+The overhead of [deferred
+function calls](/ref/spec/#Defer_statements) has been reduced by about half.
 
 ### Cgo {#cgoperf}
 
-Go에서 C로의 호출 오버헤드가 약 절반으로 줄어들었습니다.
+The overhead of calls from Go into C has been reduced by about half.
 
-## 표준 라이브러리 {#library}
+## Standard library {#library}
 
-### 예제 {#examples}
+### Examples {#examples}
 
-많은 패키지의 문서에 예제가 추가되었습니다.
+Examples have been added to the documentation across many packages.
 
-### 정렬 {#sort_slice}
+### Sort {#sort_slice}
 
-[sort](/pkg/sort/) 패키지에 _less_ 함수를 통해 슬라이스를 정렬할 수 있는 편리한 [`Slice`](/pkg/sort/#Slice) 함수가 추가되었습니다. 많은 경우, 이는 새로운 sorter 타입을 작성할 필요가 없음을 의미합니다.
+The [sort](/pkg/sort/) package
+now includes a convenience function
+[`Slice`](/pkg/sort/#Slice) to sort a
+slice given a _less_ function.
+In many cases this means that writing a new sorter type is not
+necessary.
 
-또한 [`SliceStable`](/pkg/sort/#SliceStable)과 [`SliceIsSorted`](/pkg/sort/#SliceIsSorted)가 새로 추가되었습니다.
+Also new are
+[`SliceStable`](/pkg/sort/#SliceStable) and
+[`SliceIsSorted`](/pkg/sort/#SliceIsSorted).
 
 ### HTTP/2 Push {#h2push}
 
-[net/http](/pkg/net/http/) 패키지에 [`Handler`](/pkg/net/http/#Handler)에서 HTTP/2 서버 푸시를 보낼 수 있는 메커니즘이 추가되었습니다. 기존의 `Flusher` 및 `Hijacker` 인터페이스와 유사하게, 이제 HTTP/2 [`ResponseWriter`](/pkg/net/http/#ResponseWriter)는 새로운 [`Pusher`](/pkg/net/http/#Pusher) 인터페이스를 구현합니다.
+The [net/http](/pkg/net/http/) package now includes a
+mechanism to
+send HTTP/2 server pushes from a
+[`Handler`](/pkg/net/http/#Handler).
+Similar to the existing `Flusher` and `Hijacker`
+interfaces, an HTTP/2
+[`ResponseWriter`](/pkg/net/http/#ResponseWriter)
+now implements the new
+[`Pusher`](/pkg/net/http/#Pusher) interface.
 
-### HTTP 서버의 Graceful Shutdown (우아한 종료) {#http_shutdown}
+### HTTP Server Graceful Shutdown {#http_shutdown}
 
 <!-- CL 32329 -->
-이제 HTTP Server는 새로운 [`Server.Shutdown`](/pkg/net/http/#Server.Shutdown) 메서드를 사용한 우아한 종료(graceful shutdown)와 새로운 [`Server.Close`](/pkg/net/http/#Server.Close) 메서드를 사용한 즉각적인 종료(abrupt shutdown)를 지원합니다.
+The HTTP Server now has support for graceful shutdown using the new
+[`Server.Shutdown`](/pkg/net/http/#Server.Shutdown)
+method and abrupt shutdown using the new
+[`Server.Close`](/pkg/net/http/#Server.Close)
+method.
 
-### 더 많은 컨텍스트 지원 {#more_context}
+### More Context Support {#more_context}
 
-표준 라이브러리에 [`context.Context`](/pkg/context/#Context)를 도입한 [Go 1.7](/doc/go1.7#context)에 이어, Go 1.8은 기존 패키지들에 더 많은 컨텍스트 지원을 추가합니다:
+Continuing [Go 1.7's adoption](/doc/go1.7#context)
+of [`context.Context`](/pkg/context/#Context)
+into the standard library, Go 1.8 adds more context support
+to existing packages:
 
-- 새로운 [`Server.Shutdown`](/pkg/net/http/#Server.Shutdown)은 context 인자를 받습니다.
-  - [database/sql](/pkg/database/sql/) 패키지에 context 지원을 포함한 [중요한 기능들이 추가되었습니다](#database_sql).
-  - 새로운 [`net.Resolver`](/pkg/net/#Resolver)에 추가된 9가지 `Lookup` 메서드 모두 이제 context를 받습니다.
+  - The new [`Server.Shutdown`](/pkg/net/http/#Server.Shutdown)
+    takes a context argument.
+  - There have been [significant additions](#database_sql) to the
+    [database/sql](/pkg/database/sql/) package with context support.
+  - All nine of the new `Lookup` methods on the new
+    [`net.Resolver`](/pkg/net/#Resolver) now
+    take a context.
 
-### Mutex 경합 프로파일링 (Mutex Contention Profiling) {#mutex_prof}
+### Mutex Contention Profiling {#mutex_prof}
 
-런타임과 도구들이 이제 경합이 발생하는 뮤텍스(contended mutexes)의 프로파일링을 지원합니다.
+The runtime and tools now support profiling contended mutexes.
 
-대부분의 사용자는 “[`go` `test`](/cmd/go/#hdr-Description_of_testing_flags)”와 함께 새로운 `-mutexprofile` 플래그를 사용하고, 생성된 파일에 [pprof](/cmd/pprof/)를 사용하기를 원할 것입니다.
+Most users will want to use the new `-mutexprofile`
+flag with “[`go` `test`](/cmd/go/#hdr-Description_of_testing_flags)”,
+and then use [pprof](/cmd/pprof/) on the resultant file.
 
-새로운 [`MutexProfile`](/pkg/runtime/#MutexProfile) 및 [`SetMutexProfileFraction`](/pkg/runtime/#SetMutexProfileFraction)을 통해 더 낮은 수준(lower-level)의 지원도 가능합니다.
+Lower-level support is also available via the new
+[`MutexProfile`](/pkg/runtime/#MutexProfile)
+and
+[`SetMutexProfileFraction`](/pkg/runtime/#SetMutexProfileFraction).
 
-Go 1.8의 알려진 제한 사항은 프로파일이 [`sync.Mutex`](/pkg/sync/#Mutex)에 대한 경합만 보고하며, [`sync.RWMutex`](/pkg/sync/#RWMutex)에 대해서는 보고하지 않는다는 점입니다.
+A known limitation for Go 1.8 is that the profile only reports contention for
+[`sync.Mutex`](/pkg/sync/#Mutex),
+not
+[`sync.RWMutex`](/pkg/sync/#RWMutex).
 
-### 라이브러리의 소규모 변경 사항 {#minor_library_changes}
+### Minor changes to the library {#minor_library_changes}
 
-언제나 그렇듯, Go 1 [호환성 약속](/doc/go1compat)을 염두에 두고 라이브러리에 다양한 소규모 변경 및 업데이트가 이루어졌습니다. 다음 섹션에서는 사용자가 확인할 수 있는 변경 사항과 추가 사항을 나열합니다. 최적화 및 사소한 버그 수정 사항은 목록에 포함되지 않았습니다.
+As always, there are various minor changes and updates to the library,
+made with the Go 1 [promise of compatibility](/doc/go1compat)
+in mind. The following sections list the user visible changes and additions.
+Optimizations and minor bug fixes are not listed.
 
 #### [archive/tar](/pkg/archive/tar/)
 
 <!-- CL 28471, CL 31440, CL 31441, CL 31444, CL 28418, CL 31439 -->
-tar 구현체에서 파일 형식의 엣지 케이스(corner cases)와 관련된 많은 버그가 수정되었습니다.
-[`Reader`](/pkg/archive/tar/#Reader)
-는 이제 8GB보다 큰 항목이 포함된 PAX 형식의 tar 파일을 처리할 수 있습니다.
-[`Writer`](/pkg/archive/tar/#Writer)
-는 긴 경로 이름이 포함된 일부 상황에서 더 이상 잘못된 tar 파일을 생성하지 않습니다.
+The tar implementation corrects many bugs in corner cases of the file format.
+The [`Reader`](/pkg/archive/tar/#Reader)
+is now able to process tar files in the PAX format with entries larger than 8GB.
+The [`Writer`](/pkg/archive/tar/#Writer)
+no longer produces invalid tar files in some situations involving long pathnames.
 
 #### [compress/flate](/pkg/compress/flate/)
 
 <!-- CL 31640, CL 31174, CL 32149 -->
-특정 상황에서 압축률을 향상시키기 위해 인코더에 몇 가지 사소한 수정 사항이 있었습니다. 그 결과, `DEFLATE`의 정확한 인코딩 출력값이 Go 1.7과 다를 수 있습니다. `DEFLATE`는 gzip, png, zlib, zip의 기본 압축 방식이므로, 해당 포맷들의 출력값 또한 변경되었을 수 있습니다.
+There have been some minor fixes to the encoder to improve the
+compression ratio in certain situations. As a result, the exact
+encoded output of `DEFLATE` may be different from Go 1.7. Since
+`DEFLATE` is the underlying compression of gzip, png, zlib, and zip,
+those formats may have changed outputs.
 
 <!-- CL 31174 -->
-인코더가 [`NoCompression`](/pkg/compress/flate/#NoCompression) 모드로 동작할 때, 이제 [`Write`](/pkg/compress/flate/#Writer.Write) 메서드에 전달되는 슬라이스의 크기에 의존하지 않고 일관된 출력을 생성합니다.
+The encoder, when operating in
+[`NoCompression`](/pkg/compress/flate/#NoCompression)
+mode, now produces a consistent output that is not dependent on
+the size of the slices passed to the
+[`Write`](/pkg/compress/flate/#Writer.Write)
+method.
 
 <!-- CL 28216 -->
-디코더는 이제 오류가 발생했을 때, 압축을 해제하여 버퍼에 보관하고 있던 데이터를 오류와 함께 반환합니다.
+The decoder, upon encountering an error, now returns any
+buffered data it had uncompressed along with the error.
 
 #### [compress/gzip](/pkg/compress/gzip/)
 
-[`Writer`](/pkg/compress/gzip/#Writer)는 이제 [`Header.ModTime`](/pkg/compress/gzip/#Header) 필드가 제로 값(zero value)인 경우 `MTIME` 필드를 0으로 인코딩합니다. 이전 버전의 Go에서는 `Writer`가 의미 없는 값을 인코딩했습니다. 마찬가지로, [`Reader`](/pkg/compress/gzip/#Reader)는 이제 0으로 인코딩된 `MTIME` 필드를 제로 값의 `Header.ModTime`으로 보고합니다.
+The [`Writer`](/pkg/compress/gzip/#Writer)
+now encodes a zero `MTIME` field when
+the [`Header.ModTime`](/pkg/compress/gzip/#Header)
+field is the zero value.
+In previous releases of Go, the `Writer` would encode
+a nonsensical value.
+Similarly,
+the [`Reader`](/pkg/compress/gzip/#Reader)
+now reports a zero encoded `MTIME` field as a zero
+`Header.ModTime`.
 
 #### [context](/pkg/context/)
 
 <!-- CL 30370 -->
-[`DeadlineExceeded`](/pkg/context#DeadlineExceeded)
-오류는 이제 [`net.Error`](/pkg/net/#Error)를
-구현하며, `Timeout` 및 `Temporary` 메서드 모두에 대해 true를 보고합니다.
+The [`DeadlineExceeded`](/pkg/context#DeadlineExceeded)
+error now implements
+[`net.Error`](/pkg/net/#Error)
+and reports true for both the `Timeout` and
+`Temporary` methods.
 
 #### [crypto/tls](/pkg/crypto/tls/)
 
 <!-- CL 25159, CL 31318 -->
-새로운 메서드
+The new method
 [`Conn.CloseWrite`](/pkg/crypto/tls/#Conn.CloseWrite)
-를 통해 TLS 연결을 하프 클로즈(half closed) 상태로 만들 수 있습니다.
+allows TLS connections to be half closed.
 
 <!-- CL 28075 -->
-새로운 메서드인 [`Config.Clone`](/pkg/crypto/tls/#Config.Clone)은 TLS 설정을 복제합니다.
+The new method
+[`Config.Clone`](/pkg/crypto/tls/#Config.Clone)
+clones a TLS configuration.
 
 <!-- CL 30790 -->
-새로운 [`Config.GetConfigForClient`](/pkg/crypto/tls/#Config.GetConfigForClient)
-콜백을 사용하면 클라이언트의
-[`ClientHelloInfo`](/pkg/crypto/tls/#ClientHelloInfo)를 기반으로
-클라이언트에 대한 설정을 동적으로 선택할 수 있습니다. <!-- CL 31391, CL 32119 -->
-[`ClientHelloInfo`](/pkg/crypto/tls/#ClientHelloInfo)
-구조체에 이제 `Conn`, `SignatureSchemes` (새로운
-타입인 [`SignatureScheme`](/pkg/crypto/tls/#SignatureScheme) 사용),
-`SupportedProtos` 및 `SupportedVersions` 필드가 새로 추가되었습니다.
+The new [`Config.GetConfigForClient`](/pkg/crypto/tls/#Config.GetConfigForClient)
+callback allows selecting a configuration for a client dynamically, based
+on the client's
+[`ClientHelloInfo`](/pkg/crypto/tls/#ClientHelloInfo). <!-- CL 31391, CL 32119 -->
+The [`ClientHelloInfo`](/pkg/crypto/tls/#ClientHelloInfo)
+struct now has new
+fields `Conn`, `SignatureSchemes` (using
+the new
+type [`SignatureScheme`](/pkg/crypto/tls/#SignatureScheme)),
+`SupportedProtos`, and `SupportedVersions`.
 
 <!-- CL 32115 -->
-새로운 [`Config.GetClientCertificate`](/pkg/crypto/tls/#Config.GetClientCertificate)
-콜백을 사용하면, 새로운 [`CertificateRequestInfo`](/pkg/crypto/tls/#CertificateRequestInfo)로 표현되는
-서버의 TLS `CertificateRequest` 메시지에 따라 클라이언트 인증서를 선택할 수 있습니다.
+The new [`Config.GetClientCertificate`](/pkg/crypto/tls/#Config.GetClientCertificate)
+callback allows selecting a client certificate based on the server's
+TLS `CertificateRequest` message, represented by the new
+[`CertificateRequestInfo`](/pkg/crypto/tls/#CertificateRequestInfo).
 
 <!-- CL 27434 -->
-새로운 [`Config.KeyLogWriter`](/pkg/crypto/tls/#Config.KeyLogWriter)를 사용하면 [WireShark](https://www.wireshark.org/) 및 유사한 도구에서 TLS 연결을 디버깅할 수 있습니다.
+The new
+[`Config.KeyLogWriter`](/pkg/crypto/tls/#Config.KeyLogWriter)
+allows debugging TLS connections
+in [WireShark](https://www.wireshark.org/) and
+similar tools.
 
 <!-- CL 32115 -->
-새로운
+The new
 [`Config.VerifyPeerCertificate`](/pkg/crypto/tls/#Config.VerifyPeerCertificate)
-콜백을 통해 피어(peer)가 제시한 인증서에 대한 추가 검증이 가능합니다.
+callback allows additional validation of a peer's presented certificate.
 
 <!-- CL 18130 -->
-`crypto/tls` 패키지에 CBC 패딩 오라클(padding oracles)에 대한 기본적인 대응책이 구현되었습니다. 명시적인 비밀값 의존적 타이밍(secret-dependent timings)은 없어야 하지만, 캐시 타이밍 누수를 방지하기 위해 메모리 액세스를 정규화하는 시도는 하지 않았습니다.
+The `crypto/tls` package now implements basic
+countermeasures against CBC padding oracles. There should be
+no explicit secret-dependent timings, but it does not attempt to
+normalize memory accesses to prevent cache timing leaks.
 
-`crypto/tls` 패키지가 이제
-X25519 및 <!-- CL 30824, CL 30825 -->
-ChaCha20-Poly1305를 지원합니다. <!-- CL 30957, CL 30958 -->
-이제 AES-GCM에 대한 하드웨어 지원이 없는 한 <!-- CL 32871 -->
-ChaCha20-Poly1305가 우선적으로 사용됩니다.
+The `crypto/tls` package now supports
+X25519 and <!-- CL 30824, CL 30825 -->
+ChaCha20-Poly1305. <!-- CL 30957, CL 30958 -->
+ChaCha20-Poly1305 is now prioritized unless <!-- CL 32871 -->
+hardware support for AES-GCM is present.
 
 <!-- CL 27315, CL 35290 -->
-SHA-256를 사용하는 AES-128-CBC 사이퍼 수트(cipher suites)도 이제 지원되지만, 기본적으로는 비활성화되어 있습니다.
+AES-128-CBC cipher suites with SHA-256 are also
+now supported, but disabled by default.
 
 #### [crypto/x509](/pkg/crypto/x509/)
 
 <!-- CL 24743 -->
-이제 PSS 서명을 지원합니다.
+PSS signatures are now supported.
 
 <!-- CL 32644 -->
-[`UnknownAuthorityError`](/pkg/crypto/x509/#UnknownAuthorityError)에 신뢰할 수 없는 인증서를 보고하는 `Cert` 필드가 추가되었습니다.
+[`UnknownAuthorityError`](/pkg/crypto/x509/#UnknownAuthorityError)
+now has a `Cert` field, reporting the untrusted
+certificate.
 
-인증서 검증은 몇몇 사례에서는 더 허용적이며, 다른 몇몇 사례에서는 더 엄격합니다. <!--
-crypto/x509: 리프 인증서가 루트로 직접 지정되는 것을 허용 (CL 27393)
-crypto/x509: 발급자 이름이 발급자의 주체 이름과 일치하는지 확인 (CL 23571)
-crypto/x509: 체인에 이미 나타난 루트는 수락하지 않음 (CL 32121)
-crypto/x509: 이름 제약 조건 처리 수정 (CL 30155)
-crypto/x509: RDN의 모든 이름 파싱 (CL 30810)
-crypto/x509: RSA+SHA1에 대한 ISO OID 인식 (CL 27394)
-crypto/x509: RSA 공개 키에 대해 NULL 파라미터 요구 (CL 16166, CL 27312)
-crypto/x509: SerialNumber 누락 시 에러 반환 (CL 27238)
+Certificate validation is more permissive in a few cases and
+stricter in a few other cases. <!--
+crypto/x509: allow a leaf certificate to be specified directly as root (CL 27393)
+crypto/x509: check that the issuer name matches the issuer's subject name (CL 23571)
+crypto/x509: don't accept a root that already appears in a chain. (CL 32121)
+crypto/x509: fix name constraints handling (CL 30155)
+crypto/x509: parse all names in an RDN (CL 30810)
+crypto/x509: recognise ISO OID for RSA+SHA1 (CL 27394)
+crypto/x509: require a NULL parameters for RSA public keys (CL 16166, CL 27312)
+crypto/x509: return error for missing SerialNumber (CL 27238)
 -->
 
 <!-- CL 30375 -->
-이제 RHEL 및 CentOS를 지원하기 위해 Linux의 `/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem` 경로에서도 루트 인증서를 검색합니다.
+Root certificates will now also be looked for
+at `/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem`
+on Linux, to support RHEL and CentOS.
 
 #### [database/sql](/pkg/database/sql/)
 
-이제 이 패키지는 `context.Context`를 지원합니다. [`DB.QueryContext`](/pkg/database/sql/#DB.QueryContext) 및 [`DB.PrepareContext`](/pkg/database/sql/#DB.PrepareContext)와 같이 `Context`로 끝나는 새로운 메서드들이 추가되었으며, 이들은 컨텍스트 인자를 받습니다. 새로운 `Context` 메서드들을 사용하면 요청이 완료되었을 때 연결이 닫히고 연결 풀(connection pool)로 반환되는 것을 보장하며, 드라이버가 지원하는 경우 진행 중인 쿼리를 취소할 수 있고, 데이터베이스 풀이 다음 사용 가능한 연결을 기다리는 상태를 취소할 수 있게 됩니다.
+The package now supports `context.Context`. There are new methods
+ending in `Context` such as
+[`DB.QueryContext`](/pkg/database/sql/#DB.QueryContext) and
+[`DB.PrepareContext`](/pkg/database/sql/#DB.PrepareContext)
+that take context arguments. Using the new `Context` methods ensures that
+connections are closed and returned to the connection pool when the
+request is done; enables canceling in-progress queries
+should the driver support that; and allows the database
+pool to cancel waiting for the next available connection.
 
-이제 [`TxOptions.Isolation`](/pkg/database/sql#TxOptions.Isolation)에 격리 수준을 설정하고 이를 [`DB.BeginTx`](/pkg/database/sql#DB.BeginTx)에 전달함으로써, 트랜잭션을 시작할 때 [`IsolationLevel`](/pkg/database/sql#IsolationLevel)을 설정할 수 있습니다. 드라이버가 지원하지 않는 격리 수준을 선택한 경우 에러가 반환됩니다. 또한 [`TxOptions.ReadOnly`](/pkg/database/sql/#TxOptions.ReadOnly)를 true로 설정하여 트랜잭션에 읽기 전용 속성을 설정할 수도 있습니다.
+The [`IsolationLevel`](/pkg/database/sql#IsolationLevel)
+can now be set when starting a transaction by setting the isolation level
+on [`TxOptions.Isolation`](/pkg/database/sql#TxOptions.Isolation) and passing
+it to [`DB.BeginTx`](/pkg/database/sql#DB.BeginTx).
+An error will be returned if an isolation level is selected that the driver
+does not support. A read-only attribute may also be set on the transaction
+by setting [`TxOptions.ReadOnly`](/pkg/database/sql/#TxOptions.ReadOnly)
+to true.
 
-이제 이를 지원하는 드라이버의 경우 쿼리에서 SQL 컬럼 타입 정보를 제공합니다.
-Rows는 SQL 타입 정보, 컬럼 타입 길이 및 Go 타입을 포함할 수 있는 [`ColumnTypes`](/pkg/database/sql#Rows.ColumnTypes)를 반환할 수 있습니다.
+Queries now expose the SQL column type information for drivers that support it.
+Rows can return [`ColumnTypes`](/pkg/database/sql#Rows.ColumnTypes)
+which can include SQL type information, column type lengths, and the Go type.
 
-[`Rows`](/pkg/database/sql/#Rows)는 이제 여러 개의 결과 집합(result sets)을 나타낼 수 있습니다. [`Rows.Next`](/pkg/database/sql/#Rows.Next)가 false를 반환한 후, [`Rows.NextResultSet`](/pkg/database/sql/#Rows.NextResultSet)을 호출하여 다음 결과 집합으로 이동할 수 있습니다. 다음 결과 집합으로 이동한 후에도 기존의 `Rows`를 계속해서 사용해야 합니다.
+A [`Rows`](/pkg/database/sql/#Rows)
+can now represent multiple result sets. After
+[`Rows.Next`](/pkg/database/sql/#Rows.Next) returns false,
+[`Rows.NextResultSet`](/pkg/database/sql/#Rows.NextResultSet)
+may be called to advance to the next result set. The existing `Rows`
+should continue to be used after it advances to the next result set.
 
-[`NamedArg`](/pkg/database/sql/#NamedArg)를 쿼리 인자로 사용할 수 있습니다. 새로운 [`Named`](/pkg/database/sql/#Named) 함수를 사용하면 [`NamedArg`](/pkg/database/sql/#NamedArg)를 더 간결하게 생성할 수 있습니다.
+[`NamedArg`](/pkg/database/sql/#NamedArg) may be used
+as query arguments. The new function [`Named`](/pkg/database/sql/#Named)
+helps create a [`NamedArg`](/pkg/database/sql/#NamedArg)
+more succinctly.
 
-드라이버가 새로운 [`Pinger`](/pkg/database/sql/driver/#Pinger) 인터페이스를 지원하는 경우, [`DB.Ping`](/pkg/database/sql/#DB.Ping) 및 [`DB.PingContext`](/pkg/database/sql/#DB.PingContext) 메서드는 해당 인터페이스를 사용하여 데이터베이스 연결이 여전히 유효한지 확인합니다.
+If a driver supports the new
+[`Pinger`](/pkg/database/sql/driver/#Pinger)
+interface, the
+[`DB.Ping`](/pkg/database/sql/#DB.Ping)
+and
+[`DB.PingContext`](/pkg/database/sql/#DB.PingContext)
+methods will use that interface to check whether a
+database connection is still valid.
 
-새로운 `Context` 쿼리 메서드는 모든 드라이버에서 작동하지만, 드라이버가 해당 메서드를 사용하도록 업데이트되지 않았다면 `Context` 취소에 응답하지 않습니다. 그 외의 기능들은 [`database/sql/driver`](/pkg/database/sql/driver)의 드라이버 지원이 필요합니다.
-드라이버 작성자는 새로운 인터페이스를 검토해야 합니다. 기존 드라이버 사용자는 드라이버 문서와 각 기능에 대한 시스템별 문서를 검토하여 지원 여부를 확인해야 합니다.
+The new `Context` query methods work for all drivers, but
+`Context` cancellation is not responsive unless the driver has been
+updated to use them. The other features require driver support in
+[`database/sql/driver`](/pkg/database/sql/driver).
+Driver authors should review the new interfaces. Users of existing
+driver should review the driver documentation to see what
+it supports and any system specific documentation on each feature.
 
 #### [debug/pe](/pkg/debug/pe/)
 
 <!-- CL 22720, CL 27212, CL 22181, CL 22332, CL 22336, Issue 15345 -->
-이 패키지는 기능이 확장되었으며, 이제 [Go 링커](/cmd/link/)에서 `gcc`가 생성한 오브젝트 파일을 읽는 데 사용됩니다.
-새로 추가된
+The package has been extended and is now used by
+[the Go linker](/cmd/link/) to read `gcc`-generated object files.
+The new
 [`File.StringTable`](/pkg/debug/pe/#File.StringTable)
-및
+and
 [`Section.Relocs`](/pkg/debug/pe/#Section.Relocs)
-필드는 COFF 문자열 테이블(string table)과 COFF 재배치(relocations)에 대한 접근을 제공합니다.
-새로 추가된
+fields provide access to the COFF string table and COFF relocations.
+The new
 [`File.COFFSymbols`](/pkg/debug/pe/#File.COFFSymbols)
-를 통해 COFF 심볼 테이블에 저수준으로 접근할 수 있습니다.
+allows low-level access to the COFF symbol table.
 
 #### [encoding/base64](/pkg/encoding/base64/)
 
 <!-- CL 24964 -->
-새로운
+The new
 [`Encoding.Strict`](/pkg/encoding/base64/#Encoding.Strict)
-메서드는 trailing padding 비트가 0이 아닐 때 디코더가 에러를 반환하도록 하는 `Encoding`을 반환합니다.
+method returns an `Encoding` that causes the decoder
+to return an error when the trailing padding bits are not zero.
 
 #### [encoding/binary](/pkg/encoding/binary/)
 
 <!-- CL 28514 -->
 [`Read`](/pkg/encoding/binary/#Read)
-및
+and
 [`Write`](/pkg/encoding/binary/#Write)
-가 이제 불리언(boolean) 타입을 지원합니다.
+now support booleans.
 
 #### [encoding/json](/pkg/encoding/json/)
 
 <!-- CL 18692  -->
 [`UnmarshalTypeError`](/pkg/encoding/json/#UnmarshalTypeError)
-에 이제 구조체(struct)와 필드 이름이 포함됩니다.
+now includes the struct and field name.
 
 <!-- CL 31932 -->
-nil [`Marshaler`](/pkg/encoding/json/#Marshaler)가
-이제 JSON `null` 값으로 마샬링됩니다.
+A nil [`Marshaler`](/pkg/encoding/json/#Marshaler)
+now marshals as a JSON `null` value.
 
 <!-- CL 21811 -->
-이제 [`RawMessage`](/pkg/encoding/json/#RawMessage) 값은 해당 포인터 타입과 동일하게 마샬링(marshal)됩니다.
+A [`RawMessage`](/pkg/encoding/json/#RawMessage) value now
+marshals the same as its pointer type.
 
 <!-- CL 30371 -->
-[`Marshal`](/pkg/encoding/json/#Marshal)은
-ES6와 동일한 형식을 사용하여 부동 소수점 숫자를 인코딩하며,
-더 넓은 범위의 값에 대해 10진수(지수 표기법이 아닌) 표기법을 우선적으로 사용합니다.
-특히, 2<sup>64</sup>까지의 모든 부동 소수점 정수는
-동일한 `int64` 표현과 동일하게 형식화됩니다.
+[`Marshal`](/pkg/encoding/json/#Marshal)
+encodes floating-point numbers using the same format as in ES6,
+preferring decimal (not exponential) notation for a wider range of values.
+In particular, all floating-point integers up to 2<sup>64</sup> format the
+same as the equivalent `int64` representation.
 
 <!-- CL 30944 -->
-이전 버전의 Go에서는 JSON `null`을 [`Unmarshaler`](/pkg/encoding/json/#Unmarshaler)로 언마샬링(unmarshaling)하는 것이 아무런 작업도 수행하지 않는 no-op으로 간주되었습니다. 이제는 `Unmarshaler`의 `UnmarshalJSON` 메서드가 JSON 리터럴 `null`과 함께 호출되며, 해당 케이스의 시맨틱을 직접 정의할 수 있습니다.
+In previous versions of Go, unmarshaling a JSON `null` into an
+[`Unmarshaler`](/pkg/encoding/json/#Unmarshaler)
+was considered a no-op; now the `Unmarshaler`'s
+`UnmarshalJSON` method is called with the JSON literal
+`null` and can define the semantics of that case.
 
 #### [encoding/pem](/pkg/encoding/pem/)
 
 <!-- CL 27391 -->
 [`Decode`](/pkg/encoding/pem/#Decode)
-가 이제 종료 행의 형식을 엄격하게 검사합니다.
+is now strict about the format of the ending line.
 
 #### [encoding/xml](/pkg/encoding/xml/)
 
 <!-- CL 30946 -->
-[`Unmarshal`](/pkg/encoding/xml/#Unmarshal)은
-이제 새로운 `",any,attr"` 구조체 태그를 사용하여 모든 속성을 수집하는
-와일드카드 지원 기능을 제공합니다.
+[`Unmarshal`](/pkg/encoding/xml/#Unmarshal)
+now has wildcard support for collecting all attributes using
+the new `",any,attr"` struct tag.
 
 #### [expvar](/pkg/expvar/)
 
 <!-- CL 30917 -->
-새로운 메서드인
+The new methods
 [`Int.Value`](/pkg/expvar/#Int.Value),
 [`String.Value`](/pkg/expvar/#String.Value),
-[`Float.Value`](/pkg/expvar/#Float.Value), 그리고
-[`Func.Value`](/pkg/expvar/#Func.Value)는
-내보낸 변수의 현재 값을 보고합니다.
+[`Float.Value`](/pkg/expvar/#Float.Value), and
+[`Func.Value`](/pkg/expvar/#Func.Value)
+report the current value of an exported variable.
 
 <!-- CL 24722 -->
-새로운 [`Handler`](/pkg/expvar/#Handler) 함수는 패키지의 HTTP 핸들러를 반환하여, 표준이 아닌 위치에 설치할 수 있도록 지원합니다.
+The new
+function [`Handler`](/pkg/expvar/#Handler)
+returns the package's HTTP handler, to enable installing it in
+non-standard locations.
 
 #### [fmt](/pkg/fmt/)
 
 <!-- CL 30611 -->
 [`Scanf`](/pkg/fmt/#Scanf),
-[`Fscanf`](/pkg/fmt/#Fscanf), 및
-[`Sscanf`](/pkg/fmt/#Sscanf)가 이제
-이전 릴리스보다 공백을 다르게, 그리고 더 일관되게 처리합니다.
-자세한 내용은 [스캐닝 문서](/pkg/fmt/#hdr-Scanning)를
-참조하십시오.
+[`Fscanf`](/pkg/fmt/#Fscanf), and
+[`Sscanf`](/pkg/fmt/#Sscanf) now
+handle spaces differently and more consistently than
+previous releases. See the
+[scanning documentation](/pkg/fmt/#hdr-Scanning)
+for details.
 
 #### [go/doc](/pkg/go/doc/)
 
 <!-- CL 29870 -->
-새로운 [`IsPredeclared`](/pkg/go/doc/#IsPredeclared) 함수는 문자열이 미리 선언된 식별자(predeclared identifier)인지 여부를 보고합니다.
+The new [`IsPredeclared`](/pkg/go/doc/#IsPredeclared)
+function reports whether a string is a predeclared identifier.
 
 #### [go/types](/pkg/go/types/)
 
 <!-- CL 30715 -->
-새로운 함수
+The new function
 [`Default`](/pkg/go/types/#Default)
-는 "untyped" 타입에 대한 기본 "typed" 타입을 반환합니다.
+returns the default "typed" type for an "untyped" type.
 
 <!-- CL 31939 -->
-`complex64`의 정렬(alignment) 방식이 이제 [Go 컴파일러](/cmd/compile/)와 일치합니다.
+The alignment of `complex64` now matches
+the [Go compiler](/cmd/compile/).
 
 #### [html/template](/pkg/html/template/)
 
 <!-- CL 14336 -->
-이제 패키지에서 `<script>` 태그의 `"type"` 속성을 검증합니다.
+The package now validates
+the `"type"` attribute on
+a `<script>` tag.
 
 #### [image/png](/pkg/image/png/)
 
 <!-- CL 32143, CL 32140 -->
 [`Decode`](/pkg/image/png/#Decode)
-(및 `DecodeConfig`)가
-이제 트루 컬러(True Color) 및 그레이스케일 투명도를 지원합니다.
+(and `DecodeConfig`)
+now supports True Color and grayscale transparency.
 
 <!-- CL 29872 -->
 [`Encoder`](/pkg/image/png/#Encoder)
-가 이제 팔레트 이미지(paletted images)를 인코딩할 때 속도가 더 빨라지고 출력 파일 크기가 더 작게 생성됩니다.
+is now faster and creates smaller output
+when encoding paletted images.
 
 #### [math/big](/pkg/math/big/)
 
 <!-- CL 30706 -->
-새로운 메서드
+The new method
 [`Int.Sqrt`](/pkg/math/big/#Int.Sqrt)
-는 ⌊√x⌋를 계산합니다.
+calculates ⌊√x⌋.
 
-새로운 메서드 [`Float.Scan`](/pkg/math/big/#Float.Scan)은 [`fmt.Scanner`](/pkg/fmt/#Scanner)를 위한 지원 루틴입니다.
+The new method
+[`Float.Scan`](/pkg/math/big/#Float.Scan)
+is a support routine for
+[`fmt.Scanner`](/pkg/fmt/#Scanner).
 
-[`Int.ModInverse`](/pkg/math/big/#Int.ModInverse)가 이제 음수를 지원합니다.
+[`Int.ModInverse`](/pkg/math/big/#Int.ModInverse)
+now supports negative numbers.
 
 #### [math/rand](/pkg/math/rand/)
 
 <!-- CL 27253, CL 33456 -->
-새로운 [`Rand.Uint64`](/pkg/math/rand/#Rand.Uint64)
-메서드는 `uint64` 값을 반환합니다.
-새로운 [`Source64`](/pkg/math/rand/#Source64)
-인터페이스는 이러한 값을 직접 생성할 수 있는 소스를 정의합니다. 그렇지 않은 경우 `Rand.Uint64` 메서드는
-[`Source`](/pkg/math/rand/#Source)의
-`Int63` 메서드를 두 번 호출하여 `uint64`를 구성합니다.
+The new [`Rand.Uint64`](/pkg/math/rand/#Rand.Uint64)
+method returns `uint64` values. The
+new [`Source64`](/pkg/math/rand/#Source64)
+interface describes sources capable of generating such values
+directly; otherwise the `Rand.Uint64` method
+constructs a `uint64` from two calls
+to [`Source`](/pkg/math/rand/#Source)'s
+`Int63` method.
 
 #### [mime](/pkg/mime/)
 
 <!-- CL 32175 -->
-[`ParseMediaType`](/pkg/mime/#ParseMediaType)가
-이제 MSIE를 지원하기 위해 불필요한 백슬래시 이스케이프를 리터럴로 유지합니다.
-MSIE가 전체 파일 경로를 보낼 때(“인트라넷 모드”에서), 백슬래시를 이스케이프 처리하지 않습니다: “`C:\dev\go\foo.txt`”와 같이 보내며, “`C:\\dev\\go\\foo.txt`”로 보내지 않습니다.
-이제 불필요한 백슬래시 이스케이프가 발견되면, 이를 MSIE에서 보낸 것이며 리터럴 백슬래시로 의도된 것으로 간주합니다.
-숫자와 문자 같은 단순 토큰 문자에 대해 불필요한 백슬래시 이스케이프를 생성하는 알려진 MIME 생성기는 없습니다.
+[`ParseMediaType`](/pkg/mime/#ParseMediaType)
+now preserves unnecessary backslash escapes as literals,
+in order to support MSIE.
+When MSIE sends a full file path (in “intranet mode”), it does not
+escape backslashes: “`C:\dev\go\foo.txt`”, not
+“`C:\\dev\\go\\foo.txt`”.
+If we see an unnecessary backslash escape, we now assume it is from MSIE
+and intended as a literal backslash.
+No known MIME generators emit unnecessary backslash escapes
+for simple token characters like numbers and letters.
 
 #### [mime/quotedprintable](/pkg/mime/quotedprintable/)
 
-[`Reader`](/pkg/mime/quotedprintable/#Reader)의 파싱 방식이 실제 환경에서 발견되는 더 많은 입력을 허용하기 위해 두 가지 방향으로 완화되었습니다. <!-- CL 32174 -->
-첫째, 두 자리 16진수가 뒤따르지 않는 등호(`=`)를 리터럴 등호로 허용합니다. <!-- CL 27530 -->
-둘째, 인코딩된 입력 끝에 있는 trailing 등호를 조용히 무시합니다.
+The
+[`Reader`](/pkg/mime/quotedprintable/#Reader)'s
+parsing has been relaxed in two ways to accept
+more input seen in the wild. <!-- CL 32174 -->
+First, it accepts an equals sign (`=`) not followed
+by two hex digits as a literal equal sign. <!-- CL 27530 -->
+Second, it silently ignores a trailing equals sign at the end of
+an encoded input.
 
 #### [net](/pkg/net/)
 
 <!-- CL 30164, CL 33473 -->
-[`Conn`](/pkg/net/#Conn) 문서가 인터페이스 구현에 대한 기대 사항을 명확히 하기 위해 업데이트되었습니다. `net/http` 패키지의 업데이트는 구현체가 해당 문서를 준수하는 것을 전제로 합니다.
+The [`Conn`](/pkg/net/#Conn) documentation
+has been updated to clarify expectations of an interface
+implementation. Updates in the `net/http` packages
+depend on implementations obeying the documentation.
 
-_업데이트:_ `Conn` 인터페이스의 구현체는 문서화된 시맨틱을 준수하는지 확인해야 합니다. [golang.org/x/net/nettest](https://godoc.org/golang.org/x/net/nettest) 패키지를 사용하여 `Conn`을 테스트하고 적절하게 동작하는지 검증할 수 있습니다.
+_Updating:_ implementations of the `Conn` interface should verify
+they implement the documented semantics. The
+[golang.org/x/net/nettest](https://godoc.org/golang.org/x/net/nettest)
+package will exercise a `Conn` and validate it behaves properly.
 
 <!-- CL 32099 -->
-새로운 메서드인 [`UnixListener.SetUnlinkOnClose`](/pkg/net/#UnixListener.SetUnlinkOnClose)는 리스너가 닫힐 때 기본 소켓 파일을 파일 시스템에서 제거할지 여부를 설정합니다.
+The new method
+[`UnixListener.SetUnlinkOnClose`](/pkg/net/#UnixListener.SetUnlinkOnClose)
+sets whether the underlying socket file should be removed from the file system when
+the listener is closed.
 
 <!-- CL 29951 -->
-새로운 [`Buffers`](/pkg/net/#Buffers) 타입은 메모리 상의 여러 불연속적인 버퍼로부터 네트워크에 더 효율적으로 데이터를 쓰는 것을 가능하게 합니다. 특정 머신과 특정 연결 유형의 경우, 이는 OS 전용 일괄 쓰기 작업(예: `writev`)으로 최적화됩니다.
+The new [`Buffers`](/pkg/net/#Buffers) type permits
+writing to the network more efficiently from multiple discontiguous buffers
+in memory. On certain machines, for certain types of connections,
+this is optimized into an OS-specific batch write operation (such as `writev`).
 
 <!-- CL 29440 -->
-새로운 [`Resolver`](/pkg/net/#Resolver)는 이름과 번호를 조회하며
-[`context.Context`](/pkg/context/#Context)를 지원합니다.
-[`Dialer`](/pkg/net/#Dialer)에는 이제 선택 사항인
-[`Resolver` 필드](/pkg/net/#Dialer.Resolver)가 추가되었습니다.
+The new [`Resolver`](/pkg/net/#Resolver) looks up names and numbers
+and supports [`context.Context`](/pkg/context/#Context).
+The [`Dialer`](/pkg/net/#Dialer) now has an optional
+[`Resolver` field](/pkg/net/#Dialer.Resolver).
 
 <!-- CL 29892 -->
-이제 Solaris에서 [`Interfaces`](/pkg/net/#Interfaces)가 지원됩니다.
+[`Interfaces`](/pkg/net/#Interfaces) is now supported on Solaris.
 
 <!-- CL 29233, CL 24901 -->
-이제 Go DNS 리졸버가 `resolv.conf`의 “`rotate`” 및 “`option` `ndots:0`” 옵션을 지원합니다. “`ndots`” 옵션은 이제 `libresolve`와 동일한 방식으로 준수됩니다.
+The Go DNS resolver now supports `resolv.conf`'s “`rotate`”
+and “`option` `ndots:0`” options. The “`ndots`” option is
+now respected in the same way as `libresolve`.
 
 #### [net/http](/pkg/net/http/)
 
-서버 변경 사항:
+Server changes:
 
-- 이제 서버에서 graceful shutdown을 지원합니다. [위에서 언급됨](#http_shutdown).
+  - The server now supports graceful shutdown support, [mentioned above](#http_shutdown).
   - <!-- CL 32024 -->
-    [`Server`](/pkg/net/http/#Server)에
-    설정 옵션인 `ReadHeaderTimeout`과 `IdleTimeout`이 추가되었으며,
-    `WriteTimeout`에 대한 문서가 추가되었습니다.
+    The [`Server`](/pkg/net/http/#Server)
+    adds configuration options
+    `ReadHeaderTimeout` and `IdleTimeout`
+    and documents `WriteTimeout`.
   - <!-- CL 32014 -->
-    [`FileServer`](/pkg/net/http/#FileServer)와
-    [`ServeContent`](/pkg/net/http/#ServeContent)가
-    이제 HTTP `If-Match` 조건부 요청을 지원합니다.
-    이는 RFC 7232, 섹션 2.3에 따라 적절하게 포맷된 ETag에 대해 기존에 제공하던 `If-None-Match` 지원에 추가된 기능입니다.
+    [`FileServer`](/pkg/net/http/#FileServer)
+    and
+    [`ServeContent`](/pkg/net/http/#ServeContent)
+    now support HTTP `If-Match` conditional requests,
+    in addition to the previous `If-None-Match`
+    support for ETags properly formatted according to RFC 7232, section 2.3.
 
-서버의 `Handler`가 수행할 수 있는 기능에 몇 가지 추가 사항이 있습니다:
+There are several additions to what a server's `Handler` can do:
 
-- <!-- CL 31173 -->
-    [`Request.Context`](/pkg/net/http/#Request.Context)에서 반환하는 [`Context`](/pkg/context/#Context)는 기저의 `net.Conn`이 닫히면 취소됩니다. 예를 들어, 사용자가 느린 요청 도중 브라우저를 닫으면 `Handler`는 이제 사용자가 떠났음을 감지할 수 있습니다. 이는 기존의 [`CloseNotifier`](/pkg/net/http/#CloseNotifier) 지원을 보완합니다. 이 기능이 작동하려면 기저의 [`net.Conn`](/pkg/net/#Conn)이 [최근에 명확해진 인터페이스 문서](#net)를 구현해야 합니다.
+  - <!-- CL 31173 -->
+    The [`Context`](/pkg/context/#Context)
+    returned
+    by [`Request.Context`](/pkg/net/http/#Request.Context)
+    is canceled if the underlying `net.Conn`
+    closes. For instance, if the user closes their browser in the
+    middle of a slow request, the `Handler` can now
+    detect that the user is gone. This complements the
+    existing [`CloseNotifier`](/pkg/net/http/#CloseNotifier)
+    support. This functionality requires that the underlying
+    [`net.Conn`](/pkg/net/#Conn) implements
+    [recently clarified interface documentation](#net).
   - <!-- CL 32479 -->
-    헤더가 이미 작성된 후 생성된 트레일러(trailers)를 제공하려면, 새로운 [`TrailerPrefix`](/pkg/net/http/#TrailerPrefix) 메커니즘을 참조하십시오.
+    To serve trailers produced after the header has already been written,
+    see the new
+    [`TrailerPrefix`](/pkg/net/http/#TrailerPrefix)
+    mechanism.
   - <!-- CL 33099 -->
-    이제 `Handler`는 [`ErrAbortHandler`](/pkg/net/http/#ErrAbortHandler) 에러와 함께 패닉(panic)을 일으켜 응답을 중단할 수 있습니다.
+    A `Handler` can now abort a response by panicking
+    with the error
+    [`ErrAbortHandler`](/pkg/net/http/#ErrAbortHandler).
   - <!-- CL 30812 -->
-    [`ResponseWriter`](/pkg/net/http/#ResponseWriter)에 0바이트를 `Write` 하는 것은 이제 `ResponseWriter`가 하이잭(hijack)되었는지 테스트하는 방법으로 정의됩니다. 하이잭된 경우, `Write`는 서버의 에러 로그에 에러를 출력하지 않고 [`ErrHijacked`](/pkg/net/http/#ErrHijacked)를 반환합니다.
+    A `Write` of zero bytes to a
+    [`ResponseWriter`](/pkg/net/http/#ResponseWriter)
+    is now defined as a
+    way to test whether a `ResponseWriter` has been hijacked:
+    if so, the `Write` returns
+    [`ErrHijacked`](/pkg/net/http/#ErrHijacked)
+    without printing an error
+    to the server's error log.
 
-Client 및 Transport 변경 사항:
+Client & Transport changes:
 
-- <!-- CL 28930, CL 31435 -->
-    이제 [`Client`](/pkg/net/http/#Client)가 리다이렉트 시 대부분의 요청 헤더를 복사합니다. 자세한 내용은 `Client` 타입의 [문서](/pkg/net/http/#Client)를 참조하십시오.
+  - <!-- CL 28930, CL 31435 -->
+    The [`Client`](/pkg/net/http/#Client)
+    now copies most request headers on redirect. See
+    [the documentation](/pkg/net/http/#Client)
+    on the `Client` type for details.
   - <!-- CL 29072 -->
-    이제 [`Transport`](/pkg/net/http/#Transport)가 국제화 도메인 이름(IDN)을 지원합니다. 이에 따라 [Get](/pkg/net/http/#Get) 및 기타 헬퍼 함수들도 이를 지원합니다.
+    The [`Transport`](/pkg/net/http/#Transport)
+    now supports international domain names. Consequently, so do
+    [Get](/pkg/net/http/#Get) and other helpers.
   - <!-- CL 31733, CL 29852 -->
-    이제 `Client`가 301, 307, 308 리다이렉트를 지원합니다.
-    예를 들어, `Client.Post`는 이제 301 리다이렉트를 따라가며, 이전에 302 및 303 리다이렉트 응답에서 그랬던 것처럼 바디가 없는 `GET` 요청으로 변환합니다.
-    또한 `Client`는 이제 307 및 308 리다이렉트를 따라가며, 원래의 요청 메서드와 바디(있는 경우)를 보존합니다. 리다이렉트로 인해 요청 바디를 다시 전송해야 하는 경우, 요청에 새로운 [`Request.GetBody`](/pkg/net/http/#Request) 필드가 정의되어 있어야 합니다.
-    [`NewRequest`](/pkg/net/http/#NewRequest)는 일반적인 바디 타입에 대해 `Request.GetBody`를 자동으로 설정합니다.
+    The `Client` now supports 301, 307, and 308 redirects.
+    For example, `Client.Post` now follows 301
+    redirects, converting them to `GET` requests
+    without bodies, like it did for 302 and 303 redirect responses
+    previously.
+    The `Client` now also follows 307 and 308
+    redirects, preserving the original request method and body, if
+    any. If the redirect requires resending the request body, the
+    request must have the new
+    [`Request.GetBody`](/pkg/net/http/#Request)
+    field defined.
+    [`NewRequest`](/pkg/net/http/#NewRequest)
+    sets `Request.GetBody` automatically for common
+    body types.
   - <!-- CL 32482 -->
-    이제 `Transport`는 포트에 숫자가 아닌 문자가 포함된 URL 요청을 거부합니다.
+    The `Transport` now rejects requests for URLs with
+    ports containing non-digit characters.
   - <!-- CL 27117 -->
-    이제 `Transport`는 네트워크 실패 전까지 작성된 바이트가 없고 요청 바디가 없는 경우, 멱등성(non-idempotent)이 없는 요청에 대해서도 재시도합니다.
+    The `Transport` will now retry non-idempotent
+    requests if no bytes were written before a network failure
+    and the request has no body.
   - <!-- CL 32481 -->
-    새로운 [`Transport.ProxyConnectHeader`](/pkg/net/http/#Transport)를 통해 `CONNECT` 요청 중에 프록시로 보낼 헤더 값을 설정할 수 있습니다.
+    The
+    new [`Transport.ProxyConnectHeader`](/pkg/net/http/#Transport)
+    allows configuration of header values to send to a proxy
+    during a `CONNECT` request.
   - <!-- CL 28077 -->
-    이제 [`DefaultTransport.Dialer`](/pkg/net/http/#DefaultTransport)가 `DualStack` ("[Happy Eyeballs](https://tools.ietf.org/html/rfc6555)") 지원을 활성화하여, IPv6가 실패하는 것으로 보일 때 IPv4를 백업으로 사용할 수 있습니다.
+    The [`DefaultTransport.Dialer`](/pkg/net/http/#DefaultTransport)
+    now enables `DualStack` ("[Happy Eyeballs](https://tools.ietf.org/html/rfc6555)") support,
+    allowing the use of IPv4 as a backup if it looks like IPv6 might be
+    failing.
   - <!-- CL 31726 -->
-    이제 [`Transport`](/pkg/net/http/#Transport)는 [`Request.ContentLength`](/pkg/net/http/#Request.ContentLength)가 0일 때, `ContentLength`가 실제로 0인지 아니면 단순히 정의되지 않은 것인지 판단하기 위해 nil이 아닌 [`Request.Body`](/pkg/net/http/#Request.Body)의 1바이트를 읽지 않습니다.
-    바디의 길이가 0임을 명시적으로 나타내려면, 이를 `nil`로 설정하거나 새로운 값인 [`NoBody`](/pkg/net/http/#NoBody)로 설정하십시오.
-    새로운 `NoBody` 값은 `Request` 생성자 함수에서 사용하도록 설계되었으며, [`NewRequest`](/pkg/net/http/#NewRequest)에서 사용됩니다.
+    The [`Transport`](/pkg/net/http/#Transport)
+    no longer reads a byte of a non-nil
+    [`Request.Body`](/pkg/net/http/#Request.Body)
+    when the
+    [`Request.ContentLength`](/pkg/net/http/#Request.ContentLength)
+    is zero to determine whether the `ContentLength`
+    is actually zero or just undefined.
+    To explicitly signal that a body has zero length,
+    either set it to `nil`, or set it to the new value
+    [`NoBody`](/pkg/net/http/#NoBody).
+    The new `NoBody` value is intended for use by `Request`
+    constructor functions; it is used by
+    [`NewRequest`](/pkg/net/http/#NewRequest).
 
 #### [net/http/httptrace](/pkg/net/http/httptrace/)
 
 <!-- CL 30359 -->
-이제 새로운
-[`ClientTrace.TLSHandshakeStart`](/pkg/net/http/httptrace/#ClientTrace.TLSHandshakeStart) 및
-[`ClientTrace.TLSHandshakeDone`](/pkg/net/http/httptrace/#ClientTrace.TLSHandshakeDone)을 통해
-클라이언트 요청의 TLS 핸드셰이크를 추적하는 기능이 지원됩니다.
+There is now support for tracing a client request's TLS handshakes with
+the new
+[`ClientTrace.TLSHandshakeStart`](/pkg/net/http/httptrace/#ClientTrace.TLSHandshakeStart)
+and
+[`ClientTrace.TLSHandshakeDone`](/pkg/net/http/httptrace/#ClientTrace.TLSHandshakeDone).
 
 #### [net/http/httputil](/pkg/net/http/httputil/)
 
 <!-- CL 32356 -->
-[`ReverseProxy`](/pkg/net/http/httputil/#ReverseProxy)에 
-백엔드로부터 받은 응답을 클라이언트로 프록시하기 전에 수정할 수 있는 
-새로운 선택적 훅인 [`ModifyResponse`](/pkg/net/http/httputil/#ReverseProxy.ModifyResponse)가 추가되었습니다.
+The [`ReverseProxy`](/pkg/net/http/httputil/#ReverseProxy)
+has a new optional hook,
+[`ModifyResponse`](/pkg/net/http/httputil/#ReverseProxy.ModifyResponse),
+for modifying the response from the back end before proxying it to the client.
 
 #### [net/mail](/pkg/net/mail/)
 
 <!-- CL 32176 -->
-주소의 이름 부분에서 빈 따옴표 문자열(`""`)이 다시 허용됩니다. 즉, Go 1.4 및 그 이전 버전에서는 `""` `<gopher@example.com>`을 허용했으나, Go 1.5에서 이를 거부하는 버그가 도입되었습니다. 이제 해당 주소를 다시 인식합니다.
+Empty quoted strings are once again allowed in the name part of
+an address. That is, Go 1.4 and earlier accepted
+`""` `<gopher@example.com>`,
+but Go 1.5 introduced a bug that rejected this address.
+The address is recognized again.
 
 <!-- CL 31581 -->
-[`Header.Date`](/pkg/net/mail/#Header.Date) 메서드는 항상 `Date:` 헤더를 파싱하는 방법을 제공해 왔습니다.
-새로운 함수인 [`ParseDate`](/pkg/net/mail/#ParseDate)를 통해 `Resent-Date:` 헤더와 같은 다른 헤더 라인에서 날짜를 파싱할 수 있습니다.
+The
+[`Header.Date`](/pkg/net/mail/#Header.Date)
+method has always provided a way to parse
+the `Date:` header.
+A new function
+[`ParseDate`](/pkg/net/mail/#ParseDate)
+allows parsing dates found in other
+header lines, such as the `Resent-Date:` header.
 
 #### [net/smtp](/pkg/net/smtp/)
 
 <!-- CL 33143 -->
+If an implementation of the
 [`Auth.Start`](/pkg/net/smtp/#Auth)
-메서드의 구현체가 빈 `toServer` 값을 반환하는 경우,
-패키지는 더 이상 SMTP `AUTH` 명령에서
-일부 서버가 거부했던 후행 공백(trailing whitespace)을 전송하지 않습니다.
+method returns an empty `toServer` value,
+the package no longer sends
+trailing whitespace in the SMTP `AUTH` command,
+which some servers rejected.
 
 #### [net/url](/pkg/net/url/)
 
 <!-- CL 31322 -->
-새로운 함수인
+The new functions
 [`PathEscape`](/pkg/net/url/#PathEscape)
-와
+and
 [`PathUnescape`](/pkg/net/url/#PathUnescape)
-는 쿼리 이스케이프 및 언이스케이프 함수와 유사하지만,
-경로 요소(path elements)를 위한 함수입니다.
+are similar to the query escaping and unescaping functions but
+for path elements.
 
 <!-- CL 28933 -->
-새로운 메서드인
+The new methods
 [`URL.Hostname`](/pkg/net/url/#URL.Hostname)
-및
+and
 [`URL.Port`](/pkg/net/url/#URL.Port)
-는 URL의 호스트 이름과 포트 필드를 반환하며, 포트가 없을 수 있는 경우를 올바르게 처리합니다.
+return the hostname and port fields of a URL,
+correctly handling the case where the port may not be present.
 
 <!-- CL 28343 -->
-기존의 [`URL.ResolveReference`](/pkg/net/url/#URL.ResolveReference) 메서드가 이제 이스케이프된 바이트가 포함된 경로를 처리할 때 이스케이프 상태를 유지하며 적절하게 처리합니다.
+The existing method
+[`URL.ResolveReference`](/pkg/net/url/#URL.ResolveReference)
+now properly handles paths with escaped bytes without losing
+the escaping.
 
 <!-- CL 31467 -->
-이제 `URL` 타입이 [`encoding.BinaryMarshaler`](/pkg/encoding/#BinaryMarshaler) 및 [`encoding.BinaryUnmarshaler`](/pkg/encoding/#BinaryUnmarshaler)를 구현하여, [gob 데이터](/pkg/encoding/gob/)에서 URL을 처리할 수 있게 되었습니다.
+The `URL` type now implements
+[`encoding.BinaryMarshaler`](/pkg/encoding/#BinaryMarshaler) and
+[`encoding.BinaryUnmarshaler`](/pkg/encoding/#BinaryUnmarshaler),
+making it possible to process URLs in [gob data](/pkg/encoding/gob/).
 
 <!-- CL 29610, CL 31582 -->
-RFC 3986에 따라,
+Following RFC 3986,
 [`Parse`](/pkg/net/url/#Parse)
-는 이제 `this_that:other/thing`과 같은 URL을 상대 경로로 해석하는 대신 거부합니다 (`this_that`은 유효한 scheme이 아닙니다).
-상대 경로로 해석되도록 강제하려면,
-해당 URL 앞에 “`./`”를 접두사로 붙여야 합니다.
-`URL.String` 메서드는 이제 필요에 따라 이 접두사를 삽입합니다.
+now rejects URLs like `this_that:other/thing` instead of
+interpreting them as relative paths (`this_that` is not a valid scheme).
+To force interpretation as a relative path,
+such URLs should be prefixed with “`./`”.
+The `URL.String` method now inserts this prefix as needed.
 
 #### [os](/pkg/os/)
 
 <!-- CL 16551 -->
-새로운 함수 [`Executable`](/pkg/os/#Executable)은 실행 중인 실행 파일의 경로 이름을 반환합니다.
+The new function
+[`Executable`](/pkg/os/#Executable) returns
+the path name of the running executable.
 
 <!-- CL 30614 -->
-이미 닫힌 [`os.File`](/pkg/os/#File)의 메서드를 호출하려고 하면 이제 새로운 에러 값인 [`os.ErrClosed`](/pkg/os/#ErrClosed)를 반환합니다. 이전에는 `syscall.EBADF`와 같은 시스템별 에러를 반환했습니다.
+An attempt to call a method on
+an [`os.File`](/pkg/os/#File) that has
+already been closed will now return the new error
+value [`os.ErrClosed`](/pkg/os/#ErrClosed).
+Previously it returned a system-specific error such
+as `syscall.EBADF`.
 
 <!-- CL 31358 -->
-Unix 시스템에서 [`os.Rename`](/pkg/os/#Rename)은 이제 디렉터리를 기존의 빈 디렉터리로 이름을 변경하려 할 때 에러를 반환합니다.
-이전에는 비어 있지 않은 디렉터리로 이름을 변경할 때는 실패했지만, 빈 디렉터리로 변경할 때는 성공했습니다.
-이로써 Unix에서의 동작이 다른 시스템들의 동작과 일치하게 되었습니다.
+On Unix systems, [`os.Rename`](/pkg/os/#Rename)
+will now return an error when used to rename a directory to an
+existing empty directory.
+Previously it would fail when renaming to a non-empty directory
+but succeed when renaming to an empty directory.
+This makes the behavior on Unix correspond to that of other systems.
 
 <!-- CL 32451 -->
-Windows에서 긴 절대 경로가 이제 확장 길이 경로(“`\\?\`”로 시작하는 경로)로 투명하게 변환됩니다. 이를 통해 패키지가 경로 이름이 260자를 초과하는 파일에서도 작동할 수 있습니다.
+On Windows, long absolute paths are now transparently converted to
+extended-length paths (paths that start with “`\\?\`”).
+This permits the package to work with files whose path names are
+longer than 260 characters.
 
 <!-- CL 29753 -->
-Windows에서 [`os.IsExist`](/pkg/os/#IsExist)는 이제 시스템 에러 `ERROR_DIR_NOT_EMPTY`에 대해 `true`를 반환합니다. 이는 Unix 에러 `ENOTEMPTY`에 대한 기존 처리 방식과 대략적으로 일치합니다.
+On Windows, [`os.IsExist`](/pkg/os/#IsExist)
+will now return `true` for the system
+error `ERROR_DIR_NOT_EMPTY`.
+This roughly corresponds to the existing handling of the Unix
+error `ENOTEMPTY`.
 
 <!-- CL 32152 -->
-Plan 9에서 `#M`에 의해 제공되지 않는 파일들은 이제 [`FileInfo.Mode`](/pkg/os/#FileInfo)가 반환하는 값에 [`ModeDevice`](/pkg/os/#ModeDevice)가 설정됩니다.
+On Plan 9, files that are not served by `#M` will now
+have [`ModeDevice`](/pkg/os/#ModeDevice) set in
+the value returned
+by [`FileInfo.Mode`](/pkg/os/#FileInfo).
 
 #### [path/filepath](/pkg/path/filepath/)
 
-Windows에서 발생하던 여러 버그와 코너 케이스들이 수정되었습니다:
-[`Abs`](/pkg/path/filepath/#Abs)가 이제 문서에 명시된 대로 `Clean`을 호출하며,
-[`Glob`](/pkg/path/filepath/#Glob)가 이제 “`\\?\c:\*`”와 매칭되고,
-[`EvalSymlinks`](/pkg/path/filepath/#EvalSymlinks)가 이제 “`C:.`”를 올바르게 처리하며,
-[`Clean`](/pkg/path/filepath/#Clean)이 이제 경로 시작 부분의 “`..`”를 적절하게 처리합니다.
+A number of bugs and corner cases on Windows were fixed:
+[`Abs`](/pkg/path/filepath/#Abs) now calls `Clean` as documented,
+[`Glob`](/pkg/path/filepath/#Glob) now matches
+“`\\?\c:\*`”,
+[`EvalSymlinks`](/pkg/path/filepath/#EvalSymlinks) now
+correctly handles “`C:.`”, and
+[`Clean`](/pkg/path/filepath/#Clean) now properly
+handles a leading “`..`” in the path.
 
 #### [reflect](/pkg/reflect/)
 
 <!-- CL 30088 -->
-[`sort.Slice`](#sortslice)를 지원하기 위해 새로운 함수 [`Swapper`](/pkg/reflect/#Swapper)가 추가되었습니다.
+The new function
+[`Swapper`](/pkg/reflect/#Swapper) was
+added to support [`sort.Slice`](#sortslice).
 
 #### [strconv](/pkg/strconv/)
 
 <!-- CL 31210 -->
-[`Unquote`](/pkg/strconv/#Unquote) 함수가 이제 [Go 언어 시맨틱](/ref/spec#String_literals)에 따라 백틱으로 감싸진 raw string에서 캐리지 리턴(`\r`)을 제거합니다.
+The [`Unquote`](/pkg/strconv/#Unquote)
+function now strips carriage returns (`\r`) in
+backquoted raw strings, following the
+[Go language semantics](/ref/spec#String_literals).
 
 #### [syscall](/pkg/syscall/)
 
 <!-- CL 25050, CL 25022 -->
-[`Getpagesize`](/pkg/syscall/#Getpagesize) 함수가 이제 상수 값이 아닌 시스템의 실제 크기를 반환합니다.
-이전에는 항상 4KB를 반환했습니다.
+The [`Getpagesize`](/pkg/syscall/#Getpagesize)
+now returns the system's size, rather than a constant value.
+Previously it always returned 4KB.
 
 <!-- CL 31446 -->
-Solaris에서 [`Utimes`](/pkg/syscall/#Utimes)의 시그니처가 다른 모든 Unix 시스템의 시그니처와 일치하도록 변경되었습니다. 이식 가능한 코드를 작성하려면 계속해서 [`os.Chtimes`](/pkg/os/#Chtimes)를 사용하십시오.
+The signature
+of [`Utimes`](/pkg/syscall/#Utimes) has
+changed on Solaris to match all the other Unix systems'
+signature. Portable code should continue to use
+[`os.Chtimes`](/pkg/os/#Chtimes) instead.
 
 <!-- CL 32319 -->
-[`Cmsghdr`](/pkg/syscall/#Cmsghdr)에서 `X__cmsg_data` 필드가 제거되었습니다.
+The `X__cmsg_data` field has been removed from
+[`Cmsghdr`](/pkg/syscall/#Cmsghdr).
 
 #### [text/template](/pkg/text/template/)
 
 <!-- CL 31462 -->
 [`Template.Execute`](/pkg/text/template/#Template.Execute)
-이제 데이터 인자로 [`reflect.Value`](/pkg/reflect/#Value)를 받을 수 있으며,
+can now take a
+[`reflect.Value`](/pkg/reflect/#Value) as its data
+argument, and
 [`FuncMap`](/pkg/text/template/#FuncMap)
-함수 또한 `reflect.Value`를 인자로 받거나 반환할 수 있습니다.
+functions can also accept and return `reflect.Value`.
 
 #### [time](/pkg/time/)
 
 <!-- CL 20118 -->
-새로운 [`Until`](/pkg/time/#Until) 함수는 이와 유사한 `Since` 함수를 보완합니다.
+The new function
+[`Until`](/pkg/time/#Until) complements
+the analogous `Since` function.
 
 <!-- CL 29338 -->
 [`ParseDuration`](/pkg/time/#ParseDuration)
-이제 긴 소수점 부분을 허용합니다.
+now accepts long fractional parts.
 
 <!-- CL 33429 -->
 [`Parse`](/pkg/time/#Parse)
-이제 6월 0일과 같이 월 시작 이전의 날짜를 거부합니다.
-이미 6월 31일이나 7월 32일과 같이 월 말 이후의 날짜는 거부하고 있었습니다.
+now rejects dates before the start of a month, such as June 0;
+it already rejected dates beyond the end of the month, such as
+June 31 and July 32.
 
 <!-- CL 33029 -->
 <!-- CL 34816 -->
-로컬 시간대 데이터베이스가 없는 시스템을 위해 `tzdata` 데이터베이스가 2016j 버전으로 업데이트되었습니다.
+The `tzdata` database has been updated to version
+2016j for systems that don't already have a local time zone
+database.
+
 
 #### [testing](/pkg/testing/)
 
 <!-- CL 29970 -->
-새로운 메서드인
+The new method
 [`T.Name`](/pkg/testing/#T.Name)
-(그리고 `B.Name`)은 현재
-테스트 또는 벤치마크의 이름을 반환합니다.
+(and `B.Name`) returns the name of the current
+test or benchmark.
 
 <!-- CL 32483 -->
-새로운 함수
+The new function
 [`CoverMode`](/pkg/testing/#CoverMode)
-는 테스트 커버리지 모드를 보고합니다.
+reports the test coverage mode.
 
 <!-- CL 32615 -->
-이제 race detector가 활성화된 상태에서 실행 중 데이터 레이스(data race)가 발생하면 테스트와 벤치마크가 실패로 표시됩니다. 이전에는 개별 테스트 케이스는 통과한 것으로 나타나고, 테스트 바이너리의 전체 실행 결과만 실패로 처리되었습니다.
+Tests and benchmarks are now marked as failed if the race
+detector is enabled and a data race occurs during execution.
+Previously, individual test cases would appear to pass,
+and only the overall execution of the test binary would fail.
 
 <!-- CL 32455 -->
-문서에서 허용된 대로 [`MainStart`](/pkg/testing/#MainStart) 함수의 시그니처가 변경되었습니다. 이는 내부 구현 상세이며 Go 1 호환성 약속의 일부가 아닙니다.
-`MainStart`를 직접 호출하지 않는데도 오류가 발생하는 경우, 이는 일반적으로 비어 있어야 할 `GOROOT` 환경 변수를 설정했으며, 해당 변수가 `go` 명령 바이너리의 버전과 일치하지 않음을 의미할 가능성이 높습니다.
+The signature of the
+[`MainStart`](/pkg/testing/#MainStart)
+function has changed, as allowed by the documentation. It is an
+internal detail and not part of the Go 1 compatibility promise.
+If you're not calling `MainStart` directly but see
+errors, that likely means you set the
+normally-empty `GOROOT` environment variable and it
+doesn't match the version of your `go` command's binary.
 
 #### [unicode](/pkg/unicode/)
 
 <!-- CL 30935 -->
 [`SimpleFold`](/pkg/unicode/#SimpleFold)
-함수는 이제 입력된 값이 유효하지 않은 rune인 경우 인자를 변경 없이 그대로 반환합니다.
-이전 구현에서는 인덱스 범위 체크 패닉(index bounds check panic)이 발생하며 실패했습니다.
+now returns its argument unchanged if the provided input was an invalid rune.
+Previously, the implementation failed with an index bounds check panic.

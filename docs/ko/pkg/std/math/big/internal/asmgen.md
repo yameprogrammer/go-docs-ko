@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Asmgen은 `math/big` 어셈블리를 생성합니다.
+Asmgen generates math/big assembly.
 
 ## 원문 요약
 

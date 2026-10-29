@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`rand` 패키지는 암호학적으로 안전한 난수 생성기를 구현합니다.
+Package rand implements a cryptographically secure random number generator.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`fips140cache` 패키지는 값의 수명을 키의 수명과 연결하는 weak map을 제공합니다.
+Package fips140cache provides a weak map that associates the lifetime of values with the lifetime of keys.
 
 ## 원문 요약
 

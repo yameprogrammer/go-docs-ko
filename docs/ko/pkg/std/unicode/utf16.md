@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`utf16` 패키지는 UTF-16 시퀀스의 인코딩 및 디코딩을 구현합니다.
+Package utf16 implements encoding and decoding of UTF-16 sequences.
 
 ## 원문 요약
 

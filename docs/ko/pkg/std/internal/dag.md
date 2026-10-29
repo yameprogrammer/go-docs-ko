@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`dag` 패키지는 유향 비순환 그래프(directed acyclic graphs)를 표현하기 위한 언어를 구현합니다.
+Package dag implements a language for expressing directed acyclic graphs.
 
 ## 원문 요약
 

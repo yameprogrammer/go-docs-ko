@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`oserror` 패키지는 `os` 패키지에서 사용되는 에러 값들을 정의합니다.
+Package oserror defines errors values used in the os package.
 
 ## 원문 요약
 

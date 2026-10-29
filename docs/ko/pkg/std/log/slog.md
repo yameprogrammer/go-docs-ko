@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`slog` 패키지는 구조화된 로깅(structured logging)을 제공합니다. 여기서 로그 레코드는 메시지, 심각도 수준(severity level), 그리고 키-값 쌍으로 표현된 다양한 기타 속성들을 포함합니다.
+Package slog provides structured logging, in which log records include a message, a severity level, and various other attributes expressed as key-value pairs.
 
 ## 원문 요약
 

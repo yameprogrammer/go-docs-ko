@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`lazytemplate` 패키지는 `text/template`를 얇게 감싼 래퍼(wrapper)로, 글로벌 템플릿 변수들을 `init` 시점에 강제로 파싱하지 않고도 사용할 수 있게 해줍니다.
+Package lazytemplate is a thin wrapper over text/template, allowing the use of global template variables without forcing them to be parsed at init.
 
 ## 원문 요약
 

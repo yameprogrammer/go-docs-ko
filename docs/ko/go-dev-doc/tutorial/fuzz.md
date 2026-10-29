@@ -1,95 +1,108 @@
 <!--{
   "Template": true,
-  "Title": "튜토리얼: 퍼징 시작하기",
+  "Title": "Tutorial: Getting started with fuzzing",
   "HideTOC": true,
   "Breadcrumb": true
 }-->
 
-이 튜토리얼에서는 Go의 퍼징(fuzzing) 기초를 소개합니다. 퍼징을 사용하면 무작위 데이터를 테스트에 입력하여 취약점을 찾거나 크래시를 유발하는 입력을 탐색합니다. 퍼징을 통해 찾을 수 있는 취약점의 예로는 SQL 인젝션, 버퍼 오버플로우, 서비스 거부(DoS) 및 크로스 사이트 스크립팅(XSS) 공격 등이 있습니다.
+This tutorial introduces the basics of fuzzing in Go. With fuzzing, random data
+is run against your test in an attempt to find vulnerabilities or crash-causing
+inputs. Some examples of vulnerabilities that can be found by fuzzing are SQL
+injection, buffer overflow, denial of service and cross-site scripting attacks.
 
-이 튜토리얼에서는 간단한 함수에 대한 퍼즈 테스트(fuzz test)를 작성하고, `go` 명령어를 실행하며, 코드의 문제를 디버깅하고 수정하는 방법을 알아봅니다.
+In this tutorial, you'll write a fuzz test for a simple function, run the go
+command, and debug and fix issues in the code.
 
-이 튜토리얼 전반에 걸쳐 사용되는 용어에 대한 도움말은 [Go Fuzzing glossary](/security/fuzz/#glossary)를 참조하세요.
+For help with terminology throughout this tutorial, see the [Go Fuzzing
+glossary](/security/fuzz/#glossary).
 
-다음 섹션들을 통해 학습을 진행하시게 됩니다:
+You'll progress through the following sections:
 
-1. [코드를 위한 폴더를 생성합니다.](#create_folder)
-2. [테스트할 코드를 추가합니다.](#code_to_test)
-3. [단위 테스트를 추가합니다.](#unit_test)
-4. [퍼즈 테스트를 추가합니다.](#fuzz_test)
-5. [두 개의 버그를 수정합니다.](#fix_invalid_string_error)
-6. [추가 리소스를 살펴봅니다.](#conclusion)
+1. [Create a folder for your code.](#create_folder)
+2. [Add code to test.](#code_to_test)
+3. [Add a unit test.](#unit_test)
+4. [Add a fuzz test.](#fuzz_test)
+5. [Fix two bugs.](#fix_invalid_string_error)
+6. [Explore additional resources.](#conclusion)
 
-**참고:** 다른 튜토리얼은 [Tutorials](/doc/tutorial/index.html)를 참조하십시오.
+**Note:** For other tutorials, see [Tutorials](/doc/tutorial/index.html).
 
-**참고:** Go 퍼징(fuzzing)은 현재 [Go Fuzzing 문서](/security/fuzz/#requirements)에 나열된 일부 기본 타입들만 지원하며, 향후 더 많은 기본 타입에 대한 지원이 추가될 예정입니다.
+**Note:** Go fuzzing currently supports a subset of built-in types, listed in
+the [Go Fuzzing docs](/security/fuzz/#requirements), with support for more built-in
+types to be added in the future.
 
-## 사전 요구 사항
+## Prerequisites
 
-- **Go.** 이 튜토리얼을 따라오시려면 최신 버전의 Go를 사용하시는 것을 권장합니다.
-  설치 안내는 [Installing Go](/doc/install)를 참조하십시오.
-- **코드 편집 도구.** 사용 가능한 모든 텍스트 편집기를 사용할 수 있습니다.
-- **커맨드 터미널.** Go는 Linux 및 Mac의 모든 터미널, 그리고 Windows의 PowerShell 또는 cmd에서 잘 작동합니다.
-- **퍼징(fuzzing)을 지원하는 환경.** 커버리지 계측(coverage instrumentation)을 이용한 Go 퍼징은 현재 AMD64 및 ARM64 아키텍처에서만 사용할 수 있습니다.
+- **Go.** We recommend using the latest version of Go to follow this tutorial.
+  For installation instructions, see [Installing Go](/doc/install).
+- **A tool to edit your code.** Any text editor you have will work fine.
+- **A command terminal.** Go works well using any terminal on Linux and Mac, and
+  on PowerShell or cmd in Windows.
+- **An environment that supports fuzzing.** Go fuzzing with coverage
+  instrumentation is only available on AMD64 and ARM64 architectures currently.
 
-## 코드 폴더 생성하기 {#create_folder}
+## Create a folder for your code {#create_folder}
 
-시작하려면, 작성할 코드를 위한 폴더를 생성하세요.
+To begin, create a folder for the code you’ll write.
 
-1. 명령 프롬프트를 열고 홈 디렉터리로 이동하십시오.
+1. Open a command prompt and change to your home directory.
 
-Linux 또는 Mac에서:
+   On Linux or Mac:
 
-```
+   ```
    $ cd
    ```
 
-Windows에서:
+   On Windows:
 
-```
+   ```
    C:\> cd %HOMEPATH%
    ```
 
-나머지 튜토리얼에서는 프롬프트로 `$`가 표시됩니다. 사용하시는 명령어들은 Windows에서도 작동합니다.
+   The rest of the tutorial will show a $ as the prompt. The commands you use
+   will work on Windows too.
 
-2. 명령 프롬프트에서 코드를 저장할 `fuzz`라는 이름의 디렉토리를 생성합니다.
+2. From the command prompt, create a directory for your code called fuzz.
 
-```
+   ```
    $ mkdir fuzz
    $ cd fuzz
    ```
 
-3. 코드를 보관할 모듈을 생성합니다.
+3. Create a module to hold your code.
 
-`go mod init` 명령어를 실행하고, 새 코드의 모듈 경로를 지정하세요.
+   Run the `go mod init` command, giving it your new code’s module path.
 
-```
+   ```
    $ go mod init example/fuzz
    go: creating new go.mod: module example/fuzz
    ```
 
-**참고:** 프로덕션 코드에서는 자신의 필요에 더 적합하고 구체적인 모듈 경로를 지정해야 합니다. 자세한 내용은 [의존성 관리](/doc/modules/managing-dependencies)를 참조하세요.
+   **Note:** For production code, you’d specify a module path that’s more
+   specific to your own needs. For more, be sure to see [Managing
+   dependencies](/doc/modules/managing-dependencies).
 
-다음으로, 나중에 퍼징(fuzz)할 문자열 반전(reverse)을 위한 간단한 코드를 추가하겠습니다.
+Next, you'll add some simple code to reverse a string, which we’ll fuzz later.
 
-## 테스트 코드 추가 {#code_to_test}
+## Add code to test {#code_to_test}
 
-이 단계에서는 문자열을 뒤집는 함수를 추가하게 됩니다.
+In this step, you’ll add a function to reverse a string.
 
-### 코드 작성하기
+### Write the code
 
-1. 텍스트 에디터를 사용하여 `fuzz` 디렉토리에 `main.go`라는 파일을 생성하세요.
-2. `main.go` 파일의 최상단에 다음 패키지 선언문을 붙여넣으세요.
+1.  Using your text editor, create a file called main.go in the fuzz directory.
+2.  Into main.go, at the top of the file, paste the following package
+    declaration.
 
-```
+    ```
     package main
     ```
 
-단독 실행 프로그램(라이브러리와 반대되는 개념)은 항상 `main` 패키지에 속합니다.
+    A standalone program (as opposed to a library) is always in package `main`.
 
-3. 패키지 선언 아래에 다음 함수 선언을 붙여넣으세요.
+3.  Beneath the package declaration, paste the following function declaration.
 
-```
+    ```
     func Reverse(s string) string {
         b := []byte(s)
         for i, j := 0, len(b)-1; i {{raw "<"}} len(b)/2; i, j = i+1, j-1 {
@@ -99,13 +112,17 @@ Windows에서:
     }
     ```
 
-이 함수는 `string`을 입력받아 한 번에 한 `byte`씩 루프를 돌며, 마지막에 역순으로 정렬된 문자열을 반환합니다.
+    This function will accept a `string`, loop over it a `byte` at a time, and
+    return the reversed string at the end.
 
-_참고:_ 이 코드는 golang.org/x/example 내의 `stringutil.Reverse` 함수를 기반으로 합니다.
+    _Note:_ This code is based on the `stringutil.Reverse` function within
+    golang.org/x/example.
 
-4.  `main.go` 파일의 상단, 패키지 선언 아래에 다음 `main` 함수를 붙여넣으세요. 이 함수는 문자열을 초기화하고, 이를 뒤집어 출력하며, 이 과정을 반복합니다.
+4.  At the top of main.go, beneath the package declaration, paste the following
+    `main` function to initialize a string, reverse it, print the output, and
+    repeat.
 
-```
+    ```
     func main() {
         input := "The quick brown fox jumped over the lazy dog"
         rev := Reverse(input)
@@ -116,22 +133,23 @@ _참고:_ 이 코드는 golang.org/x/example 내의 `stringutil.Reverse` 함수�
     }
     ```
 
-이 함수는 몇 번의 `Reverse` 작업을 수행한 후, 그 결과를 커맨드 라인에 출력합니다. 이는 코드가 실제로 어떻게 작동하는지 확인하고, 잠재적으로 디버깅하는 데 도움이 될 수 있습니다.
+    This function will run a few `Reverse` operations, then print the output to
+    the command line. This can be helpful for seeing the code in action, and
+    potentially for debugging.
 
-5. `main` 함수는 `fmt` 패키지를 사용하므로, 이를 import 해야 합니다.
+5.  The `main` function uses the fmt package, so you will need to import it.
 
-코드의 첫 몇 줄은 다음과 같아야 합니다:
+    The first lines of code should look like this:
 
-```
+    ```
     package main
-```
 
-import "fmt"
+    import "fmt"
     ```
 
-### 코드 실행하기
+### Run the code
 
-`main.go` 파일이 포함된 디렉토리의 명령줄에서 코드를 실행하세요.
+From the command line in the directory containing main.go, run the code.
 
 ```
 $ go run .
@@ -140,31 +158,29 @@ reversed: "god yzal eht revo depmuj xof nworb kciuq ehT"
 reversed again: "The quick brown fox jumped over the lazy dog"
 ```
 
-원래의 문자열과 이를 한 번 뒤집은 결과, 그리고 다시 한 번 뒤집어 원래와 동일해진 결과를 확인할 수 있습니다.
+You can see the original string, the result of reversing it, then the result of
+reversing it again, which is equivalent to the original.
 
-이제 코드가 실행되므로, 테스트를 진행할 차례입니다.
+Now that the code is running, it’s time to test it.
 
-## 단위 테스트 추가 {#unit_test}
+## Add a unit test {#unit_test}
 
-이 단계에서는 `Reverse` 함수에 대한 기본적인 단위 테스트를 작성하게 됩니다.
+In this step, you will write a basic unit test for the `Reverse` function.
 
-### 코드 작성하기
+### Write the code
 
-1. 텍스트 편집기를 사용하여 `fuzz` 디렉토리에 `reverse_test.go`라는 파일을 생성하세요.
-2. 다음 코드를 `reverse_test.go`에 붙여넣으세요.
+1. Using your text editor, create a file called reverse_test.go in the fuzz
+   directory.
+2. Paste the following code into reverse_test.go.
 
-```
+   ```
    package main
-```
 
-```go
-import (
+   import (
        "testing"
    )
-```
 
-```go
-func TestReverse(t *testing.T) {
+   func TestReverse(t *testing.T) {
        testcases := []struct {
            in, want string
        }{
@@ -181,11 +197,12 @@ func TestReverse(t *testing.T) {
    }
    ```
 
-이 간단한 테스트는 나열된 입력 문자열들이 올바르게 반전되는지 확인합니다.
+   This simple test will assert that the listed input strings will be correctly
+   reversed.
 
-### 코드 실행하기
+### Run the code
 
-`go test`를 사용하여 유닛 테스트를 실행하세요.
+Run the unit test using `go test`
 
 ```
 $ go test
@@ -193,25 +210,32 @@ PASS
 ok      example/fuzz  0.013s
 ```
 
-다음으로, 단위 테스트를 퍼즈 테스트(fuzz test)로 변경하겠습니다.
+Next, you will change the unit test into a fuzz test.
 
-## 퍼즈 테스트 추가하기 {#fuzz_test}
+## Add a fuzz test {#fuzz_test}
 
-단위 테스트에는 한계가 있는데, 즉 개발자가 각 입력을 테스트에 직접 추가해야 한다는 점입니다. 퍼징(fuzzing)의 장점 중 하나는 코드에 필요한 입력을 자동으로 생성하며, 개발자가 생각한 테스트 케이스가 도달하지 못한 엣지 케이스(edge cases)를 식별할 수 있다는 것입니다.
+The unit test has limitations, namely that each input must be added to the test
+by the developer. One benefit of fuzzing is that it comes up with inputs for
+your code, and may identify edge cases that the test cases you came up with
+didn’t reach.
 
-이 섹션에서는 단위 테스트를 퍼즈 테스트(fuzz test)로 변환하여, 더 적은 노력으로 더 많은 입력을 생성하는 방법을 알아봅니다!
+In this section you will convert the unit test to a fuzz test so that you can
+generate more inputs with less work!
 
-단위 테스트, 벤치마크 및 퍼즈 테스트를 동일한 `*_test.go` 파일에 유지할 수 있다는 점에 유의하세요. 하지만 이 예제에서는 단위 테스트를 퍼즈 테스트로 변환해 보겠습니다.
+Note that you can keep unit tests, benchmarks, and fuzz tests in the same
+*_test.go file, but for this example you will convert the unit test to a fuzz
+test.
 
-### 코드 작성하기
+### Write the code
 
-텍스트 에디터에서 `reverse_test.go`에 있는 단위 테스트를 다음 퍼즈 테스트(fuzz test)로 교체하세요.
+In your text editor, replace the unit test in reverse_test.go with the following
+fuzz test.
 
-```go
+```
 func FuzzReverse(f *testing.F) {
     testcases := []string{"Hello, world", " ", "!12345"}
     for _, tc := range testcases {
-        f.Add(tc)  // 시드 코퍼스(seed corpus)를 제공하기 위해 f.Add를 사용합니다.
+        f.Add(tc)  // Use f.Add to provide a seed corpus
     }
     f.Fuzz(func(t *testing.T, orig string) {
         rev := Reverse(orig)
@@ -226,25 +250,34 @@ func FuzzReverse(f *testing.F) {
 }
 ```
 
-퍼징(Fuzzing)에도 몇 가지 한계가 있습니다. 단위 테스트에서는 `Reverse` 함수의 예상 출력값을 예측하고, 실제 출력값이 해당 예상치와 일치하는지 확인할 수 있습니다.
+Fuzzing has a few limitations as well. In your unit test, you could predict the
+expected output of the `Reverse` function, and verify that the actual output met
+those expectations.
 
-예를 들어, `Reverse("Hello, world")` 테스트 케이스에서 단위 테스트는 반환 값으로 `"dlrow ,olleH"`를 지정합니다.
+For example, in the test case `Reverse("Hello, world")` the unit test specifies
+the return as `"dlrow ,olleH"`.
 
-퍼징(fuzzing)을 할 때는 입력값을 제어할 수 없기 때문에, 예상되는 출력값을 예측할 수 없습니다.
+When fuzzing, you can't predict the expected output, since you don't have
+control over the inputs.
 
-하지만 퍼즈 테스트(fuzz test)에서 확인할 수 있는 `Reverse` 함수의 몇 가지 속성들이 있습니다. 이 퍼즈 테스트에서 확인하는 두 가지 속성은 다음과 같습니다:
+However, there are a few properties of the `Reverse` function that you can
+verify in a fuzz test. The two properties being checked in this fuzz test are:
 
-1. 문자열을 두 번 뒤집으면 원래 값이 유지됩니다.
-2. 뒤집힌 문자열은 유효한 UTF-8 상태를 유지합니다.
+1.  Reversing a string twice preserves the original value
+2.  The reversed string preserves its state as valid UTF-8.
 
-단위 테스트와 퍼즈 테스트(fuzz test)의 구문 차이점에 유의하세요:
+Note the syntax differences between the unit test and the fuzz test:
 
-- 함수는 `TestXxx` 대신 `FuzzXxx`로 시작하며, `*testing.T` 대신 `*testing.F`를 인자로 받습니다.
-- `t.Run` 실행이 예상되는 위치에 대신 `f.Fuzz`가 사용됩니다. `f.Fuzz`는 파라미터로 `*testing.T`와 퍼징할 타입들을 받는 퍼즈 타겟(fuzz target) 함수를 인자로 받습니다. 단위 테스트의 입력값들은 `f.Add`를 사용하여 시드 코퍼스(seed corpus) 입력으로 제공됩니다.
+- The function begins with FuzzXxx instead of TestXxx, and takes `*testing.F`
+  instead of `*testing.T`
+- Where you would expect to see a `t.Run` execution, you instead see `f.Fuzz`
+  which takes a fuzz target function whose parameters are `*testing.T` and the
+  types to be fuzzed. The inputs from your unit test are provided as seed corpus
+  inputs using `f.Add`.
 
-새로운 패키지인 `unicode/utf8`가 임포트되었는지 확인하십시오.
+Ensure the new package, `unicode/utf8` has been imported.
 
-```go
+```
 package main
 
 import (
@@ -253,35 +286,39 @@ import (
 )
 ```
 
-단위 테스트를 퍼즈 테스트(fuzz test)로 변환했으므로, 이제 테스트를 다시 실행할 차례입니다.
+With the unit test converted to a fuzz test, it’s time to run the test again.
 
-### 코드 실행하기
+### Run the code
 
-1. 시드 입력값이 통과하는지 확인하기 위해 퍼징 없이 퍼즈 테스트를 실행하세요.
+1. Run the fuzz test without fuzzing it to make sure the seed inputs pass.
 
-```
+   ```
    $ go test
    PASS
    ok      example/fuzz  0.013s
    ```
 
-해당 파일에 다른 테스트들이 있고 퍼즈 테스트(fuzz test)만 실행하고 싶다면 `go test -run=FuzzReverse`를 실행할 수도 있습니다.
+   You can also run `go test -run=FuzzReverse` if you have other tests in that
+   file, and you only wish to run the fuzz test.
 
-2. `FuzzReverse`를 퍼징(fuzzing)으로 실행하여, 무작위로 생성된 문자열 입력으로 인해 실패가 발생하는지 확인합니다. 이는 `go test`에 새로운 플래그인 `-fuzz`를 `Fuzz` 매개변수로 설정하여 실행합니다. 아래 명령어를 복사하세요.
+2. Run `FuzzReverse` with fuzzing, to see if any randomly generated string
+   inputs will cause a failure. This is executed using `go test` with a new
+   flag, `-fuzz`, set to the parameter `Fuzz`. Copy the command below.
 
-```
+    ```
     $ go test -fuzz=Fuzz
     ```
 
-또 다른 유용한 플래그는 퍼징에 소요되는 시간을 제한하는 `-fuzztime`입니다.
-    예를 들어, 아래 테스트에서 `-fuzztime 10s`를 지정하면,
-    이전에 실패가 발생하지 않는 한 테스트는 기본적으로
-    10초가 경과한 후 종료됩니다. 다른 테스트 플래그를 확인하려면 cmd/go
-    문서의 [이 섹션](https://pkg.go.dev/cmd/go#hdr-Testing_flags)을 참조하십시오.
+    Another useful flag is `-fuzztime`, which restricts the time fuzzing takes.
+    For example, specifying `-fuzztime 10s` in the test below would mean that,
+    as long as no failures occurred earlier, the test would exit by default
+    after 10 seconds had elapsed. See [this
+    section](https://pkg.go.dev/cmd/go#hdr-Testing_flags) of the cmd/go
+    documentation to see other testing flags.
 
-이제 방금 복사한 명령어를 실행하세요.
+   Now, run the command you just copied.
 
-```
+   ```
    $ go test -fuzz=Fuzz
    fuzz: elapsed: 0s, gathering baseline coverage: 0/3 completed
    fuzz: elapsed: 0s, gathering baseline coverage: 3/3 completed, now fuzzing with 8 workers
@@ -289,28 +326,36 @@ import (
    --- FAIL: FuzzReverse (0.01s)
        --- FAIL: FuzzReverse (0.00s)
            reverse_test.go:20: Reverse produced invalid UTF-8 string "\x9c\xdd"
-```
 
-실패한 입력값이 testdata/fuzz/FuzzReverse/af69258a12129d6cbba438df5d5f25ba0ec050461c116f777e77ea7c9a0d217a 에 기록되었습니다.
-       재실행 방법:
+       Failing input written to testdata/fuzz/FuzzReverse/af69258a12129d6cbba438df5d5f25ba0ec050461c116f777e77ea7c9a0d217a
+       To re-run:
        go test -run=FuzzReverse/af69258a12129d6cbba438df5d5f25ba0ec050461c116f777e77ea7c9a0d217a
    FAIL
    exit status 1
    FAIL    example/fuzz  0.030s
    ```
 
-퍼징 도중 실패가 발생했으며, 문제를 일으킨 입력값은 시드 코퍼스(seed corpus) 파일에 기록됩니다. 이 파일은 `-fuzz` 플래그 없이 `go test`를 호출하더라도 다음 실행 시에 함께 실행됩니다. 실패를 유발한 입력값을 확인하려면 `testdata/fuzz/FuzzReverse` 디렉토리에 기록된 코퍼스 파일을 텍스트 에디터로 여십시오. 사용자의 시드 코퍼스 파일에는 다른 문자열이 포함되어 있을 수 있지만, 형식은 동일합니다.
+   A failure occurred while fuzzing, and the input that caused the problem is
+   written to a seed corpus file that will be run the next time `go test` is
+   called, even without the `-fuzz` flag. To view the input that caused the
+   failure, open the corpus file written to the testdata/fuzz/FuzzReverse
+   directory in a text editor. Your seed corpus file may contain a different
+   string, but the format will be the same.
 
-```
+   ```
    go test fuzz v1
    string("泃")
    ```
 
-코퍼스 파일의 첫 번째 줄은 인코딩 버전을 나타냅니다. 그 다음의 각 줄은 코퍼스 엔트리를 구성하는 각 타입의 값을 나타냅니다. 퍼즈 타겟(fuzz target)은 단 하나의 입력만 받으므로, 버전 뒤에는 하나의 값만 존재합니다.
+   The first line of the corpus file indicates the encoding version. Each
+   following line represents the value of each type making up the corpus entry.
+   Since the fuzz target only takes 1 input, there is only 1 value after the
+   version.
 
-3. `-fuzz` 플래그 없이 `go test`를 다시 실행하십시오. 그러면 새로 실패한 시드 코퍼스(seed corpus) 항목이 사용됩니다.
+3. Run `go test` again without the` -fuzz` flag; the new failing seed corpus
+   entry will be used:
 
-```
+   ```
    $ go test
    --- FAIL: FuzzReverse (0.00s)
        --- FAIL: FuzzReverse/af69258a12129d6cbba438df5d5f25ba0ec050461c116f777e77ea7c9a0d217a (0.00s)
@@ -320,33 +365,43 @@ import (
    FAIL    example/fuzz  0.016s
    ```
 
-테스트가 실패했으므로, 이제 디버깅을 할 시간입니다.
+   Since our test has failed, it’s time to debug.
 
-## invalid string 에러 해결하기 {#fix_invalid_string_error}
+## Fix the invalid string error {#fix_invalid_string_error}
 
-이 섹션에서는 실패 원인을 디버깅하고 버그를 수정합니다.
+In this section, you will debug the failure, and fix the bug.
 
-다음 단계로 넘어가기 전에, 시간을 갖고 충분히 생각하며 스스로 이 문제를 해결해 보시기 바랍니다.
+Feel free to spend some time thinking about this and trying to fix the issue
+yourself before moving on.
 
-### 오류 진단
+### Diagnose the error
 
-이 오류를 디버깅하는 몇 가지 방법이 있습니다. 텍스트 에디터로 VS Code를 사용하고 계신다면, [디버거를 설정](https://github.com/golang/vscode-go/blob/master/docs/debugging.md)하여 조사할 수 있습니다.
+There are a few different ways you could debug this error. If you are using VS
+Code as your text editor, you can [set up your
+debugger](https://github.com/golang/vscode-go/blob/master/docs/debugging.md) to
+investigate.
 
-이 튜토리얼에서는 유용한 디버깅 정보를 터미널에 기록하는 방법을 알아보겠습니다.
+In this tutorial, we will log useful debugging info to your terminal.
 
-먼저, [`utf8.ValidString`](https://pkg.go.dev/unicode/utf8)의 문서를 살펴보십시오.
+First, consider the docs for
+[`utf8.ValidString`](https://pkg.go.dev/unicode/utf8).
 
 ```
-ValidString은 s가 완전히 유효한 UTF-8 인코딩된 룬(runes)으로 구성되어 있는지 여부를 보고합니다.
+ValidString reports whether s consists entirely of valid UTF-8-encoded runes.
 ```
 
-현재의 `Reverse` 함수는 문자열을 바이트 단위로 뒤집으며, 바로 이 점이 문제입니다. 원래 문자열의 UTF-8 인코딩된 룬(rune)들을 보존하려면, 대신 문자열을 룬 단위로 뒤집어야 합니다.
+The current `Reverse` function reverses the string byte-by-byte, and therein
+lies our problem. In order to preserve the UTF-8-encoded runes of the original
+string, we must instead reverse the string rune-by-rune.
 
-입력값(이 경우 한자 `泃`)이 왜 `Reverse` 함수로 반전시켰을 때 유효하지 않은 문자열을 생성하는지 확인하려면, 반전된 문자열의 rune 개수를 조사해 보면 됩니다.
+To examine why the input (in this case, the Chinese character `泃`) is causing
+`Reverse` to produce an invalid string when reversed, you can inspect the number
+of runes in the reversed string.
 
-#### 코드 작성하기
+#### Write the code
 
-텍스트 에디터에서 `FuzzReverse` 내의 fuzz target을 다음 내용으로 교체하세요.
+In your text editor, replace the fuzz target within `FuzzReverse` with the
+following.
 
 ```
 f.Fuzz(func(t *testing.T, orig string) {
@@ -362,11 +417,12 @@ f.Fuzz(func(t *testing.T, orig string) {
 })
 ```
 
-이 `t.Logf` 라인은 에러가 발생하거나 `-v` 옵션으로 테스트를 실행할 때 커맨드 라인에 출력되며, 이는 해당 문제를 디버깅하는 데 도움이 될 수 있습니다.
+This `t.Logf` line will print to the command line if an error occurs, or if
+executing the test with `-v`, which can help you debug this particular issue.
 
-#### 코드 실행하기
+#### Run the code
 
-`go test`를 사용하여 테스트를 실행하세요.
+Run the test using go test
 
 ```
 $ go test
@@ -379,21 +435,25 @@ exit status 1
 FAIL    example/fuzz    0.598s
 ```
 
-전체 시드 코퍼스(seed corpus)는 모든 문자가 단일 바이트인 문자열을 사용했습니다.
-하지만 泃와 같은 문자는 여러 바이트가 필요할 수 있습니다. 따라서,
-문자열을 바이트 단위로 뒤집으면 멀티바이트 문자가 손상됩니다.
+The entire seed corpus used strings in which every character was a single byte.
+However, characters such as 泃 can require several bytes. Thus, reversing the
+string byte-by-byte will invalidate multi-byte characters.
 
-**참고:** Go가 문자열을 어떻게 처리하는지 궁금하시다면, 더 깊은 이해를 위해 블로그 포스트 [Strings, bytes, runes and characters in Go](/blog/strings)를 읽어보세요.
+**Note:** If you’re curious about how Go deals with strings, read the blog post
+[Strings, bytes, runes and characters in Go](/blog/strings) for a
+deeper understanding.
 
-버그에 대해 더 잘 이해했으므로, `Reverse` 함수의 오류를 수정하십시오.
+With a better understanding of the bug, correct the error in the `Reverse`
+function.
 
-### 에러 수정하기
+### Fix the error
 
-`Reverse` 함수를 수정하기 위해, 바이트(bytes) 대신 룬(runes) 단위로 문자열을 순회해 보겠습니다.
+To correct the `Reverse` function, let’s traverse the string by runes, instead
+of by bytes.
 
-#### 코드 작성하기
+#### Write the code
 
-텍스트 에디터에서 기존의 `Reverse()` 함수를 다음 내용으로 교체하세요.
+In your text editor, replace the existing Reverse() function with the following.
 
 ```
 func Reverse(s string) string {
@@ -405,23 +465,25 @@ func Reverse(s string) string {
 }
 ```
 
-핵심적인 차이점은 `Reverse`가 이제 문자열의 각 `byte`가 아니라 각 `rune`을 순회한다는 점입니다. 이는 단순한 예제일 뿐이며, [결합 문자(combining characters)](https://en.wikipedia.org/wiki/Combining_character)를 올바르게 처리하지 않는다는 점에 유의하세요.
+The key difference is that `Reverse` is now iterating over each `rune` in the
+string, rather than each `byte`. Note that this is just an example, and does not
+handle [combining characters](https://en.wikipedia.org/wiki/Combining_character) correctly.
 
-#### 코드 실행하기
+#### Run the code
 
-1. `go test`를 사용하여 테스트를 실행하십시오.
+1. Run the test using `go test`
 
-```
+   ```
    $ go test
    PASS
    ok      example/fuzz  0.016s
    ```
 
-이제 테스트가 통과되었습니다!
+   The test now passes!
 
-2. `go test -fuzz`로 다시 퍼징(fuzzing)하여 새로운 버그가 있는지 확인합니다.
+2. Fuzz it again with `go test -fuzz`, to see if there are any new bugs.
 
-```
+   ```
    $ go test -fuzz=Fuzz
    fuzz: elapsed: 0s, gathering baseline coverage: 0/37 completed
    fuzz: minimizing 506-byte failing input file...
@@ -429,41 +491,49 @@ func Reverse(s string) string {
    --- FAIL: FuzzReverse (0.02s)
        --- FAIL: FuzzReverse (0.00s)
            reverse_test.go:33: Before: "\x91", after: "�"
-```
 
-실패한 입력값이 testdata/fuzz/FuzzReverse/1ffc28f7538e29d79fce69fef20ce5ea72648529a9ca10bea392bcff28cd015c 에 기록되었습니다.
-       재실행 방법:
+       Failing input written to testdata/fuzz/FuzzReverse/1ffc28f7538e29d79fce69fef20ce5ea72648529a9ca10bea392bcff28cd015c
+       To re-run:
        go test -run=FuzzReverse/1ffc28f7538e29d79fce69fef20ce5ea72648529a9ca10bea392bcff28cd015c
    FAIL
    exit status 1
    FAIL    example/fuzz  0.032s
    ```
 
-두 번 뒤집은 후의 문자열이 원래의 문자열과 다르다는 것을 알 수 있습니다. 이번에는 입력값 자체가 유효하지 않은 유니코드입니다. 문자열로 퍼징(fuzzing)을 하고 있는데 어떻게 이런 일이 가능할까요?
+   We can see that the string is different from the original after being
+   reversed twice. This time the input itself is invalid unicode. How is this
+   possible if we’re fuzzing with strings?
 
-다시 디버깅해 봅시다.
+   Let’s debug again.
 
-## 이중 리버스 오류 수정 {#fix_double_reverse_error}
+## Fix the double reverse error {#fix_double_reverse_error}
 
-이 섹션에서는 double reverse 실패 사례를 디버깅하고 버그를 수정합니다.
+In this section, you will debug the double reverse failure and fix the bug.
 
-다음 단계로 넘어가기 전에, 시간을 갖고 충분히 생각하며 스스로 문제를 해결해 보시기 바랍니다.
+Feel free to spend some time thinking about this and trying to fix the issue
+yourself before moving on.
 
-### 오류 진단
+### Diagnose the error
 
-이전과 마찬가지로, 이 실패를 디버깅하는 방법은 여러 가지가 있습니다. 이 경우에는
-[debugger](https://github.com/golang/vscode-go/blob/master/docs/debugging.md)를
-사용하는 것이 좋은 접근 방식이 될 것입니다.
+Like before, there are several ways you could debug this failure. In this case,
+using a
+[debugger](https://github.com/golang/vscode-go/blob/master/docs/debugging.md)
+would be a great approach.
 
-이 튜토리얼에서는 `Reverse` 함수에 유용한 디버깅 정보를 기록하는 방법을 알아보겠습니다.
+In this tutorial, we will log useful debugging info in the `Reverse` function.
 
-역전된 문자열을 자세히 살펴보고 오류를 찾아보세요. Go에서 [문자열은 읽기 전용 바이트 슬라이스](/blog/strings)이며, 유효하지 않은 UTF-8 바이트를 포함할 수 있습니다. 원본 문자열은 `'\x91'`이라는 하나의 바이트를 가진 바이트 슬라이스입니다. 입력 문자열이 `[]rune`으로 설정되면, Go는 바이트 슬라이스를 UTF-8로 인코딩하고 해당 바이트를 UTF-8 문자 �로 대체합니다. 이 대체된 UTF-8 문자를 입력 바이트 슬라이스와 비교하면, 두 값은 분명히 서로 다릅니다.
+Look closely at the reversed string to spot the error. In Go, [a string is a
+read only slice of bytes](/blog/strings), and can contain bytes
+that aren’t valid UTF-8. The original string is a byte slice with one byte,
+`'\x91'`. When the input string is set to `[]rune`, Go encodes the byte slice to
+UTF-8, and replaces the byte with the UTF-8 character �. When we compare the
+replacement UTF-8 character to the input byte slice, they are clearly not equal.
 
-#### 코드 작성하기
+#### Write the code
 
-1. 텍스트 에디터에서 `Reverse` 함수를 다음과 같이 변경하세요.
+1. In your text editor, replace the `Reverse` function with the following.
 
-```
+   ```
    func Reverse(s string) string {
        fmt.Printf("input: %q\n", s)
        r := []rune(s)
@@ -475,16 +545,19 @@ func Reverse(s string) string {
    }
    ```
 
-이 내용은 문자열을 rune 슬라이스로 변환할 때 무엇이 잘못되고 있는지 이해하는 데 도움이 될 것입니다.
+   This will help us understand what is going wrong when converting the string
+   to a slice of runes.
 
-#### 코드 실행하기
+#### Run the code
 
-이번에는 로그를 확인하기 위해 실패한 테스트만 실행하려고 합니다. 이를 위해 `go test -run`을 사용하겠습니다.
+This time, we only want to run the failing test in order to inspect the logs. To
+do this, we will use `go test -run`.
 
-`FuzzXxx/testdata` 내의 특정 코퍼스 항목을 실행하려면 `-run` 플래그에 `{FuzzTestName}/{filename}`을 제공하면 됩니다. 이는 디버깅 시 유용할 수 있습니다.
-이 경우, `-run` 플래그를 실패한 테스트의 정확한 해시 값과 동일하게 설정하십시오.
-터미널에 표시된 고유 해시를 복사하여 붙여넣으십시오.
-해당 값은 아래에 표시된 값과 다를 것입니다.
+To run a specific corpus entry within FuzzXxx/testdata, you can provide
+{FuzzTestName}/{filename} to `-run`. This can be helpful when debugging.
+In this case, set the `-run` flag equal to the exact hash of the failing test.
+Copy and paste the unique hash from your terminal;
+it will be different than the one below.
 
 ```
 $ go test -run=FuzzReverse/28f36ef487f23e6c7a81ebdaa9feffe2f2b02b4cddaa6252e87f69863046a5e0
@@ -501,17 +574,20 @@ exit status 1
 FAIL    example/fuzz    0.145s
 ```
 
-입력이 유효하지 않은 유니코드라는 점을 알았으니, `Reverse` 함수의 오류를 수정해 보겠습니다.
+Knowing that the input is invalid unicode, let’s fix the error in our `Reverse`
+function.
 
-### 에러 수정하기
+### Fix the error
 
-이 문제를 해결하기 위해, `Reverse`의 입력값이 유효한 UTF-8이 아닌 경우 에러를 반환하도록 하겠습니다.
+To fix this issue, let's return an error if the input to `Reverse` isn't valid
+UTF-8.
 
-#### 코드 작성하기
+#### Write the code
 
-1. 텍스트 에디터에서 기존의 `Reverse` 함수를 다음 내용으로 교체하세요.
+1. In your text editor, replace the existing `Reverse` function with the
+   following.
 
-```
+   ```
    func Reverse(s string) (string, error) {
        if !utf8.ValidString(s) {
            return s, errors.New("input is not valid UTF-8")
@@ -524,11 +600,14 @@ FAIL    example/fuzz    0.145s
    }
    ```
 
-이 변경 사항은 입력 문자열에 유효하지 않은 UTF-8 문자가 포함되어 있을 경우 에러를 반환합니다.
+   This change will return an error if the input string contains characters
+   which are not valid UTF-8.
 
-1. 이제 Reverse 함수가 error를 반환하므로, `main` 함수를 수정하여 추가된 error 값을 무시하도록 하세요. 기존의 `main` 함수를 다음과 같이 교체하십시오.
+1. Since the Reverse function now returns an error, modify the `main` function to
+   discard the extra error value. Replace the existing `main` function with the
+   following.
 
-```
+   ```
    func main() {
        input := "The quick brown fox jumped over the lazy dog"
        rev, revErr := Reverse(input)
@@ -539,12 +618,13 @@ FAIL    example/fuzz    0.145s
    }
    ```
 
-입력 문자열이 유효한 UTF-8이므로, `Reverse`에 대한 이 호출들은 nil 에러를 반환해야 합니다.
+    These calls to `Reverse` should return a nil error, since the input
+    string is valid UTF-8.
 
-1. `errors` 및 `unicode/utf8` 패키지를 임포트해야 합니다.
-   `main.go`의 임포트 문은 다음과 같아야 합니다.
+1. You will need to import the errors and the unicode/utf8 packages.
+   The import statement in main.go should look like the following.
 
-```
+   ```
    import (
        "errors"
        "fmt"
@@ -552,13 +632,14 @@ FAIL    example/fuzz    0.145s
    )
    ```
 
-1. `reverse_test.go` 파일을 수정하여 에러를 확인하고, 에러가 발생하면 반환(returning)을 통해 테스트를 건너뛰도록 하십시오.
+1. Modify the reverse_test.go file to check for errors and skip the test if
+   errors are generated by returning.
 
-```go
+   ```
    func FuzzReverse(f *testing.F) {
        testcases := []string {"Hello, world", " ", "!12345"}
        for _, tc := range testcases {
-           f.Add(tc)  // f.Add를 사용하여 시드 코퍼스(seed corpus)를 제공합니다.
+           f.Add(tc)  // Use f.Add to provide a seed corpus
        }
        f.Fuzz(func(t *testing.T, orig string) {
            rev, err1 := Reverse(orig)
@@ -579,21 +660,25 @@ FAIL    example/fuzz    0.145s
    }
    ```
 
-단순히 반환하는 대신, `t.Skip()`을 호출하여 해당 퍼즈(fuzz) 입력의 실행을 중단할 수도 있습니다.
+   Rather than returning, you can also call `t.Skip()` to stop the execution of
+   that fuzz input.
 
-#### 코드 실행하기
+#### Run the code
 
-1. `go test`를 사용하여 테스트를 실행하세요.
+1. Run the test using go test
 
-```
+   ```
    $ go test
    PASS
    ok      example/fuzz  0.019s
    ```
 
-2. `go test -fuzz=Fuzz`로 퍼징을 수행한 다음, 몇 초가 지나면 `ctrl-C`를 눌러 퍼징을 중단하세요. 퍼즈 테스트는 `-fuzztime` 플래그를 전달하지 않는 한 실패하는 입력을 찾을 때까지 계속 실행됩니다. 기본적으로 실패가 발생하지 않으면 무한히 실행되며, `ctrl-C`로 프로세스를 중단할 수 있습니다.
+2.  Fuzz it with `go test -fuzz=Fuzz`, then after a few seconds has passed, stop
+    fuzzing with `ctrl-C`. The fuzz test will run until it encounters a failing
+    input unless you pass the `-fuzztime` flag. The default is to run forever if no
+    failures occur, and the process can be interrupted with `ctrl-C`.
 
-```
+   ```
    $ go test -fuzz=Fuzz
    fuzz: elapsed: 0s, gathering baseline coverage: 0/38 completed
    fuzz: elapsed: 0s, gathering baseline coverage: 38/38 completed, now fuzzing with 4 workers
@@ -607,9 +692,10 @@ FAIL    example/fuzz    0.145s
    ok      example/fuzz  228.000s
    ```
 
-3. `go test -fuzz=Fuzz -fuzztime 30s` 명령어로 퍼징을 수행합니다. 이 명령은 실패 사례가 발견되지 않을 경우 30초 동안 퍼징을 진행한 후 종료됩니다.
+3. Fuzz it with `go test -fuzz=Fuzz -fuzztime 30s` which will fuzz for 30
+   seconds before exiting if no failure was found.
 
-```
+   ```
    $ go test -fuzz=Fuzz -fuzztime 30s
    fuzz: elapsed: 0s, gathering baseline coverage: 0/5 completed
    fuzz: elapsed: 0s, gathering baseline coverage: 5/5 completed, now fuzzing with 4 workers
@@ -628,29 +714,41 @@ FAIL    example/fuzz    0.145s
    ok      example/fuzz  31.025s
    ```
 
-퍼징(Fuzzing) 통과!
+   Fuzzing passed!
 
-`-fuzz` 플래그 외에도 `go test`에 여러 새로운 플래그가 추가되었으며, 이는 [문서](/security/fuzz/#custom-settings)에서 확인할 수 있습니다.
+   In addition to the `-fuzz` flag, several new flags have been added to `go
+   test` and can be viewed in the [documentation](/security/fuzz/#custom-settings).
 
-퍼징 출력에 사용되는 용어에 대한 자세한 내용은 [Go Fuzzing](/security/fuzz/#command-line-output)을 참조하세요. 예를 들어, "new interesting"은 기존 퍼즈 테스트 코퍼스의 코드 커버리지를 확장하는 입력을 의미합니다. "new interesting" 입력의 수는 퍼징이 시작될 때 급격히 증가하고, 새로운 코드 경로가 발견됨에 따라 여러 번 급증한 후, 시간이 지남에 따라 점차 감소할 것으로 예상할 수 있습니다.
+   See [Go Fuzzing](/security/fuzz/#command-line-output) for more
+   information on terms used in fuzzing output. For example, "new interesting"
+   refers to inputs that expand the code coverage of the existing fuzz test
+   corpus. The number of "new interesting" inputs can be expected to increase
+   sharply as fuzzing begins, spike several times as new code paths are
+   discovered, then taper off over time.
 
-## 결론 {#conclusion}
+## Conclusion {#conclusion}
 
-잘하셨습니다! 방금 Go의 퍼징(fuzzing)에 입문하셨습니다.
+Nicely done! You've just introduced yourself to fuzzing in Go.
 
-다음 단계는 코드에서 퍼징(fuzz)하고 싶은 함수를 선택하여 시도해 보는 것입니다! 만약 퍼징을 통해 코드의 버그를 발견했다면, [trophy case](/wiki/Fuzzing-trophy-case)에 추가하는 것을 고려해 보세요.
+The next step is to choose a function in your code that you'd like to fuzz, and
+try it out! If fuzzing finds a bug in your code, consider adding it to the
+[trophy case](/wiki/Fuzzing-trophy-case).
 
-문제가 발생하거나 기능 제안 아이디어가 있다면, [이슈를 등록해 주세요](/issue/new/?&labels=fuzz).
+If you experience any problems or have an idea for a feature, [file an
+issue](/issue/new/?&labels=fuzz).
 
-기능에 대한 논의 및 일반적인 피드백을 위해 Gophers Slack의 [#fuzzing 채널](https://gophers.slack.com/archives/CH5KV1AKE)에도 참여하실 수 있습니다.
+For discussion and general feedback about the feature, you can also participate
+in the [#fuzzing channel](https://gophers.slack.com/archives/CH5KV1AKE) in
+Gophers Slack.
 
-더 자세한 내용은 [go.dev/security/fuzz](/security/fuzz/#requirements)의 문서를 확인하세요.
+Check out the documentation at [go.dev/security/fuzz](/security/fuzz/#requirements) for
+further reading.
 
-## 완성된 코드
+## Completed code
 
 --- main.go ---
 
-```go
+```
 package main
 
 import (
@@ -673,7 +771,7 @@ func Reverse(s string) (string, error) {
         return s, errors.New("input is not valid UTF-8")
     }
     r := []rune(s)
-    for i, j := 0, len(r)-1; i < len(r)/2; i, j = i+1, j-1 {
+    for i, j := 0, len(r)-1; i {{raw "<"}} len(r)/2; i, j = i+1, j-1 {
         r[i], r[j] = r[j], r[i]
     }
     return string(r), nil
@@ -682,7 +780,7 @@ func Reverse(s string) (string, error) {
 
 --- reverse_test.go ---
 
-```go
+```
 package main
 
 import (
@@ -693,7 +791,7 @@ import (
 func FuzzReverse(f *testing.F) {
     testcases := []string{"Hello, world", " ", "!12345"}
     for _, tc := range testcases {
-        f.Add(tc) // 시드 코퍼스(seed corpus)를 제공하기 위해 f.Add 사용
+        f.Add(tc) // Use f.Add to provide a seed corpus
     }
     f.Fuzz(func(t *testing.T, orig string) {
         rev, err1 := Reverse(orig)
@@ -714,4 +812,4 @@ func FuzzReverse(f *testing.F) {
 }
 ```
 
-[맨 위로](#top)
+[Back to top](#top)

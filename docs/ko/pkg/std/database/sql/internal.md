@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`internal` 패키지는 `database/sql`과 `database/sql/driver` 간에 공유되는 내부 심볼들을 포함합니다.
+Package internal contains internal symbols shared between database/sql and database/sql/driver.
 
 ## 원문 요약
 

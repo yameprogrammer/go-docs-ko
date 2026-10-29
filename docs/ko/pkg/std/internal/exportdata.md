@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`exportdata` 패키지는 gc가 생성한 객체 파일을 찾고 읽기 위한 공통 유틸리티를 구현합니다.
+Package exportdata implements common utilities for finding and reading gc-generated object files.
 
 ## 원문 요약
 

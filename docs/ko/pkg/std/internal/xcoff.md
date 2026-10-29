@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`xcoff` 패키지는 XCOFF(Extended Common Object File Format) 파일에 대한 액세스를 구현합니다.
+Package xcoff implements access to XCOFF (Extended Common Object File Format) files.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`image` 패키지는 기본적인 2D 이미지 라이브러리를 구현합니다.
+Package image implements a basic 2-D image library.
 
 ## 원문 요약
 

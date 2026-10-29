@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`socktest` 패키지는 소켓 테스트를 위한 유틸리티를 제공합니다.
+Package socktest provides utilities for socket testing.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`flag` 패키지는 커맨드라인 플래그 파싱을 구현합니다.
+Package flag implements command-line flag parsing.
 
 ## 원문 요약
 

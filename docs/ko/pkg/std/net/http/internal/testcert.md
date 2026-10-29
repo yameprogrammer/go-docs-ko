@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-package testcert는 테스트 전용 localhost 인증서를 포함하고 있습니다.
+Package testcert contains a test-only localhost certificate.
 
 ## 원문 요약
 

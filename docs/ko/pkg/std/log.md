@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`log` 패키지는 간단한 로깅 패키지를 구현합니다.
+Package log implements a simple logging package.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`iter` 패키지는 시퀀스에 대한 반복자(iterator)와 관련된 기본적인 정의 및 작업을 제공합니다.
+Package iter provides basic definitions and operations related to iterators over sequences.
 
 ## 원문 요약
 

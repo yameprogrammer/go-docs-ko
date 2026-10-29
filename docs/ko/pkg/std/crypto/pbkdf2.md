@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`pbkdf2` 패키지는 RFC 8018 (PKCS #5 v2.1)에 정의된 키 유도 함수 PBKDF2를 구현합니다.
+Package pbkdf2 implements the key derivation function PBKDF2 as defined in RFC 8018 (PKCS #5 v2.1).
 
 ## 원문 요약
 

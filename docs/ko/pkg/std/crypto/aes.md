@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`aes` 패키지는 미국 연방 정보 처리 표준(U.S. Federal Information Processing Standards) 출판물 197에 정의된 AES 암호화(이전의 Rijndael)를 구현합니다.
+Package aes implements AES encryption (formerly Rijndael), as defined in U.S. Federal Information Processing Standards Publication 197.
 
 ## 원문 요약
 

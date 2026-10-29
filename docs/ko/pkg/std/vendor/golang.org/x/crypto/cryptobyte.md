@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`cryptobyte` 패키지는 ASN.1 DER를 포함하여, 길이 접두사가 붙은 바이너리 메시지를 파싱하고 구성하는 데 도움이 되는 타입들을 제공합니다.
+Package cryptobyte contains types that help with parsing and constructing length-prefixed, binary messages, including ASN.1 DER.
 
 ## 원문 요약
 

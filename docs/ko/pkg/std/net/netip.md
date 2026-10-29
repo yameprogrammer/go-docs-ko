@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`netip` 패키지는 작은 값 타입(small value type)인 IP 주소 타입을 정의합니다.
+Package netip defines an IP address type that's a small value type.
 
 ## 원문 요약
 

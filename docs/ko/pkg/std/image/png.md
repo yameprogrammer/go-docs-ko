@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`png` 패키지는 PNG 이미지 디코더와 인코더를 구현합니다.
+Package png implements a PNG image decoder and encoder.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`regexp` 패키지는 정규 표현식 검색을 구현합니다.
+Package regexp implements regular expression search.
 
 ## 원문 요약
 

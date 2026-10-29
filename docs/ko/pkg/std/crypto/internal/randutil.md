@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`randutil` 패키지는 다양한 crypto 패키지를 위한 내부 무작위성 유틸리티를 포함하고 있습니다.
+Package randutil contains internal randomness utilities for various crypto packages.
 
 ## 원문 요약
 

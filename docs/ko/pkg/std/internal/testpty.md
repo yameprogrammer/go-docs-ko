@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`testpty` 패키지는 cgo를 통해 C 함수를 호출하여 구현된 Unix 시스템용 간단한 pseudo-terminal 패키지입니다.
+Package testpty is a simple pseudo-terminal package for Unix systems, implemented by calling C functions via cgo.
 
 ## 원문 요약
 

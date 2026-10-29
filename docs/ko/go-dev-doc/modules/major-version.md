@@ -1,39 +1,64 @@
 <!--{
-  "Title": "메이저 버전 업데이트 개발하기"
+  "Title": "Developing a major version update"
 }-->
 
-새 버전에서 변경하려는 내용이 모듈 사용자들에 대한 하위 호환성을 보장할 수 없을 때는 메이저 버전(major version)을 업데이트해야 합니다. 예를 들어, 모듈의 public API를 변경하여 이전 버전의 모듈을 사용하는 클라이언트 코드가 작동하지 않게 되는 경우에 이러한 변경을 수행하게 됩니다.
+You must update to a major version when changes you're making in a potential new
+version can't guarantee backward compatibility for the module's users. For
+example, you'll make this change if you change your module's public API such
+that it breaks client code using previous versions of the module.
 
-> **참고:** 메이저(major), 마이너(minor), 패치(patch) 또는 프리릴리스(pre-release)와 같은 각 릴리스 유형은 모듈 사용자에게 서로 다른 의미를 갖습니다. 사용자들은 이러한 차이점을 통해 해당 릴리스가 자신의 코드에 어느 정도의 리스크를 가져오는지를 파악합니다. 다시 말해, 릴리스를 준비할 때 버전 번호가 이전 릴리스 이후의 변경 사항 성격을 정확하게 반영하고 있는지 확인하십시오. 버전 번호에 대한 자세한 내용은 [Module version numbering](/doc/modules/version-numbers)를 참조하십시오.
+> **Note:** Each release type -- major, minor, patch, or pre-release -- has a
+different meaning for a module's users. Those users rely on these differences to
+understand the level of risk a release represents to their own code. In other
+words, when preparing a release, be sure that its version number accurately
+reflects the nature of the changes since the preceding release. For more on
+version numbers, see [Module version numbering](/doc/modules/version-numbers).
 
-**함께 보기**
+**See also**
 
-* 모듈 개발에 대한 개요는 [Developing and publishing modules](developing)를 참조하십시오.
-* 전체적인 프로세스를 확인하시려면 [Module release and versioning workflow](release-workflow)를 참조하십시오.
+* For an overview of module development, see [Developing and publishing
+  modules](developing).
+* For an end-to-end view, see [Module release and versioning
+  workflow](release-workflow).
 
-## 메이저 버전 업데이트 시 고려 사항 {#considerations}
+## Considerations for a major version update {#considerations}
 
-절대로 필요한 경우가 아니면 새로운 메이저 버전으로 업데이트하지 말아야 합니다.
-메이저 버전 업데이트는 개발자와 모듈 사용자 모두에게 상당한 변동성을 의미합니다. 메이저 버전 업데이트를 고려할 때는 다음 사항들을 생각하십시오:
+You should only update to a new major version when it's absolutely necessary.
+A major version update represents significant churn for both you and your
+module's users. When you're considering a major version update, think about
+the following:
 
-* 새로운 메이저 버전을 출시하는 것이 이전 메이저 버전의 지원에 어떤 의미인지 사용자에게 명확하게 알리십시오.
+* Be clear with your users about what releasing the new major version means
+  for your support of previous major versions.
 
-이전 버전들이 더 이상 사용되지 않나요(deprecated)? 이전과 동일하게 지원되나요? 버그 수정을 포함하여 이전 버전들에 대한 유지보수를 진행하실 예정인가요?
+  Are previous versions deprecated? Supported as they were before? Will you be
+  maintaining previous versions, including with bug fixes?
 
-* 두 가지 버전(이전 버전과 최신 버전)의 유지보수를 수행할 준비를 하십시오.
-  예를 들어, 한 버전에서 버그를 수정하면 해당 수정 사항을 다른 버전으로 포팅해야 하는 경우가 많습니다.
+* Be ready to take on the maintenance of two versions: the old and the new.
+  For example, if you fix bugs in one, you'll often be porting those fixes into
+  the other.
 
-* 의존성 관리 관점에서 새로운 메이저 버전은 새로운 모듈임을 기억하세요. 사용자는 단순히 버전을 업그레이드하는 것이 아니라, 릴리스 후 새로운 모듈을 사용하도록 업데이트해야 합니다.
+* Remember that a new major version is a new module from a dependency management
+  perspective. Your users will need to update to use a new module after you
+  release, rather than simply upgrading.
 
-이는 새로운 메이저 버전이 이전 메이저 버전과 다른 모듈 경로를 갖기 때문입니다. 예를 들어, 모듈 경로가 `example.com/mymodule`인 모듈의 경우, v2 버전의 모듈 경로는 `example.com/mymodule/v2`가 됩니다.
+  That's because a new major version has a different module path from the
+  preceding major version. For example, for a module whose module path is
+  example.com/mymodule, a v2 version would have the module path
+  example.com/mymodule/v2.
 
-* 새로운 메이저 버전을 개발할 때는 코드가 새 모듈에서 패키지를 임포트하는 모든 곳의 임포트 경로(import paths)를 업데이트해야 합니다. 모듈 사용자 또한 새 메이저 버전으로 업그레이드하려면 임포트 경로를 업데이트해야 합니다.
+* When you're developing a new major version, you must also update import paths
+  wherever code imports packages from the new module. Your module's users must
+  also update their import paths if they want to upgrade to the new major version.
 
-## 메이저 릴리스를 위한 브랜칭 {#branching}
+## Branching for a major release {#branching}
 
-새로운 메이저 버전을 개발하기 위해 소스를 처리하는 가장 간단한 방법은 이전 메이저 버전의 최신 버전에서 저장소를 브랜치(branch)하는 것입니다.
+The most straightforward approach to handling source when preparing to develop a
+new major version is to branch the repository at the latest version of the
+previous major version.
 
-예를 들어, 명령 프롬프트에서 모듈의 루트 디렉터리로 이동한 다음, 그곳에 새로운 v2 브랜치를 생성할 수 있습니다.
+For example, in a command prompt you might change to your module's root
+directory, then create a new v2 branch there.
 
 ```
 $ cd mymodule
@@ -42,17 +67,21 @@ Switched to a new branch "v2"
 ```
 
 <img src="images/v2-branch-module.png"
-     alt="master에서 v2로 분기된 저장소를 보여주는 다이어그램"
+     alt="Diagram illustrating a repository branched from master to v2"
      style="width: 600px;" />
 
-소스 브랜치를 생성한 후, 새 버전을 위해 소스에 다음과 같은 변경 사항을 적용해야 합니다.
 
-* 새 버전의 `go.mod` 파일에서, 다음 예시와 같이 모듈 경로에 새로운 메이저 버전 번호를 추가하십시오.
-  * 기존 버전: `example.com/mymodule`
-  * 새 버전: `example.com/mymodule/v2`
+Once you have the source branched, you'll need to make the following changes to
+the source for your new version:
 
-* Go 코드에서 모듈의 패키지를 임포트하는 모든 임포트 패키지 경로를 업데이트하여, 모듈 경로 부분에 메이저 버전 번호를 추가하십시오.
-  * 기존 임포트 문: `import "example.com/mymodule/package1"`
-  * 새로운 임포트 문: `import "example.com/mymodule/v2/package1"`
+* In the new version's go.mod file, append new major version number to the
+  module path, as in the following example:
+  * Existing version: `example.com/mymodule`
+  * New version: `example.com/mymodule/v2`
 
-게시 단계에 대해서는 [모듈 게시하기](/doc/modules/publishing)를 참조하세요.
+* In your Go code, update every imported package path where you import a package
+  from the module, appending the major version number to the module path portion.
+  * Old import statement: `import "example.com/mymodule/package1"`
+  * New import statement: `import "example.com/mymodule/v2/package1"`
+
+For publishing steps, see [Publishing a module](/doc/modules/publishing).

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`atomic` 패키지는 `sync/atomic`과는 독립적으로, 런타임에 원자적 연산(atomic operations)을 제공합니다.
+Package atomic provides atomic operations, independent of sync/atomic, to the runtime.
 
 ## 원문 요약
 

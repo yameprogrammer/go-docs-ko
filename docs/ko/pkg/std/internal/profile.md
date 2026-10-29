@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`profile` 패키지는 pprof 프로파일을 유향 그래프(directed graph)로 나타냅니다.
+Package profile represents a pprof profile as a directed graph.
 
 ## 원문 요약
 

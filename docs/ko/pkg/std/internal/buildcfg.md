@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`buildcfg` 패키지는 현재 환경에 의해 기술된 빌드 설정에 대한 액세스를 제공합니다.
+Package buildcfg provides access to the build configuration described by the current environment.
 
 ## 원문 요약
 

@@ -2,456 +2,593 @@
   main ul li { margin: 0.5em 0; }
 </style>
 
-## Go 1.24 소개 {#introduction}
+## Introduction to Go 1.24 {#introduction}
 
-최신 Go 릴리스인 버전 1.24가 [Go 1.23](/doc/go1.23) 출시 6개월 후인 [2025년 2월](/doc/devel/release#go1.24.0)에 출시됩니다.
-변경 사항의 대부분은 툴체인, 런타임 및 라이브러리의 구현에 집중되어 있습니다.
-언제나 그렇듯, 이번 릴리스에서도 Go 1의 [호환성 약속](/doc/go1compat)을 유지합니다.
-거의 모든 Go 프로그램이 이전과 동일하게 컴파일되고 실행될 것으로 예상합니다.
+The latest Go release, version 1.24,
+arrives in [February 2025](/doc/devel/release#go1.24.0),
+six months after [Go 1.23](/doc/go1.23).
+Most of its changes are in the implementation of the toolchain, runtime, and libraries.
+As always, the release maintains the Go 1 [promise of compatibility](/doc/go1compat).
+We expect almost all Go programs to continue to compile and run as before.
 
-## 언어 변경 사항 {#language}
+## Changes to the language {#language}
 
 <!-- go.dev/issue/46477 -->
-Go 1.24부터 [제네릭 타입 별칭(generic type aliases)](/issue/46477)을 완전히 지원합니다. 이제 타입 별칭을 정의된 타입(defined type)처럼 매개변수화할 수 있습니다.
-자세한 내용은 [언어 명세](/ref/spec#Alias_declarations)를 참조하십시오.
-현재로서는 `GOEXPERIMENT=noaliastypeparams`를 설정하여 이 기능을 비활성화할 수 있지만, `aliastypeparams` 설정은 Go 1.25에서 제거될 예정입니다.
+Go 1.24 now fully supports [generic type aliases](/issue/46477): a type alias
+may be parameterized like a defined type.
+See the [language spec](/ref/spec#Alias_declarations) for details.
+For now, the feature can be disabled by setting `GOEXPERIMENT=noaliastypeparams`;
+but the `aliastypeparams` setting will be removed for Go 1.25.
 
 ## Tools {#tools}
 
-### Go 명령어 {#go-command}
+### Go command {#go-command}
 
 <!-- go.dev/issue/48429 -->
 
-이제 Go 모듈은 `go.mod` 파일의 `tool` 지시어를 사용하여 실행 파일 의존성을 추적할 수 있습니다. 이를 통해 관습적으로 "tools.go"라고 이름 붙인 파일에 도구들을 빈 임포트(blank imports)로 추가하던 기존의 우회 방법이 더 이상 필요하지 않습니다. 이제 `go tool` 명령어를 사용하여 Go 배포판에 포함된 도구 외에도 이러한 도구들을 실행할 수 있습니다. 자세한 내용은 [문서](/doc/modules/managing-dependencies#tools)를 참조하십시오.
+Go modules can now track executable dependencies using `tool` directives in
+go.mod. This removes the need for the previous workaround of adding tools as
+blank imports to a file conventionally named "tools.go". The `go tool`
+command can now run these tools in addition to tools shipped with the Go
+distribution. For more information see [the
+documentation](/doc/modules/managing-dependencies#tools).
 
-`go get`의 새로운 `-tool` 플래그는 지정된 패키지에 대해 `require` 지시문을 추가하는 것 외에도, 현재 모듈에 tool 지시문을 추가합니다.
+The new `-tool` flag for `go get` causes a tool directive to be added to the
+current module for named packages in addition to adding require directives.
 
-새로운 [`tool` 메타 패턴](/cmd/go#hdr-Package_lists_and_patterns)은 현재 모듈의 모든 도구를 참조합니다. 이는 `go get tool`을 통해 모두 업그레이드하거나, `go install tool`을 통해 GOBIN 디렉토리에 설치하는 데 사용할 수 있습니다.
+The new [`tool` meta-pattern](/cmd/go#hdr-Package_lists_and_patterns) refers to
+all tools in the current module. This can be used to upgrade them all with `go get tool` or to install them into your GOBIN directory with `go install tool`.
 
 <!-- go.dev/issue/69290 -->
 
-`go run`으로 생성된 실행 파일과 `go tool`의 새로운 동작 방식이 이제 Go 빌드 캐시에 저장됩니다. 이로 인해 캐시 크기는 커지지만, 반복 실행 속도는 더 빨라집니다. [#69290](/issue/69290)을 참조하십시오.
+Executables created by `go run` and the new behavior of `go tool` are now
+cached in the Go build cache. This makes repeated executions faster at the
+expense of making the cache larger. See [#69290](/issue/69290).
 
 <!-- go.dev/issue/62067 -->
 
-`go build` 및 `go install` 명령어가 이제 `-json` 플래그를 지원하며, 이를 통해 빌드 출력 및 실패 내용을 표준 출력(standard output)에 구조화된 JSON 형식으로 보고합니다.
-보고 형식에 대한 자세한 내용은 `go help buildjson`을 참조하십시오.
+The `go build` and `go install` commands now accept a `-json` flag that reports
+build output and failures as structured JSON output on standard output.
+For details of the reporting format, see `go help buildjson`.
 
-또한, `go test -json`은 이제 빌드 출력과 실패 내용을 JSON으로 보고하며, 이는 테스트 결과 JSON과 서로 인터리브(interleaved)되어 나타납니다.
-이들은 새로운 `Action` 타입으로 구분되지만, 만약 테스트 통합 시스템에서 문제가 발생할 경우 [GODEBUG 설정](/doc/godebug) `gotestjsonbuildtext=1`을 통해 텍스트 빌드 출력 방식으로 되돌릴 수 있습니다.
+Furthermore, `go test -json` now reports build output and failures in JSON,
+interleaved with test result JSON.
+These are distinguished by new `Action` types, but if they cause problems in
+a test integration system, you can revert to the text build output with
+[GODEBUG setting](/doc/godebug) `gotestjsonbuildtext=1`.
 
 <!-- go.dev/issue/26232 -->
 
-새로운 `GOAUTH` 환경 변수는 프라이빗 모듈 패치(fetch)를 인증하는 유연한 방법을 제공합니다. 자세한 내용은 `go help goauth`를 참조하세요.
+The new `GOAUTH` environment variable provides a flexible way to authenticate
+private module fetches. See `go help goauth` for more information.
 
 <!-- go.dev/issue/50603 -->
 
-`go build` 명령어는 이제 버전 관리 시스템의 태그 및/또는 커밋을 기반으로 컴파일된 바이너리에 [메인 모듈의 버전](/pkg/runtime/debug#BuildInfo.Main)을 설정합니다.
-커밋되지 않은 변경 사항이 있는 경우 `+dirty` 접미사가 추가됩니다.
-바이너리에서 버전 관리 정보를 제외하려면 `-buildvcs=false` 플래그를 사용하십시오.
+The `go build` command now sets the
+[main module's version](/pkg/runtime/debug#BuildInfo.Main) in the compiled
+binary based on the version control system tag and/or commit.
+A `+dirty` suffix will be appended if there are uncommitted changes.
+Use the `-buildvcs=false` flag to omit version control information from the binary.
 
 <!-- go.dev/issue/63939 -->
 
-새로운 [GODEBUG 설정](/doc/godebug) [`toolchaintrace=1`](/doc/toolchain#select)을 사용하여 `go` 명령의 툴체인 선택 과정을 추적할 수 있습니다.
+The new [GODEBUG setting](/doc/godebug) [`toolchaintrace=1`](/doc/toolchain#select)
+can be used to trace the `go` command's toolchain selection process.
 
 ### Cgo {#cgo}
 
 <!-- go.dev/issue/56378, CL 579955 -->
-Cgo는 런타임 성능을 향상시키기 위해 C 함수에 대한 새로운 어노테이션을 지원합니다.
-`#cgo noescape cFunctionName`은 C 함수 `cFunctionname`으로 전달된 메모리가 escape(탈출)하지 않음을 컴파일러에 알립니다.
-`#cgo nocallback cFunctionName`은 C 함수 `cFunctionName`이 Go 함수를 다시 호출(callback)하지 않음을 컴파일러에 알립니다.
-자세한 내용은 [cgo 문서](/pkg/cmd/cgo#hdr-Optimizing_calls_of_C_code)를 참조하십시오.
+Cgo supports new annotations for C functions to improve run time
+performance.
+`#cgo noescape cFunctionName` tells the compiler that memory passed to
+the C function `cFunctionname` does not escape.
+`#cgo nocallback cFunctionName` tells the compiler that the C function
+`cFunctionName` does not call back to any Go functions.
+For more information, see [the cgo documentation](/pkg/cmd/cgo#hdr-Optimizing_calls_of_C_code).
 
 <!-- go.dev/issue/67699 -->
-Cgo는 현재 여러 개의 호환되지 않는 선언을 가진 C 함수에 대한 호출 컴파일을 거부합니다. 예를 들어, `f`가 `void f(int)`와 `void f(double)`로 모두 선언된 경우, cgo는 `f(0)`에 대해 잘못된 호출 시퀀스를 생성하는 대신 에러를 보고합니다. 이번 릴리스에서는 이러한 호환되지 않는 선언이 서로 다른 파일에 나타날 때 이 에러 조건을 더 잘 감지하는 기능이 추가되었습니다. [#67699](/issue/67699)를 참조하십시오.
+Cgo currently refuses to compile calls to a C function which has multiple
+incompatible declarations. For instance, if `f` is declared as both `void f(int)`
+and `void f(double)`, cgo will report an error instead of possibly generating an
+incorrect call sequence for `f(0)`. New in this release is a better detector for
+this error condition when the incompatible declarations appear in different
+files. See [#67699](/issue/67699).
 
 ### Objdump
 
-`objdump`는 바이너리 파일의 내용을 조사하는 데 사용되는 강력한 명령줄 도구입니다. 주로 컴파일된 실행 파일, 오브젝트 파일 또는 라이브러리의 어셈블리 코드를 역어셈블(disassemble)하거나 섹션 정보를 확인하는 데 사용됩니다.
-
-#### 일반적인 사용법
-
-가장 일반적인 사용 사례는 바이너리를 어셈블리로 변환하여 제어 흐름을 분석하는 것입니다.
-
-```bash
-objdump -d <binary_file>
-```
-
-* `-d`: 실행 가능한 섹션의 내용을 역어셈블합니다.
-
-#### 주요 옵션
-
-| 옵션 | 설명 |
-| :--- | :--- |
-| `-d` | 실행 가능한 섹션을 역어셈블합니다. |
-| `-D` | 모든 섹션을 역어셈블합니다. |
-| `-s` | 모든 섹션의 전체 내용을 16진수(hex)와 ASCII로 덤프합니다. |
-| `-h` | 섹션 헤더 정보를 표시합니다. |
-| `-x` | 모든 헤더 정보를 표시합니다 (심볼 테이블 포함). |
-| `-M <arch>` | 특정 아키텍처를 위해 역어셈블 형식을 지정합니다. |
-
-#### 실전 예제
-
-**1. 특정 함수만 찾아서 분석하기**
-
-파일이 너무 클 경우 `grep`과 함께 사용하여 특정 함수 주변의 코드만 확인할 수 있습니다.
-
-```bash
-objdump -d <binary_file> | grep -A 20 "<function_name>:"
-```
-
-**2. 심볼 테이블 확인하기**
-
-바이너리에 포함된 함수 및 변수 이름(심볼)을 확인하려면 다음 명령어를 사용합니다.
-
-```bash
-objdump -t <binary_file>
-```
-
-**3. 소스 코드와 함께 보기**
-
-바이너리가 디버그 정보(`-g` 옵션으로 컴파일됨)를 포함하고 있다면, 소스 코드와 어셈블리를 나란히 표시할 수 있습니다.
-
-```bash
-objdump -S <binary_file>
-```
-
-#### 분석 팁
-
-* **주소 확인**: `objdump` 출력의 왼쪽 열은 메모리 주소를 나타냅니다. 이는 디버거(GDB 등)에서 중단점(breakpoint)을 설정할 때 유용합니다.
-* **오퍼랜드 분석**: 명령어 뒤에 오는 값들은 레지스터, 메모리 주소 또는 즉시값(immediate value)을 나타냅니다.
-* **섹션 분석**: `.text` 섹션은 실행 코드를, `.data` 섹션은 초기화된 전역 변수를, `.bss` 섹션은 초기화되지 않은 전역 변수를 담고 있습니다.
-
 <!-- go.dev/issue/15255, go.dev/issue/36738 -->
-[objdump](/cmd/objdump) 도구가 이제 64비트 LoongArch (`GOARCH=loong64`), RISC-V (`GOARCH=riscv64`), S390X (`GOARCH=s390x`)의 역어셈블리를 지원합니다.
+The [objdump](/cmd/objdump) tool now supports dissassembly on 64-bit
+LoongArch (`GOARCH=loong64`), RISC-V (`GOARCH=riscv64`), and S390X (`GOARCH=s390x`).
 
 ### Vet
 
 <!-- go.dev/issue/44251 -->
-새로운 `tests` 분석기는 테스트 패키지 내의 테스트, 퍼저(fuzzers), 벤치마크 및 예제 선언에서 발생하는 일반적인 실수들을 보고합니다. 예를 들어 잘못된 이름, 부정확한 시그니처, 또는 존재하지 않는 식별자를 문서화하는 예제 등이 이에 해당합니다. 이러한 실수 중 일부는 테스트가 실행되지 않는 원인이 될 수 있습니다.
-
-이 분석기는 `go test`에 의해 실행되는 분석기 서브셋 중 하나입니다.
+The new `tests` analyzer reports common mistakes in declarations of
+tests, fuzzers, benchmarks, and examples in test packages, such as
+malformed names, incorrect signatures, or examples that document
+non-existent identifiers. Some of these mistakes may cause tests not
+to run.
+This analyzer is among the subset of analyzers that are run by `go test`.
 
 <!-- go.dev/issue/60529 -->
-기존의 `printf` 분석기(analyzer)는 이제 다른 인자 없이 `fmt.Printf(s)` 형태로 호출되며, 여기서 `s`가 상수가 아닌 포맷 문자열인 경우 진단 보고서를 생성합니다. `s`의 값에 `%` 기호가 포함될 수 있으므로 이러한 호출은 거의 항상 실수이며, 대신 `fmt.Print`를 사용해야 합니다. [#60529](/issue/60529)를 참조하십시오. 이 체크는 기존 코드에서 탐지 결과가 많이 발생하는 경향이 있으므로, 1.24 Go 툴체인으로 업데이트할 때 지속적 통합(CI) 실패가 발생하는 것을 방지하기 위해 언어 버전(go.mod의 `go` 지시어 또는 `//go:build` 주석으로 지정됨)이 최소 Go 1.24인 경우에만 적용됩니다.
+The existing `printf` analyzer now reports a diagnostic for calls of
+the form `fmt.Printf(s)`, where `s` is a non-constant format string,
+with no other arguments. Such calls are nearly always a mistake
+as the value of `s` may contain the `%` symbol; use `fmt.Print` instead.
+See [#60529](/issue/60529). This check tends to produce findings in existing
+code, and so is only applied when the language version (as specified by the
+go.mod `go` directive or `//go:build` comments) is at least Go 1.24, to avoid
+causing continuous integration failures when updating to the 1.24 Go toolchain.
 
 <!-- go.dev/issue/64127 -->
-기존의 `buildtag` 분석기가 이제 `//go:build` 지시문 내에 유효하지 않은 Go [주 버전 빌드 제약 조건](/pkg/cmd/go#hdr-Build_constraints)이 있을 때 진단 보고서를 생성합니다. 예를 들어, `//go:build go1.23.1`은 포인트 릴리스를 참조하므로, 대신 `//go:build go1.23`을 사용하십시오.
-[#64127](/issue/64127)을 참조하십시오.
+The existing `buildtag` analyzer now reports a diagnostic when
+there is an invalid Go [major version build constraint](/pkg/cmd/go#hdr-Build_constraints)
+within a `//go:build` directive. For example, `//go:build go1.23.1` refers to
+a point release; use `//go:build go1.23` instead.
+See [#64127](/issue/64127).
 
 <!-- go.dev/issue/66387 -->
-기존의 `copylock` 분석기는 이제 `for i := iter(); done(i); i = next(i) { ... }`와 같은 3절 "for" 루프에서 선언된 변수가 `sync.Mutex`와 같은 `sync.Locker`를 포함하는 경우 진단 보고서를 생성합니다. [Go 1.22](/doc/go1.22#language)에서는 이러한 루프의 동작이 변경되어 각 반복마다 이전 반복의 값을 복사하여 새로운 변수를 생성하도록 되었으며, 이러한 복사 작업은 락(lock)에 대해 안전하지 않습니다. [#66387](/issue/66387)을 참조하십시오.
+The existing `copylock` analyzer now reports a diagnostic when a
+variable declared in a 3-clause "for" loop such as
+`for i := iter(); done(i); i = next(i) { ... }` contains a `sync.Locker`,
+such as a `sync.Mutex`. [Go 1.22](/doc/go1.22#language) changed the behavior
+of these loops to create a new variable for each iteration, copying the
+value from the previous iteration; this copy operation is not safe for locks.
+See [#66387](/issue/66387).
 
 ### GOCACHEPROG
 
-`GOCACHEPROG` 환경 변수는 Go 빌드 캐시의 읽기 및 쓰기 작업을 처리하는 데 사용할 프로그램을 지정합니다.
-
-기본적으로 Go는 표준 파일 시스템 라이브러리를 사용하여 캐시를 관리하지만, 이 변수를 통해 캐시 작업을 가로채는 외부 도구를 지정할 수 있습니다. 이는 네트워크 파일 시스템이나 압축 파일 시스템과 같이 특수한 저장소 계층을 사용하여 빌드 캐시를 관리하려는 경우에 유용합니다.
-
-`GOCACHEPROG`로 지정된 프로그램은 다음과 같은 표준 인터페이스를 통해 Go 툴체인과 통신해야 합니다:
-
-1.  **명령어**: Go는 특정 작업을 수행하기 위해 프로그램을 호출하며, 각 호출에는 작업 유형을 나타내는 인자가 포함됩니다.
-2.  **동작**: 프로그램은 파일을 읽고, 쓰고, 삭제하며, 디렉토리를 생성하는 등의 파일 시스템 작업을 에뮬레이션해야 합니다.
-
-이 기능은 주로 고급 사용자나 빌드 인프라 최적화를 수행하는 팀을 위한 것이며, 일반적인 개발 환경에서는 설정할 필요가 없습니다.
-
 <!-- go.dev/issue/64876 -->
-`cmd/go` 내부의 바이너리 및 테스트 캐싱 메커니즘은 이제 `cmd/go` 도구와 `GOCACHEPROG` 환경 변수로 지정된 자식 프로세스 간의 JSON 프로토콜을 구현하는 자식 프로세스에 의해 구현될 수 있습니다.
-이 기능은 이전에 GOEXPERIMENT 뒤에 숨겨져 있었습니다.
-프로토콜에 대한 자세한 내용은 [문서](/cmd/go/internal/cacheprog)를 참조하십시오.
+The `cmd/go` internal binary and test caching mechanism can now be implemented
+by child processes implementing a JSON protocol between the `cmd/go` tool
+and the child process named by the `GOCACHEPROG` environment variable.
+This was previously behind a GOEXPERIMENT.
+For protocol details, see [the documentation](/cmd/go/internal/cacheprog).
 
-## 런타임 {#runtime}
+## Runtime {#runtime}
 
 <!-- go.dev/issue/54766 -->
 <!-- go.dev/cl/614795 -->
 <!-- go.dev/issue/68578 -->
 
-런타임의 여러 성능 개선을 통해 대표적인 벤치마크 세트 전반에서 CPU 오버헤드가 평균 2~3% 감소했습니다.
-결과는 애플리케이션에 따라 다를 수 있습니다.
-이러한 개선 사항에는 [Swiss Tables](https://abseil.io/about/design/swisstables) 기반의 새로운 내장 `map` 구현, 소형 객체의 더 효율적인 메모리 할당, 그리고 새로운 런타임 내부 mutex 구현이 포함됩니다.
+Several performance improvements to the runtime have decreased CPU overheads by
+2–3% on average across a suite of representative benchmarks.
+Results may vary by application.
+These improvements include a new builtin `map` implementation based on
+[Swiss Tables](https://abseil.io/about/design/swisstables), more efficient
+memory allocation of small objects, and a new runtime-internal mutex
+implementation.
 
-새로운 내장 `map` 구현과 새로운 런타임 내부 뮤텍스는 빌드 시 각각 `GOEXPERIMENT=noswissmap` 및 `GOEXPERIMENT=nospinbitmutex`를 설정하여 비활성화할 수 있습니다.
+The new builtin `map` implementation and new runtime-internal mutex may be
+disabled by setting `GOEXPERIMENT=noswissmap` and `GOEXPERIMENT=nospinbitmutex`
+at build time respectively.
 
-## 컴파일러 {#compiler}
+## Compiler {#compiler}
 
 <!-- go.dev/issue/60725, go.dev/issue/57926 -->
-컴파일러는 이미 cgo로 생성된 리시버 타입을 사용하여 새로운 메서드를 정의하는 것을 금지하고 있었으나, 별칭 타입(alias type)을 통해 해당 제한을 우회하는 것이 가능했습니다.
-Go 1.24부터는 리시버가 직접적으로든 간접적으로든(별칭 타입을 통해) cgo로 생성된 타입을 나타내는 경우 항상 에러를 보고합니다.
+The compiler already disallowed defining new methods with receiver types that were
+cgo-generated, but it was possible to circumvent that restriction via an alias type.
+Go 1.24 now always reports an error if a receiver denotes a cgo-generated type,
+whether directly or indirectly (through an alias type).
 
-## 링커 (Linker) {#linker}
+## Linker {#linker}
 
 <!-- go.dev/issue/68678, go.dev/issue/68652, CL 618598, CL 618601 -->
-이제 링커는 기본적으로 ELF 플랫폼에서 GNU 빌드 ID(ELF `NT_GNU_BUILD_ID` 노트)를, macOS에서 UUID(Mach-O `LC_UUID` 로드 커맨드)를 생성합니다.
-빌드 ID 또는 UUID는 Go 빌드 ID로부터 파생됩니다.
-이는 `-B none` 링커 플래그로 비활성화하거나, 사용자가 지정한 16진수 값인 `-B 0xNNNN` 링커 플래그로 재정의할 수 있습니다.
+The linker now generates a GNU build ID (the ELF `NT_GNU_BUILD_ID` note) on ELF platforms
+and a UUID (the Mach-O `LC_UUID` load command) on macOS by default.
+The build ID or UUID is derived from the Go build ID.
+It can be disabled by the `-B none` linker flag, or overridden by the `-B 0xNNNN` linker
+flag with a user-specified hexadecimal value.
 
 ## Bootstrap {#bootstrap}
 
 <!-- go.dev/issue/64751 -->
-[Go 1.22 릴리스 노트](/doc/go1.22#bootstrap)에서 언급했듯이, Go 1.24의 부트스트랩(bootstrap)에는 이제 Go 1.22.6 이상의 버전이 필요합니다.
-Go 1.26의 부트스트랩에는 Go 1.24의 포인트 릴리스 또는 그 이후 버전이 필요할 것으로 예상됩니다.
+As mentioned in the [Go 1.22 release notes](/doc/go1.22#bootstrap), Go 1.24 now requires
+Go 1.22.6 or later for bootstrap.
+We expect that Go 1.26 will require a point release of Go 1.24 or later for bootstrap.
 
-## 표준 라이브러리 {#library}
+## Standard library {#library}
 
-### 디렉토리 제한 파일 시스템 액세스
+### Directory-limited filesystem access
 
 <!-- go.dev/issue/67002 -->
-새로운 [`os.Root`](/pkg/os#Root) 타입은 특정 디렉터리 내에서 파일 시스템 작업을 수행하는 기능을 제공합니다.
+The new [`os.Root`](/pkg/os#Root) type provides the ability to perform filesystem
+operations within a specific directory.
 
-[`os.OpenRoot`](/pkg/os#OpenRoot) 함수는 디렉토리를 열고 [`os.Root`](/pkg/os#Root)를 반환합니다.
-[`os.Root`](/pkg/os#Root)의 메서드들은 해당 디렉토리 내에서 작동하며, 디렉토리 외부의 위치를 참조하는 경로(디렉토리 외부로 나가는 심볼릭 링크를 따르는 경로 포함)를 허용하지 않습니다.
-`os.Root`의 메서드들은 예를 들어 [`os.Root.Open`](/pkg/os#Root.Open),
+The [`os.OpenRoot`](/pkg/os#OpenRoot) function opens a directory and returns an [`os.Root`](/pkg/os#Root).
+Methods on [`os.Root`](/pkg/os#Root) operate within the directory and do not permit
+paths that refer to locations outside the directory, including
+ones that follow symbolic links out of the directory.
+The methods on `os.Root` mirror most of the file system operations available in the
+`os` package, including for example [`os.Root.Open`](/pkg/os#Root.Open),
 [`os.Root.Create`](/pkg/os#Root.Create),
 [`os.Root.Mkdir`](/pkg/os#Root.Mkdir),
-그리고 [`os.Root.Stat`](/pkg/os#Root.Stat)와 같이 `os` 패키지에서 사용할 수 있는 대부분의 파일 시스템 작업을 반영합니다.
+and [`os.Root.Stat`](/pkg/os#Root.Stat),
 
-### 새로운 벤치마크 함수
+### New benchmark function
 
-이제 벤치마크에서 `for range b.N`과 같이 `b.N`을 사용하는 일반적인 루프 구조 대신, 더 빠르고 오류 발생 가능성이 적은 [`testing.B.Loop`](/pkg/testing#B.Loop) 메서드를 사용하여 `for b.Loop() { ... }` 형태로 벤치마크 반복을 수행할 수 있습니다. 이는 다음과 같은 두 가지 중요한 이점을 제공합니다:
- - 벤치마크 함수가 `-count`당 정확히 한 번만 실행되므로, 비용이 많이 드는 설정(setup) 및 정리(cleanup) 단계가 한 번만 수행됩니다.
- - 함수 호출 매개변수와 결과값이 유지되어, 컴파일러가 루프 본문을 완전히 최적화하여 제거하는 것을 방지합니다.
+Benchmarks may now use the faster and less error-prone [`testing.B.Loop`](/pkg/testing#B.Loop) method to perform benchmark iterations like `for b.Loop() { ... }` in place of the typical loop structures involving `b.N` like `for range b.N`. This offers two significant advantages:
+ - The benchmark function will execute exactly once per -count, so expensive setup and cleanup steps execute only once.
+ - Function call parameters and results are kept alive, preventing the compiler from fully optimizing away the loop body.
 
-### 개선된 finalizer
+### Improved finalizers
 
 <!-- go.dev/issue/67535 -->
-새로운 [`runtime.AddCleanup`](/pkg/runtime#AddCleanup) 함수는 [`runtime.SetFinalizer`](/pkg/runtime#SetFinalizer)보다 더 유연하고 효율적이며 오류 발생 가능성이 적은 종료 처리(finalization) 메커니즘입니다.
-`AddCleanup`은 객체에 정리(cleanup) 함수를 연결하며, 이 함수는 해당 객체에 더 이상 접근할 수 없게 되면 한 번 실행됩니다.
-하지만 `SetFinalizer`와 달리,
-단일 객체에 여러 개의 cleanup 함수를 연결할 수 있고,
-내부 포인터(interior pointers)에 cleanup 함수를 연결할 수 있으며,
-객체들이 순환 구조(cycle)를 형성하더라도 일반적으로 메모리 누수를 일으키지 않고,
-객체나 해당 객체가 가리키는 객체들의 해제 시점을 지연시키지 않습니다.
-새로운 코드를 작성할 때는 `SetFinalizer`보다 `AddCleanup`을 사용하는 것이 권장됩니다.
+The new [`runtime.AddCleanup`](/pkg/runtime#AddCleanup) function is a
+finalization mechanism that is more flexible, more efficient, and less
+error-prone than [`runtime.SetFinalizer`](/pkg/runtime#SetFinalizer).
+`AddCleanup` attaches a cleanup function to an object that will run once
+the object is no longer reachable.
+However, unlike `SetFinalizer`,
+multiple cleanups may be attached to a single object,
+cleanups may be attached to interior pointers,
+cleanups do not generally cause leaks when objects form a cycle, and
+cleanups do not delay the freeing of an object or objects it points to.
+New code should prefer `AddCleanup` over `SetFinalizer`.
 
-### 새로운 weak 패키지 {#weak}
+### New weak package {#weak}
 
-새로운 [`weak`](/pkg/weak/) 패키지는 약한 포인터(weak pointers)를 제공합니다.
+The new [`weak`](/pkg/weak/) package provides weak pointers.
 
-약한 포인터(Weak pointers)는 값 연결을 위한 약한 맵(weak maps), [`unique`](/pkg/unique/) 패키지에서 다루지 않는 모든 항목을 위한 정규화 맵(canonicalization maps), 그리고 다양한 종류의 캐시와 같이 메모리 효율적인 구조의 생성을 가능하게 하기 위해 제공되는 저수준 프리미티브입니다.
+Weak pointers are a low-level primitive provided to enable the
+creation of memory-efficient structures, such as weak maps for
+associating values, canonicalization maps for anything not
+covered by package [`unique`](/pkg/unique/), and various kinds
+of caches.
+For supporting these use-cases, this release also provides
+[`runtime.AddCleanup`](/pkg/runtime/#AddCleanup) and
+[`maphash.Comparable`](/pkg/maphash/#Comparable).
 
-이러한 사용 사례를 지원하기 위해, 이번 릴리스에서는 [`runtime.AddCleanup`](/pkg/runtime/#AddCleanup)과 [`maphash.Comparable`](/pkg/maphash/#Comparable)도 함께 제공합니다.
-
-### 새로운 crypto/mlkem 패키지 {#crypto-mlkem}
+### New crypto/mlkem package {#crypto-mlkem}
 
 <!-- go.dev/issue/70122 -->
 
-새로운 [`crypto/mlkem`](/pkg/crypto/mlkem/) 패키지는 ML-KEM-768 및 ML-KEM-1024를 구현합니다.
+The new [`crypto/mlkem`](/pkg/crypto/mlkem/) package implements
+ML-KEM-768 and ML-KEM-1024.
 
-ML-KEM은 이전에 Kyber로 알려졌으며 [FIPS 203](https://doi.org/10.6028/NIST.FIPS.203)에 정의된 양자 내성 키 교환 메커니즘입니다.
+ML-KEM is a post-quantum key exchange mechanism formerly known as Kyber and
+specified in [FIPS 203](https://doi.org/10.6028/NIST.FIPS.203).
 
-### 새로운 crypto/hkdf, crypto/pbkdf2 및 crypto/sha3 패키지 {#crypto-packages}
+### New crypto/hkdf, crypto/pbkdf2, and crypto/sha3 packages {#crypto-packages}
 
 <!-- go.dev/issue/61477, go.dev/issue/69488, go.dev/issue/69982, go.dev/issue/65269, CL 629176 -->
 
-새로운 [`crypto/hkdf`](/pkg/crypto/hkdf/) 패키지는 [RFC 5869](https://www.rfc-editor.org/rfc/rfc5869.html)에 정의된 HMAC 기반의 Extract-and-Expand 키 유도 함수인 HKDF를 구현합니다.
+The new [`crypto/hkdf`](/pkg/crypto/hkdf/) package implements
+the HMAC-based Extract-and-Expand key derivation function HKDF,
+as defined in [RFC 5869](https://www.rfc-editor.org/rfc/rfc5869.html).
 
-새로운 [`crypto/pbkdf2`](/pkg/crypto/pbkdf2/) 패키지는 [RFC 8018](https://www.rfc-editor.org/rfc/rfc8018.html)에 정의된 비밀번호 기반 키 유도 함수인 PBKDF2를 구현합니다.
+The new [`crypto/pbkdf2`](/pkg/crypto/pbkdf2/) package implements
+the password-based key derivation function PBKDF2,
+as defined in [RFC 8018](https://www.rfc-editor.org/rfc/rfc8018.html).
 
-새로운 [`crypto/sha3`](/pkg/crypto/sha3/) 패키지는 [FIPS 202](http://doi.org/10.6028/NIST.FIPS.202)에 정의된 SHA-3 해시 함수와 SHAKE 및 cSHAKE 확장 출력 함수(extendable-output functions)를 구현합니다.
+The new [`crypto/sha3`](/pkg/crypto/sha3/) package implements
+the SHA-3 hash function and SHAKE and cSHAKE extendable-output functions,
+as defined in [FIPS 202](http://doi.org/10.6028/NIST.FIPS.202).
 
-세 패키지 모두 기존의 `golang.org/x/crypto/...` 패키지를 기반으로 합니다.
+All three packages are based on pre-existing `golang.org/x/crypto/...` packages.
 
-### FIPS 140-3 준수 {#fips140}
+### FIPS 140-3 compliance {#fips140}
 
-이번 릴리스에는 [FIPS 140-3 준수를 용이하게 하기 위한 새로운 메커니즘 세트](/doc/security/fips140)가 포함되어 있습니다.
+This release includes [a new set of mechanisms to facilitate FIPS 140-3
+compliance](/doc/security/fips140).
 
-Go Cryptographic Module은 FIPS 140-3 승인 알고리즘을 구현하기 위해 투명하게 사용되는 내부 표준 라이브러리 패키지 세트입니다. 애플리케이션은 승인된 알고리즘을 위해 Go Cryptographic Module을 사용하는 데 별도의 변경 사항이 필요하지 않습니다.
+The Go Cryptographic Module is a set of internal standard library packages that
+are transparently used to implement FIPS 140-3 approved algorithms. Applications
+require no changes to use the Go Cryptographic Module for approved algorithms.
 
-새로운 `GOFIPS140` 환경 변수를 사용하여 빌드 시 사용할 Go Cryptographic Module 버전을 선택할 수 있습니다. 새로운 `fips140` [GODEBUG 설정](/doc/godebug)을 사용하여 런타임에 FIPS 140-3 모드를 활성화할 수 있습니다.
+The new `GOFIPS140` environment variable can be used to select the Go
+Cryptographic Module version to use in a build. The new `fips140` [GODEBUG
+setting](/doc/godebug) can be used to enable FIPS 140-3 mode at runtime.
 
-Go 1.24에는 현재 CMVP 공인 실험실에서 테스트 중인 Go Cryptographic Module 버전 v1.0.0이 포함되어 있습니다.
+Go 1.24 includes Go Cryptographic Module version v1.0.0, which is currently
+under test with a CMVP-accredited laboratory.
 
-### 새로운 실험적 testing/synctest 패키지 {#testing-synctest}
+### New experimental testing/synctest package {#testing-synctest}
 
-새로운 실험적 [`testing/synctest`](/pkg/testing/synctest/) 패키지는 동시성 코드 테스트를 위한 지원을 제공합니다.
-- [`synctest.Run`](/pkg/testing/synctest/#Run) 함수는 격리된 "버블(bubble)" 내에서 고루틴 그룹을 시작합니다.
-  버블 내부에서 [`time`](/pkg/time) 패키지 함수들은 가상 시계(fake clock)를 기반으로 동작합니다.
-- [`synctest.Wait`](/pkg/testing/synctest#Wait) 함수는 현재 버블 내의 모든 고루틴이 블록(block) 상태가 될 때까지 대기합니다.
+The new experimental [`testing/synctest`](/pkg/testing/synctest/) package
+provides support for testing concurrent code.
+- The [`synctest.Run`](/pkg/testing/synctest/#Run) function starts a
+  group of goroutines in an isolated "bubble".
+  Within the bubble, [`time`](/pkg/time) package functions operate on a
+  fake clock.
+- The [`synctest.Wait`](/pkg/testing/synctest#Wait) function waits for
+  all goroutines in the current bubble to block.
 
-자세한 내용은 패키지 문서를 참조하십시오.
+See the package documentation for more details.
 
-`synctest` 패키지는 실험적이며, 빌드 시 `GOEXPERIMENT=synctest`를 설정하여 활성화해야 합니다.
-패키지 API는 향후 릴리스에서 변경될 수 있습니다.
-자세한 정보 확인 및 피드백 제공은 [issue #67434](/issue/67434)를 참조하십시오.
+The `synctest` package is experimental and must be enabled by
+setting `GOEXPERIMENT=synctest` at build time.
+The package API is subject to change in future releases.
+See [issue #67434](/issue/67434) for more information and
+to provide feedback.
 
-### 라이브러리의 마이너 변경 사항 {#minor_library_changes}
+### Minor changes to the library {#minor_library_changes}
 
 #### [`archive`](/pkg/archive/)
 
-`archive/zip`와 `archive/tar` 모두에서 `(*Writer).AddFS` 구현체가 이제 빈 디렉토리에 대해 디렉토리 헤더를 작성합니다.
+The `(*Writer).AddFS` implementations in both `archive/zip` and `archive/tar`
+now write a directory header for an empty directory.
 
 #### [`bytes`](/pkg/bytes/)
 
-[`bytes`](/pkg/bytes) 패키지는 이터레이터(iterator)와 함께 작동하는 여러 함수를 추가합니다:
-- [`Lines`](/pkg/bytes#Lines)는 바이트 슬라이스에서 개행 문자로 끝나는 라인들에 대한 이터레이터를 반환합니다.
-- [`SplitSeq`](/pkg/bytes#SplitSeq)는 구분자를 기준으로 분할된 바이트 슬라이스의 모든 하위 슬라이스들에 대한 이터레이터를 반환합니다.
-- [`SplitAfterSeq`](/pkg/bytes#SplitAfterSeq)는 구분자가 나타나는 지점 뒤에서 분할된 바이트 슬라이스의 하위 슬라이스들에 대한 이터레이터를 반환합니다.
-- [`FieldsSeq`](/pkg/bytes#FieldsSeq)는 [`unicode.IsSpace`](/pkg/unicode#IsSpace)에 정의된 공백 문자열을 기준으로 분할된 바이트 슬라이스의 하위 슬라이스들에 대한 이터레이터를 반환합니다.
-- [`FieldsFuncSeq`](/pkg/bytes#FieldsFuncSeq)는 서술자(predicate)를 만족하는 유니코드 코드 포인트 문자열을 기준으로 분할된 바이트 슬라이스의 하위 슬라이스들에 대한 이터레이터를 반환합니다.
+The [`bytes`](/pkg/bytes) package adds several functions that work with iterators:
+- [`Lines`](/pkg/bytes#Lines) returns an iterator over the
+  newline-terminated lines in a byte slice.
+- [`SplitSeq`](/pkg/bytes#SplitSeq) returns an iterator over
+  all subslices of a byte slice split around a separator.
+- [`SplitAfterSeq`](/pkg/bytes#SplitAfterSeq) returns an iterator
+  over subslices of a byte slice split after each instance of a
+  separator.
+- [`FieldsSeq`](/pkg/bytes#FieldsSeq) returns an iterator over
+  subslices of a byte slice split around runs of whitespace characters,
+  as defined by [`unicode.IsSpace`](/pkg/unicode#IsSpace).
+- [`FieldsFuncSeq`](/pkg/bytes#FieldsFuncSeq) returns an iterator
+  over subslices of a byte slice split around runs of Unicode code points
+  satisfying a predicate.
 
 #### [`crypto/aes`](/pkg/crypto/aes/)
 
-[`NewCipher`](/pkg/crypto/aes#NewCipher)가 반환하는 값은 더 이상 `NewCTR`, `NewGCM`, `NewCBCEncrypter` 및 `NewCBCDecrypter` 메서드를 구현하지 않습니다. 이 메서드들은 문서화되지 않았으며 모든 아키텍처에서 사용할 수 있었던 것도 아니었습니다. 대신, [`Block`](/pkg/crypto/cipher#Block) 값을 관련 [`crypto/cipher`](/pkg/crypto/cipher/) 함수로 직접 전달해야 합니다. 현재로서는 `crypto/cipher`가 표준 라이브러리에서 더 이상 사용하지 않더라도 `Block` 값에서 해당 메서드들이 있는지 여전히 확인합니다.
+The value returned by [`NewCipher`](/pkg/crypto/aes#NewCipher) no longer
+implements the `NewCTR`, `NewGCM`, `NewCBCEncrypter`, and `NewCBCDecrypter`
+methods. These methods were undocumented and not available on all architectures.
+Instead, the [`Block`](/pkg/crypto/cipher#Block) value should be passed
+directly to the relevant [`crypto/cipher`](/pkg/crypto/cipher/) functions.
+For now, `crypto/cipher` still checks for those methods on `Block` values,
+even if they are not used by the standard library anymore.
 
 #### [`crypto/cipher`](/pkg/crypto/cipher/)
 
-새로운 [`NewGCMWithRandomNonce`](/pkg/crypto/cipher#NewGCMWithRandomNonce) 함수는 Seal 과정에서 무작위 nonce를 생성하여 암호문 앞에 추가함으로써 AES-GCM을 구현하는 [`AEAD`](/pkg/crypto/cipher#AEAD)를 반환합니다.
+The new [`NewGCMWithRandomNonce`](/pkg/crypto/cipher#NewGCMWithRandomNonce)
+function returns an [`AEAD`](/pkg/crypto/cipher#AEAD) that implements AES-GCM by
+generating a random nonce during Seal and prepending it to the ciphertext.
 
-[`crypto/aes`](/pkg/crypto/aes/)와 함께 [`NewCTR`](/pkg/crypto/cipher#NewCTR)를 사용하여 반환된 [`Stream`](/pkg/crypto/cipher#Stream) 구현이 이제 amd64 및 arm64에서 수 배 더 빨라졌습니다.
+The [`Stream`](/pkg/crypto/cipher#Stream) implementation returned by
+[`NewCTR`](/pkg/crypto/cipher#NewCTR) when used with
+[`crypto/aes`](/pkg/crypto/aes/) is now several times faster on amd64 and arm64.
 
 [`NewOFB`](/pkg/crypto/cipher#NewOFB),
-[`NewCFBEncrypter`](/pkg/crypto/cipher#NewCFBEncrypter), 및
-[`NewCFBDecrypter`](/pkg/crypto/cipher#NewCFBDecrypter)는 이제 deprecated 되었습니다.
-OFB 및 CFB 모드는 인증되지 않으므로, 일반적으로 활성 공격(active attacks)을 통해 평문을 조작하고 복구하는 것이 가능합니다. 애플리케이션에서는 대신 [`AEAD`](/pkg/crypto/cipher#AEAD) 모드를 사용할 것을 권장합니다. 인증되지 않은 [`Stream`](/pkg/crypto/cipher#Stream) 모드가 필요한 경우에는 대신 [`NewCTR`](/pkg/crypto/cipher#NewCTR)를 사용하십시오.
+[`NewCFBEncrypter`](/pkg/crypto/cipher#NewCFBEncrypter), and
+[`NewCFBDecrypter`](/pkg/crypto/cipher#NewCFBDecrypter) are now deprecated.
+OFB and CFB mode are not authenticated, which generally enables active attacks to
+manipulate and recover the plaintext. It is recommended that applications use
+[`AEAD`](/pkg/crypto/cipher#AEAD) modes instead. If an unauthenticated
+[`Stream`](/pkg/crypto/cipher#Stream) mode is required, use
+[`NewCTR`](/pkg/crypto/cipher#NewCTR) instead.
 
 #### [`crypto/ecdsa`](/pkg/crypto/ecdsa/)
 
 <!-- go.dev/issue/64802 -->
-`PrivateKey.Sign`(`/pkg/crypto/ecdsa#PrivateKey.Sign`)은 이제 random source가 nil인 경우 [RFC 6979](https://www.rfc-editor.org/rfc/rfc6979.html)에 따라 결정론적(deterministic) 서명을 생성합니다.
+[`PrivateKey.Sign`](/pkg/crypto/ecdsa#PrivateKey.Sign) now produces a
+deterministic signature according to
+[RFC 6979](https://www.rfc-editor.org/rfc/rfc6979.html) if the random source is nil.
 
 #### [`crypto/md5`](/pkg/crypto/md5/)
 
-[`md5.New`](/pkg/md5#New)에 의해 반환되는 값은 이제 [`encoding.BinaryAppender`](/pkg/encoding#BinaryAppender) 인터페이스도 구현합니다.
+The value returned by [`md5.New`](/pkg/md5#New) now also implements the
+[`encoding.BinaryAppender`](/pkg/encoding#BinaryAppender) interface.
 
 #### [`crypto/rand`](/pkg/crypto/rand/)
 
 <!-- go.dev/issue/66821 -->
-이제 [`Read`](/pkg/crypto/rand#Read) 함수는 실패하지 않음이 보장됩니다.
-이 함수는 `error` 결과로 항상 `nil`을 반환합니다.
-만약 `Read`가 [`Reader`](/pkg/crypto/rand#Reader)로부터 읽는 동안 오류가 발생하면, 프로그램은 복구 불가능하게 충돌(crash)합니다.
-기본 `Reader`가 사용하는 플랫폼 API는 항상 성공하는 것으로 문서화되어 있으므로, 이 변경 사항은 `Reader` 변수를 오버라이드하는 프로그램에만 영향을 미칠 것입니다. 한 가지 예외는 리눅스 커널 3.17 이전 버전으로, 이 버전에서는 기본 `Reader`가 여전히 `/dev/urandom`을 열며 실패할 가능성이 있습니다.
+The [`Read`](/pkg/crypto/rand#Read) function is now guaranteed not to fail.
+It will always return `nil` as the `error` result.
+If `Read` were to encounter an error while reading from
+[`Reader`](/pkg/crypto/rand#Reader), the program will irrecoverably crash.
+Note that the platform APIs used by the default `Reader` are documented to
+always succeed, so this change should only affect programs that override the
+`Reader` variable. One exception are Linux kernels before version 3.17, where
+the default `Reader` still opens `/dev/urandom` and may fail.
 
 <!-- go.dev/issue/69577 -->
-Linux 6.11 및 이후 버전에서 `Reader`는 이제 vDSO를 통해 `getrandom` 시스템 호출을 사용합니다.
-이는 특히 작은 크기의 읽기 작업에서 여러 배 더 빠릅니다.
+On Linux 6.11 and later, `Reader` now uses the `getrandom` system call via vDSO.
+This is several times faster, especially for small reads.
 
 <!-- CL 608395 -->
-OpenBSD에서 `Reader`가 이제 `arc4random_buf(3)`를 사용합니다.
+On OpenBSD, `Reader` now uses `arc4random_buf(3)`.
 
 <!-- go.dev/issue/67057 -->
-새로운 [`Text`](/pkg/crypto/rand#Text) 함수를 사용하여 암호학적으로 안전한 무작위 텍스트 문자열을 생성할 수 있습니다.
+The new [`Text`](/pkg/crypto/rand#Text) function can be used to generate
+cryptographically secure random text strings.
 
 #### [`crypto/rsa`](/pkg/crypto/rsa/)
 
-[`GenerateKey`](/pkg/crypto/rsa#GenerateKey)는 이제 1024비트 미만의 키를 요청할 경우 에러를 반환합니다.
-모든 Sign, Verify, Encrypt, Decrypt 메서드는 이제 1024비트보다 작은 키와 함께 사용될 경우 에러를 반환합니다. 이러한 키들은 안전하지 않으며 사용해서는 안 됩니다.
-[GODEBUG 설정](/doc/godebug) `rsa1024min=0`을 사용하면 이전 동작으로 복구되지만, 필요한 경우에만, 그리고 예를 들어 테스트 파일에 `//go:debug rsa1024min=0` 라인을 추가하는 식으로 테스트에서만 사용할 것을 권장합니다.
-새로운 `GenerateKey` [예제](/pkg/crypto/rsa#example-GenerateKey-TestKey)에서 사용하기 쉬운 표준 2048비트 테스트 키를 제공합니다.
+[`GenerateKey`](/pkg/crypto/rsa#GenerateKey) now returns an error if a key of
+less than 1024 bits is requested.
+All Sign, Verify, Encrypt, and Decrypt methods now return an error if used with
+a key smaller than 1024 bits. Such keys are insecure and should not be used.
+[GODEBUG setting](/doc/godebug) `rsa1024min=0` restores the old behavior, but we
+recommend doing so only if necessary and only in tests, for example by adding a
+`//go:debug rsa1024min=0` line to a test file.
+A new `GenerateKey` [example](/pkg/crypto/rsa#example-GenerateKey-TestKey)
+provides an easy-to-use standard 2048-bit test key.
 
-이제 [`PrivateKey.Validate`](/pkg/crypto/rsa#PrivateKey.Validate)를 호출하기 전에 [`PrivateKey.Precompute`](/pkg/crypto/rsa#PrivateKey.Precompute)를 호출하는 것이 안전하며 더 효율적입니다. `Precompute`는 JSON에서 키를 언마샬링(unmarshaling)할 때와 같이 [`PrecomputedValues`](/pkg/crypto/rsa#PrecomputedValues)가 일부만 채워져 있는 경우 더 빠르게 동작합니다.
+It is now safe and more efficient to call
+[`PrivateKey.Precompute`](/pkg/crypto/rsa#PrivateKey.Precompute) before
+[`PrivateKey.Validate`](/pkg/crypto/rsa#PrivateKey.Validate).
+`Precompute` is now faster in the presence of partially filled out
+[`PrecomputedValues`](/pkg/crypto/rsa#PrecomputedValues), such as when
+unmarshaling a key from JSON.
 
-이제 `Validate`가 호출되지 않더라도 더 많은 잘못된 키를 거부하며, [`GenerateKey`](/pkg/crypto/rsa#GenerateKey)는 손상된 난수 소스에 대해 새로운 에러를 반환할 수 있습니다.
-[`PrivateKey`](/pkg/crypto/rsa#PrivateKey)의 [`Primes`](/pkg/crypto/rsa#PrivateKey.Primes) 및 [`Precomputed`](/pkg/crypto/rsa#PrivateKey.Precomputed) 필드는 이제 일부 값이 누락된 경우에도 사용되고 검증됩니다.
-RSA 키의 파싱 및 마샬링에 관한 `crypto/x509` 변경 사항은 [아래 설명](#cryptox509pkgcryptox509)을 참조하십시오.
+The package now rejects more invalid keys, even when `Validate` is not called,
+and [`GenerateKey`](/pkg/crypto/rsa#GenerateKey) may return new errors for
+broken random sources.
+The [`Primes`](/pkg/crypto/rsa#PrivateKey.Primes) and
+[`Precomputed`](/pkg/crypto/rsa#PrivateKey.Precomputed) fields of
+[`PrivateKey`](/pkg/crypto/rsa#PrivateKey) are now used and validated even when
+some values are missing.
+See also the changes to `crypto/x509` parsing and marshaling of RSA keys
+[described below](#cryptox509pkgcryptox509).
 
 <!-- go.dev/issue/43923 -->
-[`SignPKCS1v15`](/pkg/crypto/rsa#SignPKCS1v15) 및
-[`VerifyPKCS1v15`](/pkg/crypto/rsa#VerifyPKCS1v15)가 이제
-SHA-512/224, SHA-512/256 및 SHA-3를 지원합니다.
+[`SignPKCS1v15`](/pkg/crypto/rsa#SignPKCS1v15) and
+[`VerifyPKCS1v15`](/pkg/crypto/rsa#VerifyPKCS1v15) now support
+SHA-512/224, SHA-512/256, and SHA-3.
 
 <!-- CL 639936 -->
-[`GenerateKey`](/pkg/crypto/rsa#GenerateKey)가 이제 개인 지수(private exponent)를 생성하기 위해 약간 다른 방법(오일러 피 함수 대신 카마이클 함수 사용)을 사용합니다. 소수 인수(prime factors)만으로 외부에서 키를 재생성하는 일부 드문 애플리케이션의 경우, 결과가 달라질 수 있으나 서로 호환됩니다.
+[`GenerateKey`](/pkg/crypto/rsa#GenerateKey) now uses a slightly different
+method to generate the private exponent (Carmichael's totient instead of Euler's
+totient). Rare applications that externally regenerate keys from only the prime
+factors may produce different but compatible results.
 
 <!-- CL 626957 -->
-이제 wasm에서 공개키 및 개인키 연산 속도가 최대 2배 더 빨라졌습니다.
+Public and private key operations are now up to two times faster on wasm.
 
 #### [`crypto/sha1`](/pkg/crypto/sha1/)
 
-[`sha1.New`](/pkg/sha1#New)가 반환하는 값은 이제 [`encoding.BinaryAppender`](/pkg/encoding#BinaryAppender) 인터페이스도 구현합니다.
+The value returned by [`sha1.New`](/pkg/sha1#New) now also implements
+the [`encoding.BinaryAppender`](/pkg/encoding#BinaryAppender) interface.
 
 #### [`crypto/sha256`](/pkg/crypto/sha256/)
 
-[`sha256.New`](/pkg/sha256#New) 및 [`sha256.New224`](/pkg/sha256#New224)가 반환하는 값들이 이제 [`encoding.BinaryAppender`](/pkg/encoding#BinaryAppender) 인터페이스를 구현합니다.
+The values returned by [`sha256.New`](/pkg/sha256#New) and
+[`sha256.New224`](/pkg/sha256#New224) now also implement the
+[`encoding.BinaryAppender`](/pkg/encoding#BinaryAppender) interface.
 
 #### [`crypto/sha512`](/pkg/crypto/sha512/)
 
-[`sha512.New`](/pkg/sha512#New),
+The values returned by [`sha512.New`](/pkg/sha512#New),
 [`sha512.New384`](/pkg/sha512#New384),
-[`sha512.New512_224`](/pkg/sha512#New512_224) 및
-[`sha512.New512_256`](/pkg/sha512#New512_256)에 의해 반환되는 값들이 이제
-[`encoding.BinaryAppender`](/pkg/encoding#BinaryAppender) 인터페이스도 구현합니다.
+[`sha512.New512_224`](/pkg/sha512#New512_224) and
+[`sha512.New512_256`](/pkg/sha512#New512_256) now also implement the
+[`encoding.BinaryAppender`](/pkg/encoding#BinaryAppender) interface.
 
 #### [`crypto/subtle`](/pkg/crypto/subtle/)
 
-새로운 [`WithDataIndependentTiming`](/pkg/crypto/subtle#WithDataIndependentTiming) 함수를 사용하면 사용자는 특정 명령어가 데이터 값에 관계없이 일정한 실행 시간을 갖도록 보장하는 아키텍처별 기능을 활성화하여 함수를 실행할 수 있습니다. 이는 상수 시간(constant time)으로 실행되도록 설계된 코드가 CPU 수준의 기능에 의해 최적화되어 가변 시간(variable time)으로 동작하는 것을 방지하는 데 사용될 수 있습니다. 현재 `WithDataIndependentTiming`은 arm64의 PSTATE.DIT 비트를 사용하며, 그 외 모든 아키텍처에서는 아무런 동작을 하지 않습니다(no-op). [GODEBUG 설정](/doc/godebug) `dataindependenttiming=1`을 사용하면 Go 프로그램 전체에 대해 DIT 모드가 활성화됩니다.
+The new [`WithDataIndependentTiming`](/pkg/crypto/subtle#WithDataIndependentTiming)
+function allows the user to run a function with architecture specific features
+enabled which guarantee specific instructions are data value timing invariant.
+This can be used to make sure that code designed to run in constant time is not
+optimized by CPU-level features such that it operates in variable time.
+Currently, `WithDataIndependentTiming` uses the PSTATE.DIT bit on arm64, and is
+a no-op on all other architectures. [GODEBUG setting](/doc/godebug)
+`dataindependenttiming=1` enables the DIT mode for the entire Go program.
 
 <!-- CL 622276 -->
-[`XORBytes`](/pkg/crypto/subtle#XORBytes)의 출력값은 입력값과 완전히 겹치거나 전혀 겹치지 않아야 합니다. 이전에는 그 외의 경우 동작이 정의되지 않았으나, 이제 `XORBytes`는 panic을 발생시킵니다.
+The [`XORBytes`](/pkg/crypto/subtle#XORBytes) output must overlap exactly or not
+at all with the inputs. Previously, the behavior was otherwise undefined, while
+now `XORBytes` will panic.
 
 #### [`crypto/tls`](/pkg/crypto/tls/)
 
-이제 TLS 서버가 Encrypted Client Hello (ECH)를 지원합니다. 이 기능은 [`Config.EncryptedClientHelloKeys`](/pkg/crypto/tls#Config.EncryptedClientHelloKeys) 필드를 설정하여 활성화할 수 있습니다.
+The TLS server now supports Encrypted Client Hello (ECH). This feature can be
+enabled by populating the [`Config.EncryptedClientHelloKeys`](/pkg/crypto/tls#Config.EncryptedClientHelloKeys) field.
 
-새로운 양자 내성 [`X25519MLKEM768`](/pkg/crypto/tls#X25519MLKEM768) 키 교환 메커니즘이 이제 지원되며, [`Config.CurvePreferences`](/pkg/crypto/tls#Config.CurvePreferences)가 nil인 경우 기본적으로 활성화됩니다.
-[GODEBUG 설정](/doc/godebug) `tlsmlkem=0`을 통해 기본 설정을 되돌릴 수 있습니다.
-이는 대형 레코드를 올바르게 처리하지 못해 핸드셰이크 중 타임아웃이 발생하는 버그가 있는 TLS 서버를 다룰 때 유용할 수 있습니다 ( [TLS post-quantum TL;DR fail](https://tldr.fail/) 참고).
+The new post-quantum [`X25519MLKEM768`](/pkg/crypto/tls#X25519MLKEM768) key
+exchange mechanism is now supported and is enabled by default when
+[`Config.CurvePreferences`](/pkg/crypto/tls#Config.CurvePreferences) is nil.
+[GODEBUG setting](/doc/godebug) `tlsmlkem=0` reverts the default.
+This can be useful when dealing with buggy TLS servers that do not handle large records correctly,
+causing a timeout during the handshake (see [TLS post-quantum TL;DR fail](https://tldr.fail/)).
 
-실험적인 `X25519Kyber768Draft00` 키 교환에 대한 지원이 제거되었습니다.
+Support for the experimental `X25519Kyber768Draft00` key exchange has been removed.
 
 <!-- go.dev/issue/69393, CL 630775 -->
-이제 키 교환 순서는 `crypto/tls` 패키지에서 전적으로 처리됩니다. [`Config.CurvePreferences`](/pkg/crypto/tls#Config.CurvePreferences)의 순서는 이제 무시되며, 해당 필드가 채워져 있을 때 어떤 키 교환을 활성화할지 결정하는 용도로만 사용됩니다.
+Key exchange ordering is now handled entirely by the `crypto/tls` package. The
+order of [`Config.CurvePreferences`](/pkg/crypto/tls#Config.CurvePreferences) is
+now ignored, and the contents are only used to determine which key exchanges to
+enable when the field is populated.
 
 <!-- go.dev/issue/32936 -->
-새로운 [`ClientHelloInfo.Extensions`](/pkg/crypto/tls#ClientHelloInfo.Extensions)
-필드는 Client Hello 메시지에서 수신한 확장(extension)들의 ID 목록을 제공합니다.
-이는 TLS 클라이언트의 핑거프린팅(fingerprinting)에 유용하게 사용될 수 있습니다.
+The new [`ClientHelloInfo.Extensions`](/pkg/crypto/tls#ClientHelloInfo.Extensions)
+field lists the IDs of the extensions received in the Client Hello message.
+This can be useful for fingerprinting TLS clients.
 
-<!-- go.dev/issue/72111, Go 1.27 릴리스 이후 소급하여 문서화됨 -->
+<!-- go.dev/issue/72111, documented retro-actively after Go 1.27 release -->
 
-`tlskyber` `GODEBUG` 설정([Go 1.23](/doc/godebug#go-123에서 추가됨)이 제거되었습니다.
+The `tlskyber` `GODEBUG` setting (added in [Go 1.23](/doc/godebug#go-123))
+has been removed.
 
 #### [`crypto/x509`](/pkg/crypto/x509/)
 
 <!-- go.dev/issue/41682 -->
-`x509sha1` [GODEBUG 설정](/doc/godebug)이 제거되었습니다.
-[`Certificate.Verify`](/pkg/crypto/x509#Certificate.Verify)는 더 이상 SHA-1 기반 서명을 지원하지 않습니다.
+The `x509sha1` [GODEBUG setting](/doc/godebug) has been removed.
+[`Certificate.Verify`](/pkg/crypto/x509#Certificate.Verify) no longer
+supports SHA-1 based signatures.
 
-[`OID`](/pkg/crypto/x509#OID)가 이제 [`encoding.BinaryAppender`](/pkg/encoding#BinaryAppender) 및 [`encoding.TextAppender`](/pkg/encoding#TextAppender) 인터페이스를 구현합니다.
+[`OID`](/pkg/crypto/x509#OID) now implements the
+[`encoding.BinaryAppender`](/pkg/encoding#BinaryAppender) and
+[`encoding.TextAppender`](/pkg/encoding#TextAppender) interfaces.
 
-기본 인증서 정책 필드가 [`Certificate.PolicyIdentifiers`](/pkg/crypto/x509#Certificate.PolicyIdentifiers)에서 [`Certificate.Policies`](/pkg/crypto/x509#Certificate.Policies)로 변경되었습니다. 인증서를 파싱할 때는 두 필드가 모두 채워지지만, 인증서를 생성할 때는 이제 `Certificate.PolicyIdentifiers` 필드 대신 `Certificate.Policies` 필드에서 정책을 가져옵니다. 이 변경 사항은 [GODEBUG 설정](/doc/godebug) `x509usepolicies=0`을 통해 되돌릴 수 있습니다.
+The default certificate policies field has changed from
+[`Certificate.PolicyIdentifiers`](/pkg/crypto/x509#Certificate.PolicyIdentifiers)
+to [`Certificate.Policies`](/pkg/crypto/x509#Certificate.Policies). When parsing
+certificates, both fields will be populated, but when creating certificates
+policies will now be taken from the `Certificate.Policies` field instead of
+the `Certificate.PolicyIdentifiers` field. This change can be reverted with
+[GODEBUG setting](/doc/godebug) `x509usepolicies=0`.
 
 <!-- go.dev/issue/67675 -->
-[`CreateCertificate`](/pkg/crypto/x509#CreateCertificate)에 [`Certificate.SerialNumber`](/pkg/crypto/x509#Certificate.SerialNumber) 필드가 nil인 템플릿이 전달될 때, 실패하는 대신 이제 RFC 5280을 준수하는 방식으로 일련번호(serial number)를 생성합니다.
+[`CreateCertificate`](/pkg/crypto/x509#CreateCertificate) will now generate a
+serial number using a RFC 5280 compliant method when passed a template with a
+nil [`Certificate.SerialNumber`](/pkg/crypto/x509#Certificate.SerialNumber)
+field, instead of failing.
 
-[`Certificate.Verify`](/pkg/crypto/x509#Certificate.Verify)가 이제 RFC 5280 및 RFC 9618에 정의된 정책 검증(policy validation)을 지원합니다. 새로운 [`VerifyOptions.CertificatePolicies`](/pkg/crypto/x509#VerifyOptions.CertificatePolicies) 필드를 통해 허용 가능한 정책 [`OIDs`](/pkg/crypto/x509#OID) 집합을 설정할 수 있습니다. 유효한 정책 그래프를 가진 인증서 체인만이 [`Certificate.Verify`](/pkg/crypto/x509#Certificate.Verify)를 통해 반환됩니다.
+[`Certificate.Verify`](/pkg/crypto/x509#Certificate.Verify) now supports policy
+validation, as defined in RFC 5280 and RFC 9618. The new
+[`VerifyOptions.CertificatePolicies`](/pkg/crypto/x509#VerifyOptions.CertificatePolicies)
+field can be set to an acceptable set of policy [`OIDs`](/pkg/crypto/x509#OID).
+Only certificate chains with valid policy graphs will be returned from
+[`Certificate.Verify`](/pkg/crypto/x509#Certificate.Verify).
 
-[`MarshalPKCS8PrivateKey`](/pkg/crypto/x509#MarshalPKCS8PrivateKey)가 이제 유효하지 않은 RSA 키를 마샬링하는 대신 에러를 반환합니다.
-([`MarshalPKCS1PrivateKey`](/pkg/crypto/x509#MarshalPKCS1PrivateKey)는 에러를 반환하지 않으며, 유효하지 않은 키가 제공되었을 때의 동작은 계속해서 정의되지 않은 상태로 유지됩니다.)
+[`MarshalPKCS8PrivateKey`](/pkg/crypto/x509#MarshalPKCS8PrivateKey) now returns
+an error instead of marshaling an invalid RSA key.
+([`MarshalPKCS1PrivateKey`](/pkg/crypto/x509#MarshalPKCS1PrivateKey) doesn't
+have an error return, and its behavior when provided invalid keys continues to
+be undefined.)
 
-[`ParsePKCS1PrivateKey`](/pkg/crypto/x509#ParsePKCS1PrivateKey) 및
-[`ParsePKCS8PrivateKey`](/pkg/crypto/x509#ParsePKCS8PrivateKey)가 이제 인코딩된 CRT 값을 사용하고
-검증하므로, 이전에는 허용되었던 잘못된 RSA 키를 거부할 수 있습니다. CRT 값을 다시 계산하는 이전 방식으로 되돌리려면 [GODEBUG 설정](/doc/godebug) `x509rsacrt=0`을 사용하십시오.
+[`ParsePKCS1PrivateKey`](/pkg/crypto/x509#ParsePKCS1PrivateKey) and
+[`ParsePKCS8PrivateKey`](/pkg/crypto/x509#ParsePKCS8PrivateKey) now use and
+validate the encoded CRT values, so might reject invalid RSA keys that were
+previously accepted. Use [GODEBUG setting](/doc/godebug) `x509rsacrt=0` to
+revert to recomputing the CRT values.
 
 #### [`debug/elf`](/pkg/debug/elf/)
 
 <!-- go.dev/issue/63952 -->
 
-[`debug/elf`](/pkg/debug/elf) 패키지는 동적 ELF(Executable and Linkable Format) 파일의 심볼 버전을 처리하는 기능을 추가합니다.
-새로운 [`File.DynamicVersions`](/pkg/debug/elf#File.DynamicVersions) 메서드는 ELF 파일에 정의된 동적 버전 목록을 반환합니다.
-새로운 [`File.DynamicVersionNeeds`](/pkg/debug/elf#File.DynamicVersionNeeds) 메서드는 이 ELF 파일에서 필요로 하며 다른 ELF 객체에 정의된 동적 버전 목록을 반환합니다.
-마지막으로, 새로운 [`Symbol.HasVersion`](/pkg/debug/elf#Symbol) 및 [`Symbol.VersionIndex`](/pkg/debug/elf#Symbol) 필드는 심볼의 버전을 나타냅니다.
+The [`debug/elf`](/pkg/debug/elf) package adds support for handling symbol
+versions in dynamic ELF (Executable and Linkable Format) files.
+The new [`File.DynamicVersions`](/pkg/debug/elf#File.DynamicVersions) method
+returns a list of dynamic versions defined in the ELF file.
+The new [`File.DynamicVersionNeeds`](/pkg/debug/elf#File.DynamicVersionNeeds)
+method returns a list of dynamic versions required by this ELF file that are
+defined in other ELF objects.
+Finally, the new [`Symbol.HasVersion`](/pkg/debug/elf#Symbol) and
+[`Symbol.VersionIndex`](/pkg/debug/elf#Symbol) fields indicate the version of a
+symbol.
 
 #### [`encoding`](/pkg/encoding/)
 
-객체의 텍스트 또는 바이너리 표현을 바이트 슬라이스에 추가하기 위해 두 개의 새로운 인터페이스인 [`TextAppender`](/pkg/encoding#TextAppender)와 [`BinaryAppender`](/pkg/encoding#BinaryAppender)가 도입되었습니다. 이 인터페이스들은 [`TextMarshaler`](/pkg/encoding#TextMarshaler) 및 [`BinaryMarshaler`](/pkg/encoding#BinaryMarshaler)와 동일한 기능을 제공하지만, 매번 새로운 슬라이스를 할당하는 대신 기존 슬라이스에 데이터를 직접 추가합니다.
-이제 `TextMarshaler` 및/또는 `BinaryMarshaler`를 이미 구현하고 있던 표준 라이브러리 타입들이 이 인터페이스들을 구현합니다.
+Two new interfaces, [`TextAppender`](/pkg/encoding#TextAppender) and [`BinaryAppender`](/pkg/encoding#BinaryAppender), have been
+introduced to append the textual or binary representation of an object
+to a byte slice. These interfaces provide the same functionality as
+[`TextMarshaler`](/pkg/encoding#TextMarshaler) and [`BinaryMarshaler`](/pkg/encoding#BinaryMarshaler), but instead of allocating a new slice
+each time, they append the data directly to an existing slice.
+These interfaces are now implemented by standard library types that
+already implemented `TextMarshaler` and/or `BinaryMarshaler`.
 
 #### [`encoding/json`](/pkg/encoding/json/)
 
 <!-- go.dev/issue/45669 -->
-마샬링 시, 구조체 필드 태그에 새로운 `omitzero` 옵션이 지정되어 있고 해당 필드의 값이 제로 값(zero value)인 경우, 그 필드는 생략됩니다. 필드 타입에 `IsZero() bool` 메서드가 있는 경우, 해당 메서드를 사용하여 값이 제로 값인지 판단합니다. 그렇지 않은 경우, 해당 값이 [타입에 따른 제로 값](/ref/spec#The_zero_value)이면 제로 값으로 간주합니다.
+When marshaling, a struct field with the new `omitzero` option in the struct field
+tag will be omitted if its value is zero. If the field type has an `IsZero() bool`
+method, that will be used to determine whether the value is zero. Otherwise, the
+value is zero if it is [the zero value for its type](/ref/spec#The_zero_value).
+The `omitzero` field tag is clearer and less error-prone than `omitempty` when
+the intent is to omit zero values.
+In particular, unlike `omitempty`, `omitzero` omits zero-valued
+[`time.Time`](/pkg/time#Time) values, which is a common source of friction.
 
-제로 값을 생략하려는 의도일 때, `omitzero` 필드 태그는 `omitempty`보다 더 명확하며 오류가 발생할 가능성이 적습니다.
+If both `omitempty` and `omitzero` are specified, the field will be omitted if the
+value is either empty or zero (or both).
 
-특히 `omitempty`와 달리, `omitzero`는 제로 값인 [`time.Time`](/pkg/time#Time) 값도 생략하며, 이는 그동안 흔히 발생하던 불편함을 해결해 줍니다.
-
-`omitempty`와 `omitzero`가 모두 지정된 경우, 값이 비어 있거나(empty) 제로 값(zero)인 경우(또는 둘 다인 경우) 해당 필드는 생략됩니다.
-
-[`UnmarshalTypeError.Field`](/pkg/encoding/json#UnmarshalTypeError.Field)에 이제 임베디드 구조체(embedded structs)가 포함되어 더 상세한 에러 메시지를 제공합니다.
+[`UnmarshalTypeError.Field`](/pkg/encoding/json#UnmarshalTypeError.Field) now includes embedded structs to provide more detailed error messages.
 
 #### [`go/types`](/pkg/go/types/)
 
-`Len() int` 및 `At(int) T`와 같은 메서드 쌍을 통해 시퀀스를 노출하는 모든 `go/types` 데이터 구조에 이제 이터레이터를 반환하는 메서드가 추가되었습니다. 이를 통해 다음과 같은 코드를 간소화할 수 있습니다:
+All `go/types` data structures that expose sequences using a pair of
+methods such as `Len() int` and `At(int) T` now also have methods that
+return iterators, allowing you to simplify code such as this:
 
 ```
 params := fn.Type.(*types.Signature).Params()
@@ -460,7 +597,7 @@ for i := 0; i < params.Len(); i++ {
 }
 ```
 
-번역할 내용을 제공해 주세요. 영문 마크다운 내용을 입력해 주시면, 요청하신 대로 구조, 헤더, 표, 링크, 리스트, 인라인 코드 및 코드 펜스를 유지하면서 기술적으로 정확하게 한국어로 번역해 드리겠습니다. Go 패키지 이름, 식별자, URL, 명령어 및 코드 스니펫은 번역하지 않고 그대로 유지하겠습니다.
+to this:
 
 ```
 for param := range fn.Signature().Params().Variables() {
@@ -468,7 +605,7 @@ for param := range fn.Signature().Params().Variables() {
 }
 ```
 
-메서드들은 다음과 같습니다:
+The methods are:
 [`Interface.EmbeddedTypes`](/pkg/go/types#Interface.EmbeddedTypes),
 [`Interface.ExplicitMethods`](/pkg/go/types#Interface.ExplicitMethods),
 [`Interface.Methods`](/pkg/go/types#Interface.Methods),
@@ -483,208 +620,260 @@ for param := range fn.Signature().Params().Variables() {
 
 #### [`hash/adler32`](/pkg/hash/adler32/)
 
-[`New`](/pkg/hash/adler32#New)에서 반환되는 값은 이제 [`encoding.BinaryAppender`](/pkg/encoding#BinaryAppender) 인터페이스도 구현합니다.
+The value returned by [`New`](/pkg/hash/adler32#New) now also implements the [`encoding.BinaryAppender`](/pkg/encoding#BinaryAppender) interface.
 
 #### [`hash/crc32`](/pkg/hash/crc32/)
 
-[`New`](/pkg/hash/crc32#New) 및 [`NewIEEE`](/pkg/hash/crc32#NewIEEE)가 반환하는 값들이 이제 [`encoding.BinaryAppender`](/pkg/encoding#BinaryAppender) 인터페이스도 구현합니다.
+The values returned by [`New`](/pkg/hash/crc32#New) and [`NewIEEE`](/pkg/hash/crc32#NewIEEE) now also implement the [`encoding.BinaryAppender`](/pkg/encoding#BinaryAppender) interface.
 
 #### [`hash/crc64`](/pkg/hash/crc64/)
 
-[`New`](/pkg/hash/crc64#New)에 의해 반환되는 값은 이제 [`encoding.BinaryAppender`](/pkg/encoding#BinaryAppender) 인터페이스도 구현합니다.
+The value returned by [`New`](/pkg/hash/crc64#New) now also implements the [`encoding.BinaryAppender`](/pkg/encoding#BinaryAppender) interface.
 
 #### [`hash/fnv`](/pkg/hash/fnv/)
 
-[`New32`](/pkg/hash/fnv#New32), [`New32a`](/pkg/hash/fnv#New32a), [`New64`](/pkg/hash/fnv#New64), [`New64a`](/pkg/hash/fnv#New64a), [`New128`](/pkg/hash/fnv#New128) 및 [`New128a`](/pkg/hash/fnv#New128a)에서 반환하는 값들이 이제 [`encoding.BinaryAppender`](/pkg/encoding#BinaryAppender) 인터페이스도 구현합니다.
+The values returned by [`New32`](/pkg/hash/fnv#New32), [`New32a`](/pkg/hash/fnv#New32a), [`New64`](/pkg/hash/fnv#New64), [`New64a`](/pkg/hash/fnv#New64a), [`New128`](/pkg/hash/fnv#New128) and [`New128a`](/pkg/hash/fnv#New128a) now also implement the [`encoding.BinaryAppender`](/pkg/encoding#BinaryAppender) interface.
 
 #### [`hash/maphash`](/pkg/hash/maphash/)
 
-새로운 [`Comparable`](/pkg/hash/maphash#Comparable) 및
-[`WriteComparable`](/pkg/hash/maphash#WriteComparable) 함수를 사용하여 모든 비교 가능한(comparable) 값의
-해시를 계산할 수 있습니다.
-이를 통해 Go 맵 키로 사용할 수 있는 모든 항목에 대해 해싱이 가능해졌습니다.
+The new [`Comparable`](/pkg/hash/maphash#Comparable) and
+[`WriteComparable`](/pkg/hash/maphash#WriteComparable) functions can compute the
+hash of any comparable value.
+These make it possible to hash anything that can be used as a Go map key.
 
 #### [`log/slog`](/pkg/log/slog/)
 
-새로운 [`DiscardHandler`](/pkg/log/slog#DiscardHandler)는 절대 활성화되지 않으며 항상 출력을 폐기하는 핸들러입니다.
+The new [`DiscardHandler`](/pkg/log/slog#DiscardHandler) is a handler that is never enabled and always discards its output.
 
-[`Level`](/pkg/log/slog#Level) 및 [`LevelVar`](/pkg/log/slog#LevelVar)가 이제 [`encoding.TextAppender`](/pkg/encoding#TextAppender) 인터페이스를 구현합니다.
+[`Level`](/pkg/log/slog#Level) and [`LevelVar`](/pkg/log/slog#LevelVar) now implement the [`encoding.TextAppender`](/pkg/encoding#TextAppender) interface.
 
 #### [`math/big`](/pkg/math/big/)
 
-[`Float`](/pkg/math/big#Float), [`Int`](/pkg/math/big#Int) 및 [`Rat`](/pkg/math/big#Rat)이 이제 [`encoding.TextAppender`](/pkg/encoding#TextAppender) 인터페이스를 구현합니다.
+[`Float`](/pkg/math/big#Float), [`Int`](/pkg/math/big#Int) and [`Rat`](/pkg/math/big#Rat) now implement the [`encoding.TextAppender`](/pkg/encoding#TextAppender) interface.
 
 #### [`math/rand`](/pkg/math/rand/)
 
-더 이상 사용되지 않는(deprecated) 최상위 [`Seed`](/pkg/math/rand#Seed) 함수 호출은 더 이상 아무런 영향을 주지 않습니다. 이전 동작으로 복구하려면 [GODEBUG 설정](/doc/godebug) `randseednop=0`을 사용하십시오. 자세한 배경 내용은 [제안서 #67273](/issue/67273)을 참조하십시오.
+Calls to the deprecated top-level [`Seed`](/pkg/math/rand#Seed) function no longer have any effect. To
+restore the old behavior use [GODEBUG setting](/doc/godebug) `randseednop=0`. For more background see
+[proposal #67273](/issue/67273).
 
 #### [`math/rand/v2`](/pkg/math/rand/v2/)
 
-[`ChaCha8`](/pkg/math/rand/v2#ChaCha8)와 [`PCG`](/pkg/math/rand/v2#PCG)가 이제 [`encoding.BinaryAppender`](/pkg/encoding#BinaryAppender) 인터페이스를 구현합니다.
+[`ChaCha8`](/pkg/math/rand/v2#ChaCha8) and [`PCG`](/pkg/math/rand/v2#PCG) now implement the [`encoding.BinaryAppender`](/pkg/encoding#BinaryAppender) interface.
 
 #### [`net`](/pkg/net/)
 
-[`ListenConfig`](/pkg/net#ListenConfig)는 이제 이를 지원하는 시스템(현재 리눅스만 해당)에서 기본적으로 MPTCP를 사용합니다.
+[`ListenConfig`](/pkg/net#ListenConfig) now uses MPTCP by default on systems where it is supported
+(currently on Linux only).
 
-[`IP`](/pkg/net#IP)가 이제 [`encoding.TextAppender`](/pkg/encoding#TextAppender) 인터페이스를 구현합니다.
+[`IP`](/pkg/net#IP) now implements the [`encoding.TextAppender`](/pkg/encoding#TextAppender) interface.
 
 #### [`net/http`](/pkg/net/http/)
 
-[`Transport`](/pkg/net/http#Transport)가 요청에 대해 수신하는 1xx 정보 응답(informational responses)에 대한 제한 사항이 변경되었습니다.
-이전에는 5개 이상의 1xx 응답을 수신하면 요청을 중단하고 에러를 반환했습니다.
-이제는 모든 1xx 응답의 총 크기가 [`Transport.MaxResponseHeaderBytes`](/pkg/net/http#Transport.MaxResponseHeaderBytes) 설정 값을 초과하는 경우 에러를 반환합니다.
+[`Transport`](/pkg/net/http#Transport)'s limit on 1xx informational responses received
+in response to a request has changed.
+It previously aborted a request and returned an error after
+receiving more than 5 1xx responses.
+It now returns an error if the total size of all 1xx responses
+exceeds the [`Transport.MaxResponseHeaderBytes`](/pkg/net/http#Transport.MaxResponseHeaderBytes) configuration setting.
 
-또한, 요청에 [`net/http/httptrace.ClientTrace.Got1xxResponse`](/pkg/net/http/httptrace#ClientTrace.Got1xxResponse) 트레이스 훅이 있는 경우, 이제 1xx 응답의 총 횟수에 제한이 없습니다. `Got1xxResponse` 훅은 요청을 중단하기 위해 에러를 반환할 수 있습니다.
+In addition, when a request has a
+[`net/http/httptrace.ClientTrace.Got1xxResponse`](/pkg/net/http/httptrace#ClientTrace.Got1xxResponse)
+trace hook, there is now no limit on the total number of 1xx responses.
+The `Got1xxResponse` hook may return an error to abort a request.
 
-[`Transport`](/pkg/net/http#Transport)와 [`Server`](/pkg/net/http#Server)에 HTTP/2 프로토콜 설정을 구성할 수 있는 HTTP2 필드가 추가되었습니다.
+[`Transport`](/pkg/net/http#Transport) and [`Server`](/pkg/net/http#Server) now have an HTTP2 field which permits
+configuring HTTP/2 protocol settings.
 
-새로운 [`Server.Protocols`](/pkg/net/http#Server.Protocols) 및 [`Transport.Protocols`](/pkg/net/http#Transport.Protocols) 필드는 서버나 클라이언트가 사용할 HTTP 프로토콜을 설정하는 간단한 방법을 제공합니다.
+The new [`Server.Protocols`](/pkg/net/http#Server.Protocols) and [`Transport.Protocols`](/pkg/net/http#Transport.Protocols) fields provide
+a simple way to configure what HTTP protocols a server or client use.
 
-서버와 클라이언트는 암호화되지 않은 HTTP/2 연결을 지원하도록 설정될 수 있습니다.
+The server and client may be configured to support unencrypted HTTP/2
+connections.
 
-[`Server.Protocols`](/pkg/net/http#Server.Protocols)에 UnencryptedHTTP2가 포함되어 있으면, 서버는 암호화되지 않은 포트에서 HTTP/2 연결을 허용합니다. 서버는 동일한 포트에서 HTTP/1과 암호화되지 않은 HTTP/2를 모두 허용할 수 있습니다.
+When [`Server.Protocols`](/pkg/net/http#Server.Protocols) contains UnencryptedHTTP2, the server will accept
+HTTP/2 connections on unencrypted ports. The server can accept both
+HTTP/1 and unencrypted HTTP/2 on the same port.
 
-[`Transport.Protocols`](/pkg/net/http#Transport.Protocols)에 UnencryptedHTTP2가 포함되어 있고 HTTP1이 포함되어 있지 않은 경우, transport는 http:// URL에 대해 암호화되지 않은 HTTP/2를 사용합니다.
-transport가 HTTP/1과 암호화되지 않은 HTTP/2를 모두 사용하도록 설정된 경우, HTTP/1을 사용합니다.
+When [`Transport.Protocols`](/pkg/net/http#Transport.Protocols) contains UnencryptedHTTP2 and does not contain
+HTTP1, the transport will use unencrypted HTTP/2 for http:// URLs.
+If the transport is configured to use both HTTP/1 and unencrypted HTTP/2,
+it will use HTTP/1.
 
-암호화되지 않은 HTTP/2 지원은 "Prior Knowledge를 통한 HTTP/2"(RFC 9113, 섹션 3.3)를 사용합니다. 더 이상 사용되지 않는 "Upgrade: h2c" 헤더는 지원되지 않습니다.
+Unencrypted HTTP/2 support uses "HTTP/2 with Prior Knowledge"
+(RFC 9113, section 3.3). The deprecated "Upgrade: h2c" header
+is not supported.
 
 #### [`net/netip`](/pkg/net/netip/)
 
-[`Addr`](/pkg/net/netip#Addr), [`AddrPort`](/pkg/net/netip#AddrPort) 및 [`Prefix`](/pkg/net/netip#Prefix)가 이제 [`encoding.BinaryAppender`](/pkg/encoding#BinaryAppender)와 [`encoding.TextAppender`](/pkg/encoding#TextAppender) 인터페이스를 구현합니다.
+[`Addr`](/pkg/net/netip#Addr), [`AddrPort`](/pkg/net/netip#AddrPort) and [`Prefix`](/pkg/net/netip#Prefix) now implement the [`encoding.BinaryAppender`](/pkg/encoding#BinaryAppender) and
+[`encoding.TextAppender`](/pkg/encoding#TextAppender) interfaces.
 
 #### [`net/url`](/pkg/net/url/)
 
-[`URL`](/pkg/net/url#URL)이 이제 [`encoding.BinaryAppender`](/pkg/encoding#BinaryAppender) 인터페이스도 구현합니다.
+[`URL`](/pkg/net/url#URL) now also implements the [`encoding.BinaryAppender`](/pkg/encoding#BinaryAppender) interface.
 
 #### [`os/user`](/pkg/os/user/)
 
-Windows에서 [`Current`](/pkg/os/user#Current)를 이제 Windows Nano Server에서도 사용할 수 있습니다.
-Nano Server에서 사용할 수 없는 `NetApi32` 라이브러리의 함수 사용을 피하도록 구현이 업데이트되었습니다.
+On Windows, [`Current`](/pkg/os/user#Current) can now be used in Windows Nano Server.
+The implementation has been updated to avoid using functions
+from the `NetApi32` library, which is not available in Nano Server.
 
-Windows에서 [`Current`](/pkg/os/user#Current), [`Lookup`](/pkg/os/user#Lookup) 및 [`LookupId`](/pkg/os/user#LookupId)가 이제 다음의 빌트인 서비스 사용자 계정을 지원합니다:
+On Windows, [`Current`](/pkg/os/user#Current), [`Lookup`](/pkg/os/user#Lookup) and [`LookupId`](/pkg/os/user#LookupId) now support the
+following built-in service user accounts:
 - `NT AUTHORITY\SYSTEM`
 - `NT AUTHORITY\LOCAL SERVICE`
 - `NT AUTHORITY\NETWORK SERVICE`
 
-Windows에서 현재 사용자가 느린 도메인에 가입되어 있는 경우(많은 기업 사용자의 일반적인 사례), [`Current`](/pkg/os/user#Current)의 속도가 상당히 빨라졌습니다. 새로운 구현의 성능은 밀리초 단위로 향상되었으며, 이는 완료까지 수 초 또는 심지어 수 분이 걸릴 수 있었던 이전 구현과 대조적입니다.
+On Windows, [`Current`](/pkg/os/user#Current) has been made considerably faster when
+the current user is joined to a slow domain, which is the
+usual case for many corporate users. The new implementation
+performance is now in the order of milliseconds, compared to
+the previous implementation which could take several seconds,
+or even minutes, to complete.
 
-Windows에서, 현재 스레드가 다른 사용자를 impersonating(가장)하고 있을 때 [`Current`](/pkg/os/user#Current)가 이제 프로세스 소유자 사용자를 반환합니다. 이전에는 에러를 반환했습니다.
+On Windows, [`Current`](/pkg/os/user#Current) now returns the process owner user when
+the current thread is impersonating another user. Previously,
+it returned an error.
 
 #### [`regexp`](/pkg/regexp/)
 
-[`Regexp`](/pkg/regexp#Regexp)가 이제 [`encoding.TextAppender`](/pkg/encoding#TextAppender) 인터페이스를 구현합니다.
+[`Regexp`](/pkg/regexp#Regexp) now implements the [`encoding.TextAppender`](/pkg/encoding#TextAppender) interface.
 
 #### [`runtime`](/pkg/runtime/)
 
-[`GOROOT`](/pkg/runtime#GOROOT) 함수는 이제 deprecated 되었습니다.
-새로운 코드에서는 시스템 경로를 통해 “go” 바이너리를 찾는 방식을 권장하며,
-`go env GOROOT`를 사용하여 GOROOT를 찾으십시오.
+The [`GOROOT`](/pkg/runtime#GOROOT) function is now deprecated.
+In new code prefer to use the system path to locate the “go” binary,
+and use `go env GOROOT` to find its GOROOT.
 
 #### [`strings`](/pkg/strings/)
 
-[`strings`](/pkg/strings) 패키지는 반복자(iterator)와 함께 작동하는 여러 함수를 추가합니다:
-- [`Lines`](/pkg/strings#Lines)는 문자열에서 줄 바꿈으로 끝나는 각 줄에 대한 반복자를 반환합니다.
-- [`SplitSeq`](/pkg/strings#SplitSeq)는 구분자를 기준으로 분할된 문자열의 모든 하위 문자열에 대한 반복자를 반환합니다.
-- [`SplitAfterSeq`](/pkg/strings#SplitAfterSeq)는 구분자가 나타난 직후를 기준으로 분할된 문자열의 하위 문자열에 대한 반복자를 반환합니다.
-- [`FieldsSeq`](/pkg/strings#FieldsSeq)는 [`unicode.IsSpace`](/pkg/unicode#IsSpace)에 정의된 공백 문자열을 기준으로 분할된 하위 문자열에 대한 반복자를 반환합니다.
-- [`FieldsFuncSeq`](/pkg/strings#FieldsFuncSeq)는 서술자(predicate)를 만족하는 유니코드 코드 포인트 연속을 기준으로 분할된 하위 문자열에 대한 반복자를 반환합니다.
+The [`strings`](/pkg/strings) package adds several functions that work with iterators:
+- [`Lines`](/pkg/strings#Lines) returns an iterator over
+  the newline-terminated lines in a string.
+- [`SplitSeq`](/pkg/strings#SplitSeq) returns an iterator over
+  all substrings of a string split around a separator.
+- [`SplitAfterSeq`](/pkg/strings#SplitAfterSeq) returns an iterator
+  over substrings of a string split after each instance of a
+  separator.
+- [`FieldsSeq`](/pkg/strings#FieldsSeq) returns an iterator over
+  substrings of a string split around runs of whitespace characters,
+  as defined by [`unicode.IsSpace`](/pkg/unicode#IsSpace).
+- [`FieldsFuncSeq`](/pkg/strings#FieldsFuncSeq) returns an iterator
+  over substrings of a string split around runs of Unicode code points
+  satisfying a predicate.
 
 #### [`sync`](/pkg/sync/)
 
-[`sync.Map`](/pkg/sync#Map)의 구현이 변경되어, 특히 맵 수정 시의 성능이 향상되었습니다.
-예를 들어, 더 큰 맵에서 서로 겹치지 않는 키 집합을 수정할 때 경합(contention)이 발생할 가능성이 훨씬 낮아졌으며, 맵에서 낮은 경합 부하를 달성하기 위해 필요했던 준비 시간(ramp-up time)이 더 이상 필요하지 않습니다.
+The implementation of [`sync.Map`](/pkg/sync#Map) has been changed, improving performance,
+particularly for map modifications.
+For instance, modifications of disjoint sets of keys are much less likely to contend on
+larger maps, and there is no longer any ramp-up time required to achieve low-contention
+loads from the map.
 
-문제가 발생할 경우, 빌드 시 `GOEXPERIMENT=nosynchashtriemap`를 설정하여 이전 구현 방식으로 되돌리고 [이슈를 제출](/issue/new)해 주시기 바랍니다.
+If you encounter any problems, set `GOEXPERIMENT=nosynchashtriemap` at build
+time to switch back to the old implementation and please [file an
+issue](/issue/new).
 
 #### [`testing`](/pkg/testing/)
 
-새로운 [`T.Context`](/pkg/testing#T.Context) 및 [`B.Context`](/pkg/testing#B.Context) 메서드는 테스트가 완료된 후 그리고 테스트 정리(cleanup) 함수들이 실행되기 전에 취소되는 context를 반환합니다.
+The new [`T.Context`](/pkg/testing#T.Context) and [`B.Context`](/pkg/testing#B.Context) methods return a context that's canceled
+after the test completes and before test cleanup functions run.
 
-<!-- 6-stdlib/6-testing-bloop.md에 언급된 testing.B.Loop입니다. -->
+<!-- testing.B.Loop mentioned in 6-stdlib/6-testing-bloop.md. -->
 
-새로운 [`T.Chdir`](/pkg/testing#T.Chdir) 및 [`B.Chdir`](/pkg/testing#B.Chdir) 메서드를 사용하여 테스트 또는 벤치마크가 실행되는 동안 작업 디렉터리를 변경할 수 있습니다.
+The new [`T.Chdir`](/pkg/testing#T.Chdir) and [`B.Chdir`](/pkg/testing#B.Chdir) methods can be used to change the working
+directory for the duration of a test or benchmark.
 
 #### [`text/template`](/pkg/text/template/)
 
-템플릿에서 이제 `range-over-func` 및 `range-over-int`를 지원합니다.
+Templates now support range-over-func and range-over-int.
 
 #### [`time`](/pkg/time/)
 
-[`Time`](/pkg/time#Time)은 이제 [`encoding.BinaryAppender`](/pkg/encoding#BinaryAppender) 및 [`encoding.TextAppender`](/pkg/encoding#TextAppender) 인터페이스를 구현합니다.
+[`Time`](/pkg/time#Time) now implements the [`encoding.BinaryAppender`](/pkg/encoding#BinaryAppender) and [`encoding.TextAppender`](/pkg/encoding#TextAppender) interfaces.
 
 ## Ports {#ports}
 
 ### Linux {#linux}
 
 <!-- go.dev/issue/67001 -->
-Go 1.23 릴리스 노트에서 [공지](go1.23#linux)한 바와 같이, Go 1.24는 Linux 커널 버전 3.2 이상이 필요합니다.
+As [announced](go1.23#linux) in the Go 1.23 release notes, Go 1.24 requires Linux
+kernel version 3.2 or later.
 
 ### Darwin {#darwin}
 
 <!-- go.dev/issue/69839 -->
-Go 1.24은 macOS 11 Big Sur에서 실행되는 마지막 릴리스입니다.
-Go 1.25부터는 macOS 12 Monterey 또는 그 이후 버전이 필요합니다.
+Go 1.24 is the last release that will run on macOS 11 Big Sur.
+Go 1.25 will require macOS 12 Monterey or later.
 
 ### WebAssembly {#wasm}
 
 <!-- go.dev/issue/65199, CL 603055 -->
-Go 프로그램이 WebAssembly 호스트로 함수를 내보낼 수 있도록 `go:wasmexport` 컴파일러 지시어가 추가되었습니다.
+The `go:wasmexport` compiler directive is added for Go programs to export functions
+to the WebAssembly host.
 
-WebAssembly System Interface Preview 1 (`GOOS=wasip1 GOARCH=wasm`)에서 Go 1.24는 `-buildmode=c-shared` 빌드 플래그를 지정하여 Go 프로그램을 [reactor/library](https://github.com/WebAssembly/WASI/blob/63a46f61052a21bfab75a76558485cf097c0dbba/legacy/application-abi.md#current-unstable-abi)로 빌드하는 것을 지원합니다.
+On WebAssembly System Interface Preview 1 (`GOOS=wasip1 GOARCH=wasm`), Go 1.24 supports
+building a Go program as a
+[reactor/library](https://github.com/WebAssembly/WASI/blob/63a46f61052a21bfab75a76558485cf097c0dbba/legacy/application-abi.md#current-unstable-abi),
+by specifying the `-buildmode=c-shared` build flag.
 
 <!-- go.dev/issue/66984, CL 626615 -->
-이제 더 많은 타입이 `go:wasmimport` 함수의 인자 또는 결과 타입으로 허용됩니다.
-구체적으로, 기존에 허용되었던 32비트 및 64비트 정수 및 부동 소수점 타입, `unsafe.Pointer`와 더불어 `bool`, `string`, `uintptr` 및 특정 타입에 대한 포인터가 허용됩니다 (자세한 내용은 [문서](/pkg/cmd/compile#hdr-WebAssembly_Directives) 참조).
-이러한 타입들은 `go:wasmexport` 함수의 인자 또는 결과 타입으로도 허용됩니다.
+More types are now permitted as argument or result types for `go:wasmimport` functions.
+Specifically, `bool`, `string`, `uintptr`, and pointers to certain types are allowed
+(see the [documentation](/pkg/cmd/compile#hdr-WebAssembly_Directives) for detail),
+along with 32-bit and 64-bit integer and float types, and `unsafe.Pointer`, which
+are already allowed.
+These types are also permitted as argument or result types for `go:wasmexport` functions.
 
 <!-- go.dev/issue/68024 -->
-WebAssembly 지원 파일이 `misc/wasm`에서 `lib/wasm`으로 이동되었습니다.
+The support files for WebAssembly have been moved to `lib/wasm` from `misc/wasm`.
 
 <!-- CL 621635, CL 621636 -->
-초기 메모리 크기가 크게 감소했으며, 특히 소규모 WebAssembly 애플리케이션에서 더욱 두드러집니다.
+The initial memory size is significantly reduced, especially for small WebAssembly
+applications.
 
 ### Windows {#windows}
 
 <!-- go.dev/issue/70705 -->
-32비트 windows/arm 포트(`GOOS=windows GOARCH=arm`)가 broken 상태로 표시되었습니다.
-자세한 내용은 [issue #70705](/issue/70705)를 참조하십시오.
+The 32-bit windows/arm port (`GOOS=windows GOARCH=arm`) has been marked broken.
+See [issue #70705](/issue/70705) for details.
 
-<!-- Go 1.24 릴리스 노트에 언급될 필요는 없으나 relnote todo에 의해 선택된 항목들입니다. -->
+<!-- Items that don't need to be mentioned in Go 1.24 release notes but are picked up by relnote todo.
 
-승인된 제안 https://go.dev/issue/25309 (https://go.dev/cl/594018, https://go.dev/cl/595120, https://go.dev/cl/595564, https://go.dev/cl/601778 기반) - 새로운 x/crypto 패키지; 언급할 필요가 없어 보임
-승인된 제안 https://go.dev/issue/43744 (https://go.dev/cl/357530 기반) - 표준 라이브러리 변경 사항 없음
-승인된 제안 https://go.dev/issue/60905 (https://go.dev/cl/610195 기반) - CL 610195 되돌림(reverted)
-승인된 제안 https://go.dev/issue/61395 (https://go.dev/cl/594738, https://go.dev/cl/594976 기반) - CL 594738은 amd64에서 sync/atomic AND/OR 연산을 intrinsic으로 만들었으나, API는 이미 Go 1.23에 추가됨; CL 594976은 수정 사항임; 아마도 Go 1.24 릴리스 노트에 필요하지 않음 (성능 변경만 해당)
-승인된 제안 https://go.dev/issue/51269 (https://go.dev/cl/627035 기반) - Go 1.24 릴리스 노트에 언급할 가치가 있거나, 제외해도 무방함; https://go.dev/issue/51269#issuecomment-2501802763 에서 논의됨; Ian이 제외해도 괜찮다고 확인함
-승인된 제안 https://go.dev/issue/66540 (https://go.dev/cl/603958 기반) - Go 언어 사양(spec) 명확화; Go 1.24 릴리스 노트에 언급할 필요가 없을 수 있음; https://go.dev/issue/66540#issuecomment-2502051684 에 의견을 남김; Robert가 실제로 필요하지 않음을 확인함
-승인된 제안 https://go.dev/issue/34208 (https://go.dev/cl/586241 기반) - CL 586241은 Go 1.23 기능에 대한 수정 사항을 구현함, Go 1.24 릴리스 노트에 필요한 내용은 없어 보임
-승인된 제안 https://go.dev/issue/43993 (https://go.dev/cl/626116 기반) - CL 626116은 vet 변경을 위해 트리를 준비하지만 vet 변경 자체는 Go 1.24에 구현되지 않음, 따라서 Go 1.24 릴리스 노트에 기재할 내용 없음
-승인된 제안 https://go.dev/issue/44505 (https://go.dev/cl/609955 기반) - CL 609955는 x/tools 내부 정리 작업임, Go 1.24 릴리스 노트 불필요
-승인된 제안 https://go.dev/issue/61476 (https://go.dev/cl/608255 기반) - CL 608255는 Go 1.23에 추가된 GORISCV64를 기반으로 함; Go 1.24 릴리스 노트에 언급할 내용 없음
-승인된 제안 https://go.dev/issue/66315 (https://go.dev/cl/577996 기반) - x/tools/go/analysis에 Pass.Module 필드를 추가하는 것은 Go 1.24 릴리스 노트에 언급할 사항이 아닌 것으로 보임
-승인된 제안 https://go.dev/issue/57786 (https://go.dev/cl/472717 기반) - CL 472717은 x/net/http2에 있으며 Go 1.21 제안을 언급함; Go 1.24 릴리스 노트에 필요한 내용은 없어 보임
-승인된 제안 https://go.dev/issue/54265 (https://go.dev/cl/609915, https://go.dev/cl/610675 기반) - Go 1.22 제안을 참조하는 CL들임, Go 1.24 릴리스 노트에 추가로 필요한 내용 없음
-승인된 제안 https://go.dev/issue/53021 (https://go.dev/cl/622276 기반) - CL 622276은 문서를 개선함; 제안 53021은 Go 1.20 당시에 이루어졌으므로 Go 1.24 릴리스 노트에 추가로 필요한 내용 없음
-승인된 제안 https://go.dev/issue/51430 (https://go.dev/cl/613375 기반) - CL 613375는 내부 문서 주석임; 제안 51430은 Go 1.20/1.21 당시에 이루어졌으므로 Go 1.24 릴리스 노트에 추가로 필요한 내용 없음
-승인된 제안 https://go.dev/issue/38445 (https://go.dev/cl/626495 기반) - CL 626495는 x/tools/go/package에 관한 제안 38445에 대한 작업임, Go 1.24 릴리스 노트에 필요한 내용 없음
-승인된 제안 https://go.dev/issue/56986 (https://go.dev/cl/618115 기반) - CL 618115는 문서를 추가함; Go 1.24 릴리스 노트에 언급될 필요 없음
-승인된 제안 https://go.dev/issue/60061 (https://go.dev/cl/612038 기반) - CL 612038은 x/tools/go/ast의 일부 항목을 deprecated하고 Go 1.22 제안을 언급하는 CL임; Go 1.24 릴리스 노트에 필요한 내용 없음
-승인된 제안 https://go.dev/issue/61324 (https://go.dev/cl/411907 기반) - CL 411907은 x/tools의 새로운 패키지에 대한 제안을 구현한 CL임; Go 1.24 릴리스 노트에 필요한 내용 없음
-승인된 제안 https://go.dev/issue/61777 (https://go.dev/cl/601496 기반) - CL 601496은 x/net/http2.Server에 WriteByteTimeout 필드를 추가함; Go 1.24 릴리스 노트 불필요
-승인된 제안 https://go.dev/issue/61940 (https://go.dev/cl/600997 기반) - CL 600997은 x/build의 오래된 코드를 삭제하고 승인된 제안을 언급함; Go 1.24 릴리스 노트 불필요
-승인된 제안 https://go.dev/issue/62113 (https://go.dev/cl/594195 기반) - CL 594195는 x/net/html에 iterator 관련 내용을 추가함; Go 1.24 릴리스 노트 불필요
-승인된 제안 https://go.dev/issue/62484 (https://go.dev/cl/600775 기반) - CL 600775는 CopyFS 심볼릭 링크 동작을 문서화하고 Go 1.23 제안을 언급함; Go 1.24 릴리스 노트 불필요
-승인된 제안 https://go.dev/issue/64207 (https://go.dev/cl/605875 기반) - Go 1.23 제안의 후속 조치인 x/website CL임; Go 1.24 릴리스 노트 불필요
-승인된 제안 https://go.dev/issue/65236 (https://go.dev/cl/596135 기반) - CL 596135는 Go 1.23 제안 65236에 대한 테스트를 추가함; Go 1.24 릴리스 노트 불필요
-승인된 제안 https://go.dev/issue/67795 (https://go.dev/cl/616218 기반) - x/tools/go/ast/inspector의 iterator 지원; Go 1.24 릴리스 노트 불필요
-승인된 제안 https://go.dev/issue/67812 (https://go.dev/cl/601497 기반) - x/net/http2.Server를 위한 설정 가능한 서버 핑(pings); Go 1.24 릴리스 노트 불필요
-승인된 제안 https://go.dev/issue/68232 (https://go.dev/cl/595676 기반) - x/sys/unix 추가 사항; Go 1.24 릴리스 노트 불필요
-승인된 제안 https://go.dev/issue/68898 (https://go.dev/cl/607495, https://go.dev/cl/620036, https://go.dev/cl/620135, https://go.dev/cl/623638 기반) - x/tools/go/gcexportdata가 2개 릴리스 + tip 지원 정책을 문서화하도록 하는 제안임; 변경 사항이 x/tools에 있으므로 Go 1.24 릴리스 노트 불필요
-승인된 제안 https://go.dev/issue/69095 (https://go.dev/cl/593683, https://go.dev/cl/608955, https://go.dev/cl/610716 기반) - golang.org/x 저장소의 유지보수 및 지원에 영향을 주는 제안임; Go 1.24 릴리스 노트에 언급할 필요 없음
-승인된 제안 https://go.dev/issue/68384 (https://go.dev/cl/611875 기반) - Go Telemetry의 범위를 Delve까지 확장하는 것은 Go 1.24와 직접적으로 연결되지 않으며 Go 1.24 릴리스 노트에 언급할 필요가 없어 보임
-승인된 제안 https://go.dev/issue/69291 (https://go.dev/cl/610939 기반) - CL 610939는 x/tools의 코드를 리팩토링하며 x/tools/go/ssa/ssautil에 Reachable을 추가하려는 아직 열려 있는 제안 #69291을 언급함; Go 1.24 릴리스 노트 불필요
-승인된 제안 https://go.dev/issue/69360 (https://go.dev/cl/614158, https://go.dev/cl/614159, https://go.dev/cl/614635, https://go.dev/cl/614675 기반) - 제안 69360은 x/tools에서 gorename을 태그 지정하고 삭제하는 것임; Go 1.24 릴리스 노트 불필요
-승인된 제안 https://go.dev/issue/61417 (https://go.dev/cl/605955 기반) - x/oauth2의 새로운 필드; Go 1.24 릴리스 노트에 언급할 내용 없음
-승인된 제안 https://go.dev/issue/29266 (https://go.dev/cl/632897 기반) - go.dev/doc/contribute를 위한 문서 전용 제안임; Go 1.24 릴리스 노트 불필요
+accepted proposal https://go.dev/issue/25309 (from https://go.dev/cl/594018, https://go.dev/cl/595120, https://go.dev/cl/595564, https://go.dev/cl/601778) - new x/crypto package; doesn't seem to need to be mentioned
+accepted proposal https://go.dev/issue/43744 (from https://go.dev/cl/357530) - no change in the standard library
+accepted proposal https://go.dev/issue/60905 (from https://go.dev/cl/610195) - CL 610195 reverted
+accepted proposal https://go.dev/issue/61395 (from https://go.dev/cl/594738, https://go.dev/cl/594976) - CL 594738 made sync/atomic AND/OR operations intrinsic on amd64, but the API was already added in Go 1.23; CL 594976 is a fix; probably doesn't require a Go 1.24 release note (performance change only)
+accepted proposal https://go.dev/issue/51269 (from https://go.dev/cl/627035) - may be worth mentioning in Go 1.24 release notes, or may be fine to leave out; commented at https://go.dev/issue/51269#issuecomment-2501802763; Ian confirmed it's fine to leave out
+accepted proposal https://go.dev/issue/66540 (from https://go.dev/cl/603958) - a Go language spec clarification; might not need to be mentioned in Go 1.24 release notes; left a comment at https://go.dev/issue/66540#issuecomment-2502051684; Robert confirmed it indeed doesn't
+accepted proposal https://go.dev/issue/34208 (from https://go.dev/cl/586241) - CL 586241 implements a fix for a Go 1.23 feature, doesn't seem to be need anything in Go 1.24 release notes
+accepted proposal https://go.dev/issue/43993 (from https://go.dev/cl/626116) - CL 626116 prepares the tree towards the vet change but the vet change itself isn't implemented in Go 1.24, so nothing to say in Go 1.24 release notes
+accepted proposal https://go.dev/issue/44505 (from https://go.dev/cl/609955) - CL 609955 is an internal cleanup in x/tools, no need for Go 1.24 release note
+accepted proposal https://go.dev/issue/61476 (from https://go.dev/cl/608255) - CL 608255 builds on GORISCV64 added in Go 1.23; nothing to mention in Go 1.24 release notes
+accepted proposal https://go.dev/issue/66315 (from https://go.dev/cl/577996) - adding Pass.Module field to x/tools/go/analysis doesn't seem like something that needs to be mentioned in Go 1.24 release notes
+accepted proposal https://go.dev/issue/57786 (from https://go.dev/cl/472717) - CL 472717 is in x/net/http2 and mentions a Go 1.21 proposal; it doesn't seem to need anything in Go 1.24 release notes
+accepted proposal https://go.dev/issue/54265 (from https://go.dev/cl/609915, https://go.dev/cl/610675) - CLs that refer to a Go 1.22 proposal, nothing more is needed in Go 1.24 release notes
+accepted proposal https://go.dev/issue/53021 (from https://go.dev/cl/622276) - CL 622276 improves docs; proposal 53021 was in Go 1.20 so nothing more is needed in Go 1.24 release notes
+accepted proposal https://go.dev/issue/51430 (from https://go.dev/cl/613375) - CL 613375 is an internal documentation comment; proposal 51430 happened in Go 1.20/1.21 so nothing more is needed in Go 1.24 release notes
+accepted proposal https://go.dev/issue/38445 (from https://go.dev/cl/626495) - CL 626495 works on proposal 38445, which is about x/tools/go/package, doesn't need anything in Go 1.24 release notes
+accepted proposal https://go.dev/issue/56986 (from https://go.dev/cl/618115) - CL 618115 adds documentation; it doesn't need to be mentioned in Go 1.24 release notes
+accepted proposal https://go.dev/issue/60061 (from https://go.dev/cl/612038) - CL 612038 is a CL that deprecates something in x/tools/go/ast and mentions a Go 1.22 proposal; doesn't need anything in Go 1.24 release notes
+accepted proposal https://go.dev/issue/61324 (from https://go.dev/cl/411907) - CL 411907 is an x/tools CL that implements a proposal for a new package there; doesn't need anything in Go 1.24 release notes
+accepted proposal https://go.dev/issue/61777 (from https://go.dev/cl/601496) - CL 601496 added a WriteByteTimeout field to x/net/http2.Server; doesn't need a Go 1.24 release note
+accepted proposal https://go.dev/issue/61940 (from https://go.dev/cl/600997) - CL 600997 deleted obsolete code in x/build and mentioned an accepted proposal; doesn't need a Go 1.24 release note
+accepted proposal https://go.dev/issue/62113 (from https://go.dev/cl/594195) - CL 594195 made iterator-related additions in x/net/html; doesn't need a Go 1.24 release note
+accepted proposal https://go.dev/issue/62484 (from https://go.dev/cl/600775) - CL 600775 documents CopyFS symlink behavior and mentions the Go 1.23 proposal; doesn't need a Go 1.24 release note
+accepted proposal https://go.dev/issue/64207 (from https://go.dev/cl/605875) - an x/website CL that follows up on a Go 1.23 proposal; doesn't need a Go 1.24 release note
+accepted proposal https://go.dev/issue/65236 (from https://go.dev/cl/596135) - CL 596135 adds tests for the Go 1.23 proposal 65236; doesn't need a Go 1.24 release note
+accepted proposal https://go.dev/issue/67795 (from https://go.dev/cl/616218) - iteratior support for x/tools/go/ast/inspector; doesn't need a Go 1.24 release note
+accepted proposal https://go.dev/issue/67812 (from https://go.dev/cl/601497) - configurable server pings for x/net/http2.Server; doesn't need a Go 1.24 release note
+accepted proposal https://go.dev/issue/68232 (from https://go.dev/cl/595676) - x/sys/unix additions; doesn't need a Go 1.24 release note
+accepted proposal https://go.dev/issue/68898 (from https://go.dev/cl/607495, https://go.dev/cl/620036, https://go.dev/cl/620135, https://go.dev/cl/623638) - a proposal for x/tools/go/gcexportdata to document 2 releases + tip support policy; since the change is in x/tools it doesn't need a Go 1.24 release note
+accepted proposal https://go.dev/issue/69095 (from https://go.dev/cl/593683, https://go.dev/cl/608955, https://go.dev/cl/610716) - a proposal that affects maintenance and support of golang.org/x repositories; doesn't need to be mentioned in Go 1.24 release notes
+accepted proposal https://go.dev/issue/68384 (from https://go.dev/cl/611875) - expanding the scope of Go Telemetry to include Delve isn't directly tied to Go 1.24 and doesn't seem to need to be mentioned in Go 1.24 release notes
+accepted proposal https://go.dev/issue/69291 (from https://go.dev/cl/610939) - CL 610939 refactors code in x/tools and mentions the still-open proposal #69291 to add Reachable to x/tools/go/ssa/ssautil; doesn't need a Go 1.24 release note
+accepted proposal https://go.dev/issue/69360 (from https://go.dev/cl/614158, https://go.dev/cl/614159, https://go.dev/cl/614635, https://go.dev/cl/614675) - proposal 69360 is to tag and delete gorename from x/tools; doesn't need a Go 1.24 release note
+accepted proposal https://go.dev/issue/61417 (from https://go.dev/cl/605955) - a new field in x/oauth2; nothing to mention in Go 1.24 release notes
+accepted proposal https://go.dev/issue/29266 (from https://go.dev/cl/632897) - a documentation-only proposal for go.dev/doc/contribute; doesn't need a Go 1.24 release note
 -->

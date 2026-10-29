@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`cipher` 패키지는 저수준 블록 암호 구현을 래핑하여 사용할 수 있는 표준 블록 암호 모드들을 구현합니다.
+Package cipher implements standard block cipher modes that can be wrapped around low-level block cipher implementations.
 
 ## 원문 요약
 

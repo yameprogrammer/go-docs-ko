@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`cookiejar` 패키지는 인메모리 방식의 [RFC 6265] 준수 [http.CookieJar]를 구현합니다.
+Package cookiejar implements an in-memory [RFC 6265]-compliant [http.CookieJar].
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-pprof 패키지는 pprof 시각화 도구에서 기대하는 형식으로 런타임 프로파일링 데이터를 기록합니다.
+Package pprof writes runtime profiling data in the format expected by the pprof visualization tool.
 
 ## 원문 요약
 

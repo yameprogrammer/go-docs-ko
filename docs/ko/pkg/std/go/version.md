@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package version은 [Go toolchain name syntax] 형식의 [Go versions](예: "go1.20", "go1.21.0", "go1.22rc2", "go1.23.4-custom"와 같은 문자열)에 대한 작업을 제공합니다.
+Package version provides operations on [Go versions] in [Go toolchain name syntax]: strings like "go1.20", "go1.21.0", "go1.22rc2", and "go1.23.4-custom".
 
 ## 원문 요약
 

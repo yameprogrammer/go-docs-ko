@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`csv` 패키지는 쉼표로 구분된 값(CSV) 파일을 읽고 씁니다.
+Package csv reads and writes comma-separated values (CSV) files.
 
 ## 원문 요약
 

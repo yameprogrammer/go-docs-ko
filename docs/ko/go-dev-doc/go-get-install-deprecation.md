@@ -1,89 +1,65 @@
 <!--{
-  "Title": "실행 파일 설치를 위한 'go get'의 지원 중단",
+  "Title": "Deprecation of 'go get' for installing executables",
   "Path": "/doc/go-get-install-deprecation",
   "Breadcrumb": true
 }-->
 
-# 실행 파일 설치를 위한 'go get'의 지원 중단
+## Overview
 
-Go 1.16부터 `go get`을 사용하여 실행 파일을 설치하는 방식이 지원 중단(deprecated)되었습니다. 대신 `go install`을 사용하십시오.
+Starting in Go 1.17, installing executables with `go get` is deprecated.
+`go install` may be used instead.
 
-## 왜 변경되었나요?
+In Go 1.18, `go get` will no longer build packages; it will only
+be used to add, update, or remove dependencies in `go.mod`. Specifically,
+`go get` will always act as if the `-d` flag were enabled.
 
-전통적으로 `go get`은 두 가지 역할을 수행했습니다:
-1. 의존성 패키지를 다운로드하여 `go.mod` 파일에 추가하는 것.
-2. 패키지를 빌드하여 실행 파일을 `$GOPATH/bin`에 설치하는 것.
+## What to use instead
 
-이러한 이중 목적은 혼란을 야기했으며, 특히 모듈 모드에서 의존성 관리와 도구 설치 사이의 구분이 모호했습니다. 이를 해결하기 위해 Go 팀은 두 기능을 분리하기로 결정했습니다.
-
-## 새로운 방식
-
-### 도구(실행 파일) 설치하기
-
-이제 실행 파일을 설치하려면 `go install`을 사용해야 합니다. 버전 지정이 가능하므로 더 안전하고 예측 가능한 설치가 가능합니다.
-
-```bash
-# 최신 버전 설치
-go install golang.org/x/tools/cmd/goimports@latest
-
-# 특정 버전 설치
-go install golang.org/x/tools/cmd/goimports@v0.10.0
-```
-
-`go install`은 소스 코드를 다운로드하고 빌드하여 실행 파일을 설치하지만, 현재 작업 중인 모듈의 `go.mod` 파일은 수정하지 않습니다.
-
-### 의존성 추가하기
-
-프로젝트의 의존성으로 패키지를 추가하려면 여전히 `go get`을 사용합니다. 하지만 이제 `go get`은 실행 파일을 설치하지 않고 `go.mod` 파일만 업데이트합니다.
-
-```bash
-go get golang.org/x/net/context
-```
-
-## 요약 표
-
-| 작업 | 이전 방식 (Go 1.16 미만) | 새로운 방식 (Go 1.16 이상) |
-| :--- | :--- | :--- |
-| 도구 설치 | `go get <package>` | `go install <package>@latest` |
-| 의존성 추가 | `go get <package>` | `go get <package>` |
-
-더 자세한 내용은 [Go 블로그](https://go.dev/blog) 또는 공식 문서의 `go install` 명령 페이지를 참조하십시오.
-
-## 개요
-
-Go 1.17부터 `go get`을 사용하여 실행 파일을 설치하는 방식은 더 이상 권장되지 않습니다(deprecated).
-대신 `go install`을 사용할 수 있습니다.
-
-Go 1.18부터 `go get`은 더 이상 패키지를 빌드하지 않으며, `go.mod`에서 의존성을 추가, 업데이트 또는 제거하는 용도로만 사용됩니다. 구체적으로, `go get`은 항상 `-d` 플래그가 활성화된 것처럼 동작합니다.
-
-## 대신 사용할 것
-
-현재 모듈의 컨텍스트에서 실행 파일을 설치하려면 아래와 같이 버전 접미사 없이 `go install`을 사용하십시오. 이렇게 하면 현재 디렉토리 또는 상위 디렉토리에 있는 `go.mod` 파일의 버전 요구 사항 및 기타 지시문이 적용됩니다.
+To install an executable in the context of the current module, use `go install`,
+without a version suffix, as below. This applies version requirements and
+other directives from the `go.mod` file in the current directory or a parent
+directory.
 
 ```
 go install example.com/cmd
 ```
 
-현재 모듈을 무시하고 실행 파일을 설치하려면, 아래와 같이 `@v1.2.3` 또는 `@latest`와 같은 [버전 접미사](/ref/mod#version-queries)를 *함께 사용하여* `go install`을 사용하십시오. 버전 접미사와 함께 사용할 때, `go install`은 현재 디렉터리나 상위 디렉터리에 있는 `go.mod` 파일을 읽거나 업데이트하지 않습니다.
+To install an executable while ignoring the current module, use `go install`
+*with* a [version suffix](/ref/mod#version-queries) like `@v1.2.3` or `@latest`,
+as below. When used with a version suffix, `go install` does not read or update
+the `go.mod` file in the current directory or a parent directory.
 
 ```
-# 특정 버전을 설치합니다.
+# Install a specific version.
 go install example.com/cmd@v1.2.3
 
-# 사용 가능한 최신 버전을 설치합니다.
+# Install the highest available version.
 go install example.com/cmd@latest
 ```
 
-모호성을 피하기 위해, `go install`을 버전 접미사와 함께 사용할 때 모든 인자는 동일한 버전의 동일한 모듈 내에 있는 `main` 패키지를 참조해야 합니다. 해당 모듈에 `go.mod` 파일이 있는 경우, 해당 모듈이 메인 모듈일 때와 다르게 해석되게 만드는 `replace` 또는 `exclude`와 같은 지시어가 포함되어 있어서는 안 됩니다. 모듈의 `vendor` 디렉토리는 사용되지 않습니다.
+In order to avoid ambiguity, when `go install` is used with a version suffix,
+all arguments must refer to `main` packages in the same module at the same
+version. If that module has a `go.mod` file, it must not contain directives like
+`replace` or `exclude` that would cause it to be interpreted differently if it
+were the main module. The module's `vendor` directory is not used.
 
-자세한 내용은 [`go install`](/ref/mod#go-install)을 참조하십시오.
+See [`go install`](/ref/mod#go-install) for details.
 
-## 왜 이런 현상이 발생하는가
+## Why this is happening
 
-모듈이 도입된 이후, `go get` 명령어는 `go.mod`의 의존성을 업데이트하는 용도와 명령어를 설치하는 용도 모두로 사용되어 왔습니다. 이러한 결합은 자주 혼란과 불편함을 초래합니다. 대부분의 경우, 개발자는 의존성을 업데이트하거나 명령어를 설치하기를 원하며, 이 두 가지를 동시에 수행하기를 원하지 않기 때문입니다.
+Since modules were introduced, the `go get` command has been used both to update
+dependencies in `go.mod` and to install commands. This combination is frequently
+confusing and inconvenient: in most cases, developers want to update a
+dependency or install a command but not both at the same time.
 
-Go 1.16부터 `go install`은 현재 디렉토리에 `go.mod` 파일이 있더라도 이를 무시하고 명령줄에서 지정한 버전의 명령어를 설치할 수 있습니다. 이제 대부분의 경우 명령어를 설치할 때 `go install`을 사용해야 합니다.
+Since Go 1.16, `go install` can install a command at a version specified on the
+command line while ignoring the `go.mod` file in the current directory (if one
+exists). `go install` should now be used to install commands in most cases.
 
-`go get`의 명령어를 빌드하고 설치하는 기능은 이제 `go install`과 기능이 중복되므로 deprecated(더 이상 권장되지 않음)되었습니다. 이 기능을 제거하면 `go get`이 기본적으로 패키지를 컴파일하거나 링크하지 않게 되어 속도가 더 빨라집니다. 또한 `go get`은 현재 플랫폼에서 빌드할 수 없는 패키지를 업데이트할 때 더 이상 에러를 보고하지 않습니다.
+`go get`'s ability to build and install commands is now deprecated, since that
+functionality is redundant with `go install`. Removing this functionality
+will make `go get` faster, since it won't compile or link packages by default.
+`go get` also won't report an error when updating a package that can't be built
+for the current platform.
 
-전체 논의 내용은 제안서 [#40276](/issue/40276)를 참조하십시오.
+See proposal [#40276](/issue/40276) for the full discussion.

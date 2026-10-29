@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package slogtest는 `log/slog.Handler` 구현체에 대한 테스트 지원을 구현합니다.
+Package slogtest implements support for testing implementations of log/slog.Handler.
 
 ## 원문 요약
 

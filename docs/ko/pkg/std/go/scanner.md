@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`scanner` 패키지는 Go 소스 텍스트를 위한 스캐너를 구현합니다.
+Package scanner implements a scanner for Go source text.
 
 ## 원문 요약
 

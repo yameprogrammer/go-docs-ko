@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`singleflight` 패키지는 중복 함수 호출 억제 메커니즘을 제공합니다.
+Package singleflight provides a duplicate function call suppression mechanism.
 
 ## 원문 요약
 

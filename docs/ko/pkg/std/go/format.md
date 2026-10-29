@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`format` 패키지는 Go 소스 코드의 표준 포맷팅을 구현합니다.
+Package format implements standard formatting of Go source.
 
 ## 원문 요약
 

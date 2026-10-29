@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`httputil` 패키지는 `net/http` 패키지의 일반적인 기능들을 보완하는 HTTP 유틸리티 함수들을 제공합니다.
+Package httputil provides HTTP utility functions, complementing the more common ones in the net/http package.
 
 ## 원문 요약
 

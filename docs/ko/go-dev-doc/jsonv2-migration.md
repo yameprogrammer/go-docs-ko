@@ -1,43 +1,43 @@
-Go 1.27에서 도입된 [encoding/json/v2](/pkg/encoding/json/v2) 패키지는 기존 [encoding/json](/pkg/encoding/json) 패키지를 대폭 수정하여 만든 버전입니다.
-이 가이드는 왜 v1에서 v2 패키지로 마이그레이션해야 하는지와 이를 안전하게 수행하는 방법에 대해 설명합니다.
+Introduced in Go 1.27, the [encoding/json/v2](/pkg/encoding/json/v2) package is a major revision of the original [encoding/json](/pkg/encoding/json) package.
+This guide describes why you may want to migrate from the v1 to v2 package, and the mechanics of doing so safely.
 
-# 왜 마이그레이션해야 하는가?
+# Why migrate?
 
-가장 먼저 말씀드릴 점은, 반드시 하실 필요는 없다는 것입니다!
-`encoding/json` 패키지는 사라지지 않습니다.
-이 패키지는 Go 1 호환성 약속(compatibility promise)의 적용을 받으므로, `encoding/json`을 사용하는 패키지들은 앞으로도 계속해서 정상적으로 작동할 것입니다.
+First things first: you don't have to!
+The `encoding/json` package will never go away.
+It is covered by the Go 1 compatibility promise, so packages using `encoding/json` will continue working indefinitely.
 
-또한, `encoding/json`과 `encoding/json/v2`는 서로 호환됩니다.
-예를 들어, 어떤 타입이 [`encoding/json/v2.MarshalerTo`](/pkg/encoding/json/v2#MarshalerTo)를 통해 커스텀 마샬링 동작을 구현한 경우, [`encoding/json.Marshal`](/pkg/encoding/json#Marshal)을 통해 이 타입을 마샬링하는 호출자도 여전히 해당 커스텀 마샬러를 거치게 됩니다.
-마찬가지로, `encoding/json/v2`와 함께 Go 1.27에서 도입된 새로운 `json` 구조체 태그 또한 `encoding/json`에서 지원됩니다.
+In addition, `encoding/json` and `encoding/json/v2` are compatible with each other.
+For example, if a type implements custom marshaling behavior with [`encoding/json/v2.MarshalerTo`](/pkg/encoding/json/v2#MarshalerTo), the callers marshaling this type through [`encoding/json.Marshal`](/pkg/encoding/json#Marshal) will still go through the custom marshaler.
+Similarly, new `json` struct tags introduced in Go 1.27 alongside `encoding/json/v2` are also supported by `encoding/json`.
 
-마이그레이션이 필수 사항은 아니지만, 그렇게 해야 할 몇 가지 타당한 이유가 있습니다:
+Though you are not required to migrate, there are several good reasons to do so:
 
-우선, 새로운 API는 사용하기 더 쉽습니다.
-예를 들어, [`encoding/json.Encoder`](/pkg/encoding/json#Encoder)가 필요했던 이전과 달리, [`encoding/json/v2.MarshalWrite`](/pkg/encoding/json/v2#MarshalWrite)를 사용하여 [`io.Writer`](/pkg/io#Writer)로 쉽게 마샬링(marshal)할 수 있습니다.
-[`encoding/json/v2.Marshalers`](/pkg/encoding/json/v2#Marshalers)를 사용하면 직접 제어할 수 없는 타입이라 하더라도 특정 타입의 마샬링 동작을 오버라이드할 수 있습니다.
-[`encoding/json/v2.MatchCaseInsenstiveNames`](/pkg/encoding/json/v2#MatchCaseInsenstiveNames)를 통해 JSON 객체의 멤버 이름과 Go 구조체 필드를 매칭할 때의 대소문자 구분 여부를 제어할 수 있습니다.
+First, the new API is easier to use.
+For example, easily marshal to an [`io.Writer`](/pkg/io#Writer) with [`encoding/json/v2.MarshalWrite`](/pkg/encoding/json/v2#MarshalWrite), rather than needing an [`encoding/json.Encoder`](/pkg/encoding/json#Encoder).
+[`encoding/json/v2.Marshalers`](/pkg/encoding/json/v2#Marshalers) allows overriding the marshal behavior of specific types, even if you do not control those types.
+[`encoding/json/v2.MatchCaseInsenstiveNames`](/pkg/encoding/json/v2#MatchCaseInsenstiveNames) allows control over the case sensitivity of matching JSON object member names to Go struct fields.
 
-이러한 개선 사항들도 좋지만, 마이그레이션을 해야 하는 가장 큰 이유는 v2 패키지가 v1보다 더 엄격하고 상호 운용성이 높은 기본값을 선택했다는 점입니다. [`encoding/json` 문서](/pkg/encoding/json#hdr-Migrating_to_v2)에 전체 차이점이 설명되어 있으며, 주요 내용은 다음과 같습니다.
+While these improvements are nice, the best reason to migrate is that the v2 package chooses stricter, more interoperable defaults than v1. The [`encoding/json` documentation](/pkg/encoding/json#hdr-Migrating_to_v2) contains the complete set of differences, but some highlights include:
 
-* v1에서는 문자열 내의 잘못된 UTF-8 바이트가 유니코드 대체 문자로 조용히 대체됩니다. 반면, v2에서는 잘못된 UTF-8이 존재할 경우 에러가 발생합니다.
-* v1에서는 중복된 이름이 있는 JSON 객체가 허용됩니다. 반면, v2에서는 중복된 이름이 있는 JSON 객체가 있을 경우 에러가 발생합니다.
-* v1에서는 nil Go 슬라이스나 Go 맵이 JSON null로 마샬링됩니다. 반면, v2에서는 nil Go 슬라이스나 Go 맵을 각각 빈 JSON 배열이나 JSON 객체로 마샬링합니다.
-* v1에서는 구조적 에러(예: 잘못된 필드 태그)가 있는 Go 구조체 타입에 대해 런타임에 에러를 보고하지 않습니다. 반면, v2에서는 JSON 직렬화와 관련하여 유효하지 않은 Go 타입에 대해 런타임 에러를 보고합니다.
+* In v1, bytes of invalid UTF-8 within a string are silently replaced with the Unicode replacement character. In contrast, in v2 the presence of invalid UTF-8 results in an error.
+* In v1, a JSON object with duplicate names is permitted. In contrast, in v2 a JSON object with duplicate names results in an error.
+* In v1, a nil Go slice or Go map is marshaled as a JSON null. In contrast, v2 marshals a nil Go slice or Go map as an empty JSON array or JSON object, respectively.
+* In v1, errors are never reported at runtime for Go struct types that have some form of structural error (e.g., a malformed field tag). In contrast, v2 reports a runtime error for Go types that are invalid as they relate to JSON serialization.
 
-이러한 변경 사항들은 `encoding/json/v2`가 더 넓은 JSON 생태계와 더 잘 상호 운용되고, 예측 가능하며, 오류가 적도록 설계되었습니다.
-하지만 이는 하위 호환성을 유지하지 않습니다. 일부 애플리케이션은 v1의 동작 방식에 의존하고 있을 수 있습니다.
-따라서 v2로 마이그레이션할 때는 호환성을 보장하기 위해 세심한 테스트가 수반되어야 합니다.
+These changes are designed to make `encoding/json/v2` more interoperable with the wider JSON ecosystem, less surprising, and less error-prone.
+But they are not backwards compatible; some applications may depend on the v1 behavior.
+Therefore, migration to v2 must involve careful testing to ensure compatibility.
 
-# API vs 동작 변경 사항 (behavior changes)
+# API vs behavior changes
 
-단순한 마샬링(marshaling) 및 언마샬링(unmarshaling)의 경우, Go API는 언어 수준에서 대부분 호환되므로 API 마이그레이션이 매우 간단합니다.
-예를 들어, `import "encoding/json"`을 `import "encoding/json/v2"`로 변경하는 것만으로도 `b, err := json.Marshal(v)` 코드는 그대로 컴파일됩니다.
+For simple marshaling and unmarshaling, the Go APIs are largely compatible at the language level, and thus the API migration is trivial.
+For example, `b, err := json.Marshal(v)` will continue to compile simply by switching `import "encoding/json"` to `import "encoding/json/v2"`.
 
-v1에서 v2로 마이그레이션할 때 어려운 점은 API의 차이가 아니라, 마샬링(marshaling) 및 언마샬링(unmarshaling) 시의 동작 변경 사항입니다.
-다음 프로그램을 살펴보십시오:
+The difficult part of migrating from v1 to v2 is not the API differences, but behavior changes in marshaling and unmarshaling.
+Consider this program:
 
-```go
+```
 package main
 
 import (
@@ -63,28 +63,28 @@ func main() {
 }
 ```
 
-[실행](/play/p/Us887UVmEwm) 시, 다음과 같이 출력됩니다:
+When [run](/play/p/Us887UVmEwm), this outputs:
 
 ```
 [{"Name":"Oliver","Nicknames":["Ollie","Olliepop"]},{"Name":"Remi","Nicknames":null}]
 ```
 
-임포트를 변경하여 이 프로그램을 `encoding/json/v2`로 간단히 마이그레이션하더라도, 프로그램은 여전히 컴파일됩니다.
-[실행](/play/p/E-SprmrVHZF)하면 다음과 같이 출력됩니다:
+If we trivially migrate this program to `encoding/json/v2` by changing the import, the program still compiles.
+When [run](/play/p/E-SprmrVHZF), it outputs:
 
 ```
 [{"Name":"Oliver","Nicknames":["Ollie","Olliepop"]},{"Name":"Remi","Nicknames":[]}]
 ```
 
-Remi의 "Nicknames" 필드가 `null`에서 `[]`로 변경된 점에 유의하십시오.
-만약 이것이 새로운 프로그램이었다면 빈 배열을 사용하는 것이 좋은 개선이었겠지만, 기존 애플리케이션의 경우 이 출력값을 사용하는 다운스트림 소비자들이 `null` 값의 존재에 의존하고 있을 수 있으므로, 이러한 변경 사항은 시스템 장애를 일으킬 수 있습니다.
+Notice that the "Nicknames" field for Remi has changed from `null` to `[]`.
+If this were a new program, using an empty array is likely a nice improvement, but in an existing application downstream consumers of this output may be depending on the presence of `null`, so this change may break them.
 
-# 옵션
+# Options
 
-v2 동작이 v1과 다른 모든 부분은 [`Options`](/pkg/encoding/json/v2#Options)에서 다루고 있으며, 이를 통해 v2 API를 사용하면서 v1 동작을 지정할 수 있습니다.
-v2 API를 사용하되 모든 v1 동작을 지정하려면 [`DefaultOptionsV1`](/pkg/encoding/json#DefaultOptionsV1)을 사용하십시오:
+All of the places where v2 behavior diverges from v1 are covered by [`Options`](/pkg/encoding/json/v2#Options) which allow specifying the v1 behavior using the v2 API.
+To use the v2 API, but specify all v1 behaviors, use [`DefaultOptionsV1`](/pkg/encoding/json#DefaultOptionsV1):
 
-```go
+```
 package main
 
 import (
@@ -111,66 +111,66 @@ func main() {
 }
 ```
 
-[실행](/play/p/8wg09vDeNN6)하면, 이번에도 다시 `null`이 출력됩니다:
+When [run](/play/p/8wg09vDeNN6), this once again outputs `null`:
 
 ```
 [{"Name":"Oliver","Nicknames":["Ollie","Olliepop"]},{"Name":"Remi","Nicknames":null}]
 ```
 
-[DefaultOptionsV1](/pkg/encoding/json#DefaultOptionsV1) 문서는 v1 호환성을 위해 사용되는 옵션의 전체 세트를 나열합니다.
-나중에 정의된 옵션이 이전 옵션을 덮어쓰므로, 이 목록을 사용하여 v2 동작을 하나씩 활성화할 수 있습니다.
+The [DefaultOptionsV1](/pkg/encoding/json#DefaultOptionsV1) documentation lists the full set of options used for v1 compatibility.
+Later options override earlier options, so you can use this list to enable v2 behaviors one at a time.
 
-# 마이그레이션
+# Migration
 
-애플리케이션의 유형과 리스크 허용 범위에 따라 v2 마이그레이션에 접근하는 여러 가지 방법이 있습니다.
+Depending on the type of application and its risk tolerance, there are several different ways to approach a v2 migration:
 
-* 높은 위험 감수 성향: [all-at-once](#all-at-once)
-* 낮은 위험 감수 성향 또는 문제 해결 중: [option-by-option](#option-by-option)
-* 프로덕션 서버 애플리케이션: [jsonsplit](#jsonsplit)
+* High risk tolerance: [all-at-once](#all-at-once)
+* Low risk tolerance or troubleshooting: [option-by-option](#option-by-option)
+* Production server applications: [jsonsplit](#jsonsplit)
 
 ## All-at-once {#all-at-once}
 
-애플리케이션이 단순하거나 리스크 허용 범위가 높은 경우(마이그레이션으로 인해 문제가 발생해도 영향이 적은 경우), 정교한 마이그레이션 프로세스가 필요하지 않을 수 있습니다.
-단순히 호출 사이트(callsites)에서 `encoding/json/v2`를 사용하도록 업데이트하고, 테스트가 통과하는지 확인한 후 커밋하십시오.
+If the application is simple or has high risk tolerance (there is little consequence to the migration causing problems), then there may be no need for an elaborate migration process.
+Simply update callsites to use `encoding/json/v2`, make sure the tests pass, and check it in.
 
-호환성 문제가 발생하는 경우, 변경 사항이나 에러 메시지를 통해 차이점이 명확하게 드러날 수 있으며, 이 경우 [적절한 호환성 옵션](/pkg/encoding/json#DefaultOptionsV1)을 설정할 수 있습니다.
-문제의 원인이 명확하지 않은 경우, 문제 해결을 돕기 위해 아래 방법 중 하나를 사용할 수 있습니다.
+If you do run into compatibility issues, the source of the difference may be clear from the change or error message, in which case you can set the [appropriate compatibility option](/pkg/encoding/json#DefaultOptionsV1).
+If the source of the problem is not clear, you may want to use one of the approaches below to help troubleshoot.
 
-이는 나머지 문제를 추적하기 위한 더 세밀한 접근 방식으로 넘어가기 전에, 명백한 문제(단위 테스트에 의해 식별된 문제 등)를 빠르게 찾아 수정하는 방법이 될 수도 있습니다.
+This can also be a quick way to find and fix obvious issues (such as those identified by unit tests) before moving on to a more nuanced approach to track down the remainder.
 
-## 옵션별 설명 {#option-by-option}
+## Option-by-option {#option-by-option}
 
-애플리케이션이 복잡하거나 위험 허용 범위가 낮다면, 더 느리고 신중한 접근 방식이 필요할 수 있습니다.
+If the application is complex or has a low risk tolerance, then you may need to take a slower, more careful approach.
 
-앞서 언급했듯이, [DefaultOptionsV1](/pkg/encoding/json#DefaultOptionsV1)을 사용하여 `Marshal` 또는 `Unmarshal`을 호출하면 `encoding/json`과 동일하게 동작합니다.
-첫 번째 단계로, `DefaultOptionsV1`을 사용하여 `encoding/json/v2`로의 모든 호출을 마이그레이션하십시오.
-이는 단순하고 안전한 변경입니다. 실제로 이것이 바로 [`encoding/json`이 `Marshal` 및 `Unmarshal`를 구현하는 방식](https://cs.opensource.google/go/go/+/refs/tags/go1.27rc2:src/encoding/json/v2_encode.go;l=184-186)입니다!
+As mentioned above, calling `Marshal` or `Unmarshal` with [DefaultOptionsV1](/pkg/encoding/json#DefaultOptionsV1) makes the call behave identically to `encoding/json`.
+As a first step, migrate all calls to `encoding/json/v2` with `DefaultOptionsV1`.
+This is a trivial and safe change; in fact, this is exactly how [`encoding/json` implements `Marshal` and `Unmarshal`](https://cs.opensource.google/go/go/+/refs/tags/go1.27rc2:src/encoding/json/v2_encode.go;l=184-186)!
 
-추가로 전달된 옵션은 이전 옵션을 덮어쓰므로, 개별 [v1 호환성 옵션](/pkg/encoding/json#DefaultOptionsV1)을 비활성화할 수 있습니다.
-예를 들어, `json.Marshal(v, jsonv1.DefaultOptionsV1(), json.FormatNilSliceAsNull(false))`는 `nil` 슬라이스가 빈 배열로 포맷팅되는 점을 제외하고는 v1과 동일하게 동작합니다.
+Additional passed options override earlier options, so you can disable individual [v1 compatibility options](/pkg/encoding/json#DefaultOptionsV1).
+For example, `json.Marshal(v, jsonv1.DefaultOptionsV1(), json.FormatNilSliceAsNull(false))` will behave like v1 except that `nil` slices format as empty arrays.
 
-이는 모든 동작을 한꺼번에 변경하는 대신, 더 완만한 마이그레이션을 수행할 수 있는 경로를 제공합니다.
-무엇이 변경되고 있는지 확실히 확인하기 위해 한 번에 하나의 옵션만 활성화하거나, 유사한 옵션들을 그룹화하여 활성화할 수 있습니다.
-또는 트러블슈팅 시, 아래 `jsonsplit`에서 살펴볼 옵션 감지 방식과 유사하게, 정확히 어떤 동작 변경으로 인해 문제가 발생했는지 이분법(bisect) 방식으로 찾아낼 수 있는 방법을 제공합니다.
+This provides a path to perform a slower migration rather than changing all behavior at once.
+You could enable one option at a time to be very sure what is changing, or group similar options.
+Alternatively, when troubleshooting these options provide a way to bisect down to the exact breaking behavior change, similar to the option detection we'll see in `jsonsplit` below.
 
 ## jsonsplit {#jsonsplit}
 
-[`github.com/go-json-experiment/jsonsplit`](https://pkg.go.dev/github.com/go-json-experiment/jsonsplit)은 운영 환경에서 v1과 v2 사이의 차이점을 보고함으로써 마이그레이션을 돕는 JSON 래퍼 패키지입니다.
+[`github.com/go-json-experiment/jsonsplit`](https://pkg.go.dev/github.com/go-json-experiment/jsonsplit) is a JSON wrapper package that aids migration by reporting differences between v1 and v2 in a production setting.
 
-`jsonsplit`은 기본적으로 `encoding/json`과 동일하게 동작하는 `Marshal` 및 `Unmarshal` 래퍼 함수를 제공하며, 런타임에 v1, v2 또는 두 버전 모두를 사용하도록 설정할 수 있습니다.
+`jsonsplit` provides `Marshal` and `Unmarshal` wrapper functions which behave the same as `encoding/json` by default, but can be configured at runtime to use v1, v2, or both.
 
-([`CallBothButReturnV1`](https://pkg.go.dev/github.com/go-json-experiment/jsonsplit#CallMode))를 사용하도록 설정하면, `jsonsplit.Marshal`은 입력을 v1과 v2로 각각 한 번씩, 총 두 번 마샬링합니다.
-차이점이 발견되면 이를 보고하지만, 호출자에게는 여전히 v1 값을 반환합니다.
-이를 통해 운영 서비스는 동작을 변경하지 않고도 차이점을 보고할 수 있습니다.
-선택 사항인 [`AutoDetectOptions`](https://pkg.go.dev/github.com/go-json-experiment/jsonsplit#Codec)를 사용하면, `jsonsplit`은 어떤 특정 옵션이 차이를 유발하는지 자동으로 판별합니다.
+When configured to use both ([`CallBothButReturnV1`](https://pkg.go.dev/github.com/go-json-experiment/jsonsplit#CallMode)), `jsonsplit.Marshal` will marshal the input twice: once with v1 and v2.
+It will report any differences, but still return the v1 value to the caller.
+This allows a production service to report differences without changing its behavior.
+With the optional [`AutoDetectOptions`](https://pkg.go.dev/github.com/go-json-experiment/jsonsplit#Codec), `jsonsplit` will even automatically determine which specific options cause the difference.
 
-이 기능에는 비용이 따른다는 점에 유의하십시오.
-차이점을 감지하기 위해 v1과 v2 모두를 사용하여 마샬링(marshaling)하면 마샬링 비용이 거의 두 배로 증가하며, `AutoDetectOptions`는 관련 옵션을 좁히기 위해 훨씬 더 많은 마샬링을 수행합니다.
-이러한 비용을 완화하기 위해, `jsonsplit`은 [`SetMarshalCallRatio`](https://pkg.go.dev/github.com/go-json-experiment/jsonsplit#Codec.SetMarshalCallRatio)를 통해 호출의 무작위 서브셋만 확인하도록 허용합니다.
+Note that this functionality comes at a cost.
+Marshaling with both v1 and v2 to detect differences will approximately double the cost of marshaling, and `AutoDetectOptions` performs even more marshals to narrow down the relevant options.
+To mitigate these costs, `jsonsplit` allows checking only a random subset of calls via [`SetMarshalCallRatio`](https://pkg.go.dev/github.com/go-json-experiment/jsonsplit#Codec.SetMarshalCallRatio).
 
-여기에서는 원래 예제에 `jsonsplit`을 적용해 보았습니다:
+Here, we have applied `jsonsplit` to the original example:
 
-```go
+```
 package main
 
 import (
@@ -180,15 +180,15 @@ import (
 )
 
 func init() {
-	// 차이점을 감지할 수 있도록 v1과 v2를 모두 호출하지만,
-	// v1 출력물을 계속 사용합니다.
+	// Call both v1 and v2 so we can detect differences, but continue using
+	// v1 output.
 	jsonsplit.GlobalCodec.SetMarshalCallMode(jsonsplit.CallBothButReturnV1)
 
-	// 차이점이 감지되었을 때, 어떤 옵션이 차이를 유발하는지
-	// 자동으로 감지하도록 지정합니다.
+	// Specify that when a difference is detected, to auto-detect which
+	// options are causing the difference.
 	jsonsplit.GlobalCodec.AutoDetectOptions = true
 
-	// v1과 v2 사이의 차이점이 감지될 때마다 로그를 남깁니다.
+	// Log every time we detect a difference between v1 and v2.
 	jsonsplit.GlobalCodec.ReportDifference = func(d jsonsplit.Difference) {
 		fmt.Printf("detected jsonv1-to-jsonv2 difference: %v\n", d)
 	}
@@ -212,39 +212,39 @@ func main() {
 }
 ```
 
-[실행](/play/p/wagp5v8V1w-)하면, 차이점이 보고되며 심지어 `FormatNilSliceAsNull`이 그 차이의 원인임이 나타납니다:
+When [run](/play/p/wagp5v8V1w-), this reports the difference and even that `FormatNilSliceAsNull` is responsible for the difference:
 
 ```
 detected jsonv1-to-jsonv2 difference: {"Caller":"main.main+5","Func":"Marshal","GoType":"[]main.Pet","JSONValueV1":[{"Name":"Oliver","Nicknames":["Ollie","Olliepop"]},{"Name":"Remi","Nicknames":null}],"JSONValueV2":[{"Name":"Oliver","Nicknames":["Ollie","Olliepop"]},{"Name":"Remi","Nicknames":[]}],"Options":["jsonv2.FormatNilSliceAsNull"]}
 [{"Name":"Oliver","Nicknames":["Ollie","Olliepop"]},{"Name":"Remi","Nicknames":null}]
 ```
 
-다음과 같은 절차를 통해 운영 서비스를 원활하게 마이그레이션할 수 있습니다:
+We can migrate our production service smoothly using a procedure like the following:
 
-1. 호출 사이트를 `jsonsplit`으로 전환하고, [`CallBothButReturnV1`](https://pkg.go.dev/github.com/go-json-experiment/jsonsplit#CallMode), [`AutoDetectOptions`](https://pkg.go.dev/github.com/go-json-experiment/jsonsplit#CallMode) (선택 사항)를 설정하십시오. 또한 [`ReportDifference`](https://pkg.go.dev/github.com/go-json-experiment/jsonsplit#CallMode)에 선호하는 모니터링 방식(로그 기록 또는 게시된 메트릭 등)을 연결하십시오.
+1. Switch callsites to `jsonsplit`, set [`CallBothButReturnV1`](https://pkg.go.dev/github.com/go-json-experiment/jsonsplit#CallMode), [`AutoDetectOptions`](https://pkg.go.dev/github.com/go-json-experiment/jsonsplit#CallMode) (optional), and wire up your preferred monitoring approach to [`ReportDifference`](https://pkg.go.dev/github.com/go-json-experiment/jsonsplit#CallMode) (such as logging or published metrics).
 
-2. 보고된 차이점이 있는지 프로덕션 환경을 모니터링하십시오.
+2. Monitor your production environment for reported differences.
 
-3. 차이점 인코딩(Encode differences).
+3. Encode differences.
 
-`jsonsplit`이 차이점을 보고하는 경우, 출력이 동일하도록 옵션이나 타입을 조정하십시오.
+Where `jsonsplit` reports differences, adjust the options or types to ensure identical output.
 
-예를 들어, 위의 예시에서는 `json.FormatNilSliceAsNull(true)` 옵션을 전달하십시오.
-다른 경우에 v2는 수정하기 간단한 문제를 보고할 수 있습니다.
-예를 들어, 잘못된 타입(구조체 등)에 "string" JSON 구조체 필드 태그를 적용하는 것은 v1에서는 무시되었지만, v2에서는 에러를 보고합니다.
-[`ReportErrorsWithLegacySemantics`](/pkg/encoding/json#ReportErrorsWithLegacySemantics)를 사용하면 해당 에러를 억제할 수 있지만, "string" 태그를 제거하는 것이 더 합리적입니다.
-어차피 아무런 역할도 하지 않기 때문입니다.
+For example, in the example above, pass the `json.FormatNilSliceAsNull(true)` option.
+In other cases, v2 may report a problem that is straightforward to fix.
+For example, applying the "string" JSON struct field tag to an invalid type (such as a struct) is ignored in v1, but reports an error in v2.
+While [`ReportErrorsWithLegacySemantics`](/pkg/encoding/json#ReportErrorsWithLegacySemantics) would suppress the error, it makes more sense to drop the "string" tag.
+It isn't doing anything anyway.
 
-출력 결과의 차이가 반드시 다운스트림 동작의 파손을 의미하는 것은 아니며, 파손될 가능성이 있음을 의미한다는 점에 유의하십시오.
-현재 옵션을 조정하는 이유는 미세한 출력 변화를 평가하기 위해 멈추지 않고 마이그레이션의绝대다수를 완료하기 위함입니다. 하지만 v2로 전환한 후에는 해당 위치들을 다시 검토하여 새로운 동작으로 마이그레이션할 수 있는지 판단해야 합니다.
+Note that a difference in output does not necessarily mean that downstream behavior is broken, but that there is an opportunity for breakage.
+We adjust options now so we can complete the vast majority of the migration without stopping to evaluate subtle output changes, but after switching to v2, you should revisit these locations to determine if you can migrate to the new behavior.
 
-4. v2로 전환하십시오.
+4. Switch to v2.
 
-운영 환경에서 더 이상 새로운 차이점이 보고되지 않으면, [`OnlyCallV2`](https://pkg.go.dev/github.com/go-json-experiment/jsonsplit#CallMode)를 설정하여 v2 동작으로 마이그레이션하거나, 차이점을 계속 확인하기 위해 [`CallBothButReturnV2`](https://pkg.go.dev/github.com/go-json-experiment/jsonsplit#CallMode)를 설정할 수 있습니다.
+Once your production environment stops reporting new differences, you can migrate to v2 behavior by setting [`OnlyCallV2`](https://pkg.go.dev/github.com/go-json-experiment/jsonsplit#CallMode) or [`CallBothButReturnV2`](https://pkg.go.dev/github.com/go-json-experiment/jsonsplit#CallMode) to keep checking for differences.
 
-5. 정리.
+5. Clean up.
 
-v2로의 전환이 안전하게 배포되면, `jsonsplit`에서 `encoding/json/v2` 자체로 전환하여 마이그레이션을 정리하십시오.
-이 시점에서, v1 동작을 유지했던 (3)의 사례들을 평가하여 v2 동작으로 전환해도 안전한지 결정할 수 있습니다.
+Once the switch to v2 is safely deployed, clean up the migration, by switching from `jsonsplit` to `encoding/json/v2` itself.
+At this point, you can evaluate the cases from (3) that kept some v1 behavior to determine if it is safe to switch them to the v2 behavior.
 
-`jsonsplit` 마이그레이션에 대한 자세한 내용은 [`jsonsplit` 문서](https://pkg.go.dev/github.com/go-json-experiment/jsonsplit#hdr-Example_usage_and_migration)를 참조하세요.
+See the [`jsonsplit` documentation](https://pkg.go.dev/github.com/go-json-experiment/jsonsplit#hdr-Example_usage_and_migration) for more details about `jsonsplit` migrations.

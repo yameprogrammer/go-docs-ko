@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`srcimporter` 패키지는 설치된 패키지가 아닌 소스 파일에서 직접 임포트하는 기능을 구현합니다.
+Package srcimporter implements importing directly from source files rather than installed packages.
 
 ## 원문 요약
 

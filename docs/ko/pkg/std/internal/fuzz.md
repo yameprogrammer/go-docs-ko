@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`fuzz` 패키지는 `go test`로 빌드된 테스트와 `testing` 패키지의 퍼징(fuzzing) 기능을 사용하는 프로그램에 공통적인 퍼징 기능을 제공합니다.
+Package fuzz provides common fuzzing functionality for tests built with "go test" and for programs that use fuzzing functionality in the testing package.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`race` 패키지는 레이스 디텍터(race detector)를 위해 코드를 수동으로 인스트루멘테이션(instrumenting)하는 데 필요한 헬퍼 함수들을 포함하고 있습니다.
+Package race contains helper functions for manually instrumenting code for the race detector.
 
 ## 원문 요약
 

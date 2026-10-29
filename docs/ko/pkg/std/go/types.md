@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`types` 패키지는 데이터 타입을 선언하고 Go 패키지의 타입 체크를 위한 알고리즘을 구현합니다.
+Package types declares the data types and implements the algorithms for type-checking of Go packages.
 
 ## 원문 요약
 

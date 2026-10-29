@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`runtime` 패키지는 고루틴을 제어하는 함수와 같이 Go의 런타임 시스템과 상호작용하는 연산들을 포함하고 있습니다.
+Package runtime contains operations that interact with Go's runtime system, such as functions to control goroutines.
 
 ## 원문 요약
 

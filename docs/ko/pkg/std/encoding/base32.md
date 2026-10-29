@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`base32` 패키지는 RFC 4648에 지정된 base32 인코딩을 구현합니다.
+Package base32 implements base32 encoding as specified by RFC 4648.
 
 ## 원문 요약
 

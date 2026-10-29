@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`ast` 패키지는 Go 패키지의 구문 트리(syntax trees)를 표현하는 데 사용되는 타입들을 선언합니다.
+Package ast declares the types used to represent syntax trees for Go packages.
 
 ## 원문 요약
 

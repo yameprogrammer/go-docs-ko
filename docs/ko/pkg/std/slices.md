@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`slices` 패키지는 모든 타입의 슬라이스에 유용한 다양한 함수들을 정의합니다.
+Package slices defines various functions useful with slices of any type.
 
 ## 원문 요약
 

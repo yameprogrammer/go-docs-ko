@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`unsafeheader` 패키지는 Go 런타임의 slice 및 string 구현을 위한 헤더 선언을 포함하고 있습니다.
+Package unsafeheader contains header declarations for the Go runtime's slice and string implementations.
 
 ## 원문 요약
 

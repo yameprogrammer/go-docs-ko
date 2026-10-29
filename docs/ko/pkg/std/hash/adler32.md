@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-package adler32는 Adler-32 체크섬을 구현합니다.
+Package adler32 implements the Adler-32 checksum.
 
 ## 원문 요약
 

@@ -1,98 +1,57 @@
-# Go SIMD 코드 생성기들
+# Go SIMD 코드 생성기(code generators)
 
-Go 언어에서 SIMD(단일 명령어로 여러 데이터 처리)를 활용하는 것은 까다로운 일입니다. Go 컴파일러는 자동 벡터화(auto-vectorization)를 수행하지 않으며, Go 어셈블리를 직접 작성하는 것은 학습 곡선이 높고 유지보수가 어렵기 때문입니다.
+이 디렉터리는 Go의 SIMD 지원을 위한 코드 생성기와, 해당 생성기들을 빌드하는 데 사용되는 라이브러리 및 디버깅 도구들을 포함하고 있습니다. 이는 메인 Go 트리와는 분리된 별도의 모듈입니다. `main.go`는 모든 생성기를 실행하는 드라이버이며, 또는 각 생성기를 개별적으로 실행할 수도 있습니다.
 
-이러한 문제를 해결하기 위해, 고수준의 정의를 사용하여 Go 어셈블리를 생성해 주는 여러 코드 생성기들이 개발되었습니다.
-
-## 주요 도구들
-
-### [avo](https://github.com/mmcloughlin/avo)
-`avo`는 Go 언어 자체를 사용하여 어셈블리 코드를 생성하는 라이브러리입니다. 어셈블리 파일을 직접 작성하는 대신, Go 코드로 레지스터 할당과 명령어 시퀀스를 정의하면 `avo`가 최적화된 `.s` 파일을 생성합니다.
-
-**특징:**
-- **강력한 타입 체크:** 레지스터 타입 불일치를 컴파일 타임에 잡아낼 수 있습니다.
-- **자동 레지스터 할당:** 사용 가능한 레지스터를 효율적으로 관리합니다.
-- **유연성:** 복잡한 루프 구조와 조건부 실행을 정의할 수 있습니다.
-
-### [void](https://github.com/klauspost/void)
-`void`는 `avo`와 유사하지만, 특히 성능 최적화와 다양한 아키텍처 지원에 중점을 둔 도구입니다. `klauspost/compress`와 같은 고성능 라이브러리에서 널리 사용됩니다.
-
-## 왜 코드 생성기를 사용하는가?
-
-| 방식 | 장점 | 단점 |
-| :--- | :--- | :--- |
-| **순수 Go** | 이식성이 높고 작성이 쉬움 | SIMD 활용 불가, 성능 제한적 |
-| **수동 어셈블리** | 최대 성능 구현 가능 | 작성 및 디버깅이 매우 어려움, 아키텍처 종속적 |
-| **코드 생성기** | 고성능 + 유지보수 가능성 | 추가 빌드 단계 필요, 학습 필요 |
-
-## 사용 예시 (Conceptual)
-
-일반적으로 이러한 도구들은 다음과 같은 흐름으로 작동합니다:
-
-1. **정의:** Go 코드로 어떤 SIMD 명령어를 사용할지 정의합니다.
-   ```go
-   // pseudo-code
-   gen.Instruction(AVX2.VPADDD, reg1, reg2, reg3)
-   ```
-2. **생성:** 생성기를 실행하여 `.s` 파일(Plan 9 어셈블리)을 만듭니다.
-3. **컴파일:** `go build`가 생성된 `.s` 파일을 함께 컴파일합니다.
-
-## 결론
-
-Go에서 극한의 성능이 필요한 수학 연산, 암호화, 데이터 압축 등을 구현해야 한다면 `avo`와 같은 SIMD 코드 생성기를 검토해 보시기 바랍니다. 이는 수동으로 어셈블리를 작성하는 위험을 줄이면서도 하드웨어의 잠재력을 최대한 끌어낼 수 있는 최선의 방법입니다.
-
-이 디렉토리는 Go의 SIMD 지원을 위한 코드 생성기와, 해당 생성기들을 빌드하는 데 사용되는 라이브러리 및 디버깅 도구들을 포함하고 있습니다. 이는 메인 Go 트리와는 별개의 모듈입니다. `main.go`는 모든 생성기를 실행하는 드라이버이며, 또는 각 생성기를 개별적으로 실행할 수도 있습니다.
-
-우리는 amd64, arm64 (NEON), arm64 SVE, wasm의 네 가지 **타겟(targets)**에 대해 생성합니다. SVE는 GOARCH가 아닙니다. 이는 고유한 생성 파일, 고유한 확장 벡터 타입, 그리고 고유한 simdgen 호출 방식을 가진 arm64의 기능입니다. SVE는 전체 과정에서 별도의 타겟처럼 동작하므로, "네 가지 타겟"은 항상 이 네 가지를 의미합니다.
+우리는 amd64, arm64 (NEON), arm64 SVE, 그리고 wasm의 네 가지 **타겟(targets)**을 위해 생성합니다. SVE는 GOARCH가 아닙니다. 이는 고유한 생성 파일, 고유한 확장 벡터 타입(scalable vector types), 그리고 고유한 simdgen 호출 방식을 가진 arm64의 기능입니다. SVE는 전체 과정에서 별도의 타겟처럼 동작하므로, "네 가지 타겟"은 항상 이 네 가지를 의미합니다.
 
 ## 우리가 생성하는 패키지들
 
-Go SIMD API는 `$GOROOT/src/simd`에 위치합니다:
+Go SIMD API는 `$GOROOT/src/simd` 아래에 위치합니다:
 
 | 경로 | 설명 |
 |---|---|
-| `simd/` | 이식 가능한(Portable) 패키지. 길이 독립적인 벡터 타입만 포함 (`Int8s`, `Float32s`, `Mask8s`, …). 모든 플랫폼에서 작동합니다. |
-| `simd/archsimd/` | 플랫폼 패키지. 고정 너비 타입 (`Int8x16` … `Float64x8`) 및 SVE의 확장 가능(scalable) 타입을 포함합니다. 내용은 GOARCH에 따라 다릅니다. |
-| `simd/internal/spec/` | 실행 가능한 명세서. 빌드 가능한 Go 코드이지만, 직접 호출하도록 설계되지 않았습니다. |
-| `simd/internal/simdref/` | API의 참조 구현체로, `refgen`에 의해 명세서(spec)로부터 생성됩니다. |
+| `simd/` | 이식 가능한 패키지. 길이 제한이 없는 벡터 타입만 포함 (`Int8s`, `Float32s`, `Mask8s`, …). 모든 플랫폼에서 동작합니다. |
+| `simd/archsimd/` | 플랫폼 패키지. 고정 너비 타입 (`Int8x16` … `Float64x8`) 및 SVE의 확장 가능(scalable) 타입이 포함됩니다. 내용은 GOARCH에 따라 다릅니다. |
+| `simd/internal/spec/` | 실행 가능한 사양서. 빌드 가능한 Go 코드이지만, 직접 호출하도록 설계되지 않았습니다. |
+| `simd/internal/simdref/` | API의 참조 구현체로, `refgen`에 의해 spec으로부터 생성됩니다. |
 | `simd/internal/bridge/` | `simd`와 `archsimd` 사이의 연결 고리. `midway`에 의해 생성되며 사용자에게 노출되지 않습니다. |
 
 ## "하나의 의미" 규칙
 
-`simd`와 `archsimd`는 모두 단 하나의 규칙을 따르며, 이는 프로젝트 전체에서 가장 어렵게 얻어낸 속성입니다:
+`simd`와 `archsimd` 모두 단 하나의 규칙을 따르며, 이는 전체 프로젝트에서 가장 어렵게 얻어낸 특성입니다:
 
-> **하나의 이름은 하나의 의미를 갖습니다.** 이름이 모든 플랫폼에 존재하거나 두 패키지 모두에 존재할 필요는 없지만, 이름이 존재하는 곳이라면 어디서든 동일한 시그니처와 동일한 의미를 가진 동일한 작업을 나타내야 합니다.
+> **하나의 이름은 하나의 의미를 가집니다.** 이름이 모든 플랫폼이나 두 패키지 모두에 존재할 필요는 없지만, 존재한다면 어디서든 동일한 시그니처와 동일한 시맨틱을 가진 동일한 작업을 나타내야 합니다.
 
-메서드는 벡터(vector)와 마스크(mask)라는 두 가지 카테고리 내의 *모든 타입*에 대해 동일한 의미를 가져야 합니다. 또한, 메서드의 시그니처는 리시버에 따라 사소한 부분(예: 레인 수에 따른 차이)만 달라져야 합니다. `simd`와 `archsimd`는 완전히 동일한 확장 가능 벡터(scalable vector) 타입을 가집니다. 고정 너비(fixed-width) 아키텍처에서는 타입이 서로 다르지만, 메서드 이름, 시그니처 및 의미는 여전히 일치합니다.
+메서드는 벡터와 마스크라는 두 가지 카테고리 내의 *모든 타입*에 대해 동일한 의미를 가져야 합니다. 또한, 메서드의 시그니처는 리시버에 따라 약간의 차이만 있어야 합니다 (예: 레인 수에 따라 달라질 수 있음). `simd`와 `archsimd`는 완전히 동일한 확장 가능 벡터 타입을 가집니다. 고정 너비 아키텍처에서는 타입이 서로 다르지만, 메서드 이름, 시그니처 및 의미는 여전히 일치합니다.
 
-*카테고리 간에* 공유되는 메서드 이름은 적어도 논리적으로 관련이 있어야 합니다.
-예를 들어, `Mask8x16.ToBits()`는 `uint16` 비트맵을 생성하는 반면, `Float32x4.ToBits()`는 비트를 `Uint32x4`로 재해석합니다. 형태는 다르지만 의미상 분명히 연관되어 있으며, 둘 다 올바른 사용 예입니다.
+*카테고리 간에* 공유되는 메서드 이름은 최소한 논리적으로 관련이 있어야 합니다.
+예를 들어, `Mask8x16.ToBits()`는 `uint16` 비트맵을 생성하는 반면, `Float32x4.ToBits()`는 비트를 `Uint32x4`로 재해석합니다. 형태는 다르지만, 의미상 분명하게 연관되어 있으며 두 경우 모두 적절합니다.
 
-한 가지 주의할 점은, 부동 소수점 반올림이나 범위를 벗어난 변환 처리와 같이 하드웨어에 따라 달라지는 사소한 방식으로 메서드의 구현이 다를 수 있다는 것입니다. 허용되는 오차 범위(wiggle room)는 아직 명확하게 정의되지 않았습니다.
+한 가지 주의할 점은, 부동 소수점 반올림이나 범위를 벗어난 변환 처리와 같이 하드웨어에 따라 달라지는 사소한 방식으로 메서드의 구현이 서로 다를 수 있다는 것입니다. 허용되는 오차 범위(wiggle room)는 아직 명확하게 정의되지 않았습니다.
 
-역사적으로 이 규칙은 사후 감사를 수행하는 [`apisum`](https://github.com/aclements/go-misc/tree/master/simdapi/cmd/apisum)에 의해 유지되었습니다. `spec`은 이를 반대로 적용한 동일한 개념입니다. 즉, 관찰을 통한 일관성이 아니라 구조적으로 일관성을 유지하며, 문서이자 동작 오라클(behavioral oracle)의 역할도 겸합니다.
+역사적으로 이 규칙은 사후 검사를 수행하는 [`apisum`](https://github.com/aclements/go-misc/tree/master/simdapi/cmd/apisum)에 의해 유지되었습니다. `spec`은 이를 역순으로 적용한 동일한 개념입니다. 즉, 관찰을 통한 일관성 유지가 아니라 구조적으로 일관성을 갖도록 하며, 동시에 문서 및 동작 오라클(behavioral oracle)의 역할도 수행합니다.
 
-## 교차 계수 (The intersection corollary)
+## 교집합 따름정리 (The intersection corollary)
 
-`simd` 패키지 API는 고정 너비(fixed-width)를 가변 너비(scalable width)로 일반화한 후, 모든 아키텍처에 걸친 `archsimd` 패키지 API들의 교집합에 에뮬레이션 동작을 쿼리하기 위한 몇 가지 메서드를 추가한 것입니다. 이는 "하나의 의미(one meaning)" 규칙 덕분에 가능합니다.
+`simd` 패키지 API는 고정 너비를 가변 너비(scalable width)로 일반화한 후, 모든 아키텍처에 걸친 `archsimd` 패키지 API들의 교집합에 에뮬레이션 동작을 쿼리하기 위한 몇 가지 메서드를 추가한 형태입니다. 이는 "하나의 의미(one meaning)" 규칙 덕분에 가능합니다.
 
-이로 인한 또 다른 결과는 다음과 같습니다. `simd`에 연산을 추가하려는 경우, 모든 아키텍처에 걸쳐 `archsimd`에 해당 연산이 구현되어 있는지 확인하고, `archsimd` 패키지 내에서 에뮬레이션으로 구현된 부분은 명확하게 문서화하여 수행합니다.
+이로 인한 또 다른 결과는 다음과 같습니다. 만약 `simd`에 연산을 추가하고 싶다면, 모든 아키텍처에 걸쳐 `archsimd`에 해당 연산이 구현되어 있는지 확인해야 하며, `archsimd` 패키지 내에서 에뮬레이션으로 구현된 부분은 명확하게 문서화해야 합니다.
 
-`simd` 서피스의 핵심 제약 조건은 모든 연산이 모든 아키텍처에서 네이티브로 지원되거나 효율적으로 에뮬레이션 가능해야 한다는 점입니다. 일반적으로 어떤 연산이 보편적으로 효율적인지에 대해서는 Highway 프로젝트의 방향을 따릅니다.
+`simd` 서피스의 핵심 제약 사항은 모든 연산이 모든 아키텍처에서 네이티브로 지원되거나, 효율적으로 에뮬레이션 가능해야 한다는 점입니다. 일반적으로 어떤 연산이 보편적으로 효율적인지에 대해서는 Highway 프로젝트의 방향을 따릅니다.
 
 ## 제너레이터 (The generators)
 
 | 디렉토리 | 역할 |
 |---|---|
-| `simdgen/` | 가장 핵심적인 부분. Unification 기반. amd64/arm64/SVE API와 컴파일러 백엔드를 모두 생성합니다. |
-| `tmplgen/` | slice 연산, 비교, mask 병합, 변환 및 테스트 보일러플레이트를 위한 템플릿 확장. |
+| `simdgen/` | 핵심 디렉토리. Unification 기반. amd64/arm64/SVE API와 컴파일러 백엔드를 생성합니다. |
+| `tmplgen/` | 슬라이스 연산, 비교, 마스크 병합, 변환 및 테스트 상용구(boilerplate)를 위한 템플릿 확장. |
 | `wasmgen/` | wasm API. |
-| `midway/` | 아키텍처 간 메서드의 교집합을 계산하여 이식 가능한 `simd` 패키지의 선언문을 생성합니다. |
+| `midway/` | 아키텍처 간 메서드의 교집합을 계산하여 이식 가능한 `simd` 패키지의 선언부를 생성합니다. |
 | `specgen/` | `internal/spec`을 구체적인 API 설명으로 해석합니다. |
-| `specgen/specexpr/` | 벡터 형상(vector shapes)에 대한 제약 조건 솔버(Constraint solver). |
-| `unify/` | simdgen의 기반이 되는 unification 엔진. |
-| `gentools/` | 일반 공유 파일 쓰기 유틸리티: `-w`, `-diff`, `-txtar`, `-goroot`. 모든 생성기에서 사용됩니다. |
-| `sgutil/` | 이 생성기들에 특화된 여러 헬퍼 함수들: 경로 확인(path resolution), 정렬된 맵(ordered maps), 자연 정렬(natural sort). |
+| `specgen/specexpr/` | 벡터 모양(shape)에 대한 제약 조건 해결기(Constraint solver). |
+| `unify/` | simdgen이 기반하고 있는 unification 엔진. |
+| `gentools/` | 일반 공용 파일 쓰기 유틸리티: `-w`, `-diff`, `-txtar`, `-goroot`. 모든 생성기에서 사용됩니다. |
+| `sgutil/` | 이 생성기들에 특화된 다양한 헬퍼: 경로 분석, 정렬된 맵, 자연 정렬(natural sort). |
 | `cmd/refgen/` | spec으로부터 `internal/simdref`를 생성합니다. |
 | `cmd/specls/` | 생성기가 아님: spec이 확장되는 API를 출력합니다. spec을 위한 주요 디버깅 도구입니다. |
 
@@ -100,27 +59,26 @@ simd 패키지의 어떤 파일들이 생성되었으며 어떤 도구에 의해
 
 ## simdgen의 작동 방식
 
-simdgen은 네 가지 입력을 통합하고, 통합된 결과를 `Operation` 값으로 디코딩하며, 여러 단계의 정준화(canonicalization) 및 업데이트 과정을 수행한 후, 최종 `Operation` 집합에 대해 여러 이미터(emitter)를 실행합니다.
+simdgen은 네 개의 입력을 통합하고, 통합된 결과들을 `Operation` 값으로 디코딩하며, 여러 단계의 정준화(canonicalization) 및 업데이트 단계를 수행한 후, 최종 `Operation` 집합에 대해 여러 이미터(emitter)를 실행합니다.
 
 | 입력 | 내용 |
 |---|---|
 | 플랫폼 로더 (`xed.go`, `arm64/`, `sve/`) | ISA 테이블에서 `simdgen` 정의로 파싱된 머신 명령어 |
 | `types.yaml` | `simdgen` 정의로 작성된 유효한 타입들의 어휘집 |
 | `ops/*/categories.yaml` | 플랫폼 독립적인 API 정의: 이름, 문서, 교환 법칙 |
-| `ops/*/go_GOARCH.yaml` | ISA 정의와 Go API 사이의 접착제: `go:` (주로 정규표현식), `asm:` 패턴, 피연산자 패턴 및 기타 여러 특이 케이스 필드들 |
+| `ops/*/go_GOARCH.yaml` | ISA 정의와 Go API 사이의 연결 고리: `go:` (종종 정규 표현식), `asm:` 패턴, 피연산자 패턴 및 다양한 특이 케이스(quirk) 필드들 |
 
 놓치기 쉬운 두 가지 구조적 사실:
 
-- `!import ops/*/categories.yaml`는 **단일 전역 합계(single global sum)**를 생성합니다.
-  `ops/AddSub/`, `ops/Moves/`와 같은 디렉토리 구조는 외관상의 것일 뿐입니다. 디렉토리의 카테고리 항목을 해당 디렉토리의 아키텍처 항목으로 제한하는 범위(scope)는 없으며, 모든 항목이 서로 교차 조인(cross-join)됩니다.
+- `!import ops/*/categories.yaml`는 **단일 전역 합계(single global sum)**를 생성합니다. `ops/AddSub/`, `ops/Moves/`와 같은 디렉터리 구조는 외관상의 설정일 뿐입니다. 디렉터리의 category 항목을 해당 디렉터리의 arch 항목으로 제한(scope)하는 장치는 없으며, 모든 항목이 서로 교차 결합(cross-join)됩니다.
 
-- `unify.Def`는 누락된 모든 필드를 `Top`으로 처리하므로, **스키마가 존재하지 않습니다**. 임의로 생성되었거나 오타가 난 키는 조용히 수용되며 아무런 동작을 하지 않습니다. 체크인된 YAML의 여러 키들이 정확히 이 이유 때문에 불필요한 요소(dead weight)로 남아 있습니다.
+- `unify.Def`는 누락된 모든 필드를 `Top`으로 처리하므로 **스키마가 존재하지 않습니다**. 임의로 만들어냈거나 철자가 틀린 키는 조용히 수용되며 아무런 동작을 하지 않습니다. 체크인된 YAML의 여러 키들이 정확히 이 이유 때문에 불필요한 데이터(dead weight)로 남아 있습니다.
 
 외부 명령어 데이터가 체크인되지 않았습니다. `fetch-xed.sh` 및 `fetch-arm64.sh`를 사용하거나, `-xedPath` / `-arm64Path` (또는 `$XEDPATH` / `$ARM64_ISA_PATH`)를 기존 복사본의 경로로 지정하십시오.
 
 ## spec와 specgen이란 무엇인가
 
-`internal/spec`은 오퍼레이션을 제네릭 Go 함수로 설명합니다:
+`internal/spec`은 연산을 제네릭 Go 함수로 설명합니다:
 
 ```go
 // Add는 두 벡터의 해당 요소들을 더합니다.
@@ -131,44 +89,44 @@ func Add[E Nums, W Width](x, y Vec[E, W]) (z Vec[E, W]) {
 }
 ```
 
-`specgen.Load(dir string, opts *LoadOptions)`는 `([]*specgen.Func, error)`를 반환합니다. 각 `Func`는 **완전하게 인스턴스화된 구체적인(concrete)** API 시그니처입니다. `Recv`, `In`, `Out`은 `specgen.Arg` 값(파라미터 *이름*과 `specexpr.Type`)입니다. 따라서 `Func`는 타입뿐만 아니라 인자 이름까지 포함하며, 이는 시그니처를 비교하는 모든 작업에서 중요합니다. 또한 `Name`과 `Doc`이 존재합니다. `//specgen:name`, `//specgen:require` 및 `{{.var}}` 문서 템플릿 메커니즘에 대해서는 `simd/internal/spec/doc.go`를 읽어보시기 바랍니다.
+`specgen.Load(dir string, opts *LoadOptions)`는 `([]*specgen.Func, error)`를 반환합니다. 각 `Func`는 **완전히 인스턴스화된 구체적인(concrete)** API 시그니처입니다. `Recv`, `In`, `Out`은 `specgen.Arg` 값(파라미터 *이름*과 `specexpr.Type`)입니다. 따라서 `Func`는 타입뿐만 아니라 인자 이름도 함께 가지고 있으며, 이는 시그니처를 비교하는 모든 작업에서 중요하게 작용합니다. 또한 `Name`과 `Doc` 필드도 존재합니다. `//specgen:name`, `//specgen:require` 및 `{{.var}}` 문서 템플릿 메커니즘에 대해서는 `simd/internal/spec/doc.go`를 참조하십시오.
 
-specgen에서 무엇을 구축하기 전에 알아두어야 할 두 가지 속성이 있습니다:
+specgen에서 무엇인가를 구축하기 전에 알아두어야 할 두 가지 속성이 있습니다:
 
-1. **`Func.Name`은 이미 API 이름입니다.** `//specgen:name`은 specgen 내부에서 해석되므로, 소비자는 `ToBits` 및 `ReshapeToUint32s`를 보게 되며, 기반이 되는 spec 함수 이름은 절대 보지 않습니다. 구체적인 API 선언을 spec 함수와 매칭하는 것은 단순한 `(리시버 타입 이름, 메서드 이름)` 조회입니다. 어디에도 매핑 테이블이 필요하지 않습니다.
+1. **`Func.Name`이 이미 API 이름입니다.** `//specgen:name`은 specgen 내부에서 해석되므로, 사용자는 `ToBits` 및 `ReshapeToUint32s`를 보게 되며 내부의 spec 함수 이름은 절대 노출되지 않습니다. 구체적인 API 선언을 spec 함수와 매칭하는 것은 단순한 `(리시버 타입 이름, 메서드 이름)` 조회 과정입니다. 어느 곳에서도 매핑 테이블이 필요하지 않습니다.
 
-2. **`Func.Decl()`은 이미 문서(doc)와 시그니처를 합성하므로**, 선언문을 출력하거나 비교하는 모든 기능은 이를 다시 구현하는 대신 `Func.Decl()`을 기반으로 구축해야 합니다.
+2. **`Func.Decl()`은 이미 문서(doc)와 시그니처(signature)를 합성하므로**, 선언문을 출력하거나 비교하는 모든 기능은 이를 다시 구현하는 대신 `Func.Decl()`을 기반으로 구축해야 합니다.
 
 ## 이 트리에서 작업하기
 
-`_gen` 모듈은 `go.mod`에 명시된 Go 버전 이상이 필요합니다. 해당 버전의 작동하는 Go 개발 트리(dev tree) 또는 설치된 Go 시스템이 필요합니다.
+`_gen` 모듈은 `go.mod`에 명시된 버전 이상의 Go 버전이 필요합니다. 해당 버전의 작동하는 Go 개발 트리(dev tree) 또는 설치된 Go 시스템이 필요합니다.
 
-모든 제너레이터는 `-w` (트리에 쓰기), `-diff` (트리와 비교하여 통합 diff 출력), 그리고 `-txtar` (생성된 파일을 stdout으로 덤프; 기본값) 옵션을 지원합니다. **`-diff`를 습관적으로 사용하세요.** 생성된 파일들은 체크인되어 있으므로, 바이트 단위의 비교를 통해 여러분이 수행한 모든 변경 사항(아무것도 변경하지 않아야 하는 리팩토링 포함)에 대해 회귀 테스트(regression test)를 수행할 수 있습니다.
+모든 제너레이터는 `-w` (트리에 쓰기), `-diff` (트리와 비교하여 통합 diff 출력), `-txtar` (생성된 파일을 stdout으로 덤프; 기본값) 옵션을 지원합니다. **`-diff`를 지속적으로 사용하십시오.** 생성된 파일들이 체크인되어 있으므로, 이 파일들과 바이트 단위로 비교하는 것을 통해 아무것도 변경하지 않아야 하는 리팩토링을 포함하여, 당신이 수행한 모든 변경 사항에 대한 회귀 테스트(regression test)로 활용할 수 있습니다.
 
-생성기를 변경하는 동일한 커밋에 생성된 출력물의 변경 사항을 반드시 포함하세요. 이렇게 하면 생성기 변경으로 인한 영향을 쉽게 검토할 수 있습니다.
+제너레이터를 변경하는 동일한 커밋에 생성된 출력물의 변경 사항도 반드시 포함하십시오. 이렇게 하면 제너레이터 변경으로 인한 영향을 검토하기가 쉬워집니다.
 
 유용한 한 줄 명령어들:
 
 ```sh
-go run ./cmd/specls              # 현재 API 사양(spec)이 확장되는 방식 확인
-go run ./cmd/specls -f Add       # 단일 사양 함수만 확인
-go run ./cmd/specls -f Add -trace  # 사양 함수가 왜 그렇게 확장되는지 추적
+go run ./cmd/specls              # 현재 API 스펙이 어떻게 확장되는지 확인
+go run ./cmd/specls -f Add       # 단 하나의 스펙 함수만 확인
+go run ./cmd/specls -f Add -trace  # 스펙 함수가 왜 그렇게 확장되는지 추적
 go run ./cmd/refgen -diff        # internal/simdref가 최신 상태인지 확인
 go run . -tools tmplgen -diff    # 드라이버를 통해 하나의 제너레이터 실행
 ```
 
 ## 입문자를 위한 읽기 순서
 
-사양서를 작업 중이신가요? 다음을 확인해 보세요:
+사양서(spec)를 작업 중이신가요? 다음을 확인해 보세요:
 
 1. `simd/internal/spec/doc.go` — 스펙 언어: `Vec`, `Width`,
    `//specgen:name`, `//specgen:require`, 문서 템플릿.
-2. `simd/internal/spec/math.go`, `loadstore.go`, `masks.go` — 구현 예제.
+2. `simd/internal/spec/math.go`, `loadstore.go`, `masks.go` — 작업 예제.
 3. `specgen/api.go` — `Func`, `Signature()`, `Decl()`, `SpecFunc()`.
 4. `specgen/specexpr/solver.go` — 형상 제약 언어(shape constraint language), 패키지 주석에 문서화됨.
 5. `cmd/refgen/main.go` — `specgen.Load`를 사용하는 간단한 소비자이자 `[]*Func`를 순회하는 방법의 모델.
 
-simdgen으로 작업 중이신가요? 다음을 확인해 보세요:
+simdgen을 사용 중이신가요? 다음 내용을 확인해 보세요:
 
-1. `simdgen/ops/AddSub/*.yaml` — 핵심 수학 연산을 위한 unifier 입력 파일.
+1. `simdgen/ops/AddSub/*.yaml` — 핵심 수학 연산을 위한 unifier 입력값들.
 2. `simdgen/godefs.go` 및 `simdgen/types/operation.go` — `Operation` 모델.

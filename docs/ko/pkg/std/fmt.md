@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`fmt` 패키지는 C 언어의 `printf` 및 `scanf`와 유사한 함수를 통해 형식화된 I/O를 구현합니다.
+Package fmt implements formatted I/O with functions analogous to C's printf and scanf.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`buffer` 패키지는 풀(pool) 방식으로 할당되는 바이트 버퍼를 제공합니다.
+Package buffer provides a pool-allocated byte buffer.
 
 ## 원문 요약
 

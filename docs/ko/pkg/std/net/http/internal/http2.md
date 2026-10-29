@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`http2` 패키지는 HTTP/2 프로토콜을 구현합니다.
+Package http2 implements the HTTP/2 protocol.
 
 ## 원문 요약
 

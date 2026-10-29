@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`httptrace` 패키지는 HTTP 클라이언트 요청 내의 이벤트를 추적하기 위한 메커니즘을 제공합니다.
+Package httptrace provides mechanisms to trace the events within HTTP client requests.
 
 ## 원문 요약
 

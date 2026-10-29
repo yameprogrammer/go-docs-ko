@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-package benchmarks는 slog에 대한 벤치마크를 포함하고 있습니다.
+Package benchmarks contains benchmarks for slog.
 
 ## 원문 요약
 

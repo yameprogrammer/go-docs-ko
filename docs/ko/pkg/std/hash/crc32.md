@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`crc32` 패키지는 32비트 순환 중복 검사(cyclic redundancy check), 즉 CRC-32 체크섬을 구현합니다.
+Package crc32 implements the 32-bit cyclic redundancy check, or CRC-32, checksum.
 
 ## 원문 요약
 

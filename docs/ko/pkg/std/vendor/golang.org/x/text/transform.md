@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`transform` 패키지는 통과하는 바이트를 변환하는 reader 및 writer 래퍼와 다양한 변환 기능을 제공합니다.
+Package transform provides reader and writer wrappers that transform the bytes passing through as well as various transformations.
 
 ## 원문 요약
 

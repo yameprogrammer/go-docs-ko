@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`jsontest` 패키지는 JSON 테스트를 지원하는 기능을 포함하고 있습니다.
+Package jsontest contains functionality to assist in testing JSON.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`norm` 패키지는 Unicode 문자열을 정규화하기 위한 타입과 함수들을 제공합니다.
+Package norm contains types and functions for normalizing Unicode strings.
 
 ## 원문 요약
 

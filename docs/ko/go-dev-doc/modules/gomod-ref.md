@@ -1,113 +1,54 @@
 <!--{
-  "Title": "go.mod 파일 레퍼런스"
+  "Title": "go.mod file reference"
 }-->
 
-`go.mod` 파일은 Go 모듈의 메인 정의 파일입니다. 이 파일은 모듈의 경로, Go 버전 및 의존성 목록을 정의합니다.
+Each Go module is defined by a go.mod file that describes the module's
+properties, including its dependencies on other modules and on versions of Go.
 
-## 문법
+These properties include:
 
-`go.mod` 파일의 구문은 다음과 같습니다.
+* The current module's **module path**. This should be a location from which
+the module can be downloaded by Go tools, such as the module code's
+repository location. This serves as a unique identifier, when combined
+with the module's version number. It is also the prefix of the package path for
+all packages in the module. For more about how Go locates the module, see the
+<a href="/ref/mod#vcs-find">Go Modules Reference</a>.
+* The minimum **version of Go** required by the current module.
+* A list of minimum versions of other **modules required** by the current module.
+* Instructions, optionally, to **replace** a required module with another
+  module version or a local directory, to **exclude** a specific version of
+  a required module, or to **ignore** specific directories within the module
+  when matching package patterns.
 
-### module
-
-`module` 지시어는 모듈의 경로를 정의합니다. 모듈 경로는 다른 모듈이 이 모듈을 가져올(import) 때 사용하는 식별자입니다.
-
-```go
-module example.com/my-module
-```
-
-### go
-
-`go` 지시어는 모듈에 필요한 최소 Go 버전을 지정합니다.
-
-```go
-go 1.21
-```
-
-### require
-
-`require` 지시어는 모듈이 의존하는 다른 모듈과 그 버전을 나열합니다.
-
-```go
-require (
-    example.com/other-module v1.2.3
-    github.com/google/uuid v1.3.0
-)
-```
-
-단일 의존성만 있을 경우 괄호 없이 한 줄로 작성할 수 있습니다.
-
-```go
-require example.com/other-module v1.2.3
-```
-
-### exclude
-
-`exclude` 지시어는 특정 버전의 모듈을 사용하지 않도록 설정합니다. 이는 버그가 있는 특정 버전을 피해야 할 때 유용합니다.
-
-```go
-exclude example.com/bad-module v1.1.0
-```
-
-### replace
-
-`replace` 지시어는 의존성 경로를 다른 경로(예: 로컬 디렉토리)나 다른 버전으로 교체합니다. 이는 주로 라이브러리를 수정하여 테스트할 때 사용됩니다.
-
-```go
-// 특정 버전을 다른 버전으로 교체
-replace example.com/module v1.0.0 => example.com/module v1.0.1
-
-// 원격 모듈을 로컬 경로로 교체
-replace example.com/module => ../local-module
-```
-
-## 버전 선택 (Version Selection)
-
-Go는 **최소 버전 선택(Minimal Version Selection, MVS)** 알고리즘을 사용하여 의존성 그래프에서 사용할 모듈 버전을 결정합니다.
-
-- `go.mod` 파일에 명시된 버전 중 가장 높은 버전이 선택됩니다.
-- 간접 의존성(indirect dependencies)의 경우, `// indirect` 주석이 붙어 표시됩니다.
-
-## 주요 명령어
-
-`go.mod` 파일을 관리하기 위해 다음 명령어를 사용합니다.
-
-| 명령어 | 설명 |
-| :--- | :--- |
-| `go mod init <module-path>` | 새로운 `go.mod` 파일을 생성하고 모듈을 초기화합니다. |
-| `go mod tidy` | 사용하지 않는 의존성을 제거하고 누락된 의존성을 추가하여 `go.mod`와 `go.sum`을 최신 상태로 유지합니다. |
-| `go mod vendor` | 의존성 패키지들을 프로젝트 내의 `vendor` 디렉토리에 복사합니다. |
-| `go mod download` | 의존성 모듈을 로컬 캐시에 다운로드합니다. |
-| `go mod verify` | 다운로드된 의존성이 수정되지 않았는지 검증합니다. |
-
-각 Go 모듈은 다른 모듈 및 Go 버전에 대한 의존성을 포함하여 모듈의 속성을 기술하는 `go.mod` 파일에 의해 정의됩니다.
-
-이러한 속성에는 다음이 포함됩니다:
-
-* 현재 모듈의 **module path**입니다. 이는 모듈 코드의 저장소 위치와 같이 Go 도구가 모듈을 다운로드할 수 있는 위치여야 합니다. 이는 모듈의 버전 번호와 결합되어 고유 식별자 역할을 합니다. 또한 모듈 내 모든 패키지 경로의 접두사가 됩니다. Go가 모듈을 찾는 방법에 대한 자세한 내용은 <a href="/ref/mod#vcs-find">Go Modules Reference</a>를 참조하십시오.
-* 현재 모듈에 필요한 최소 **version of Go**입니다.
-* 현재 모듈에서 **required**하는 다른 모듈들의 최소 버전 목록입니다.
-* 선택적으로, 필요한 모듈을 다른 모듈 버전이나 로컬 디렉터리로 **replace**하거나, 필요한 모듈의 특정 버전을 **exclude**하거나, 패키지 패턴을 매칭할 때 모듈 내의 특정 디렉터리를 **ignore**하는 지침입니다.
-
-[`go mod init` 명령](/ref/mod#go-mod-init)을 실행하면 Go가 go.mod 파일을 생성합니다. 다음 예제는 모듈 경로를 example/mymodule로 설정하여 go.mod 파일을 생성하는 방법입니다.
+Go generates a go.mod file when you run the [`go mod init`
+command](/ref/mod#go-mod-init). The following example creates a go.mod file,
+setting the module's module path to example/mymodule:
 
 ```
 $ go mod init example/mymodule
 ```
 
-`go` 명령어를 사용하여 종속성을 관리하세요. 이 명령어들은 `go.mod` 파일에 기술된 요구 사항이 일관되게 유지되고 `go.mod` 파일의 내용이 유효하도록 보장합니다. 이러한 명령어에는 [`go get`](/ref/mod#go-get), [`go mod tidy`](/ref/mod#go-mod-tidy) 및 [`go mod edit`](/ref/mod#go-mod-edit) 명령어가 포함됩니다.
+Use `go` commands to manage dependencies. The commands ensure that the
+requirements described in your go.mod file remain consistent and the content of
+your go.mod file is valid. These commands include the [`go get`](/ref/mod#go-get)
+and [`go mod tidy`](/ref/mod#go-mod-tidy) and [`go mod edit`](/ref/mod#go-mod-edit)
+commands.
 
-`go` 명령어에 대한 참조는 [Command go](/cmd/go/)를 확인하세요.
-`go help mod tidy`와 같이 커맨드 라인에서 `go help` _명령어-이름_을 입력하여 도움말을 얻을 수 있습니다.
+For reference on `go` commands, see [Command go](/cmd/go/).
+You can get help from the command line by typing `go help` _command-name_, as
+with `go help mod tidy`.
 
-**함께 보기**
+**See also**
 
-* Go 도구는 의존성을 관리하는 동안 `go.mod` 파일을 자동으로 변경합니다. 자세한 내용은 [의존성 관리](/doc/modules/managing-dependencies)를 참조하세요.
-* `go.mod` 파일과 관련된 더 자세한 내용 및 제약 사항은 [Go 모듈 참조](/ref/mod#go-mod-file)를 참조하세요.
+* Go tools make changes to your go.mod file as you use them to manage
+  dependencies. For more, see [Managing dependencies](/doc/modules/managing-dependencies).
+* For more details and constraints related to go.mod files, see the [Go modules
+  reference](/ref/mod#go-mod-file).
 
-## 예제 {#example}
+## Example {#example}
 
-`go.mod` 파일에는 다음 예제와 같이 지시문(directives)이 포함됩니다. 이에 대한 자세한 설명은 이 주제의 다른 섹션에서 다룹니다.
+A go.mod file includes directives as shown in the following example. These are
+described elsewhere in this topic.
 
 ```
 module example.com/mymodule
@@ -126,9 +67,12 @@ exclude example.com/thismodule v1.3.0
 
 ## module {#module}
 
-모듈의 모듈 경로(module path)를 선언합니다. 모듈 경로는 (모듈 버전 번호와 결합되었을 때) 모듈의 고유 식별자가 됩니다. 모듈 경로는 해당 모듈에 포함된 모든 패키지의 import 접두사가 됩니다.
+Declares the module's module path, which is the module's unique identifier
+(when combined with the module version number). The module path becomes the
+import prefix for all packages the module contains.
 
-자세한 내용은 Go 모듈 참조의 [`module` 지시어](/ref/mod#go-mod-file-module)를 확인하세요.
+For more, see [`module` directive](/ref/mod#go-mod-file-module) in the
+Go Modules Reference.
 
 ### Syntax {#module-syntax}
 
@@ -136,35 +80,54 @@ exclude example.com/thismodule v1.3.0
 
 <dl>
     <dt>module-path</dt>
-    <dd>모듈의 모듈 경로로, 일반적으로 Go 도구를 통해 모듈을 다운로드할 수 있는 저장소 위치입니다. v2 이상의 모듈 버전의 경우, 이 값은 <code>/v2</code>와 같이 주 버전 번호로 끝나야 합니다.</dd>
+    <dd>The module's module path, usually the repository location from which
+      the module can be downloaded by Go tools. For module versions v2 and
+      later, this value must end with the major version number, such as
+      <code>/v2</code>.</dd>
 </dl>
 
-### 예제 {#module-examples}
+### Examples {#module-examples}
 
-다음 예제들은 모듈을 다운로드할 수 있는 리포지토리 도메인을 `example.com`으로 대체하여 표시합니다.
+The following examples substitute `example.com` for a repository domain from
+which the module could be downloaded.
 
-* v0 또는 v1 모듈의 모듈 선언:
+* Module declaration for a v0 or v1 module:
   ```
   module example.com/mymodule
   ```
-* v2 모듈의 모듈 경로:
+* Module path for a v2 module:
   ```
   module example.com/mymodule/v2
   ```
 
-### 참고 사항 {#module-notes}
+### Notes {#module-notes}
 
-모듈 경로는 모듈을 고유하게 식별해야 합니다. 대부분의 모듈의 경우, 경로는 `go` 명령어가 코드를 찾을 수 있는 URL(또는 코드로 연결되는 리다이렉트 주소)입니다. 직접 다운로드될 일이 없는 모듈의 경우, 모듈 경로는 고유성을 보장할 수 있는 사용자가 제어하는 임의의 이름일 수 있습니다. `example/` 접두사는 이와 같은 예제에서 사용하기 위해 예약되어 있습니다.
+The module path must uniquely identify your module. For most modules, the path
+is a URL where the `go` command can find the code (or a redirect to the code).
+For modules that won't ever be downloaded directly, the module path
+can be just some name you control that will ensure uniqueness. The prefix
+`example/` is also reserved for use in examples like these.
 
-더 자세한 내용은 [의존성 관리](/doc/modules/managing-dependencies#naming_module)를 참조하십시오.
+For more details, see [Managing dependencies](/doc/modules/managing-dependencies#naming_module).
 
-실제로 모듈 경로는 일반적으로 모듈 소스의 저장소 도메인과 저장소 내 모듈 코드까지의 경로로 구성됩니다. `go` 명령어는 모듈 사용자를 대신하여 의존성을 해결하기 위해 모듈 버전을 다운로드할 때 이 형식을 사용합니다.
+In practice, the module path is typically the module source's repository domain
+and path to the module code within the repository. The `go` command
+relies on this form when downloading module versions to resolve dependencies
+on the module user's behalf.
 
-처음에는 모듈을 다른 코드에서 사용할 수 있도록 제공할 의도가 없더라도, 저장소 경로(repository path)를 사용하는 것이 가장 좋습니다. 이렇게 하면 나중에 모듈을 게시하게 되었을 때 모듈 이름을 변경해야 하는 상황을 피할 수 있습니다.
+Even if you're not at first intending to make your module available for use
+from other code, using its repository path is a best practice that will help
+you avoid having to rename the module if you publish it later.
 
-모듈의 최종 저장소 위치를 처음부터 알지 못하는 경우, 본인 소유의 도메인 이름이나 제어 가능한 이름(예: 회사 이름)을 모듈 이름 또는 소스 디렉터리 뒤에 경로를 붙여 임시로 안전한 대체제로 사용하는 것을 고려하십시오. 자세한 내용은 [의존성 관리](/doc/modules/managing-dependencies#naming_module)를 참조하십시오.
+If at first you don't know the module's eventual repository location, consider
+temporarily using a safe substitute, such as the name of a domain you own or
+a name you control (such as your company name), along with a path following
+from the module's name or source directory. For more, see
+[Managing dependencies](/doc/modules/managing-dependencies#naming_module).
 
-예를 들어, `stringtools` 디렉토리에서 개발 중이라면, 다음 예시와 같이 임시 모듈 경로는 `<company-name>/stringtools`가 될 수 있습니다. 여기서 _company-name_은 귀사의 이름입니다.
+For example, if you're developing in a `stringtools` directory, your temporary
+module path might be `<company-name>/stringtools`, as in the following example,
+where _company-name_ is your company's name:
 
 ```
 go mod init <company-name>/stringtools
@@ -172,113 +135,148 @@ go mod init <company-name>/stringtools
 
 ## go {#go}
 
-해당 지시어(directive)에 의해 지정된 Go 버전의 시맨틱(semantics)을 가정하고 모듈이 작성되었음을 나타냅니다.
+Indicates that the module was written assuming the semantics of the Go version
+specified by the directive.
 
-더 자세한 내용은 Go 모듈 참조(Go Modules Reference)의 [`go` 지시어](/ref/mod#go-mod-file-go)를 참조하십시오.
+For more, see [`go` directive](/ref/mod#go-mod-file-go) in the
+Go Modules Reference.
 
-### 구문 {#go-syntax}
+### Syntax {#go-syntax}
 
 <pre>go <var>minimum-go-version</var></pre>
 
 <dl>
     <dt>minimum-go-version</dt>
-    <dd>이 모듈의 패키지를 컴파일하는 데 필요한 Go의 최소 버전입니다.</dd>
+    <dd>The minimum version of Go required to compile packages in this module.</dd>
 </dl>
 
-### 예제 {#go-examples}
+### Examples {#go-examples}
 
-* 모듈은 Go 버전 1.14 이상에서 실행되어야 합니다:
+* Module must run on Go version 1.14 or later:
   ```
   go 1.14
   ```
 
-### 노트 {#go-notes}
+### Notes {#go-notes}
 
-`go` 지시문은 이 모듈을 사용하는 데 필요한 Go의 최소 버전을 설정합니다.
-Go 1.21 이전에는 이 지시문이 권장 사항일 뿐이었으나, 이제는 필수 요구 사항입니다.
-Go 툴체인은 더 최신 Go 버전을 선언한 모듈의 사용을 거부합니다.
+The `go` directive sets the minimum version of Go required to use this module.
+Before Go 1.21, the directive was advisory only; now it is a mandatory requirement:
+Go toolchains refuse to use modules declaring newer Go versions.
 
-`go` 지시문은 실행할 Go 툴체인을 선택하는 입력값으로 사용됩니다.
-자세한 내용은 “[Go toolchains](/doc/toolchain)”를 참조하십시오.
+The `go` directive is an input into selecting which Go toolchain to run.
+See “[Go toolchains](/doc/toolchain)” for details.
 
-`go` 지시문은 새로운 언어 기능의 사용에 영향을 줍니다:
+The `go` directive affects use of new language features:
 
-* 모듈 내의 패키지에 대해, 컴파일러는 `go` 지시어에 의해 지정된 버전 이후에 도입된 언어 기능의 사용을 거부합니다. 예를 들어, 모듈에 `go 1.12` 지시어가 있다면, 해당 패키지들은 Go 1.13에서 도입된 `1_000_000`과 같은 숫자 리터럴을 사용할 수 없습니다.
-* 이전 버전의 Go가 모듈의 패키지 중 하나를 빌드하다가 컴파일 에러가 발생하면, 해당 모듈이 더 최신 버전의 Go를 위해 작성되었다는 점을 에러 메시지에 명시합니다. 예를 들어, 모듈에 `go 1.13`이 지정되어 있고 패키지에서 숫자 리터럴 `1_000_000`을 사용하는 경우, 해당 패키지를 Go 1.12로 빌드하면 컴파일러는 이 코드가 Go 1.13을 위해 작성되었음을 알립니다.
+* For packages within the module, the compiler rejects use of language features
+  introduced after the version specified by the `go` directive. For example, if
+  a module has the directive `go 1.12`, its packages may not use numeric
+  literals like `1_000_000`, which were introduced in Go 1.13.
+* If an older Go version builds one of the module's packages and encounters a
+  compile error, the error notes that the module was written for a newer Go
+  version. For example, suppose a module has `go 1.13` and a package uses the
+  numeric literal `1_000_000`. If that package is built with Go 1.12, the
+  compiler notes that the code is written for Go 1.13.
 
-`go` 지시문은 `go` 명령어의 동작에도 영향을 미칩니다:
+The `go` directive also affects the behavior of the `go` command:
 
-* `go 1.14` 이상에서는 자동 [vendoring](/ref/mod#vendoring)이 활성화될 수 있습니다. `vendor/modules.txt` 파일이 존재하고 `go.mod`와 일치한다면, 명시적으로 `-mod=vendor` 플래그를 사용할 필요가 없습니다.
-* `go 1.16` 이상에서 `all` 패키지 패턴은 [main module](/ref/mod#glos-main-module)의 패키지 및 테스트에서 전이적으로(transitively) 임포트된 패키지만과 일치합니다. 이는 모듈이 도입된 이후 [`go mod vendor`](/ref/mod#go-mod-vendor)에 의해 유지되는 패키지 집합과 동일합니다. 이전 버전에서 `all`은 메인 모듈의 패키지에 의해 임포트된 패키지의 테스트, 해당 패키지들의 테스트 등을 모두 포함했습니다.
-* `go 1.17` 이상:
-   * `go.mod` 파일은 메인 모듈의 패키지나 테스트에서 전이적으로 임포트된 패키지를 제공하는 각 모듈에 대해 명시적인 [`require` directive](/ref/mod#go-mod-file-require)를 포함합니다. (`go 1.16` 이하에서는 [minimal version selection](/ref/mod#minimal-version-selection)이 다른 버전을 선택하게 될 경우에만 간접 의존성이 포함되었습니다.) 이 추가 정보는 [module graph pruning](/ref/mod#graph-pruning) 및 [lazy module loading](/ref/mod#lazy-loading)을 가능하게 합니다.
-   * 이전 `go` 버전보다 `// indirect` 의존성이 훨씬 더 많아질 수 있기 때문에, 간접 의존성은 `go.mod` 파일 내의 별도 블록에 기록됩니다.
-   * `go mod vendor`는 벤더링된 의존성에 대한 `go.mod` 및 `go.sum` 파일을 생략합니다. (이를 통해 `vendor` 하위 디렉터리 내에서 `go` 명령어를 실행할 때 올바른 메인 모듈을 식별할 수 있습니다.)
-   * `go mod vendor`는 각 의존성의 `go.mod` 파일에 명시된 `go` 버전을 `vendor/modules.txt`에 기록합니다.
-* `go 1.21` 이상:
-   * `go` 라인은 이 모듈과 함께 사용해야 하는 Go의 최소 요구 버전을 선언합니다.
-   * `go` 라인은 모든 의존성의 `go` 라인보다 크거나 같아야 합니다.
-   * `go` 명령어는 더 이상 이전의 오래된 Go 버전과의 호환성을 유지하려고 시도하지 않습니다.
-   * `go` 명령어는 `go.sum` 파일 내의 `go.mod` 파일 체크섬을 유지하는 데 더 주의를 기울입니다.
+* At `go 1.14` or higher, automatic [vendoring](/ref/mod#vendoring) may be
+  enabled.  If the file `vendor/modules.txt` is present and consistent with
+  `go.mod`, there is no need to explicitly use the `-mod=vendor` flag.
+* At `go 1.16` or higher, the `all` package pattern matches only packages
+  transitively imported by packages and tests in the [main
+  module](/ref/mod#glos-main-module). This is the same set of packages retained
+  by [`go mod vendor`](/ref/mod#go-mod-vendor) since modules were introduced. In
+  lower versions, `all` also includes tests of packages imported by packages in
+  the main module, tests of those packages, and so on.
+* At `go 1.17` or higher:
+   * The `go.mod` file includes an explicit [`require`
+     directive](/ref/mod#go-mod-file-require) for each module that provides any
+     package transitively imported by a package or test in the main module. (At
+     `go 1.16` and lower, an indirect dependency is included only if [minimal
+     version selection](/ref/mod#minimal-version-selection) would otherwise
+     select a different version.) This extra information enables [module graph
+     pruning](/ref/mod#graph-pruning) and [lazy module
+     loading](/ref/mod#lazy-loading).
+   * Because there may be many more `// indirect` dependencies than in previous
+     `go` versions, indirect dependencies are recorded in a separate block
+     within the `go.mod` file.
+   * `go mod vendor` omits `go.mod` and `go.sum` files for vendored
+     dependencies. (That allows invocations of the `go` command within
+     subdirectories of `vendor` to identify the correct main module.)
+   * `go mod vendor` records the `go` version from each dependency's `go.mod`
+     file in `vendor/modules.txt`.
+* At `go 1.21` or higher:
+   * The `go` line declares a required minimum version of Go to use with this module.
+   * The `go` line must be greater than or equal to the `go` line of all dependencies.
+   * The `go` command no longer attempts to maintain compatibility with the previous older version of Go.
+   * The `go` command is more careful about keeping checksums of `go.mod` files in the `go.sum` file.
 <!-- If you update this list, also update /ref/mod#go-mod-file-go. -->
 
-`go.mod` 파일에는 최대 하나의 `go` 지시문이 포함될 수 있습니다. 대부분의 명령어는 `go` 지시문이 없는 경우 현재 Go 버전으로 `go` 지시문을 추가합니다.
+A `go.mod` file may contain at most one `go` directive. Most commands will add a
+`go` directive with the current Go version if one is not present.
 
 ## toolchain {#toolchain}
 
-이 모듈과 함께 사용할 권장 Go 툴체인을 선언합니다.
-모듈이 메인 모듈이고 기본 툴체인이 권장 툴체인보다 오래된 경우에만 적용됩니다.
+Declares a suggested Go toolchain to use with this module.
+Only takes effect when the module is the main module
+and the default toolchain is older than the suggested toolchain.
 
-더 자세한 내용은 “[Go toolchains](/doc/toolchain)” 및 Go Modules Reference의 [`toolchain` directive](/ref/mod/#go-mod-file-toolchain)를 참조하십시오.
+For more see “[Go toolchains](/doc/toolchain)” and
+[`toolchain` directive](/ref/mod/#go-mod-file-toolchain) in the
+Go Modules Reference.
 
-### 구문 {#toolchain-syntax}
+### Syntax {#toolchain-syntax}
 
 <pre>toolchain <var>toolchain-name</var></pre>
 
 <dl>
     <dt>toolchain-name</dt>
-    <dd>제안된 Go 툴체인의 이름입니다. 표준 툴체인 이름은 Go 버전 <i>V</i>에 대해 <code>go<i>V</i></code> 형태를 가지며, 예시는 <code>go1.21.0</code> 및 <code>go1.18rc1</code>입니다.
-      특수 값인 <code>default</code>는 자동 툴체인 전환을 비활성화합니다.</dd>
+    <dd>The suggested Go toolchain's name. Standard toolchain names take the form
+      <code>go<i>V</i></code> for a Go version <i>V</i>, as in
+      <code>go1.21.0</code> and <code>go1.18rc1</code>.
+      The special value <code>default</code> disables automatic toolchain switching.</dd>
 </dl>
 
-### 예제 {#toolchain-examples}
+### Examples {#toolchain-examples}
 
-* Go 1.21.0 또는 그 이상의 버전 사용을 권장합니다:
+* Suggest using Go 1.21.0 or newer:
     ```
     toolchain go1.21.0
     ```
 
-### 참고 사항 {#toolchain-notes}
+### Notes {#toolchain-notes}
 
-`toolchain` 라인이 Go 툴체인 선택에 어떻게 영향을 미치는지에 대한 자세한 내용은 “[Go toolchains](/doc/toolchain)”를 참조하세요.
+See “[Go toolchains](/doc/toolchain)” for details about how the `toolchain` line
+affects Go toolchain selection.
 
 ## godebug {#godebug}
 
-이 모듈의 메인 패키지에 적용될 기본 [GODEBUG](/doc/godebug) 설정을 나타냅니다.
-이 설정은 모든 툴체인 기본값을 덮어쓰며, 메인 패키지에 명시된 `//go:debug` 라인에 의해 다시 덮어쓰여집니다.
+Indicates the default [GODEBUG](/doc/godebug) settings to be applied to the main packages of this module.
+These override any toolchain defaults, and are overridden by explicit `//go:debug` lines in main packages.
 
-### 구문 {#godebug-syntax}
+### Syntax {#godebug-syntax}
 
 <pre>godebug <var>debug-key</var>=<var>debug-value</var></pre>
 
 <dl>
     <dt>debug-key</dt>
-    <dd>적용할 설정의 이름입니다.
-      설정 목록과 해당 설정이 도입된 버전은
-      <a href="/doc/godebug#history">GODEBUG History</a>에서 확인할 수 있습니다.
+    <dd>The name of the setting to be applied.
+      A list of settings and the versions they were introduced in can be found at
+      <a href="/doc/godebug#history">GODEBUG History</a>.
     </dd>
     <dt>debug-value</dt>
-    <dd>설정에 제공되는 값입니다.
-      별도로 지정되지 않은 경우, 해당 동작을 비활성화하려면 <code>0</code>을, 활성화하려면 <code>1</code>을 사용합니다.</dd>
+    <dd>The value provided to the setting.
+      If not otherwise specified, <code>0</code> to disable and <code>1</code> to enable the named behavior.</dd>
 </dl>
 
-### 예제 {#godebug-examples}
+### Examples {#godebug-examples}
 
-* 새로운 1.23 `asynctimerchan=0` 동작을 사용하십시오:
+* Use the new 1.23 `asynctimerchan=0` behavior:
   ```
   godebug asynctimerchan=0
   ```
-* Go 1.21의 기본 GODEBUG 설정을 사용하되, 이전의 `panicnil=1` 동작을 사용하십시오:
+* Use the default GODEBUGs from Go 1.21, but the old `panicnil=1` behavior:
   ```
   godebug (
       default=go1.21
@@ -286,187 +284,232 @@ Go 툴체인은 더 최신 Go 버전을 선언한 모듈의 사용을 거부합�
   )
   ```
 
-### 참고 사항 {#godebug-notes}
+### Notes {#godebug-notes}
 
-GODEBUG 설정은 현재 모듈의 main 패키지 빌드 및 테스트 바이너리에만 적용됩니다.
-모듈이 의존성으로 사용될 때는 아무런 영향을 미치지 않습니다.
+GODEBUG settings only apply for builds of main packages and test binaries in the current module.
+They have no effect when a module is used as a dependency.
 
-하위 호환성에 대한 자세한 내용은 “[Go, Backwards Compatibility, and GODEBUG](/doc/godebug)”를 참조하십시오.
+See “[Go, Backwards Compatibility, and GODEBUG](/doc/godebug)” for details on backwards compatibility.
 
 ## require {#require}
 
-현재 모듈의 의존성으로 모듈을 선언하며, 필요한 모듈의 최소 버전을 지정합니다.
+Declares a module as a dependency of the current module, specifying the
+minimum version of the module required.
 
-더 자세한 내용은 Go 모듈 참조의 [`require` 지시어](/ref/mod#go-mod-file-require)를 확인하세요.
+For more, see [`require` directive](/ref/mod#go-mod-file-require) in the
+Go Modules Reference.
 
-### 구문 {#require-syntax}
+### Syntax {#require-syntax}
 
 <pre>require <var>module-path</var> <var>module-version</var></pre>
 
 <dl>
     <dt>module-path</dt>
-    <dd>모듈의 모듈 경로로, 일반적으로 모듈 소스의 저장소 도메인과 모듈 이름의 결합입니다. v2 이상의 모듈 버전의 경우, 이 값은 <code>/v2</code>와 같이 메이저 버전 번호로 끝나야 합니다.</dd>
+    <dd>The module's module path, usually a concatenation of the module source's
+      repository domain and the module name. For module versions v2 and later,
+      this value must end with the major version number, such as <code>/v2</code>.</dd>
     <dt>module-version</dt>
-    <dd>모듈의 버전입니다. v1.2.3과 같은 릴리스 버전 번호이거나, v0.0.0-20200921210052-fa0125251cc4와 같이 Go에서 생성한 pseudo-version 번호일 수 있습니다.</dd>
+    <dd>The module's version. This can be either a release version number, such
+      as v1.2.3, or a Go-generated pseudo-version number, such as
+      v0.0.0-20200921210052-fa0125251cc4.</dd>
 </dl>
 
-### 예제 {#require-examples}
+### Examples {#require-examples}
 
-* 출시된 버전 v1.2.3을 요구하는 경우:
+* Requiring a released version v1.2.3:
     ```
     require example.com/othermodule v1.2.3
     ```
-* Go 도구에 의해 생성된 의사 버전(pseudo-version) 번호를 사용하여 저장소에 아직 태그가 지정되지 않은 버전을 요구하는 경우:
+* Requiring a version not yet tagged in its repository by using a pseudo-version
+  number generated by Go tools:
     ```
     require example.com/othermodule v0.0.0-20200921210052-fa0125251cc4
     ```
 
-### 참고 사항 {#require-notes}
+### Notes {#require-notes}
 
-`go get`와 같은 `go` 명령어를 실행하면, Go는 임포트된 패키지를 포함하는 각 모듈에 대해 `require` 지시문을 삽입합니다. 모듈이 아직 저장소에서 태그 지정되지 않은 경우, Go는 명령어를 실행할 때 생성한 의사 버전(pseudo-version) 번호를 할당합니다.
+When you run a `go` command such as `go get`, Go inserts `require` directives
+for each module containing imported packages. When a module isn't yet tagged in
+its repository, Go assigns a pseudo-version number it generates when you run the
+command.
 
-[`replace` 지시어](#replace)를 사용하면 Go가 저장소가 아닌 다른 위치에서 모듈을 가져오도록 설정할 수 있습니다.
+You can have Go require a module from a location other than its repository by
+using the [`replace` directive](#replace).
 
-버전 번호에 대한 자세한 내용은 [Module version numbering](/doc/modules/version-numbers)을 참조하십시오.
+For more about version numbers, see [Module version numbering](/doc/modules/version-numbers).
 
-의존성 관리에 대한 자세한 내용은 다음을 참조하십시오.
+For more about managing dependencies, see the following:
 
-* [의존성 추가하기](/doc/modules/managing-dependencies#adding_dependency)
-* [특정 의존성 버전 가져오기](/doc/modules/managing-dependencies#getting_version)
-* [사용 가능한 업데이트 확인하기](/doc/modules/managing-dependencies#discovering_updates)
-* [의존성 업그레이드 또는 다운그레이드하기](/doc/modules/managing-dependencies#upgrading)
-* [코드의 의존성 동기화하기](/doc/modules/managing-dependencies#synchronizing)
+* [Adding a dependency](/doc/modules/managing-dependencies#adding_dependency)
+* [Getting a specific dependency version](/doc/modules/managing-dependencies#getting_version)
+* [Discovering available updates](/doc/modules/managing-dependencies#discovering_updates)
+* [Upgrading or downgrading a dependency](/doc/modules/managing-dependencies#upgrading)
+* [Synchronizing your code's dependencies](/doc/modules/managing-dependencies#synchronizing)
 
 ## tool {#tool}
 
-현재 모듈의 종속성으로 패키지를 추가하며, 현재 작업 디렉토리가 이 모듈 내에 있을 때 `go tool`로 실행할 수 있도록 설정합니다.
+Adds a package as a dependency of the current module, and makes it available to run with `go tool` when the current working directory is within this module.
 
-### 구문 {#tool-syntax}
+### Syntax {#tool-syntax}
 
 <pre>tool <var>package-path</var></pre>
 
 <dl>
     <dt>package-path</dt>
-    <dd>툴의 패키지 경로로, 툴을 포함하는 모듈과 모듈 내에서 툴을 구현하는 패키지로의 경로(비어 있을 수 있음)를 결합한 것입니다.</dd>
+    <dd>The tool's package path, a concatenation of the module containing
+        the tool and the (possibly empty) path to the package implementing
+        the tool within the module.</dd>
 </dl>
 
-### 예제 {#tool-examples}
+### Examples {#tool-examples}
 
-* 현재 모듈에 구현된 도구를 선언하기:
-    ```
-    module example.com/mymodule
-    ```
-
-tool example.com/mymodule/cmd/mytool
-    ```
-* 별도의 모듈로 구현된 도구를 선언하는 방법:
+* Declaring a tool implemented in the current module:
     ```
     module example.com/mymodule
 
-tool example.com/atool/cmd/atool
+    tool example.com/mymodule/cmd/mytool
+    ```
+* Declaring a tool implemented in a separate module:
+    ```
+    module example.com/mymodule
 
-require example.com/atool v1.2.3
+    tool example.com/atool/cmd/atool
+
+    require example.com/atool v1.2.3
     ```
 
-### 참고 사항 {#tool-notes}
+### Notes {#tool-notes}
 
-`go tool`을 사용하여 전체 패키지 경로(fully qualified package path) 또는 모호함이 없는 경우 마지막 경로 세그먼트를 통해 모듈에 선언된 도구를 실행할 수 있습니다. 위의 첫 번째 예시에서 `go tool mytool` 또는 `go tool example.com/mymodule/cmd/mytool`을 실행할 수 있습니다.
+You can use `go tool` to run tools declared in your module by fully qualified package path
+or, if there is no ambiguity, by the last path segment. In the first example
+above you could run `go tool mytool` or `go tool example.com/mymodule/cmd/mytool`.
 
-워크스페이스 모드에서는 `go tool`을 사용하여 워크스페이스 내의 어떤 모듈에서든 선언된 도구를 실행할 수 있습니다.
+In workspace mode, you can use `go tool` to run a tool declared in any workspace module.
 
-도구는 모듈 자체와 동일한 모듈 그래프를 사용하여 빌드됩니다. 도구를 구현하는 모듈의 버전을 선택하려면 [`require` 지시문](#require)이 필요합니다. 모든 [`replace` 지시문](#replace) 또는 [`exclude` 지시문](#exclude) 또한 해당 도구와 그 의존성 항목들에 적용됩니다.
+Tools are built using the same module graph as the module itself. A [`require`
+directive](#require) is needed to select the version of the module that
+implements the tool. Any [`replace` directives](#replace), or [`exclude`
+directives](#exclude) also apply to the tool and its dependencies.
 
-자세한 내용은 [Tool dependencies](/doc/modules/managing-dependencies#tools)를 참조하십시오.
+For more information see [Tool dependencies](/doc/modules/managing-dependencies#tools).
 
 ## replace {#replace}
 
-특정 버전(또는 모든 버전)의 모듈 콘텐츠를 다른 모듈 버전이나 로컬 디렉토리로 대체합니다. Go 도구는 의존성을 해결할 때 이 대체 경로를 사용합니다.
+Replaces the content of a module at a specific version (or all versions) with
+another module version or with a local directory. Go tools will use the
+replacement path when resolving the dependency.
 
-더 자세한 내용은 Go 모듈 레퍼런스의 [`replace` directive](/ref/mod#go-mod-file-replace)를 참조하십시오.
+For more, see [`replace` directive](/ref/mod#go-mod-file-replace) in the
+Go Modules Reference.
 
-### 구문 {#replace-syntax}
+### Syntax {#replace-syntax}
 
 <pre>replace <var>module-path</var> <var>[module-version]</var> => <var>replacement-path</var> <var>[replacement-version]</var></pre>
 
 <dl>
     <dt>module-path</dt>
-    <dd>교체할 모듈의 모듈 경로입니다.</dd>
+    <dd>The module path of the module to replace.</dd>
     <dt>module-version</dt>
-    <dd>선택 사항입니다. 교체할 특정 버전입니다. 이 버전 번호를 생략하면, 해당 모듈의 모든 버전이 화살표 오른쪽에 있는 내용으로 교체됩니다.</dd>
+    <dd>Optional. A specific version to replace. If this version number is
+      omitted, all versions of the module are replaced with the content on the
+      right side of the arrow.</dd>
     <dt>replacement-path</dt>
-    <dd>Go가 필요한 모듈을 찾을 경로입니다. 이는 모듈 경로이거나 교체 모듈이 있는 로컬 파일 시스템의 디렉토리 경로일 수 있습니다. 모듈 경로인 경우 <em>replacement-version</em> 값을 지정해야 합니다. 로컬 경로인 경우 <em>replacement-version</em> 값을 사용할 수 없습니다.</dd>
+    <dd>The path at which Go should look for the required module. This can be a
+      module path or a path to a directory on the file system local to the
+      replacement module. If this is a module path, you must specify a
+      <em>replacement-version</em> value. If this is a local path, you may not use a
+      <em>replacement-version</em> value.</dd>
     <dt>replacement-version</dt>
-    <dd>교체 모듈의 버전입니다. <em>replacement-path</em>가 모듈 경로(로컬 디렉토리가 아님)인 경우에만 교체 버전을 지정할 수 있습니다.</dd>
+    <dd>The version of the replacement module. The replacement version may only
+      be specified if <em>replacement-path</em> is a module path (not a local directory).</dd>
 </dl>
 
-### 예제 {#replace-examples}
+### Examples {#replace-examples}
 
-* 모듈 저장소의 포크(fork)로 교체하기
+* Replacing with a fork of the module repository
 
-다음 예제에서는 `example.com/othermodule`의 모든 버전이 지정된 코드 포크(fork)로 대체됩니다.
+  In the following example, any version of example.com/othermodule is replaced
+  with the specified fork of its code.
 
-```
+  ```
   require example.com/othermodule v1.2.3
-```
 
-replace example.com/othermodule => example.com/myfork/othermodule v1.2.3-fixed
+  replace example.com/othermodule => example.com/myfork/othermodule v1.2.3-fixed
   ```
 
-한 모듈 경로를 다른 경로로 교체할 때, 교체 대상이 되는 모듈 내 패키지들의 import 문은 변경하지 마십시오.
+  When you replace one module path with another, do not change import statements
+  for packages in the module you're replacing.
 
-모듈 코드의 포크(forked) 복사본 사용에 대한 자세한 내용은 [자신의 리포지토리 포크에서 외부 모듈 코드 요구하기](/doc/modules/managing-dependencies#external_fork)를 참조하세요.
+  For more on using a forked copy of module code, see [Requiring external module
+  code from your own repository fork](/doc/modules/managing-dependencies#external_fork).
 
-* 다른 버전 번호로 교체하기
+* Replacing with a different version number
 
-다음 예제는 모듈의 다른 버전 대신 v1.2.3 버전을 사용해야 함을 지정합니다.
+  The following example specifies that version v1.2.3 should be used instead of
+  any other version of the module.
 
-```
+  ```
   require example.com/othermodule v1.2.2
-```
 
-replace example.com/othermodule => example.com/othermodule v1.2.3
+  replace example.com/othermodule => example.com/othermodule v1.2.3
   ```
 
-다음 예제는 모듈 버전 `v1.2.5`를 동일한 모듈의 버전 `v1.2.3`으로 교체합니다.
+  The following example replaces module version v1.2.5 with version v1.2.3 of
+  the same module.
 
-```
+  ```
   replace example.com/othermodule v1.2.5 => example.com/othermodule v1.2.3
   ```
 
-* 로컬 코드로 교체
+* Replacing with local code
 
-다음 예제는 모든 버전의 모듈을 대체하여 로컬 디렉토리를 사용하도록 지정하는 방법을 보여줍니다.
+  The following example specifies that a local directory should be used as a
+  replacement for all versions of the module.
 
-```
+  ```
   require example.com/othermodule v1.2.3
-```
 
-replace example.com/othermodule => ../othermodule
+  replace example.com/othermodule => ../othermodule
   ```
 
-다음 예제는 v1.2.5에 대해서만 로컬 디렉토리를 대체제로 사용하도록 지정합니다.
+  The following example specifies that a local directory should be used as a
+  replacement for v1.2.5 only.
 
-```
+  ```
   require example.com/othermodule v1.2.5
-```
 
-replace example.com/othermodule v1.2.5 => ../othermodule
+  replace example.com/othermodule v1.2.5 => ../othermodule
   ```
 
-모듈 코드의 로컬 복사본 사용에 대한 자세한 내용은 [로컬 디렉토리의 모듈 코드 요구하기](/doc/modules/managing-dependencies#local_directory)를 참조하십시오.
+  For more on using a local copy of module code, see [Requiring module code in a
+  local directory](/doc/modules/managing-dependencies#local_directory).
 
-### 참고 사항 {#replace-notes}
+### Notes {#replace-notes}
 
-`replace` 지시어를 사용하면 Go가 모듈 소스를 찾을 때 다른 경로를 사용하도록 모듈 경로 값을 일시적으로 다른 값으로 대체할 수 있습니다. 이는 Go의 모듈 검색 방향을 대체 경로의 위치로 리다이렉션하는 효과가 있습니다. 대체 경로를 사용하기 위해 패키지 import 경로를 변경할 필요는 없습니다.
+Use the `replace` directive to temporarily substitute a module path value with
+another value when you want Go to use the other path to find the module's
+source. This has the effect of redirecting Go's search for the module to the
+replacement's location. You needn't change package import paths to use the
+replacement path.
 
-현재 모듈을 빌드할 때 `exclude` 및 `replace` 지시문을 사용하여 빌드 타임의 의존성 해결을 제어하십시오. 이러한 지시문은 현재 모듈에 의존하는 다른 모듈에서는 무시됩니다.
+Use the `exclude` and `replace` directives to control build-time dependency
+resolution when building the current module. These directives are ignored in
+modules that depend on the current module.
 
-`replace` 지시어는 다음과 같은 상황에서 유용하게 사용할 수 있습니다:
+The `replace` directive can be useful in situations such as the following:
 
-* 아직 저장소에 코드가 반영되지 않은 새로운 모듈을 개발 중이며, 로컬 버전을 사용하여 클라이언트와 함께 테스트하려는 경우.
-* 의존성 라이브러리에서 문제를 발견하여 해당 저장소를 클론했고, 로컬 저장소에서 수정 사항을 테스트하려는 경우.
+* You're developing a new module whose code is not yet in the repository. You
+  want to test with clients using a local version.
+* You've identified an issue with a dependency, have cloned the dependency's
+  repository, and you're testing a fix with the local repository.
 
-`replace` 지시문만으로는 [모듈 그래프](/ref/mod#glos-module-graph)에 모듈이 추가되지 않는다는 점에 유의하십시오. 메인 모듈의 `go.mod` 파일이나 종속성 모듈의 `go.mod` 파일에 대체된 모듈 버전을 참조하는 [`require` 지시문](#require)이 함께 필요합니다. 대체할 특정 버전이 없는 경우, 아래 예시와 같이 가짜 버전을 사용할 수 있습니다. `replace` 지시문은 메인 모듈에서만 적용되므로, 이 방식은 귀하의 모듈에 의존하는 다른 모듈들을 망가뜨릴 수 있다는 점에 유의하십시오.
+Note that a `replace` directive alone does not add a module to the
+[module graph](/ref/mod#glos-module-graph). A [`require` directive](#require)
+that refers to a replaced module version is also needed, either in the main
+module's `go.mod` file or a dependency's `go.mod` file. If you don't have a
+specific version to replace, you can use a fake version, as in the example
+below. Note that this will break modules that depend on your module, since
+`replace` directives are only applied in the main module.
 
 ```
 require example.com/mod v0.0.0-replace
@@ -474,60 +517,75 @@ require example.com/mod v0.0.0-replace
 replace example.com/mod v0.0.0-replace => ./mod
 ```
 
-필수 모듈을 교체하는 방법(Go 도구를 사용하여 변경하는 방법 포함)에 대한 자세한 내용은 다음을 참조하십시오:
+For more on replacing a required module, including using Go tools to make the
+change, see:
 
-* [본인의 저장소에서 포크(fork)한 외부 모듈 코드 가져오기](/doc/modules/managing-dependencies#external_fork)
-* [로컬 디렉터리의 모듈 코드 가져오기](/doc/modules/managing-dependencies#local_directory)
+* [Requiring external module code from your own repository
+fork](/doc/modules/managing-dependencies#external_fork)
+* [Requiring module code in a local
+directory](/doc/modules/managing-dependencies#local_directory)
 
-버전 번호에 대한 자세한 내용은 [Module version numbering](/doc/modules/version-numbers)을 참조하세요.
+For more about version numbers, see [Module version
+numbering](/doc/modules/version-numbers).
 
 ## exclude {#exclude}
 
-현재 모듈의 의존성 그래프에서 제외할 모듈 또는 모듈 버전을 지정합니다.
+Specifies a module or module version to exclude from the current module's
+dependency graph.
 
-자세한 내용은 Go Modules Reference의 [`exclude` directive](/ref/mod#go-mod-file-exclude)를 참조하십시오.
+For more, see [`exclude` directive](/ref/mod#go-mod-file-exclude) in the
+Go Modules Reference.
 
-### 구문 {#exclude-syntax}
+### Syntax {#exclude-syntax}
 
 <pre>exclude <var>module-path</var> <var>module-version</var></pre>
 
 <dl>
     <dt>module-path</dt>
-    <dd>제외할 모듈의 모듈 경로입니다.</dd>
+    <dd>The module path of the module to exclude.</dd>
     <dt>module-version</dt>
-    <dd>제외할 특정 버전입니다.</dd>
+    <dd>The specific version to exclude.</dd>
 </dl>
 
-### 예제 {#exclude-example}
+### Example {#exclude-example}
 
-* example.com/theirmodule 버전 v1.3.0 제외
+* Exclude example.com/theirmodule version v1.3.0
 
-```
+  ```
   exclude example.com/theirmodule v1.3.0
   ```
 
 ### Notes {#exclude-notes}
 
-`exclude` 지시어를 사용하여 간접적으로 필요하지만 어떤 이유로든 로드할 수 없는 모듈의 특정 버전을 제외하십시오. 예를 들어, 체크섬(checksum)이 잘못된 모듈 버전을 제외하는 데 사용할 수 있습니다.
+Use the `exclude` directive to exclude a specific version of a module that is
+indirectly required but can't be loaded for some reason. For example, you might
+use it to exclude a version of a module that has an invalid checksum.
 
-현재 모듈(빌드 중인 메인 모듈)을 빌드할 때, `exclude` 및 `replace` 지시어를 사용하여 빌드 시간의 의존성 해결(dependency resolution)을 제어하십시오. 이 지시어들은 현재 모듈에 의존하는 다른 모듈에서는 무시됩니다.
+Use the `exclude` and `replace` directives to control build-time dependency
+resolution when building the current module (the main module you're building).
+These directives are ignored in modules that depend on the current module.
 
-다음 예제와 같이 [`go mod edit`](/ref/mod#go-mod-edit) 명령어를 사용하여 모듈을 제외할 수 있습니다.
+You can use the [`go mod edit`](/ref/mod#go-mod-edit) command
+to exclude a module, as in the following example.
 
 ```
 go mod edit -exclude=example.com/theirmodule@v1.3.0
 ```
 
-버전 번호에 대한 자세한 내용은
-[Module version numbering](/doc/modules/version-numbers)을(를) 참조하십시오.
+For more about version numbers, see
+[Module version numbering](/doc/modules/version-numbers).
 
 ## retract {#retract}
 
-`go.mod`에 정의된 모듈의 특정 버전 또는 버전 범위에 대해 의존해서는 안 됨을 나타냅니다. `retract` 지시문은 버전이 너무 일찍 게시되었거나, 게시 후 심각한 문제가 발견되었을 때 유용합니다.
+Indicates that a version or range of versions of the module defined by `go.mod`
+should not be depended upon. A `retract` directive is useful when a version was
+published prematurely or a severe problem was discovered after the version was
+published.
 
-더 자세한 내용은 Go 모듈 참조의 [`retract` directive](/ref/mod#go-mod-file-retract)를 확인하세요.
+For more, see [`retract` directive](/ref/mod#go-mod-file-retract) in the
+Go Modules Reference.
 
-### 구문 {#retract-syntax}
+### Syntax {#retract-syntax}
 
 <pre>
 retract <var>version</var> // <var>rationale</var>
@@ -536,70 +594,89 @@ retract [<var>version-low</var>,<var>version-high</var>] // <var>rationale</var>
 
 <dl>
   <dt>version</dt>
-  <dd>철회할 단일 버전입니다.</dd>
+  <dd>A single version to retract.</dd>
   <dt>version-low</dt>
-  <dd>철회할 버전 범위의 하한선입니다.</dd>
+  <dd>Lower bound of a range of versions to retract.</dd>
   <dt>version-high</dt>
   <dd>
-    철회할 버전 범위의 상한선입니다. <var>version-low</var>와
-    <var>version-high</var> 모두 범위에 포함됩니다.
+    Upper bound of a range of versions to retract. Both <var>version-low</var>
+    and <var>version-high</var> are included in the range.
   </dd>
   <dt>rationale</dt>
   <dd>
-    철회 이유를 설명하는 선택적 코멘트입니다. 사용자에게 보내는 메시지에
-    표시될 수 있습니다.
+    Optional comment explaining the retraction. May be shown in messages to
+    the user.
   </dd>
 </dl>
 
-### 예제 {#retract-example}
+### Example {#retract-example}
 
-* 단일 버전 회수하기
+* Retracting a single version
 
-```
-  retract v1.1.0 // 실수로 게시됨.
+  ```
+  retract v1.1.0 // Published accidentally.
   ```
 
-* 버전 범위 회수(Retracting a range of versions)
+* Retracting a range of versions
 
-```
-  retract [v1.0.0,v1.0.5] // 일부 플랫폼에서 빌드 오류 발생.
+  ```
+  retract [v1.0.0,v1.0.5] // Build broken on some platforms.
   ```
 
-### 참고 사항 {#retract-notes}
+### Notes {#retract-notes}
 
-`retract` 지시어를 사용하여 모듈의 이전 버전을 사용하지 말아야 함을 나타내십시오. 사용자는 `go get`, `go mod tidy` 또는 다른 명령어를 통해 회수된(retracted) 버전으로 자동 업그레이드되지 않습니다. 또한 사용자는 `go list -m -u`를 실행했을 때 회수된 버전을 사용 가능한 업데이트로 보지 않게 됩니다.
+Use the `retract` directive to indicate that a previous version of your module
+should not be used. Users will not automatically upgrade to a retracted version
+with `go get`, `go mod tidy`, or other commands. Users will not see a retracted
+version as an available update with `go list -m -u`.
 
-철회된(Retracted) 버전은 이미 해당 버전에 의존하고 있는 사용자가 패키지를 빌드할 수 있도록 계속 제공되어야 합니다. 철회된 버전이 소스 저장소에서 삭제되더라도, [proxy.golang.org](https://proxy.golang.org)와 같은 미러 사이트에서는 계속 제공될 수 있습니다. 철회된 버전에 의존하는 사용자는 관련 모듈에 대해 `go get` 또는 `go list -m -u`를 실행할 때 알림을 받을 수 있습니다.
+Retracted versions should remain available so users that already depend on them
+are able to build their packages. Even if a retracted version is deleted from
+the source repository, it may remain available on mirrors such as
+[proxy.golang.org](https://proxy.golang.org). Users that depend on retracted
+versions may be notified when they run `go get` or `go list -m -u` on
+related modules.
 
-`go` 명령어는 모듈의 최신 버전 내 `go.mod` 파일에 있는 `retract` 지시문을 읽어 철회된(retracted) 버전을 찾아냅니다. 최신 버전은 다음 우선순위에 따라 결정됩니다:
+The `go` command discovers retracted versions by reading `retract` directives
+in the `go.mod` file in the latest version of a module. The latest version is,
+in order of precedence:
 
-1. 가장 높은 릴리스 버전(있는 경우)
-2. 가장 높은 프리릴리스 버전(있는 경우)
-3. 저장소의 기본 브랜치 최신 지점(tip)에 대한 의사 버전(pseudo-version).
+1. Its highest release version, if any
+2. Its highest pre-release version, if any
+3. A pseudo-version for the tip of the repository's default branch.
 
-retraction을 추가할 때는 거의 항상 더 높은 버전의 새 태그를 지정해야 합니다. 그래야 명령어가 모듈의 최신 버전에서 해당 내용을 확인할 수 있기 때문입니다.
+When you add a retraction, you almost always need to tag a new, higher version
+so the command will see it in the latest version of the module.
 
-철회(retraction)를 알리는 것만을 목적으로 하는 버전을 게시할 수 있습니다. 이 경우, 새 버전이 자기 자신을 철회할 수도 있습니다.
+You can publish a version whose sole purpose is to signal retractions. In this
+case, the new version may also retract itself.
 
-예를 들어, 실수로 `v1.0.0` 태그를 지정한 경우, 다음 지시어를 사용하여 `v1.0.1` 태그를 지정할 수 있습니다.
+For example, if you accidentally tag `v1.0.0`, you can tag `v1.0.1` with the
+following directives:
 
 ```
-retract v1.0.0 // 실수로 게시되었습니다.
-retract v1.0.1 // 철회 내용만 포함되어 있습니다.
+retract v1.0.0 // Published accidentally.
+retract v1.0.1 // Contains retraction only.
 ```
 
-안타깝게도 버전이 한 번 게시되면 변경할 수 없습니다. 나중에 다른 커밋에 `v1.0.0` 태그를 지정하면, `go` 명령어가 `go.sum` 또는 [체크섬 데이터베이스](/ref/mod#checksum-database)에서 일치하지 않는 합계(sum)를 감지할 수 있습니다.
+Unfortunately, once a version is published, it cannot be changed. If you later
+tag `v1.0.0` at a different commit, the `go` command may detect a
+mismatched sum in `go.sum` or in the [checksum
+database](/ref/mod#checksum-database).
 
-모듈의 철회된(Retracted) 버전은 보통 `go list -m -versions` 출력에 나타나지 않지만, `-retracted` 플래그를 사용하여 이를 표시할 수 있습니다.
-자세한 내용은 Go 모듈 참조의 [`go list -m`](/ref/mod#go-list-m)을 확인하세요.
+Retracted versions of a module do not normally appear in the output of
+`go list -m -versions`, but you can use the `-retracted` to show them.
+For more, see [`go list -m`](/ref/mod#go-list-m) in the Go Modules Reference.
 
 ## ignore {#ignore}
 
-`go` 명령어가 패키지 패턴을 매칭할 때 무시해야 할 모듈 내의 디렉터리 경로를 지정합니다.
+Specifies directory paths within the module that the `go` command should
+ignore when matching package patterns.
 
-더 자세한 내용은 Go 모듈 레퍼런스의 [`ignore` 지시문](/ref/mod#go-mod-file-ignore)을 참조하십시오.
+For more, see [`ignore` directive](/ref/mod#go-mod-file-ignore) in the
+Go Modules Reference.
 
-### 구문 {#ignore-syntax}
+### Syntax {#ignore-syntax}
 
 <pre>
 ignore <var>path</var>
@@ -608,29 +685,29 @@ ignore <var>path</var>
 <dl>
   <dt>path</dt>
   <dd>
-    무시할 슬래시(/) 구분 경로입니다. 경로가 <code>./</code>로 시작하면
-    모듈 루트 디렉토리를 기준으로 상대 경로로 해석됩니다. 그렇지 않으면,
-    모듈 내 어느 깊이에서든 해당 이름을 가진 모든 디렉토리가 무시됩니다.
+    A slash-separated path to ignore. If the path starts with <code>./</code>,
+    it is interpreted relative to the module root directory. Otherwise, any
+    directory with that name at any depth within the module is ignored.
   </dd>
 </dl>
 
-### 예제 {#ignore-examples}
+### Examples {#ignore-examples}
 
-* 모듈 루트를 기준으로 로컬 디렉터리를 무시합니다.
+* Ignore a local directory relative to the module root
 
-```
+  ```
   ignore ./node_modules
   ```
 
-* 모듈 내 어디서든 `generated`라는 이름의 모든 디렉터리를 무시합니다.
+* Ignore all directories named `generated` anywhere in the module
 
-```
+  ```
   ignore generated
   ```
 
-* 블록을 사용하여 여러 경로 무시하기
+* Ignore multiple paths using a block
 
-```
+  ```
   ignore (
       static
       content/html
@@ -638,9 +715,13 @@ ignore <var>path</var>
   )
   ```
 
-### 참고 사항 {#ignore-notes}
+### Notes {#ignore-notes}
 
-`./...`와 같은 와일드카드 패턴을 사용할 때, `go` 명령어가 생성된 디렉토리나 Go 관련이 없는 디렉토리의 패키지를 매칭하지 않도록 하려면 `ignore` 지시어를 사용하십시오. 무시된 디렉토리와 그 내용은 패키지 패턴에서 제외되지만, 모듈 파일 트리에는 여전히 존재합니다.
+Use the `ignore` directive to prevent the `go` command from matching
+packages in generated or non-Go directories when using
+wildcard patterns like `./...`. Ignored directories and their contents
+are excluded from package patterns but are still present in the module
+file tree.
 
-`ignore` 지시문은 메인 모듈의 `go.mod` 파일에만 적용됩니다.
-의존성 모듈의 `go.mod` 파일에서는 아무런 효과가 없습니다.
+The `ignore` directive only applies in the main module's `go.mod` file.
+It has no effect in `go.mod` files of dependencies.

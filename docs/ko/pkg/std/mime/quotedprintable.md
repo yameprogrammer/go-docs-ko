@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`quotedprintable` 패키지는 RFC 2045에 명시된 quoted-printable 인코딩을 구현합니다.
+Package quotedprintable implements quoted-printable encoding as specified by RFC 2045.
 
 ## 원문 요약
 

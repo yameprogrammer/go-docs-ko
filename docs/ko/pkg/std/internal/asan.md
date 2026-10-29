@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`asan` 패키지는 address sanitizer를 위해 코드를 수동으로 계측(instrumenting)하는 데 필요한 헬퍼 함수들을 포함하고 있습니다.
+Package asan contains helper functions for manually instrumenting code for the address sanitizer.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`ecdsa` 패키지는 [FIPS 186-5]에 정의된 타원 곡선 디지털 서명 알고리즘(Elliptic Curve Digital Signature Algorithm)을 구현합니다.
+Package ecdsa implements the Elliptic Curve Digital Signature Algorithm, as defined in [FIPS 186-5].
 
 ## 원문 요약
 

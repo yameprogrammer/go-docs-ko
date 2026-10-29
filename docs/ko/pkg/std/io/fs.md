@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`fs` 패키지는 파일 시스템에 대한 기본 인터페이스를 정의합니다.
+Package fs defines basic interfaces to a file system.
 
 ## 원문 요약
 

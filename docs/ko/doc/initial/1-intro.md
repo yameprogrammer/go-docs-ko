@@ -1,4 +1,6 @@
-Please provide the Markdown content you would like me to translate. I am ready to translate your technical text from English to Korean while preserving all structure and code.
+<style>
+  main ul li { margin: 0.5em 0; }
+</style>
 
 ## 출시 노트 초안 — Go 1.N 소개 {#introduction}
 
