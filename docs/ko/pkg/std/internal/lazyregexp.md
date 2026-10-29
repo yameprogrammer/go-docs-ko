@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`lazyregexp` 패키지는 `regexp`를 감싸는 얇은 래퍼(wrapper)로, 전역 `regexp` 변수를 사용할 때 `init` 단계에서 강제로 컴파일되지 않도록 해줍니다.
+Package lazyregexp is a thin wrapper over regexp, allowing the use of global regexp variables without forcing them to be compiled at init.
 
 ## 원문 요약
 

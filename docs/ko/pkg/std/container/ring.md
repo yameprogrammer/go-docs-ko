@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`ring` 패키지는 원형 리스트(circular lists)에 대한 연산을 구현합니다.
+Package ring implements operations on circular lists.
 
 ## 원문 요약
 

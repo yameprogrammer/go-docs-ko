@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`weak` 패키지는 메모리를 안전하게 약하게 참조(weakly reference)하는 방법을 제공합니다. 즉, 해당 메모리의 회수(reclamation)를 방해하지 않고 참조할 수 있게 합니다.
+Package weak provides ways to safely reference memory weakly, that is, without preventing its reclamation.
 
 ## 원문 요약
 

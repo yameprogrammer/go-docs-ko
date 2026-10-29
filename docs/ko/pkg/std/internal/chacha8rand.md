@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`chacha8rand` 패키지는 ChaCha8 기반의 의사 난수 생성기를 구현합니다.
+Package chacha8rand implements a pseudorandom generator based on ChaCha8.
 
 ## 원문 요약
 

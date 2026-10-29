@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`http` 패키지는 HTTP 클라이언트 및 서버 구현을 제공합니다.
+Package http provides HTTP client and server implementations.
 
 ## 원문 요약
 

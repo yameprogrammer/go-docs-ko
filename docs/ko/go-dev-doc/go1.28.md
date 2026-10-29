@@ -1,8 +1,8 @@
 {{/*
-	이것은 https://tip.golang.org/doc/go1.28 에서 
-	Go 1.28 릴리스 노트 초안을 미리 볼 수 있게 하는 플레이스홀더 템플릿입니다.
-	결국 doc/next 에 있는 릴리스 노트 조각들이 병합되어
-	여기에 추가될 것이며, "docNext" 함수 호출을 대체하게 됩니다.
+	This is a placeholder template that makes it possible to preview
+	Go 1.28 release notes draft at https://tip.golang.org/doc/go1.28.
+	Eventually the release note fragments in doc/next will be merged
+	and added here, replacing the "docNext" function call.
 */}}
 
-{{with docNext}}{{.}}{{else}}사용 가능한 다음 릴리스 노트 조각이 없습니다.{{end}}
+{{with docNext}}{{.}}{{else}}No next release note fragments available.{{end}}

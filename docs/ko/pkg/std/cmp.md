@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`cmp` 패키지는 정렬 가능한 값(ordered values)의 비교와 관련된 타입 및 함수를 제공합니다.
+Package cmp provides types and functions related to comparing ordered values.
 
 ## 원문 요약
 

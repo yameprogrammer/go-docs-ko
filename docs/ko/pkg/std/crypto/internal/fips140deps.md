@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`fipsdeps` 패키지는 FIPS 모듈에 노출되는 내부 API를 위한 래퍼(wrapper) 패키지들을 포함하고 있습니다.
+Package fipsdeps contains wrapper packages for internal APIs that are exposed to the FIPS module.
 
 ## 원문 요약
 

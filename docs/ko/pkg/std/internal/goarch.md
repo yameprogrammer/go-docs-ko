@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`goarch` 패키지는 GOARCH 전용 상수를 포함합니다.
+package goarch contains GOARCH-specific constants.
 
 ## 원문 요약
 

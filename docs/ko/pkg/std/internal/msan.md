@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`msan` 패키지는 메모리 새니타이저(memory sanitizer)를 위해 코드를 수동으로 계측(instrumenting)하는 데 필요한 헬퍼 함수들을 포함하고 있습니다.
+Package msan contains helper functions for manually instrumenting code for the memory sanitizer.
 
 ## 원문 요약
 

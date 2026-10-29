@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`mlkem` 패키지는 [NIST FIPS 203]에 명시된 양자 내성 키 캡슐화 메커니즘인 ML-KEM(이전 명칭 Kyber)을 구현합니다.
+Package mlkem implements the quantum-resistant key encapsulation method ML-KEM (formerly known as Kyber), as specified in [NIST FIPS 203].
 
 ## 원문 요약
 

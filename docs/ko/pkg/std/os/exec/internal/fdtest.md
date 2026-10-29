@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package fdtest는 exec 전후로 파일 디스크립터를 다루기 위한 테스트 헬퍼를 제공합니다.
+Package fdtest provides test helpers for working with file descriptors across exec.
 
 ## 원문 요약
 

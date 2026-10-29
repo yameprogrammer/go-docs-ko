@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`testing` 패키지는 Go 패키지의 자동화된 테스트를 위한 지원을 제공합니다.
+Package testing provides support for automated testing of Go packages.
 
 ## 원문 요약
 

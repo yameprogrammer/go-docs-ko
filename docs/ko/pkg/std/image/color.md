@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`color` 패키지는 기본적인 컬러 라이브러리를 구현합니다.
+Package color implements a basic color library.
 
 ## 원문 요약
 

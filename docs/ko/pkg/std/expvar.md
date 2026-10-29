@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`expvar` 패키지는 서버의 작업 카운터와 같은 공개 변수에 대한 표준화된 인터페이스를 제공합니다.
+Package expvar provides a standardized interface to public variables, such as operation counters in servers.
 
 ## 원문 요약
 

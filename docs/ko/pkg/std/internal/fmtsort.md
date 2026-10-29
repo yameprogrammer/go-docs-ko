@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`fmtsort` 패키지는 `fmt` 및 `text/template` 패키지를 대신하여 맵(map)에 대한 일반적인 안정적 정렬 메커니즘을 제공합니다.
+Package fmtsort provides a general stable ordering mechanism for maps, on behalf of the fmt and text/template packages.
 
 ## 원문 요약
 

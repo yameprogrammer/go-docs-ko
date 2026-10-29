@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`nistec` 패키지는 NIST SP 800-186의 타원 곡선들을 구현합니다.
+Package nistec implements the elliptic curves from NIST SP 800-186.
 
 ## 원문 요약
 

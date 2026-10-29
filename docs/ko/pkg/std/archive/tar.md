@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`tar` 패키지는 tar 아카이브에 대한 액세스를 구현합니다.
+Package tar implements access to tar archives.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`exithook` 패키지는 종료 시 정리(cleanup) 작업을 위한 제한적인 지원을 제공합니다.
+Package exithook provides limited support for on-exit cleanup.
 
 ## 원문 요약
 

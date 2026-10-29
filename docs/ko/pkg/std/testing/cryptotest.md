@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`cryptotest` 패키지는 결정론적 랜덤 소스 테스트를 제공합니다.
+Package cryptotest provides deterministic random source testing.
 
 ## 원문 요약
 

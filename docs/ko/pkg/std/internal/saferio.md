@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`saferio` 패키지는 불필요하게 많은 양의 메모리를 할당하는 것을 방지하는 I/O 함수들을 제공합니다.
+Package saferio provides I/O functions that avoid allocating large amounts of memory unnecessarily.
 
 ## 원문 요약
 

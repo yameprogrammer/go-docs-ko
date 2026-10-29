@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-package driver는 package sql에서 사용하는 데이터베이스 드라이버가 구현해야 할 인터페이스를 정의합니다.
+Package driver defines interfaces to be implemented by database drivers as used by package sql.
 
 ## 원문 요약
 

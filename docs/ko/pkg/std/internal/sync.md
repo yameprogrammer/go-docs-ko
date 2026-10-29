@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`sync` 패키지는 상호 배제 락(mutual exclusion locks)과 같은 기본적인 동기화 기본 제공 객체들을 내부 패키지(`sync`에 의존하는 패키지 포함)에 제공합니다.
+Package sync provides basic synchronization primitives such as mutual exclusion locks to internal packages (including ones that depend on sync).
 
 ## 원문 요약
 

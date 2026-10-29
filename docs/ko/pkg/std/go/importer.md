@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package importer는 export 데이터 importer에 대한 액세스를 제공합니다.
+Package importer provides access to export data importers.
 
 ## 원문 요약
 

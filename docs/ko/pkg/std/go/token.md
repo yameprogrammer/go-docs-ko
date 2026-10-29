@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`token` 패키지는 Go 프로그래밍 언어의 어휘 토큰(lexical tokens)을 나타내는 상수들과 토큰에 대한 기본 작업(출력, 서술어)을 정의합니다.
+Package token defines constants representing the lexical tokens of the Go programming language and basic operations on tokens (printing, predicates).
 
 ## 원문 요약
 

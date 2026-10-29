@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`hash` 패키지는 해시 함수를 위한 인터페이스를 제공합니다.
+Package hash provides interfaces for hash functions.
 
 ## 원문 요약
 

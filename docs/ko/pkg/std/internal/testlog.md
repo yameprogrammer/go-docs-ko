@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`testlog` 패키지는 테스트와 `os` 패키지 사이에 백채널 통신 경로를 제공하여, `cmd/go`가 테스트에서 어떤 환경 변수와 파일들을 참조하는지 확인할 수 있게 합니다.
+Package testlog provides a back-channel communication path between tests and package os, so that cmd/go can see which environment variables and files a test consults.
 
 ## 원문 요약
 

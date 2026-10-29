@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-poll 패키지는 폴링을 통한 파일 디스크립터의 논블로킹(non-blocking) I/O를 지원합니다.
+Package poll supports non-blocking I/O on file descriptors with polling.
 
 ## 원문 요약
 

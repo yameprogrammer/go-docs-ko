@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`dwarf` 패키지는 http://dwarfstd.org/doc/dwarf-2.0.0.pdf 에 정의된 DWARF 2.0 표준에 따라, 실행 파일에서 로드된 DWARF 디버깅 정보에 대한 액세스를 제공합니다.
+Package dwarf provides access to DWARF debugging information loaded from executable files, as defined in the DWARF 2.0 Standard at http://dwarfstd.org/doc/dwarf-2.0.0.pdf.
 
 ## 원문 요약
 

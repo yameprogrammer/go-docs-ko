@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`path` 패키지는 슬래시(`/`)로 구분된 경로를 조작하기 위한 유틸리티 루틴을 구현합니다.
+Package path implements utility routines for manipulating slash-separated paths.
 
 ## 원문 요약
 

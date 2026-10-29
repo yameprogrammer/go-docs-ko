@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`boring` 패키지는 BoringCrypto 구현 함수들에 대한 액세스를 제공합니다.
+Package boring provides access to BoringCrypto implementation functions.
 
 ## 원문 요약
 

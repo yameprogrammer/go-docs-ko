@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`crypto` 패키지는 공통 암호화 상수들을 수집합니다.
+Package crypto collects common cryptographic constants.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`sync` 패키지는 상호 배제 락(mutual exclusion locks)과 같은 기본적인 동기화 프리미티브를 제공합니다.
+Package sync provides basic synchronization primitives such as mutual exclusion locks.
 
 ## 원문 요약
 

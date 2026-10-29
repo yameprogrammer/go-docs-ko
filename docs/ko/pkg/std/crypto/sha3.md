@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-sha3 패키지는 FIPS 202에 정의된 SHA-3 해시 알고리즘과 SHAKE 확장 출력 함수를 구현합니다.
+Package sha3 implements the SHA-3 hash algorithms and the SHAKE extendable output functions defined in FIPS 202.
 
 ## 원문 요약
 

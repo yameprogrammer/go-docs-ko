@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`gate` 패키지는 대안적인 조건 변수(condition variable)를 제공합니다.
+Package gate contains an alternative condition variable.
 
 ## 원문 요약
 

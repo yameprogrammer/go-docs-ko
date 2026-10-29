@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`dnsmessage` 패키지는 대부분 RFC 1035를 준수하는 DNS 메시지 패킹(packing) 및 언패킹(unpacking) 구현을 제공합니다.
+Package dnsmessage provides a mostly RFC 1035 compliant implementation of DNS message packing and unpacking.
 
 ## 원문 요약
 

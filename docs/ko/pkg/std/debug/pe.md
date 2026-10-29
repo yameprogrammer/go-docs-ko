@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-package pe는 PE (Microsoft Windows Portable Executable) 파일에 대한 액세스 기능을 구현합니다.
+Package pe implements access to PE (Microsoft Windows Portable Executable) files.
 
 ## 원문 요약
 

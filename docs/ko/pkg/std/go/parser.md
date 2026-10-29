@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`parser` 패키지는 Go 소스 파일용 파서를 구현합니다.
+Package parser implements a parser for Go source files.
 
 ## 원문 요약
 

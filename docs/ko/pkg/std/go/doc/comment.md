@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`comment` 패키지는 Go doc 주석(문서화 주석)의 파싱 및 재포맷팅을 구현합니다. 여기서 문서화 주석이란 패키지, `const`, `func`, `type` 또는 `var`의 최상위 선언 바로 앞에 오는 주석을 의미합니다.
+Package comment implements parsing and reformatting of Go doc comments, (documentation comments), which are comments that immediately precede a top-level declaration of a package, const, func, type, or var.
 
 ## 원문 요약
 

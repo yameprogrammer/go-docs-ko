@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`doc` 패키지는 Go AST에서 소스 코드 문서를 추출합니다.
+Package doc extracts source code documentation from a Go AST.
 
 ## 원문 요약
 

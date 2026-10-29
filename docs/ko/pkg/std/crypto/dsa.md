@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`dsa` 패키지는 FIPS 186-3에 정의된 디지털 서명 알고리즘(Digital Signature Algorithm)을 구현합니다.
+Package dsa implements the Digital Signature Algorithm, as defined in FIPS 186-3.
 
 ## 원문 요약
 

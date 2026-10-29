@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package hpke는 [RFC 9180]에 정의된 하이브리드 공개키 암호화(Hybrid Public Key Encryption, HPKE)를 구현합니다.
+Package hpke implements Hybrid Public Key Encryption (HPKE) as defined in [RFC 9180].
 
 ## 원문 요약
 

@@ -1,120 +1,187 @@
-## 개요 {#overview}
+## Overview {#overview}
 
-이 문서는 Go 보안 팀이 일반적으로 보고되는 다양한 문제들에 대해 내린 결정 사항들을 포함하고 있습니다. 주로 저희가 취약점으로 간주하지 않는 항목들에 대한 참조 자료로 활용됩니다.
+This document includes decisions the Go Security team has made about
+various commonly-reported issues. It mostly serves as a reference
+for things we do not consider to be a vulnerability.
 
-이 목록이 모든 내용을 포괄하는 것은 아닙니다.
+This list is not comprehensive.
 
-## 일반 원칙 {#principles}
+## General principles {#principles}
 
-모든 버그가 취약점인 것은 아닙니다.
+Not every bug is a vulnerability.
 
-어떤 버그든, 그것이 취약점을 유발하는 가상의 시나리오를 구성하는 것은 거의 항상 가능합니다.
+For any bug, it is almost always possible to construct
+a hypothetical scenario in which it causes a vulnerability.
 
-예를 들어, 일부 입력을 잘못 디코딩하게 만드는 이미지 디코더의 버그가 있다고 가정해 보겠습니다. 이제 수표 사진을 받아 해당 수표에 따라 계좌 이체를 수행하는 가상의 시스템을 생각해 보십시오. 만약 이 시스템에 요청을 검증하는 게이트웨이와 이체를 수행하는 백엔드가 있다면, 게이트웨이와 백엔드에서 사용하는 이미지 디코더 간의 파서 차이(parser differential)로 인해 게이트웨이가 악성 작업을 백엔드로 전달하는 결과가 발생할 수 있습니다.
+For example, imagine a bug in an image decoder which causes it to
+incorrectly decode some inputs. Now imagine a hypothetical system
+which accepts pictures of written cheques and makes bank transfers
+to satisfy the cheques. If this system contains a gateway which validates
+the request and a backend which performs the transfer, a parser
+differential in the image decoders used by the gateway and backend
+could result in the gateway passing a malicious operation on to the
+backend.
 
-이 시나리오를 바탕으로 이미지 파싱 오류 버그를 취약점으로 분류하는 것은 아무런 유용한 목적이 없습니다. 이러한 성격의 "취약점"에 영향을 받는다고 사용자에게 경고하는 것은 단지 소음에 불과하며, 실제로 영향을 받는 사용자는 거의 없거나 전혀 없기 때문입니다. 이를 취약점으로 부르는 것은 보안에 해롭습니다. 사용자들이 보고서를 대부분 무의미한 것으로 간주하고 무시하도록 학습시키기 때문입니다.
+Classifying an image misparsing bug as a vulnerability based on this
+scenario does not serve any useful purpose. Warning users that they
+are affected by a "vulnerability" of this nature is just noise,
+since few to no users will actually be affected. Calling this a
+vulnerability is detrimental to security, since it trains users to
+ignore reports as mostly meaningless.
 
-이 시나리오는 우리가 보안 문제에 심각도(severity) 라벨을 할당하지 않는 이유를 보여주는 또 다른 예시입니다. 가상의 수표 처리 업체에게는 이것이 심각도가 높은 문제일 수 있지만, 대부분의 사용자에게는 전혀 문제가 되지 않기 때문입니다.
+This scenario is also an example of why we do not assign severity
+labels to security issues: To the hypothetical cheques processor
+this may be a high-severity issue, but to most users it is not an
+issue at all.
 
-일반적인 원칙으로서, 버그가 보안 문제를 일으키는 가상 시나리오를 구성할 수 있다는 사실만으로는 해당 건을 보안 문제로 처리하기에 충분한 근거가 되지 않습니다.
+As a general principle, simply being able to construct a
+hypothetical scenario in which a bug causes a security issue
+is not sufficient cause for us to handle it as a security issue itself.
 
-## 취약점 {#vulns}
+## Vulnerabilities {#vulns}
 
-### 원격 코드 실행 (Remote Code Execution) {#rce}
+### Remote Code Execution {#rce}
 
-코드 실행이 예상되지 않는 상황에서 공격자가 코드를 실행할 수 있게 하는 시나리오는 PRIVATE 트랙 취약점으로 분류됩니다. 이는 다른 모든 결정보다 우선합니다.
+A scenario which permits an attacker to execute code in a situation
+where code execution is not expected is a PRIVATE-track vulnerability.
+This supersedes all other decisions.
 
-이 결정은 코드를 실행할 것으로 예상되는 함수에는 적용되지 않습니다.
+This decision does not cover functions which are expected to execute code.
 
-다루는 내용:
+Covered:
 
-- 악의적인 입력에 대해 코드를 실행하는 parse 함수.
-- HTTP 서버가 코드를 실행하게 만드는 악의적인 요청.
+- A parse function which executes code on a malicious input.
+- A malicious request causing the HTTP server to execute code.
 
-다루지 않는 내용:
+Not covered:
 
-- `go test` 명령은 테스트를 실행합니다. 공격자가 제어하는 테스트에 대해 `go test`를 실행하는 것은 당사의 위협 모델에 포함되지 않습니다.
+- The `go test` command runs tests. Running `go test` on attacker-controlled
+  tests is not within our threat model.
 
-### 패닉 (Panics) {#panics}
+### Panics {#panics}
 
-공격자가 제어하는 입력을 처리하는 도중 발생하는 패닉(panic)은 취약점이 될 수 있습니다.
+A panic when processing attacker-controlled input may be a vulnerability.
 
-`net/http` 서버와 같이 공격자가 제어하는 요청을 처리해야 하는 서버에서 발생하는 패닉(panic)은 일반적으로 PRIVATE 트랙 취약점으로 분류됩니다.
+A panic in a server expected to handle attacker-controlled requests,
+such as a `net/http` server, is usually a PRIVATE-track vulnerability.
 
-`net/http` 클라이언트와 같은 클라이언트에서의 패닉(panic)은 일반적으로 PUBLIC-track 취약점으로 분류됩니다.
+A panic in a client, such as a `net/http` client, is usually a PUBLIC-track
+vulnerability.
 
-`archive/zip` 또는 `image/png`와 같이 악의적일 가능성이 있는 입력을 처리하는 패키지의 파싱 함수에서 발생하는 패닉(panic)은 일반적으로 PUBLIC-track 취약점으로 분류됩니다.
+A panic in a parse function in a package which handles plausibly
+malicious input, such as `archive/zip` or `image/png`,
+is usually a PUBLIC-track vulnerablity.
 
-매우 큰 이미지와 같이 자연적인 크기로 인해 패닉(panic)을 유발하는 입력은 일반적으로 취약점으로 분류되지 않습니다.
+An input which causes a panic due to its natural size,
+such as a very large image, is usually not classified as a vulnerability.
 
-잠재적으로 악의적인 데이터를 파싱하도록 명확하게 설계되지 않은 함수에 잘못된 입력값이 들어오는 경우는 당사의 위협 모델에 포함되지 않으며, 일반적으로 보안 버그의 범위 밖으로 간주합니다. 예를 들어, 이미지 *파서(parser)*는 잘못된 입력에 대비해 방어해야 하지만, 이미지 *인코더(encoder)*에서 발생하는 패닉(panic)은 버그일 수는 있어도 취약점으로 처리되지는 않습니다.
+Invalid inputs to functions which are not clearly designed to parse
+potentially malicious data are not in our threat model and
+generally out of scope as security bugs. For example, image *parsers*
+are expected to defend against invalid inputs, but a panic in
+an image *encoder* might be a bug but would not be handled
+as a vulnerability.
 
-사용 중단된(deprecated) 함수에서의 패닉은 취약점이 아닙니다. 아래의 [사용 중단된 API](#deprecated)에 관한 결정을 참조하십시오.
+A panic in a deprecated function is not a vulnerability;
+see the decision on [deprecated APIs](#deprecated) below.
 
-### 과도한 리소스 소비 {#quadratic}
+### Excessive resource consumption {#quadratic}
 
-우리는 일반적으로 입력 크기에 대해 런타임이 O(n²)인 함수와 같이 과도한 CPU 또는 메모리 소비가 발생하는 경우를 panic과 동일하게 취급합니다.
+We generally treat excessive CPU or memory consumption,
+such as a function with a runtime that is O(n²) in terms of its input size,
+as equivalent to a panic.
 
-### 악성 코드 빌드 {#malicious-build}
+### Building malicious code {#malicious-build}
 
-공격자가 제어하는 프로그램을 빌드하는 것은, 설령 그 프로그램을 실행하는 것이 안전하지 않더라도 빌드 과정 자체는 안전해야 합니다. 예를 들어, 신뢰할 수 없는 코드를 빌드한 후 이를 샌드박스 내에서 실행하는 시나리오는 안전해야 한다고 생각합니다.
+Building an attacker-controlled program should be safe, even when
+running it is not. For example, we intend it to be safe to build
+untrusted code which is then run in a sandbox.
+We strongly recommend that anyone building untrusted code consider
+this a defense-in-depth measure, and that builds of untrusted code
+also be performed in an unprivileged sandbox environment.
 
-신뢰할 수 없는 코드를 빌드하는 모든 사용자는 이를 심층 방어(defense-in-depth) 조치로 간주하고, 신뢰할 수 없는 코드의 빌드 역시 권한이 없는 샌드박스 환경에서 수행할 것을 강력히 권장합니다.
+Data exfiltation is not in our threat model.
+Building an attacker-controlled program may produce output which
+contains the contents of arbitrary local files.
 
-데이터 유출(Data exfiltration)은 우리의 위협 모델에 포함되지 않습니다.
-공격자가 제어하는 프로그램을 빌드하면 임의의 로컬 파일 내용이 포함된 출력이 생성될 수 있습니다.
+*Executing* malicious code is also not in our threat model.
+Running a malicious program obviously permits it to do malicious things.
 
-악성 코드를 *실행(Executing)*하는 것 또한 우리의 위협 모델에 포함되지 않습니다.
-악성 프로그램을 실행하면 당연히 해당 프로그램이 악의적인 동작을 수행할 수 있게 됩니다.
+A vulnerability, usually PRIVATE track:
 
-취약점, 일반적으로 PRIVATE 트랙:
+- A malicious module can cause "go build" to execute arbitrary code.
 
-- 악성 모듈은 `go build`가 임의의 코드를 실행하도록 유도할 수 있습니다.
+Not handled as a security issue:
 
-보안 이슈로 처리되지 않음:
+- "go build" produces an error containing text from an arbitrary local file.
+- A compiled executable contains the contents from an arbitrary local file.
+- A malicious program can corrupt the runtime's state and execute arbitrary code.
+- A compilation bug allows obfuscating malicious code.
 
-- "go build"가 임의의 로컬 파일의 텍스트를 포함하는 에러를 생성합니다.
-- 컴파일된 실행 파일에 임의의 로컬 파일 내용이 포함됩니다.
-- 악성 프로그램이 런타임 상태를 손상시키고 임의의 코드를 실행할 수 있습니다.
-- 컴파일 버그로 인해 악성 코드를 난독화할 수 있습니다.
+## Non-Vulnerabilities {#non-vuln}
 
-## 취약점이 아닌 사례 {#non-vuln}
+### Attacker-controlled environment {#attacker-control}
 
-### 공격자 제어 환경 {#attacker-control}
+If an attack relies on the attacker having control over the environment
+a program runs in, it is not a vulnerability.
 
-공격자가 프로그램이 실행되는 환경을 제어할 수 있어야만 가능한 공격이라면, 이는 취약점이 아닙니다.
+This includes, but is not restricted to, an attacker with the ability to
+add programs to `$PATH` or set arbitrary environment variables.
 
-여기에는 `$PATH`에 프로그램을 추가하거나 임의의 환경 변수를 설정할 수 있는 권한을 가진 공격자가 포함되지만, 이에 국한되지 않습니다.
+### Deprecated APIs {#deprecated}
 
-### 지원 중단된 API (Deprecated APIs) {#deprecated}
+The bar for a bug in a deprecated API to be considered a security issue
+is higher than it is for a supported API.
 
-지원 중단된(deprecated) API의 버그가 보안 이슈로 간주되기 위한 기준은 지원되는(supported) API의 기준보다 더 높습니다.
+In particular, a panic or excessive resource consumption in a deprecated API
+is never handled as a vulnerability. Users who require security hardening
+should use supported APIs.
 
-특히, 지원이 중단된(deprecated) API에서 발생하는 패닉(panic)이나 과도한 리소스 소비는 취약점으로 처리되지 않습니다. 보안 강화를 필요로 하는 사용자는 지원되는 API를 사용해야 합니다.
+### image, x/image: Large images {#large-image}
 
-### image, x/image: 대형 이미지 {#large-image}
+Parsing a large image can allocate a large amount of memory.
+For example, a 65536x65536 32-bit color image requires 16MiB
+to store uncompressed.
 
-대용량 이미지를 파싱하면 많은 양의 메모리가 할당될 수 있습니다.
-예를 들어, 65536x65536 32비트 컬러 이미지를 압축되지 않은 상태로 저장하려면 16MiB가 필요합니다.
+Many image compression formats can reduce a large, simple image
+to a very small file size. Decoding the small file may allocate
+a large amount of memory.
 
-많은 이미지 압축 형식은 크고 단순한 이미지를 매우 작은 파일 크기로 줄일 수 있습니다. 이러한 작은 파일을 디코딩하면 많은 양의 메모리가 할당될 수 있습니다.
+Users parsing untrusted images should verify the image size prior
+to parsing, using a function such as
+[image.DecodeConfig](https://pkg.go.dev/image#DecodeConfig).
 
-신뢰할 수 없는 이미지를 파싱하는 사용자는 [image.DecodeConfig](https://pkg.go.dev/image#DecodeConfig)와 같은 함수를 사용하여 파싱 전에 이미지 크기를 확인해야 합니다.
+We do not consider it to be a vulnerability for an image parsing
+function to decode a large, well-compressed image.
 
-이미지 파싱 함수가 크고 압축률이 높은 이미지를 디코딩하는 것을 취약점으로 간주하지 않습니다.
+### net/http: Redirects {#http-redirect}
 
-### net/http: 리다이렉트 {#http-redirect}
+The `net/http` package's HTTP client handles redirects.
+It implements security-relevant behavior in redirect handling.
+For example, it strips the "Authorization" header when following
+a redirect to a domain that is not a subdomain or exact match
+for the initial request's domain.
 
-`net/http` 패키지의 HTTP 클라이언트는 리다이렉트를 처리합니다.
-이 패키지는 리다이렉트 처리 시 보안과 관련된 동작을 구현합니다.
-예를 들어, 초기 요청의 도메인과 정확히 일치하지 않거나 서브도메인이 아닌 도메인으로 리다이렉트될 때 "Authorization" 헤더를 제거합니다.
+Header stripping is a defense-in-depth measure,
+avoiding the case where a misconfigured or compromised server
+inadvertently forwards a client request containing sensitive headers
+to an untrusted destination.
+Failure to strip headers on redirect does not, by itself, permit
+an attacker to acquire credentials passed in header.
+However, it may be combined with other vulnerabilities
+(for example, a server with an open redirect vulnerability)
+to do so.
 
-헤더 제거(Header stripping)는 심층 방어(defense-in-depth) 조치로, 잘못 설정되었거나 침해된 서버가 민감한 헤더가 포함된 클라이언트 요청을 신뢰할 수 없는 대상으로 실수로 전달하는 상황을 방지합니다.
+Changing the HTTP client's behavior runs a high risk of breaking
+existing users who depend on the current behavior.
+For example, the client's same origin policy currently permits subdomains
+(a redirect from example.com to www.example.com will preserve headers),
+while the WHATWG Fetch standard does not.
+Aligning the client with the standard may be worthwhile,
+but doing so in a security release is more likely to cause
+pain to existing users than it is to address real vulnerabilities.
 
-리다이렉트 시 헤더를 제거하지 않는 것만으로는 공격자가 헤더에 전달된 자격 증명을 획득할 수 없습니다. 하지만 이는 다른 취약점(예: 오픈 리다이렉트 취약점이 있는 서버)과 결합되어 자격 증명 탈취로 이어질 수 있습니다.
-
-HTTP 클라이언트의 동작을 변경하는 것은 현재 동작에 의존하고 있는 기존 사용자들에게 문제를 일으킬 위험이 큽니다.
-예를 들어, 현재 클라이언트의 동일 출처 정책(same origin policy)은 서브도메인을 허용하지만(example.com에서 www.example.com으로 리다이렉트 시 헤더가 유지됨), WHATWG Fetch 표준은 이를 허용하지 않습니다.
-클라이언트를 표준에 맞추는 것이 가치 있는 일일 수 있으나, 보안 릴리스에서 이를 수행하는 것은 실제 취약점을 해결하기보다 기존 사용자들에게 불편을 초래할 가능성이 더 높습니다.
-
-리다이렉트 새니타이제이션(redirect sanitization)은 심층 방어(defense-in-depth) 조치이며, 이를 변경하는 것은 위험하므로, HTTP 클라이언트 리다이렉트와 관련된 모든 측면은 보안 버그 프로세스의 범위 밖(out of scope)으로 간주합니다.
+Since redirect sanitization is a defense-in-depth measure,
+and making changes to it is risky,
+we consider all aspects of the HTTP client redirects
+to be out of scope for the security bug process.

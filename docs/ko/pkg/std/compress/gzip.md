@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`gzip` 패키지는 RFC 1952에 지정된 gzip 형식의 압축 파일 읽기 및 쓰기 기능을 구현합니다.
+Package gzip implements reading and writing of gzip format compressed files, as specified in RFC 1952.
 
 ## 원문 요약
 

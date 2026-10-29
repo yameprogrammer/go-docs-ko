@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`tls` 패키지는 RFC 5246에 정의된 TLS 1.2와 RFC 8446에 정의된 TLS 1.3을 부분적으로 구현합니다.
+Package tls partially implements TLS 1.2, as specified in RFC 5246, and TLS 1.3, as specified in RFC 8446.
 
 ## 원문 요약
 

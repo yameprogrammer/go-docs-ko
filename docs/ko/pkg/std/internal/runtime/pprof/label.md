@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`label` 패키지는 `runtime`과 `runtime/pprof` 패키지 모두에서 사용되는 공통 선언을 제공합니다.
+Package label provides common declarations used by both the runtime and runtime/pprof packages.
 
 ## 원문 요약
 

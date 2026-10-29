@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`fips140tls` 패키지는 `crypto/tls`가 FIPS 승인 설정을 요구하는지 여부를 제어합니다.
+Package fips140tls controls whether crypto/tls requires FIPS-approved settings.
 
 ## 원문 요약
 

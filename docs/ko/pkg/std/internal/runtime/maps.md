@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`maps` 패키지는 Go의 내장 map 타입을 구현합니다.
+Package maps implements Go's builtin map type.
 
 ## 원문 요약
 

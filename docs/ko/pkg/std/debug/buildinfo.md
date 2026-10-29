@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`buildinfo` 패키지는 Go 바이너리에 내장된 빌드 방식에 관한 정보에 대한 액세스를 제공합니다.
+Package buildinfo provides access to information embedded in a Go binary about how it was built.
 
 ## 원문 요약
 

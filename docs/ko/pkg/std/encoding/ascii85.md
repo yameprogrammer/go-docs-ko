@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`ascii85` 패키지는 `btoa` 도구와 Adobe의 PostScript 및 PDF 문서 형식에서 사용되는 ascii85 데이터 인코딩을 구현합니다.
+Package ascii85 implements the ascii85 data encoding as used in the btoa tool and Adobe's PostScript and PDF document formats.
 
 ## 원문 요약
 

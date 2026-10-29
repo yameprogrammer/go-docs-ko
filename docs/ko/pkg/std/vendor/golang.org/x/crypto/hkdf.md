@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-package hkdf는 RFC 5869에 정의된 HMAC 기반 추출-확장 키 유도 함수(HKDF)를 구현합니다.
+Package hkdf implements the HMAC-based Extract-and-Expand Key Derivation Function (HKDF) as defined in RFC 5869.
 
 ## 원문 요약
 

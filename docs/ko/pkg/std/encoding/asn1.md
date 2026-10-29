@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`asn1` 패키지는 ITU-T Rec X.690에 정의된 DER 인코딩된 ASN.1 데이터 구조의 파싱을 구현합니다.
+Package asn1 implements parsing of DER-encoded ASN.1 data structures, as defined in ITU-T Rec X.690.
 
 ## 원문 요약
 

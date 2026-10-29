@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`elliptic` 패키지는 소수체(prime fields) 상의 표준 NIST P-224, P-256, P-384, P-521 타원 곡선을 구현합니다.
+Package elliptic implements the standard NIST P-224, P-256, P-384, and P-521 elliptic curves over prime fields.
 
 ## 원문 요약
 

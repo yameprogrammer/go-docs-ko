@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`bytes` 패키지는 바이트 슬라이스 조작을 위한 함수들을 구현합니다.
+Package bytes implements functions for the manipulation of byte slices.
 
 ## 원문 요약
 

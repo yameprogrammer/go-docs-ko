@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`base64` 패키지는 RFC 4648에 지정된 base64 인코딩을 구현합니다.
+Package base64 implements base64 encoding as specified by RFC 4648.
 
 ## 원문 요약
 

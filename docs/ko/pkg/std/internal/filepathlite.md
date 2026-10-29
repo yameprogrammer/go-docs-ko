@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-Package filepathlite는 "os" 패키지에서 임포트할 수 있는 패키지만을 사용하여 path/filepath의 서브셋을 구현합니다.
+Package filepathlite implements a subset of path/filepath, only using packages which may be imported by "os".
 
 ## 원문 요약
 

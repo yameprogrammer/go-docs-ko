@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`cgrouptest` 패키지는 cgroup 내부에서 테스트를 실행하기 위한 최선의 노력(best-effort) 헬퍼들을 제공합니다.
+Package cgrouptest provides best-effort helpers for running tests inside a cgroup.
 
 ## 원문 요약
 

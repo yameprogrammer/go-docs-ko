@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`unique` 패키지는 비교 가능한 값들을 정규화("interning")하는 기능을 제공합니다.
+The unique package provides facilities for canonicalizing ("interning") comparable values.
 
 ## 원문 요약
 

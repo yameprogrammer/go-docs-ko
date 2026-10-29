@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`metrics` 패키지는 Go 런타임에서 내보내는 구현 정의 메트릭(implementation-defined metrics)에 접근할 수 있는 안정적인 인터페이스를 제공합니다.
+Package metrics provides a stable interface to access implementation-defined metrics exported by the Go runtime.
 
 ## 원문 요약
 

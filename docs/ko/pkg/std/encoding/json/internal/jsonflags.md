@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-jsonflags는 모든 선택적 불리언(boolean) 플래그를 구현합니다.
+jsonflags implements all the optional boolean flags.
 
 ## 원문 요약
 

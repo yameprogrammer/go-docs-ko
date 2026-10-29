@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`mldsa` 패키지는 [FIPS 204]에 명시된 양자 내성 ML-DSA 서명 체계를 구현합니다.
+Package mldsa implements the post-quantum ML-DSA signature scheme specified in [FIPS 204].
 
 ## 원문 요약
 

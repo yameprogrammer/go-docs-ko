@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`strconv` 패키지는 기본 데이터 타입과 문자열 표현 간의 변환을 구현합니다.
+Package strconv implements conversions to and from string representations of basic data types.
 
 ## 원문 요약
 

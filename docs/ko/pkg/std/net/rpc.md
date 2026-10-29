@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`rpc` 패키지는 네트워크 또는 기타 I/O 연결을 통해 객체의 내보내기(exported) 된 메서드에 액세스하는 기능을 제공합니다.
+Package rpc provides access to the exported methods of an object across a network or other I/O connection.
 
 ## 원문 요약
 

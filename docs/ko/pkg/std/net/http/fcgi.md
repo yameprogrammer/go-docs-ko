@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`fcgi` 패키지는 FastCGI 프로토콜을 구현합니다.
+Package fcgi implements the FastCGI protocol.
 
 ## 원문 요약
 

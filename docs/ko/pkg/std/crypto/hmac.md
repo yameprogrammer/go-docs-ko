@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`hmac` 패키지는 미국 연방 정보 처리 표준 발행물(U.S. Federal Information Processing Standards Publication) 198에 정의된 키 기반 해시 메시지 인증 코드(HMAC)를 구현합니다.
+Package hmac implements the Keyed-Hash Message Authentication Code (HMAC) as defined in U.S. Federal Information Processing Standards Publication 198.
 
 ## 원문 요약
 

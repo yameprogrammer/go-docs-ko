@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`html` 패키지는 HTML 텍스트를 이스케이프(escaping)하고 언이스케이프(unescaping)하는 함수들을 제공합니다.
+Package html provides functions for escaping and unescaping HTML text.
 
 ## 원문 요약
 

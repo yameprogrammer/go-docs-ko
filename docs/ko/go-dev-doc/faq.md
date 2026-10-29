@@ -1,319 +1,608 @@
-## 기원 {#Origins}
-
-### 프로젝트의 목적은 무엇인가요? {#What_is_the_purpose_of_the_project}
-
-2007년 Go가 처음 등장했을 당시의 프로그래밍 세계는 오늘날과 달랐습니다.
-운영 소프트웨어는 주로 C++나 Java로 작성되었고,
-GitHub는 존재하지 않았으며, 대부분의 컴퓨터는 아직 멀티프로세서가 아니었습니다.
-또한 Visual Studio와 Eclipse 외에는 IDE나 다른 고수준 도구들이 거의 없었으며,
-인터넷에서 무료로 제공되는 도구는 더더욱 드물었습니다.
-
-한편, 우리는 당시 사용하던 언어들과 그와 관련된 빌드 시스템으로 대규모 소프트웨어 프로젝트를 구축하는 데 필요한 과도한 복잡함에 좌절감을 느끼고 있었습니다. C, C++, Java와 같은 언어들이 처음 개발된 이후 컴퓨터의 속도는 엄청나게 빨라졌지만, 프로그래밍 행위 자체는 그만큼 발전하지 못했습니다. 또한, 멀티프로세서가 보편화되고 있음이 분명했으나, 대부분의 언어는 이를 효율적이고 안전하게 프로그래밍하는 데 거의 도움이 되지 않았습니다.
-
-우리는 한 걸음 물러나 기술이 발전함에 따라 향후 몇 년간 소프트웨어 공학을 지배하게 될 주요 이슈가 무엇인지, 그리고 새로운 언어가 이를 해결하는 데 어떻게 도움이 될 수 있을지 생각하기로 했습니다.
-예를 들어, 멀티코어 CPU의 등장은 언어가 어떤 형태로든 동시성(concurrency)이나 병렬성(parallelism)에 대한 일급 지원(first-class support)을 제공해야 함을 시사했습니다.
-또한, 대규모 동시성 프로그램에서 리소스 관리를 다룰 수 있는 수준으로 만들기 위해 가비지 컬렉션, 또는 최소한 어떤 형태로든 안전한 자동 메모리 관리가 필요했습니다.
-
-이러한 고민들은 [일련의 토론](https://commandcenter.blogspot.com/2017/09/go-ten-years-and-climbing.html)으로 이어졌으며, 이를 통해 Go가 먼저 일련의 아이디어와 필요 요구사항(desiderata)으로, 그 후 하나의 언어로 탄생하게 되었습니다.
-
-전체적인 목표는 툴링(tooling)을 활성화하고, 코드 포맷팅과 같은 일상적인 작업을 자동화하며, 대규모 코드 베이스에서 작업할 때 발생하는 장애물들을 제거함으로써 실무 프로그래머에게 더 많은 도움을 주는 것이었습니다.
-
-Go의 목표와 이를 어떻게 달성했는지, 또는 최소한 어떻게 접근하고 있는지에 대한 훨씬 더 상세한 설명은 [Go at Google: Language Design in the Service of Software Engineering](/talks/2012/splash.article) 문서에서 확인하실 수 있습니다.
-
-### 프로젝트의 역사는 어떻게 되나요? {#history}
-
-Robert Griesemer, Rob Pike 그리고 Ken Thompson은 2007년 9월 21일 화이트보드에 새로운 언어를 위한 목표를 스케치하기 시작했습니다. 며칠 지나지 않아 목표는 무언가를 실행하기 위한 계획으로 정립되었으며, 그것이 무엇이 될지에 대한 대략적인 아이디어가 잡혔습니다. 설계는 관련 없는 다른 작업들과 병행하여 파트타임으로 계속되었습니다. 2008년 1월까지 Ken은 아이디어를 탐구하기 위한 컴파일러 작업을 시작했으며, 이는 C 코드를 출력으로 생성했습니다. 그해 중반쯤 언어 설계는 전임 프로젝트가 되었고, 프로덕션 컴파일러를 시도할 수 있을 만큼 충분히 정립되었습니다. 2008년 5월, Ian Taylor는 초안 사양을 사용하여 Go를 위한 GCC 프론트엔드 작업을 독립적으로 시작했습니다. Russ Cox는 2008년 말에 합류하여 언어와 라이브러리를 프로토타입에서 실제 구현체로 옮기는 것을 도왔습니다.
-
-Go는 2009년 11월 10일에 공개 오픈 소스 프로젝트가 되었습니다.
-커뮤니티의 수많은 사람들이 아이디어, 토론 및 코드를 기여해 왔습니다.
-
-전 세계적으로 수백만 명의 Go 프로그래머(gophers)가 있으며, 그 수는 매일 늘어나고 있습니다.
-Go의 성공은 우리의 기대를 훨씬 뛰어넘었습니다.
-
-### 고퍼(gopher) 마스코트의 기원은 무엇인가요? {#gopher}
-
-마스코트와 로고는 Plan 9의 토끼인 [Glenda](https://9p.io/plan9/glenda.html)를 디자인한 [Renée French](https://reneefrench.blogspot.com)가 디자인했습니다.
-고퍼(gopher)에 관한 [블로그 포스트](/blog/gopher)에서는 이 캐릭터가 몇 년 전 그녀가 [WFMU](https://wfmu.org/) T-셔츠 디자인에 사용했던 캐릭터에서 어떻게 유래되었는지 설명하고 있습니다.
-로고와 마스코트는 [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/) 라이선스의 적용을 받습니다.
-
-고퍼는 그의 특징과 이를 올바르게 표현하는 방법을 설명하는
-[모델 시트](/doc/gopher/modelsheet.jpg)
-를 가지고 있습니다.
-이 모델 시트는 2016년 Gophercon에서 Renée의
-[강연](https://www.youtube.com/watch?v=4rw_B4yY69k)
-에서 처음 공개되었습니다.
-그는 독특한 특징을 가지고 있습니다. 그는 단순히 평범한 고퍼가 아니라 바로 *Go 고퍼*이기 때문입니다.
-
-### 언어 이름이 Go인가요, Golang인가요? {#go_or_golang}
-
-이 언어의 이름은 Go입니다.
-"golang"이라는 별칭은 웹사이트 주소가 원래 *golang.org*였기 때문에 생겨났습니다.
-(당시에는 *.dev* 도메인이 없었습니다.)
-하지만 많은 사람들이 golang이라는 이름을 사용하며, 이는 레이블로서 편리합니다.
-예를 들어, 이 언어의 소셜 미디어 태그는 "#golang"입니다.
-그럼에도 불구하고, 언어의 정식 명칭은 그냥 Go입니다.
-
-참고: [공식 로고](/blog/go-brand)에는 대문자가 두 개 사용되었지만, 언어 이름은 GO가 아니라 Go로 씁니다.
-
-### 왜 새로운 언어를 만드셨나요? {#creating_a_new_language}
-
-Go는 Google에서 우리가 수행하던 작업에 사용되던 기존 언어와 환경에 대한 불만에서 탄생했습니다. 프로그래밍은 너무 어려워졌으며, 언어의 선택 또한 그 원인의 일부였습니다. 효율적인 컴파일, 효율적인 실행, 또는 프로그래밍의 편의성 중 하나를 선택해야만 했으며, 이 세 가지를 모두 갖춘 주류 언어는 없었습니다. 가능한 프로그래머들은 C++나 (그보다는 덜하지만) Java 대신 Python이나 JavaScript와 같은 동적 타입 언어로 이동함으로써, 안전성과 효율성보다 편의성을 선택하고 있었습니다.
-
-우리는 이러한 우려를 하는 유일한 사람들이 아니었습니다.
-프로그래밍 언어 분야의 풍경이 꽤 정체되어 있던 수년의 시간이 흐른 뒤,
-Go는 Rust, Elixir, Swift 등과 더불어 프로그래밍 언어 개발을
-다시 활발하고 거의 주류가 된 분야로 만든 몇 가지 새로운 언어 중 하나였습니다.
-
-Go는 인터프리터 방식의 동적 타입 언어가 가진 프로그래밍의 용이함과, 정적 타입 컴파일 언어가 가진 효율성 및 안전성을 결합함으로써 이러한 문제들을 해결하고자 했습니다.
-또한 네트워크 및 멀티코어 컴퓨팅 지원을 통해 최신 하드웨어에 더 잘 적응하는 것을 목표로 했습니다.
-마지막으로, Go를 사용하는 과정은 *빠르게* 진행되어야 합니다. 단일 컴퓨터에서 대규모 실행 파일을 빌드하는 데 최대 몇 초밖에 걸리지 않아야 합니다.
-이러한 목표들을 달성하기 위해 우리는 현재 사용하는 언어들의 일부 프로그래밍 접근 방식을 재고하게 되었으며, 이는 다음과 같은 결과로 이어졌습니다:
-계층적이기보다 구성적인(compositional) 타입 시스템;
-동시성(concurrency) 및 가비지 컬렉션 지원; 엄격한 의존성 명시;
-등등.
-이러한 사항들은 라이브러리나 도구만으로는 제대로 처리될 수 없었기에, 새로운 언어가 필요했습니다.
-
-[Go at Google](/talks/2012/splash.article) 기사는 Go 언어 설계의 배경과 동기를 다루며, 이 FAQ에서 제시된 많은 답변에 대해 더 자세한 내용을 제공합니다.
-
-### Go의 조상은 무엇인가요? {#ancestors}
-
-Go는 주로 C 계열(기본 구문)에 속하며, Pascal/Modula/Oberon 계열(선언, 패키지)의 상당한 영향을 받았고, Newsqueak 및 Limbo와 같이 Tony Hoare의 CSP에서 영감을 받은 언어들의 아이디어(동시성)가 더해졌습니다. 하지만 전반적으로는 새로운 언어입니다. 모든 면에서 이 언어는 프로그래머가 무엇을 하는지, 그리고 프로그래밍을(적어도 우리가 하는 방식의 프로그래밍을) 어떻게 하면 더 효율적으로, 즉 더 즐겁게 만들 수 있을지를 고민하여 설계되었습니다.
-
-### 설계의 지침 원칙은 무엇인가요? {#principles}
-
-Go가 설계될 당시, 적어도 Google에서는 서버를 작성하는 데 Java와 C++가 가장 흔히 사용되는 언어였습니다.
-우리는 이 언어들이 너무 많은 관리 작업(bookkeeping)과 반복을 요구한다고 느꼈습니다.
-일부 프로그래머들은 효율성과 타입 안전성을 희생하는 대신, Python과 같이 더 동적이고 유연한 언어로 이동하는 방식으로 반응했습니다.
-우리는 하나의 언어에서 효율성, 안전성, 그리고 유연성을 모두 갖추는 것이 가능해야 한다고 생각했습니다.
-
-Go는 두 가지 의미 모두에서 타이핑의 양을 줄이려고 시도합니다.
-설계 전반에 걸쳐 우리는 군더더기와 복잡함을 줄이기 위해 노력했습니다. 전방 선언(forward declarations)과 헤더 파일이 없으며, 모든 것은 정확히 한 번만 선언됩니다. 초기화는 표현력이 풍부하고 자동적이며 사용하기 쉽습니다. 구문은 깔끔하고 키워드 사용이 적습니다. `:=` 선언-및-초기화 구조를 사용한 단순한 타입 추론을 통해 반복(`foo.Foo* myFoo = new(foo.Foo)`)을 줄였습니다. 그리고 아마도 가장 급진적인 점은 타입 계층 구조가 없다는 것입니다. 타입은 그냥 존재할 뿐이며, 서로의 관계를 알릴 필요가 없습니다. 이러한 단순화 덕분에 Go는 생산성을 희생하지 않으면서도 표현력이 풍부하고 이해하기 쉬운 언어가 될 수 있었습니다.
-
-또 다른 중요한 원칙은 개념들을 직교적(orthogonal)으로 유지하는 것입니다.
-메서드는 어떤 타입에 대해서도 구현될 수 있으며, 구조체(structure)는 데이터를 표현하고 인터페이스(interface)는 추상화를 표현합니다. 직교성은 여러 요소가 결합될 때 어떤 일이 일어나는지 더 쉽게 이해할 수 있게 해줍니다.
-
-## 사용법 {#Usage}
-
-### Google은 내부적으로 Go를 사용하고 있나요? {#internal_usage}
-
-네. Go는 Google 내부의 프로덕션 환경에서 널리 사용되고 있습니다.
-한 가지 예로 Google의 다운로드 서버인 `dl.google.com`이 있으며,
-이 서버는 Chrome 바이너리와 `apt-get` 패키지와 같은 기타 대용량 설치 파일을 제공합니다.
-
-Go가 Google에서 사용되는 유일한 언어는 아니며, 결코 그렇지도 않지만, [site reliability engineering (SRE)](/talks/2013/go-sreops.slide) 및 대규모 데이터 처리와 같은 여러 분야에서 핵심적인 언어로 사용되고 있습니다.
-또한 Google Cloud를 실행하는 소프트웨어의 핵심 부분이기도 합니다.
-
-### 다른 어떤 회사들이 Go를 사용하나요? {#external_usage}
-
-Go의 사용량은 전 세계적으로 증가하고 있으며, 특히 클라우드 컴퓨팅 분야에서 두드러지지만 결코 그 분야에만 국한된 것은 아닙니다.
-Go로 작성된 몇 가지 주요 클라우드 인프라 프로젝트로는 Docker와 Kubernetes가 있으며, 이 외에도 훨씬 더 많은 프로젝트가 존재합니다.
-
-하지만 [go.dev 웹사이트](/)의 기업 목록과 일부 [성공 사례](/solutions/case-studies)에서 볼 수 있듯이, 비단 클라우드 분야뿐만이 아닙니다. 또한 Go Wiki에는 정기적으로 업데이트되는 [페이지](/wiki/GoUsers)가 있으며, 이곳에서 Go를 사용하는 수많은 기업 중 일부를 확인할 수 있습니다.
-
-Wiki에는 이 언어를 사용하고 있는 기업과 프로젝트에 관한 더 많은
-[성공 사례](/wiki/SuccessStories)
-링크가 포함된 페이지가 있습니다.
-
-### Go 프로그램은 C/C++ 프로그램과 링크되나요? {#Do_Go_programs_link_with_Cpp_programs}
-
-C와 Go를 동일한 주소 공간에서 함께 사용하는 것이 가능하지만, 이는 자연스러운 조합이 아니며 특수한 인터페이스 소프트웨어가 필요할 수 있습니다. 또한, C를 Go 코드와 연결하면 Go가 제공하는 메모리 안전성 및 스택 관리 특성을 포기하게 됩니다. 때로는 문제를 해결하기 위해 C 라이브러리를 사용하는 것이 절대적으로 필요할 때가 있지만, 그렇게 하는 것은 순수 Go 코드에서는 나타나지 않는 위험 요소를 항상 수반하므로 주의해서 사용하십시오.
-
-Go와 함께 C를 사용해야 하는 경우, 진행 방법은 Go 컴파일러 구현체에 따라 다릅니다.
-Google의 Go 팀이 지원하는 Go 툴체인의 일부인 "표준" 컴파일러는 `gc`라고 불립니다.
-또한, GCC 기반 컴파일러(`gccgo`)와 LLVM 기반 컴파일러(`gollvm`)가 있으며,
-[TinyGo](https://tinygo.org/)와 같이 때로는 언어의 일부 기능만 구현하며 서로 다른 목적을 위해 제공되는 이색적인 컴파일러들의 목록도 계속 늘어나고 있습니다.
-
-`Gc`는 C와 다른 호출 규약(calling convention) 및 링커를 사용하므로, C 프로그램에서 직접 호출하거나 그 반대로 호출할 수 없습니다. [`cgo`](/cmd/cgo/) 프로그램은 Go 코드에서 C 라이브러리를 안전하게 호출할 수 있도록 하는 "외래 함수 인터페이스(foreign function interface)" 메커니즘을 제공합니다. SWIG는 이러한 기능을 C++ 라이브러리까지 확장합니다.
-
-`gccgo` 및 `gollvm`과 함께 `cgo` 및 SWIG를 사용할 수도 있습니다.
-이들은 전통적인 ABI를 사용하므로, 매우 주의 깊게 작업한다면 이러한 컴파일러로 생성된 코드를 GCC/LLVM으로 컴파일된 C 또는 C++ 프로그램과 직접 링크하는 것도 가능합니다.
-하지만 이를 안전하게 수행하려면 관련 모든 언어의 호출 규약(calling conventions)에 대한 이해가 필요하며, Go에서 C 또는 C++를 호출할 때의 스택 제한(stack limits)에 대해서도 주의해야 합니다.
-
-### Go는 어떤 IDE를 지원하나요? {#ide}
-
-Go 프로젝트는 전용 IDE를 포함하고 있지 않지만, 언어와 라이브러리들이 소스 코드를 쉽게 분석할 수 있도록 설계되었습니다. 그 결과, 대부분의 유명한 에디터와 IDE들이 직접적으로 또는 플러그인을 통해 Go를 잘 지원합니다.
-
-Go 팀은 LSP 프로토콜을 위한 Go 언어 서버인 [`gopls`](https://pkg.go.dev/golang.org/x/tools/gopls#section-readme)도 지원합니다.
-LSP를 지원하는 도구들은 `gopls`를 사용하여 언어별 지원 기능을 통합할 수 있습니다.
-
-Go를 잘 지원하는 유명한 IDE 및 에디터 목록에는 Emacs, Vim, VSCode, Atom, Eclipse, Sublime, IntelliJ(GoLand라는 맞춤형 변형을 통해 제공) 등이 있으며, 그 외에도 매우 많습니다. 여러분이 선호하는 환경 또한 Go 프로그래밍을 위한 생산적인 환경일 가능성이 높습니다.
-
-### Go는 Google의 protocol buffers를 지원하나요? {#protocol_buffers}
-
-별도의 오픈 소스 프로젝트에서 필요한 컴파일러 플러그인과 라이브러리를 제공합니다.
-해당 프로젝트는 [github.com/golang/protobuf/](https://github.com/golang/protobuf)에서 이용 가능합니다.
-
-## 설계 {#Design}
-
-### Go에 런타임이 있나요? {#runtime}
-
-Go에는 모든 Go 프로그램의 일부인 광범위한 런타임 라이브러리(종종 간단히 *runtime*이라고 함)가 포함되어 있습니다.
-이 라이브러리는 가비지 컬렉션, 동시성, 스택 관리 및 Go 언어의 기타 핵심 기능을 구현합니다.
-Go의 런타임은 언어의 더 중심적인 역할을 하지만, C 라이브러리인 `libc`와 유사합니다.
-
-하지만 Go의 런타임에는 Java 런타임에서 제공하는 것과 같은 가상 머신(virtual machine)이 포함되어 있지 않다는 점을 이해하는 것이 중요합니다. Go 프로그램은 미리 네이티브 머신 코드(또는 일부 변형 구현의 경우 JavaScript나 WebAssembly)로 컴파일됩니다. 따라서 "런타임"이라는 용어가 프로그램이 실행되는 가상 환경을 설명하는 데 자주 사용되지만, Go에서 "런타임"이라는 단어는 단지 핵심 언어 서비스를 제공하는 라이브러리에 붙여진 이름일 뿐입니다.
-
-### Unicode 식별자는 어떻게 처리되나요? {#unicode_identifiers}
-
-Go를 설계할 때, 우리는 Go가 지나치게 ASCII 중심적이지 않도록 보장하고 싶었습니다. 이는 식별자의 범위를 7비트 ASCII의 제한에서 확장하는 것을 의미했습니다.
-
-Go의 규칙—식별자 문자는 Unicode에서 정의한 문자와 숫자여야 한다—은 이해하고 구현하기 간단하지만 제한 사항이 있습니다. 예를 들어, 설계상 결합 문자(Combining characters)는 제외되며, 이로 인해 데바나가리(Devanagari)와 같은 일부 언어는 제외됩니다.
-
-이 규칙에는 또 다른 불운한 결과가 있습니다.
-내보내기(exported) 식별자는 반드시 대문자로 시작해야 하므로, 일부 언어의 문자로 생성된 식별자는 정의상 내보낼 수 없습니다.
-현재로서는 `X日本語`와 같은 방식을 사용하는 것이 유일한 해결책이며, 이는 분명히 만족스럽지 못한 방법입니다.
-
-언어의 초기 버전부터, 다른 모국어를 사용하는 프로그래머들을 수용하기 위해 식별자 공간을 확장하는 최선의 방법에 대해 상당한 고민이 있었습니다.
-
-정확히 어떻게 할 것인가는 여전히 활발한 논의 주제이며, 향후 언어 버전에서는 식별자의 정의를 더 관대하게 설정할 수도 있습니다. 예를 들어, 식별자에 대한 Unicode 조직의 [권고안](http://unicode.org/reports/tr31/) 중 일부 아이디어를 채택할 수도 있습니다.
-
-어떤 결정이 내려지든, 이는 호환성을 유지하며 수행되어야 하며, 동시에 대소문자가 식별자의 가시성(visibility)을 결정하는 방식(우리가 Go에서 가장 좋아하는 기능 중 하나입니다)을 보존(또는 확장)해야 합니다.
-
-당분간은 나중에 프로그램을 망가뜨리지 않고도 확장할 수 있는 간단한 규칙을 적용합니다. 이는 모호한 식별자를 허용하는 규칙에서 반드시 발생했을 버그들을 방지하기 위한 것입니다.
-
-### Go에는 왜 기능 X가 없나요? {#Why_doesnt_Go_have_feature_X}
-
-모든 언어에는 새로운 기능이 포함되어 있으며, 누군가가 좋아하는 기능이 누락되어 있기도 합니다. Go는 프로그래밍의 편의성, 컴파일 속도, 개념의 직교성, 그리고 동시성과 가비지 컬렉션 같은 기능을 지원해야 할 필요성에 중점을 두고 설계되었습니다. 당신이 좋아하는 기능이 없는 이유는 그것이 설계와 맞지 않거나, 컴파일 속도 또는 설계의 명확성에 영향을 주거나, 혹은 기본적인 시스템 모델을 너무 어렵게 만들기 때문일 수 있습니다.
-
-Go에 기능 *X*가 없다는 점이 불편하시더라도, 부디 너그러이 양해해 주시고 Go가 실제로 가지고 있는 기능들을 살펴보시기 바랍니다. *X*의 부재를 흥미로운 방식으로 보완하는 기능들을 발견하실 수 있을 것입니다.
-
-### Go는 언제 제네릭 타입(generic types)이 도입되었나요? {#generics}
-
-Go 1.18 릴리스에서는 언어에 타입 파라미터(type parameters)가 추가되었습니다.
-이를 통해 다형성(polymorphic) 또는 제네릭 프로그래밍(generic programming)이 가능해졌습니다.
-자세한 내용은 [언어 명세](/ref/spec)와 [제안서](/design/43651-type-parameters)를 참조하십시오.
-
-### Go가 처음 출시될 때 제네릭 타입 없이 출시된 이유는 무엇인가요? {#beginning_generics}
-
-Go는 시간이 지나도 유지보수가 쉬운 서버 프로그램을 작성하기 위한 언어로 설계되었습니다.
-(더 자세한 배경은 [이 문서](/talks/2012/splash.article)를 참조하십시오.)
-설계 과정에서 확장성, 가독성, 그리고 동시성과 같은 요소들에 집중했습니다.
-당시에는 다형성 프로그래밍(Polymorphic programming)이 언어의 목표에 필수적이지 않다고 판단되어, 단순성을 위해 초기에는 제외되었습니다.
-
-제네릭은 편리하지만, 타입 시스템과 런타임의 복잡성이라는 비용이 따릅니다.
-우리는 복잡성에 비례하는 가치를 제공한다고 믿는 설계를 개발하기 위해 상당한 시간을 들였습니다.
-
-### Go에는 왜 예외(exceptions)가 없나요? {#exceptions}
-
-우리는 `try-catch-finally` 관용구처럼 예외를 제어 구조와 결합하는 것이 코드를 복잡하게 만든다고 믿습니다. 또한, 이는 프로그래머가 파일 열기 실패와 같은 너무 많은 일반적인 오류를 '예외적'인 것으로 분류하도록 부추기는 경향이 있습니다.
-
-Go는 다른 접근 방식을 취합니다. 단순한 에러 처리의 경우, Go의 다중 값 반환(multi-value returns) 덕분에 반환 값을 과하게 사용하지 않고도 에러를 쉽게 보고할 수 있습니다. [Go의 다른 기능들과 결합된 표준 에러 타입](/doc/articles/error_handling.html)은 에러 처리를 즐겁게 만들어 주지만, 다른 언어들의 방식과는 상당히 다릅니다.
-
-Go에는 정말 예외적인 상황을 신호하고(signal) 복구(recover)하기 위한 몇 가지 내장 함수가 있습니다. 복구 메커니즘은 에러 발생 후 함수의 상태가 해제되는 과정의 일부로만 실행됩니다. 이는 치명적인 상황을 처리하기에 충분하며, 추가적인 제어 구조가 필요하지 않으므로 적절히 사용한다면 깔끔한 에러 처리 코드를 작성할 수 있습니다.
-
-자세한 내용은 [Defer, Panic, and Recover](/doc/articles/defer_panic_recover.html) 문서를 참조하십시오.
-또한, [Errors are values](/blog/errors-are-values) 블로그 포스트에서는 에러가 단순히 값이라는 점을 보여줌으로써, 에러 처리 시 Go의 모든 기능을 활용하여 깔끔하게 에러를 처리하는 한 가지 방법을 설명합니다.
-
-### Go에는 왜 assertion이 없을까요? {#assertions}
-
-Go는 assertion을 제공하지 않습니다. assertion은 부정할 수 없을 정도로 편리하지만, 저희의 경험상 프로그래머들이 적절한 에러 처리와 보고에 대해 고민하는 것을 피하기 위한 보조 수단으로 이를 사용하는 경향이 있었습니다. 적절한 에러 처리란 치명적이지 않은 에러가 발생했을 때 서버가 충돌하여 종료되는 대신 계속해서 작동하는 것을 의미합니다. 적절한 에러 보고란 에러 메시지가 명확하고 간결하여 프로그래머가 방대한 crash trace를 해석해야 하는 수고를 덜어주는 것을 의미합니다. 특히 에러를 확인하는 프로그래머가 해당 코드에 익숙하지 않은 경우, 정확한 에러 보고는 매우 중요합니다.
-
-이 점이 논쟁의 대상이 되고 있다는 것을 알고 있습니다. Go 언어와 라이브러리에는 현대적인 관행과 다른 점들이 많이 있는데, 이는 단순히 때로는 다른 접근 방식을 시도해 볼 가치가 있다고 생각하기 때문입니다.
-
-### 왜 CSP의 아이디어를 기반으로 동시성을 구축해야 하는가? {#csp}
-
-동시성과 멀티스레드 프로그래밍은 시간이 흐르며 어렵다는 평판을 얻게 되었습니다. 저희는 이것이 부분적으로는 [pthreads](https://en.wikipedia.org/wiki/POSIX_Threads)와 같은 복잡한 설계 때문이며, 또 부분적으로는 뮤텍스(mutex), 조건 변수(condition variable), 메모리 배리어(memory barrier)와 같은 저수준 세부 사항을 너무 강조했기 때문이라고 믿습니다. 내부적으로는 여전히 뮤텍스 등이 사용될지라도, 더 높은 수준의 인터페이스를 사용하면 훨씬 더 단순한 코드를 작성할 수 있습니다.
-
-동시성을 위한 고수준의 언어적 지원을 제공하는 가장 성공적인 모델 중 하나는 Hoare의 Communicating Sequential Processes, 즉 CSP에서 나왔습니다. Occam과 Erlang은 CSP에서 파생된 잘 알려진 두 가지 언어입니다. Go의 동시성 프리미티브는 가계도의 다른 부분에서 유래되었으며, 이 부분의 주요 기여는 채널(channels)을 일급 객체(first class objects)로 다루는 강력한 개념입니다. 이전의 여러 언어를 사용해 본 경험에 따르면, CSP 모델은 절차형 언어 프레임워크에 잘 들어맞는 것으로 나타났습니다.
-
-### 왜 스레드 대신 고루틴(goroutines)을 사용하나요? {#goroutines}
-
-Goroutine은 동시성(concurrency)을 사용하기 쉽게 만드는 핵심 요소입니다. 이미 오래전부터 존재했던 이 개념은 독립적으로 실행되는 함수들, 즉 코루틴(coroutine)을 일련의 스레드들에 다중화(multiplex)하는 것입니다.
-
-코루틴이 블로킹 시스템 호출을 호출하는 등 블록(block) 상태가 되면, 런타임은 동일한 운영체제 스레드에 있는 다른 코루틴들을 블록되지 않도록 실행 가능한 다른 스레드로 자동으로 이동시킵니다. 프로그래머는 이 과정을 전혀 알 필요가 없으며, 이것이 바로 이 설계의 핵심입니다.
-
-우리가 goroutine이라고 부르는 이 결과물은 매우 저렴하게 생성될 수 있습니다. 스택을 위한 메모리(단 몇 킬로바이트에 불과함) 외에는 오버헤드가 거의 없기 때문입니다.
-
-스택 크기를 작게 유지하기 위해, Go의 런타임은 크기 조정이 가능하고 경계가 정해진(bounded) 스택을 사용합니다. 새로 생성된 goroutine에는 몇 킬로바이트가 할당되며, 이는 거의 항상 충분한 양입니다. 스택 공간이 부족해지면 런타임이 스택 저장용 메모리를 자동으로 늘리거나(또는 줄여서) 관리하므로, 적은 양의 메모리에서도 수많은 goroutine이 존재할 수 있습니다.
-
-CPU 오버헤드는 함수 호출당 평균 약 3개의 저렴한 인스트럭션 수준입니다. 따라서 동일한 주소 공간 내에 수십만 개의 goroutine을 생성하는 것이 실용적입니다. 만약 goroutine이 단순히 스레드였다면, 훨씬 적은 수의 생성만으로도 시스템 리소스가 고갈되었을 것입니다.
-
-### 왜 맵(map) 작업은 원자적(atomic)으로 정의되지 않았나요? {#atomic_maps}
-
-긴 논의 끝에, 맵(map)의 일반적인 사용 사례에서는 여러 고루틴(goroutine)으로부터의 안전한 액세스가 필요하지 않으며, 그것이 필요한 경우에는 해당 맵이 이미 동기화된 더 큰 데이터 구조나 계산의 일부일 가능성이 높다는 결론을 내렸습니다. 따라서 모든 맵 작업에 뮤텍스(mutex)를 요구하는 것은 대부분의 프로그램 속도를 늦출 뿐, 안전성을 얻는 경우는 극소수일 것입니다. 하지만 이는 제어되지 않은 맵 액세스가 프로그램을 충돌(crash)시킬 수 있음을 의미하므로, 결코 쉬운 결정은 아니었습니다.
-
-이 언어는 원자적(atomic) 맵 업데이트를 배제하지 않습니다. 신뢰할 수 없는 프로그램을 호스팅하는 경우와 같이 필요한 상황에서, 구현체는 맵 접근을 상호 배제(interlock)할 수 있습니다.
-
-Map 액세스는 업데이트가 발생할 때만 안전하지 않습니다.
-모든 고루틴이 읽기 작업만 수행하는 경우—`for` `range` 루프를 사용한 반복을 포함하여 맵의 요소를 조회하는 작업—이며, 요소에 값을 할당하거나 삭제하여 맵을 변경하지 않는다면, 동기화 없이 동시에 맵에 액세스해도 안전합니다.
-
-올바른 맵 사용을 돕기 위해, 일부 언어 구현체에는 동시 실행으로 인해 맵이 안전하지 않게 수정될 때 런타임에 이를 자동으로 보고하는 특별한 체크 기능이 포함되어 있습니다.
-
-또한 `sync` 라이브러리에는 [`sync.Map`](https://pkg.go.dev/sync#Map)이라는 타입이 있으며, 이는 정적 캐시와 같은 특정 사용 패턴에 적합합니다. 다만, 내장 맵 타입을 완전히 대체하는 일반적인 용도로 사용하기에는 적절하지 않습니다.
-
-### 언어 변경 요청을 수락하시겠습니까? {#language_changes}
-
-사람들은 종종 언어에 대한 개선 사항을 제안하며—[메일링 리스트](https://groups.google.com/group/golang-nuts)에는 이러한 논의의 풍부한 기록이 남아 있습니다—하지만 이러한 변경 사항 중 실제로 수용된 것은 매우 적습니다.
-
-Go는 오픈 소스 프로젝트이지만, 언어와 라이브러리는 [호환성 약속](/doc/go1compat.html)에 의해 보호되며, 이는 최소한 소스 코드 수준에서 기존 프로그램을 망가뜨리는 변경을 방지합니다(프로그램을 최신 상태로 유지하기 위해 가끔 재컴파일이 필요할 수 있습니다). 만약 제안하신 내용이 Go 1 사양을 위반한다면, 그 가치와 상관없이 검토조차 할 수 없습니다.
-
-향후 Go의 메이저 릴리스는 Go 1과 호환되지 않을 수 있으나, 해당 주제에 대한 논의는 이제 막 시작되었으며 한 가지 확실한 점은 그 과정에서 도입되는 불호환성은 매우 적을 것이라는 점입니다. 또한, 호환성 약속은 그러한 상황이 발생할 경우 기존 프로그램이 적응할 수 있도록 자동화된 경로를 제공하도록 독려합니다.
-
-제안하신 내용이 Go 1 스펙과 호환되더라도, Go의 설계 목표 정신에는 부합하지 않을 수 있습니다.
-*[Go at Google: Language Design in the Service of Software Engineering](/talks/2012/splash.article)* 기사에서는 Go의 기원과 설계 배경에 있는 동기에 대해 설명하고 있습니다.
+## Origins {#Origins}
+
+### What is the purpose of the project? {#What_is_the_purpose_of_the_project}
+
+At the time of Go's inception in 2007 the programming world was different from today.
+Production software was usually written in C++ or Java,
+GitHub did not exist, most computers were not yet multiprocessors,
+and other than Visual Studio and Eclipse there were few IDEs or other high-level tools available
+at all, let alone for free on the Internet.
+
+Meanwhile, we had become frustrated by the undue complexity required
+to build large software projects with
+the languages we were using and their associated build systems.
+Computers had become enormously quicker since languages such as
+C, C++ and Java were first developed but the act of programming had not
+itself advanced nearly as much.
+Also, it was clear that multiprocessors were becoming universal but
+most languages offered little help to program them efficiently
+and safely.
+
+We decided to take a step back and think about what major issues were
+going to dominate software engineering in the years ahead as technology
+developed, and how a new language might help address them.
+For instance, the rise of multicore CPUs argued that a language should
+provide first-class support for some sort of concurrency or parallelism.
+And to make resource management tractable in a large concurrent program,
+garbage collection, or at least some sort of safe automatic memory management was required.
+
+These considerations led to
+[a series of discussions](https://commandcenter.blogspot.com/2017/09/go-ten-years-and-climbing.html)
+from which Go arose, first as a set of ideas and
+desiderata, then as a language.
+An overarching goal was that Go do more to help the working programmer
+by enabling tooling, automating mundane tasks such as code formatting,
+and removing obstacles to working on large code bases.
+
+A much more expansive description of the goals of Go and how
+they are met, or at least approached, is available in the article,
+[Go at Google: Language Design in the Service of Software Engineering](/talks/2012/splash.article).
+
+### What is the history of the project? {#history}
+
+Robert Griesemer, Rob Pike and Ken Thompson started sketching the
+goals for a new language on the white board on September 21, 2007.
+Within a few days the goals had settled into a plan to do something
+and a fair idea of what it would be.  Design continued part-time in
+parallel with unrelated work.  By January 2008, Ken had started work
+on a compiler with which to explore ideas; it generated C code as its
+output.  By mid-year the language had become a full-time project and
+had settled enough to attempt a production compiler.  In May 2008,
+Ian Taylor independently started on a GCC front end for Go using the
+draft specification.  Russ Cox joined in late 2008 and helped move the language
+and libraries from prototype to reality.
+
+Go became a public open source project on November 10, 2009.
+Countless people from the community have contributed ideas, discussions, and code.
+
+There are now millions of Go programmers—gophers—around the world,
+and there are more every day.
+Go's success has far exceeded our expectations.
+
+### What's the origin of the gopher mascot? {#gopher}
+
+The mascot and logo were designed by
+[Renée French](https://reneefrench.blogspot.com), who also designed
+[Glenda](https://9p.io/plan9/glenda.html),
+the Plan 9 bunny.
+A [blog post](/blog/gopher)
+about the gopher explains how it was
+derived from one she used for a [WFMU](https://wfmu.org/)
+T-shirt design some years ago.
+The logo and mascot are covered by the
+[Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/)
+license.
+
+The gopher has a
+[model sheet](/doc/gopher/modelsheet.jpg)
+illustrating his characteristics and how to represent them correctly.
+The model sheet was first shown in a
+[talk](https://www.youtube.com/watch?v=4rw_B4yY69k)
+by Renée at Gophercon in 2016.
+He has unique features; he's the *Go gopher*, not just any old gopher.
+
+### Is the language called Go or Golang? {#go_or_golang}
+
+The language is called Go.
+The "golang" moniker arose because the web site was
+originally *golang.org*.
+(There was no *.dev* domain then.)
+Many use the golang name, though, and it is handy as
+a label.
+For instance, the social media tag for the language is "#golang".
+The language's name is just plain Go, regardless.
+
+A side note: Although the
+[official logo](/blog/go-brand)
+has two capital letters, the language name is written Go, not GO.
+
+### Why did you create a new language? {#creating_a_new_language}
+
+Go was born out of frustration with existing languages and
+environments for the work we were doing at Google.
+Programming had become too
+difficult and the choice of languages was partly to blame.  One had to
+choose either efficient compilation, efficient execution, or ease of
+programming; all three were not available in the same mainstream
+language.  Programmers who could were choosing ease over
+safety and efficiency by moving to dynamically typed languages such as
+Python and JavaScript rather than C++ or, to a lesser extent, Java.
+
+We were not alone in our concerns.
+After many years with a pretty quiet landscape for programming languages,
+Go was among the first of several new languages—Rust,
+Elixir, Swift, and more—that have made programming language development
+an active, almost mainstream field again.
+
+Go addressed these issues by attempting to combine the ease of programming of an interpreted,
+dynamically typed
+language with the efficiency and safety of a statically typed, compiled language.
+It also aimed to be better adapted to current hardware, with support for networked and multicore
+computing.
+Finally, working with Go is intended to be *fast*: it should take
+at most a few seconds to build a large executable on a single computer.
+Meeting these goals led us to rethink some of the programming approaches
+from our current languages, leading to:
+a compositional rather than hierarchical type system;
+support for concurrency and garbage collection; rigid specification of dependencies;
+and so on.
+These cannot be handled well by libraries or tools; a new
+language was called for.
+
+The article [Go at Google](/talks/2012/splash.article)
+discusses the background and motivation behind the design of the Go language,
+as well as providing more detail about many of the answers presented in this FAQ.
+
+### What are Go's ancestors? {#ancestors}
+
+Go is mostly in the C family (basic syntax),
+with significant input from the Pascal/Modula/Oberon
+family (declarations, packages),
+plus some ideas from languages
+inspired by Tony Hoare's CSP,
+such as Newsqueak and Limbo (concurrency).
+However, it is a new language across the board.
+In every respect the language was designed by thinking
+about what programmers do and how to make programming, at least the
+kind of programming we do, more effective, which means more fun.
+
+### What are the guiding principles in the design? {#principles}
+
+When Go was designed, Java and C++ were the most commonly
+used languages for writing servers, at least at Google.
+We felt that these languages required
+too much bookkeeping and repetition.
+Some programmers reacted by moving towards more dynamic,
+fluid languages like Python, at the cost of efficiency and
+type safety.
+We felt it should be possible to have the efficiency,
+the safety, and the fluidity in a single language.
+
+Go attempts to reduce the amount of typing in both senses of the word.
+Throughout its design, we have tried to reduce clutter and
+complexity.  There are no forward declarations and no header files;
+everything is declared exactly once.  Initialization is expressive,
+automatic, and easy to use.  Syntax is clean and light on keywords.
+Repetition (`foo.Foo* myFoo = new(foo.Foo)`) is reduced by
+simple type derivation using the `:=`
+declare-and-initialize construct.  And perhaps most radically, there
+is no type hierarchy: types just *are*, they don't have to
+announce their relationships.  These simplifications allow Go to be
+expressive yet comprehensible without sacrificing productivity.
+
+Another important principle is to keep the concepts orthogonal.
+Methods can be implemented for any type; structures represent data while
+interfaces represent abstraction; and so on.  Orthogonality makes it
+easier to understand what happens when things combine.
+
+## Usage {#Usage}
+
+### Is Google using Go internally? {#internal_usage}
+
+Yes. Go is used widely in production inside Google.
+One example is Google's download server, `dl.google.com`,
+which delivers Chrome binaries and other large installables such as `apt-get`
+packages.
+
+Go is not the only language used at Google, far from it, but it is a key language
+for a number of areas including
+[site reliability engineering (SRE)](/talks/2013/go-sreops.slide)
+and large-scale data processing.
+It is also a key part of the software that runs Google Cloud.
+
+### What other companies use Go? {#external_usage}
+
+Go usage is growing worldwide, especially but by no means exclusively
+in the cloud computing space.
+A couple of major cloud infrastructure projects written in Go are
+Docker and Kubernetes,
+but there are many more.
+
+It's not just cloud, though, as you can see from the list of
+companies on the
+[go.dev web site](/)
+along with some
+[success stories](/solutions/case-studies).
+Also, the Go Wiki includes a
+[page](/wiki/GoUsers),
+updated regularly, that lists some of the many companies using Go.
+
+The Wiki also has a page with links to more
+[success stories](/wiki/SuccessStories)
+about companies and projects that are using the language.
+
+### Do Go programs link with C/C++ programs? {#Do_Go_programs_link_with_Cpp_programs}
+
+It is possible to use C and Go together in the same address space,
+but it is not a natural fit and can require special interface software.
+Also, linking C with Go code gives up the memory
+safety and stack management properties that Go provides.
+Sometimes it's absolutely necessary to use C libraries to solve a problem,
+but doing so always introduces an element of risk not present with
+pure Go code, so do so with care.
+
+If you do need to use C with Go, how to proceed depends on the Go
+compiler implementation.
+The "standard" compiler, part of the Go toolchain supported by the
+Go team at Google, is called `gc`.
+In addition, there are also a GCC-based compiler (`gccgo`) and
+an LLVM-based compiler (`gollvm`),
+as well as a growing list of unusual ones serving different purposes,
+sometimes implementing language subsets,
+such as [TinyGo](https://tinygo.org/).
+
+`Gc` uses a different calling convention and linker from C and
+therefore cannot be called directly from C programs, or vice versa.
+The [`cgo`](/cmd/cgo/) program provides the mechanism for a
+"foreign function interface" to allow safe calling of
+C libraries from Go code.
+SWIG extends this capability to C++ libraries.
+
+You can also use `cgo` and SWIG with `gccgo` and `gollvm`.
+Since they use a traditional ABI, it's also possible, with great care,
+to link code from these compilers directly with GCC/LLVM-compiled C or C++ programs.
+However, doing so safely requires an understanding of the calling conventions for
+all languages concerned, as well as concern for stack limits when calling C or C++
+from Go.
+
+### What IDEs does Go support? {#ide}
+
+The Go project does not include a custom IDE, but the language and
+libraries have been designed to make it easy to analyze source code.
+As a consequence, most well-known editors and IDEs support Go well,
+either directly or through a plugin.
+
+The Go team also supports a Go language server for the LSP protocol, called
+[`gopls`](https://pkg.go.dev/golang.org/x/tools/gopls#section-readme).
+Tools that support LSP can use `gopls` to integrate language-specific support.
+
+The list of well-known IDEs and editors that offer good Go support
+includes Emacs, Vim, VSCode, Atom, Eclipse, Sublime, IntelliJ
+(through a custom variant called GoLand), and many more.
+Chances are your favorite environment is a productive one for
+programming in Go.
+
+### Does Go support Google's protocol buffers? {#protocol_buffers}
+
+A separate open source project provides the necessary compiler plugin and library.
+It is available at
+[github.com/golang/protobuf/](https://github.com/golang/protobuf).
+
+## Design {#Design}
+
+### Does Go have a runtime? {#runtime}
+
+Go has an extensive runtime library, often just called the *runtime*,
+that is part of every Go program.
+This library implements garbage collection, concurrency,
+stack management, and other critical features of the Go language.
+Although it is more central to the language, Go's runtime is analogous
+to `libc`, the C library.
+
+It is important to understand, however, that Go's runtime does not
+include a virtual machine, such as is provided by the Java runtime.
+Go programs are compiled ahead of time to native machine code
+(or JavaScript or WebAssembly, for some variant implementations).
+Thus, although the term is often used to describe the virtual
+environment in which a program runs, in Go the word "runtime"
+is just the name given to the library providing critical language services.
+
+### What's up with Unicode identifiers? {#unicode_identifiers}
+
+When designing Go, we wanted to make sure that it was not
+overly ASCII-centric,
+which meant extending the space of identifiers from the
+confines of 7-bit ASCII.
+Go's rule&mdash;identifier characters must be
+letters or digits as defined by Unicode&mdash;is simple to understand
+and to implement but has restrictions.
+Combining characters are
+excluded by design, for instance,
+and that excludes some languages such as Devanagari.
+
+This rule has one other unfortunate consequence.
+Since an exported identifier must begin with an
+upper-case letter, identifiers created from characters
+in some languages can, by definition, not be exported.
+For now the
+only solution is to use something like `X日本語`, which
+is clearly unsatisfactory.
+
+Since the earliest version of the language, there has been considerable
+thought into how best to expand the identifier space to accommodate
+programmers using other native languages.
+Exactly what to do remains an active topic of discussion, and a future
+version of the language may be more liberal in its definition
+of an identifier.
+For instance, it might adopt some of the ideas from the Unicode
+organization's [recommendations](http://unicode.org/reports/tr31/)
+for identifiers.
+Whatever happens, it must be done compatibly while preserving
+(or perhaps expanding) the way letter case determines visibility of
+identifiers, which remains one of our favorite features of Go.
+
+For the time being, we have a simple rule that can be expanded later
+without breaking programs, one that avoids bugs that would surely arise
+from a rule that admits ambiguous identifiers.
+
+### Why does Go not have feature X? {#Why_doesnt_Go_have_feature_X}
+
+Every language contains novel features and omits someone's favorite
+feature. Go was designed with an eye on felicity of programming, speed of
+compilation, orthogonality of concepts, and the need to support features
+such as concurrency and garbage collection. Your favorite feature may be
+missing because it doesn't fit, because it affects compilation speed or
+clarity of design, or because it would make the fundamental system model
+too difficult.
+
+If it bothers you that Go is missing feature *X*,
+please forgive us and investigate the features that Go does have. You might find that
+they compensate in interesting ways for the lack of *X*.
+
+### When did Go get generic types? {#generics}
+
+The Go 1.18 release added type parameters to the language.
+This permits a form of polymorphic or generic programming.
+See the [language spec](/ref/spec) and the
+[proposal](/design/43651-type-parameters) for details.
+
+### Why was Go initially released without generic types? {#beginning_generics}
+
+Go was intended as a language for writing server programs that would be
+easy to maintain over time.
+(See [this article](/talks/2012/splash.article) for more background.)
+The design concentrated on things like scalability, readability, and
+concurrency.
+Polymorphic programming did not seem essential to the language's
+goals at the time, and so was initially left out for simplicity.
+
+Generics are convenient but they come at a cost in complexity in the
+type system and run-time.
+It took a while to develop a design that we believe gives value
+proportionate to the complexity.
+
+### Why does Go not have exceptions? {#exceptions}
+
+We believe that coupling exceptions to a control
+structure, as in the `try-catch-finally` idiom, results in
+convoluted code.  It also tends to encourage programmers to label
+too many ordinary errors, such as failing to open a file, as
+exceptional.
+
+Go takes a different approach.  For plain error handling, Go's multi-value
+returns make it easy to report an error without overloading the return value.
+[A canonical error type, coupled with Go's other features](/doc/articles/error_handling.html),
+makes error handling pleasant but quite different
+from that in other languages.
+
+Go also has a couple
+of built-in functions to signal and recover from truly exceptional
+conditions.  The recovery mechanism is executed only as part of a
+function's state being torn down after an error, which is sufficient
+to handle catastrophe but requires no extra control structures and,
+when used well, can result in clean error-handling code.
+
+See the [Defer, Panic, and Recover](/doc/articles/defer_panic_recover.html) article for details.
+Also, the [Errors are values](/blog/errors-are-values) blog post
+describes one approach to handling errors cleanly in Go by demonstrating that,
+since errors are just values, the full power of Go can be deployed in error handling.
+
+### Why does Go not have assertions? {#assertions}
+
+Go doesn't provide assertions. They are undeniably convenient, but our
+experience has been that programmers use them as a crutch to avoid thinking
+about proper error handling and reporting. Proper error handling means that
+servers continue to operate instead of crashing after a non-fatal error.
+Proper error reporting means that errors are direct and to the point,
+saving the programmer from interpreting a large crash trace. Precise
+errors are particularly important when the programmer seeing the errors is
+not familiar with the code.
+
+We understand that this is a point of contention. There are many things in
+the Go language and libraries that differ from modern practices, simply
+because we feel it's sometimes worth trying a different approach.
+
+### Why build concurrency on the ideas of CSP? {#csp}
+
+Concurrency and multi-threaded programming have over time
+developed a reputation for difficulty.  We believe this is due partly to complex
+designs such as
+[pthreads](https://en.wikipedia.org/wiki/POSIX_Threads)
+and partly to overemphasis on low-level details
+such as mutexes, condition variables, and memory barriers.
+Higher-level interfaces enable much simpler code, even if there are still
+mutexes and such under the covers.
+
+One of the most successful models for providing high-level linguistic support
+for concurrency comes from Hoare's Communicating Sequential Processes, or CSP.
+Occam and Erlang are two well known languages that stem from CSP.
+Go's concurrency primitives derive from a different part of the family tree
+whose main contribution is the powerful notion of channels as first class objects.
+Experience with several earlier languages has shown that the CSP model
+fits well into a procedural language framework.
+
+### Why goroutines instead of threads? {#goroutines}
+
+Goroutines are part of making concurrency easy to use.  The idea, which has
+been around for a while, is to multiplex independently executing
+functions&mdash;coroutines&mdash;onto a set of threads.
+When a coroutine blocks, such as by calling a blocking system call,
+the run-time automatically moves other coroutines on the same operating
+system thread to a different, runnable thread so they won't be blocked.
+The programmer sees none of this, which is the point.
+The result, which we call goroutines, can be very cheap: they have little
+overhead beyond the memory for the stack, which is just a few kilobytes.
+
+To make the stacks small, Go's run-time uses resizable, bounded stacks.  A newly
+minted goroutine is given a few kilobytes, which is almost always enough.
+When it isn't, the run-time grows (and shrinks) the memory for storing
+the stack automatically, allowing many goroutines to live in a modest
+amount of memory.
+The CPU overhead averages about three cheap instructions per function call.
+It is practical to create hundreds of thousands of goroutines in the same
+address space.
+If goroutines were just threads, system resources would
+run out at a much smaller number.
+
+### Why are map operations not defined to be atomic? {#atomic_maps}
+
+After long discussion it was decided that the typical use of maps did not require
+safe access from multiple goroutines, and in those cases where it did, the map was
+probably part of some larger data structure or computation that was already
+synchronized.  Therefore requiring that all map operations grab a mutex would slow
+down most programs and add safety to few.  This was not an easy decision,
+however, since it means uncontrolled map access can crash the program.
+
+The language does not preclude atomic map updates.  When required, such
+as when hosting an untrusted program, the implementation could interlock
+map access.
+
+Map access is unsafe only when updates are occurring.
+As long as all goroutines are only reading—looking up elements in the map,
+including iterating through it using a
+`for` `range` loop—and not changing the map
+by assigning to elements or doing deletions,
+it is safe for them to access the map concurrently without synchronization.
+
+As an aid to correct map use, some implementations of the language
+contain a special check that automatically reports at run time when a map is modified
+unsafely by concurrent execution.
+Also there is a type in the sync library called
+[`sync.Map`](https://pkg.go.dev/sync#Map) that works
+well for certain usage patterns such as static caches, although it is not
+suitable as a general replacement for the builtin map type.
+
+### Will you accept my language change? {#language_changes}
+
+People often suggest improvements to the language—the
+[mailing list](https://groups.google.com/group/golang-nuts)
+contains a rich history of such discussions—but very few of these changes have
+been accepted.
+
+Although Go is an open source project, the language and libraries are protected
+by a [compatibility promise](/doc/go1compat.html) that prevents
+changes that break existing programs, at least at the source code level
+(programs may need to be recompiled occasionally to stay current).
+If your proposal violates the Go 1 specification we cannot even entertain the
+idea, regardless of its merit.
+A future major release of Go may be incompatible with Go 1, but discussions
+on that topic have only just begun and one thing is certain:
+there will be very few such incompatibilities introduced in the process.
+Moreover, the compatibility promise encourages us to provide an automatic path
+forward for old programs to adapt should that situation arise.
+
+Even if your proposal is compatible with the Go 1 spec, it might
+not be in the spirit of Go's design goals.
+The article *[Go
+at Google: Language Design in the Service of Software Engineering](/talks/2012/splash.article)*
+explains Go's origins and the motivation behind its design.
 
 ## Types {#types}
 
-### Go는 객체 지향 언어인가요? {#Is_Go_an_object-oriented_language}
+### Is Go an object-oriented language? {#Is_Go_an_object-oriented_language}
 
-그렇기도 하고 아니기도 합니다. Go에는 타입과 메서드가 있으며 객체 지향 프로그래밍 스타일을 허용하지만, 타입 계층 구조(type hierarchy)는 존재하지 않습니다. Go의 "인터페이스" 개념은 사용하기 쉽고 어떤 면에서는 더 일반적이라고 믿는 다른 접근 방식을 제공합니다. 또한, 서브클래싱(subclassing)과 유사하지만 동일하지는 않은 기능을 제공하기 위해 타입을 다른 타입에 내장(embed)하는 방법도 있습니다.
+Yes and no. Although Go has types and methods and allows an
+object-oriented style of programming, there is no type hierarchy.
+The concept of "interface" in Go provides a different approach that
+we believe is easy to use and in some ways more general. There are
+also ways to embed types in other types to provide something
+analogous&mdash;but not identical&mdash;to subclassing.
+Moreover, methods in Go are more general than in C++ or Java:
+they can be defined for any sort of data, even built-in types such
+as plain, "unboxed" integers.
+They are not restricted to structs (classes).
 
-더욱이, Go의 메서드는 C++나 Java보다 더 일반적입니다. 즉, 일반적인 "언박싱된(unboxed)" 정수와 같은 내장 타입을 포함하여 어떤 종류의 데이터에 대해서도 메서드를 정의할 수 있습니다.
+Also, the lack of a type hierarchy makes "objects" in Go feel much more
+lightweight than in languages such as C++ or Java.
 
-메서드는 struct(클래스)에만 제한되지 않습니다.
+### How do I get dynamic dispatch of methods? {#How_do_I_get_dynamic_dispatch_of_methods}
 
-또한, 타입 계층 구조가 없기 때문에 Go의 "객체"는 C++나 Java와 같은 언어보다 훨씬 가볍게 느껴집니다.
+The only way to have dynamically dispatched methods is through an
+interface. Methods on a struct or any other concrete type are always resolved statically.
 
-### 메서드의 동적 디스패치(dynamic dispatch)를 어떻게 구현하나요? {#How_do_I_get_dynamic_dispatch_of_methods}
+### Why is there no type inheritance? {#inheritance}
 
-동적으로 디스패치(dynamically dispatched)되는 메서드를 갖는 유일한 방법은 인터페이스를 통하는 것입니다. 구조체(struct)나 다른 구체 타입(concrete type)의 메서드는 항상 정적으로 결정(resolved statically)됩니다.
+Object-oriented programming, at least in the best-known languages,
+involves too much discussion of the relationships between types,
+relationships that often could be derived automatically.  Go takes a
+different approach.
 
-### 왜 타입 상속이 없나요? {#inheritance}
+Rather than requiring the programmer to declare ahead of time that two
+types are related, in Go a type automatically satisfies any interface
+that specifies a subset of its methods.  Besides reducing the
+bookkeeping, this approach has real advantages.  Types can satisfy
+many interfaces at once, without the complexities of traditional
+multiple inheritance.
+Interfaces can be very lightweight&mdash;an interface with
+one or even zero methods can express a useful concept.
+Interfaces can be added after the fact if a new idea comes along
+or for testing&mdash;without annotating the original types.
+Because there are no explicit relationships between types
+and interfaces, there is no type hierarchy to manage or discuss.
 
-객체 지향 프로그래밍은, 적어도 가장 잘 알려진 언어들에서는, 타입 간의 관계에 대한 논의가 너무 많으며, 이러한 관계들은 종종 자동으로 도출될 수 있는 것들입니다. Go는 이와 다른 접근 방식을 취합니다.
+It's possible to use these ideas to construct something analogous to
+type-safe Unix pipes.  For instance, see how `fmt.Fprintf`
+enables formatted printing to any output, not just a file, or how the
+`bufio` package can be completely separate from file I/O,
+or how the `image` packages generate compressed
+image files.  All these ideas stem from a single interface
+(`io.Writer`) representing a single method
+(`Write`).  And that's only scratching the surface.
+Go's interfaces have a profound influence on how programs are structured.
 
-프로그래머가 두 타입이 서로 관련되어 있다고 미리 선언하도록 요구하는 대신, Go에서는 타입이 자신의 메서드 집합의 부분 집합을 정의하는 모든 인터페이스를 자동으로 만족합니다. 이러한 방식은 단순한 관리 작업을 줄여줄 뿐만 아니라 실질적인 장점들이 있습니다. 타입은 전통적인 다중 상속의 복잡함 없이 한 번에 여러 인터페이스를 만족할 수 있습니다.
+It takes some getting used to but this implicit style of type
+dependency is one of the most productive things about Go.
 
-인터페이스는 매우 가벼울 수 있습니다. 메서드가 하나뿐이거나 심지어 없는 인터페이스라도 유용한 개념을 표현할 수 있습니다.
+### Why is `len` a function and not a method? {#methods_on_basics}
 
-새로운 아이디어가 떠오르거나 테스트가 필요한 경우, 원래의 타입을 수정하지 않고도 사후에 인터페이스를 추가할 수 있습니다.
+We debated this issue but decided
+implementing `len` and friends as functions was fine in practice and
+didn't complicate questions about the interface (in the Go type sense)
+of basic types.
 
-타입과 인터페이스 사이에 명시적인 관계가 없기 때문에, 관리하거나 논의해야 할 타입 계층 구조가 존재하지 않습니다.
+### Why does Go not support overloading of methods and operators? {#overloading}
 
-이러한 아이디어들을 사용하여 타입 안전한(type-safe) Unix 파이프와 유사한 것을 구축할 수 있습니다. 예를 들어, `fmt.Fprintf`가 파일뿐만 아니라 모든 출력 대상으로 포맷팅된 출력을 가능하게 하는 방식, `bufio` 패키지가 파일 I/O와 완전히 분리될 수 있는 방식, 또는 `image` 패키지들이 압축된 이미지 파일을 생성하는 방식을 살펴보십시오. 이 모든 아이디어는 단일 메서드(`Write`)를 나타내는 단일 인터페이스(`io.Writer`)에서 비롯됩니다. 그리고 이는 시작에 불과합니다. Go의 인터페이스는 프로그램이 구조화되는 방식에 지대한 영향을 미칩니다.
+Method dispatch is simplified if it doesn't need to do type matching as well.
+Experience with other languages told us that having a variety of
+methods with the same name but different signatures was occasionally useful
+but that it could also be confusing and fragile in practice.  Matching only by name
+and requiring consistency in the types was a major simplifying decision
+in Go's type system.
 
-익숙해지는 데 시간이 좀 걸리지만, 이러한 암시적인 타입 의존성 스타일은 Go의 가장 생산적인 특징 중 하나입니다.
+Regarding operator overloading, it seems more a convenience than an absolute
+requirement.  Again, things are simpler without it.
 
-### 왜 `len`은 메서드가 아니라 함수인가요? {#methods_on_basics}
+### Why doesn't Go have "implements" declarations? {#implements_interface}
 
-우리는 이 문제에 대해 논의했지만, `len`과 그 유사한 기능들을 함수로 구현하는 것이 실제적으로 문제가 없으며, 기본 타입의 인터페이스(Go 타입 관점에서의 인터페이스)에 관한 문제를 복잡하게 만들지 않는다고 결정했습니다.
+A Go type implements an interface by implementing the methods of that interface,
+nothing more.  This property allows interfaces to be defined and used without
+needing to modify existing code.  It enables a kind of
+[structural typing](https://en.wikipedia.org/wiki/Structural_type_system) that
+promotes separation of concerns and improves code re-use, and makes it easier
+to build on patterns that emerge as the code develops.
+The semantics of interfaces is one of the main reasons for Go's nimble,
+lightweight feel.
 
-### Go는 왜 메서드 및 연산자 오버로딩을 지원하지 않나요? {#overloading}
+See the [question on type inheritance](#inheritance) for more detail.
 
-메서드 디스패치(Method dispatch)는 타입 매칭을 함께 수행할 필요가 없다면 더 단순해집니다.
-다른 언어들의 경험을 통해, 이름은 같지만 시그니처가 다른 다양한 메서드를 갖는 것이 때로는 유용할 수 있지만, 실제로는 혼란스럽고 취약할 수 있다는 점을 배웠습니다. 이름으로만 매칭하고 타입의 일관성을 요구하는 것은 Go 타입 시스템의 주요한 단순화 결정이었습니다.
+### How can I guarantee my type satisfies an interface? {#guarantee_satisfies_interface}
 
-연산자 오버로딩과 관련하여, 이는 절대적인 요구사항이라기보다 편의 기능에 더 가까운 것으로 보입니다. 다시 말하지만, 이것이 없는 편이 더 단순합니다.
-
-### Go에는 왜 "implements" 선언이 없을까요? {#implements_interface}
-
-Go 타입은 해당 인터페이스의 메서드들을 구현함으로써 인터페이스를 구현하며, 그 외에 추가적인 작업은 필요하지 않습니다. 이러한 특성 덕분에 기존 코드를 수정할 필요 없이 인터페이스를 정의하고 사용할 수 있습니다. 이는 [structural typing](https://en.wikipedia.org/wiki/Structural_type_system)의 일종을 가능하게 하여 관심사의 분리를 촉진하고 코드 재사용성을 높이며, 코드가 발전함에 따라 나타나는 패턴을 기반으로 더 쉽게 구축할 수 있게 합니다. 인터페이스의 이러한 시맨틱은 Go가 민첩하고 가벼운 느낌을 주는 주요 이유 중 하나입니다.
-
-더 자세한 내용은 [타입 상속에 관한 질문](#inheritance)을 참조하십시오.
-
-### 내 타입이 인터페이스를 충족하는지 어떻게 보장할 수 있나요? {#guarantee_satisfies_interface}
-
-다음과 같이 `T`의 제로 값(zero value) 또는 `T`에 대한 포인터를 사용하여 할당을 시도함으로써, 컴파일러가 타입 `T`가 인터페이스 `I`를 구현하는지 확인하도록 요청할 수 있습니다.
+You can ask the compiler to check that the type `T` implements the
+interface `I` by attempting an assignment using the zero value for
+`T` or pointer to `T`, as appropriate:
 
 ```
 type T struct{}
-var _ I = T{}       // T가 I를 구현하는지 확인합니다.
-var _ I = (*T)(nil) // *T가 I를 구현하는지 확인합니다.
+var _ I = T{}       // Verify that T implements I.
+var _ I = (*T)(nil) // Verify that *T implements I.
 ```
 
-`T`(또는 상황에 따라 `*T`)가 `I`를 구현하지 않은 경우, 해당 실수는 컴파일 타임에 발견됩니다.
+If `T` (or `*T`, accordingly) doesn't implement
+`I`, the mistake will be caught at compile time.
 
-인터페이스 사용자가 해당 인터페이스를 구현했음을 명시적으로 선언하게 하려면, 인터페이스의 메서드 집합에 설명적인 이름의 메서드를 추가할 수 있습니다. 예를 들어:
+If you wish the users of an interface to explicitly declare that they implement
+it, you can add a method with a descriptive name to the interface's method set.
+For example:
 
 ```
 type Fooer interface {
@@ -322,7 +611,9 @@ type Fooer interface {
 }
 ```
 
-타입이 `Fooer`가 되려면 `ImplementsFooer` 메서드를 구현해야 하며, 이를 통해 해당 사실을 명확히 문서화하고 [go doc](/cmd/go/#hdr-Show_documentation_for_package_or_symbol) 출력 결과에 알릴 수 있습니다.
+A type must then implement the `ImplementsFooer` method to be a
+`Fooer`, clearly documenting the fact and announcing it in
+[go doc](/cmd/go/#hdr-Show_documentation_for_package_or_symbol)'s output.
 
 ```
 type Bar struct{}
@@ -330,11 +621,14 @@ func (b Bar) ImplementsFooer() {}
 func (b Bar) Foo() {}
 ```
 
-대부분의 코드는 이러한 제약 사항을 사용하지 않는데, 이는 인터페이스 개념의 유용성을 제한하기 때문입니다. 하지만 때로는 유사한 인터페이스들 사이의 모호성을 해결하기 위해 이러한 제약 사항이 필요할 때가 있습니다.
+Most code doesn't make use of such constraints, since they limit the utility of
+the interface idea. Sometimes, though, they're necessary to resolve ambiguities
+among similar interfaces.
 
-### 왜 타입 T가 Equal 인터페이스를 만족하지 않나요? {#t_and_equal_interface}
+### Why doesn't type T satisfy the Equal interface? {#t_and_equal_interface}
 
-다른 값과 자신을 비교할 수 있는 객체를 표현하는 다음과 같은 간단한 인터페이스를 생각해 보겠습니다.
+Consider this simple interface to represent an object that can compare
+itself with another value:
 
 ```
 type Equaler interface {
@@ -342,30 +636,37 @@ type Equaler interface {
 }
 ```
 
-그리고 이 타입, `T`:
+and this type, `T`:
 
 ```
 type T int
-func (t T) Equal(u T) bool { return t == u } // Equaler를 충족하지 않음
+func (t T) Equal(u T) bool { return t == u } // does not satisfy Equaler
 ```
 
-일부 다형성 타입 시스템(polymorphic type systems)의 유사한 상황과 달리,
-`T`는 `Equaler`를 구현하지 않습니다.
-`T.Equal`의 인자 타입은 `T`이며,
-문자 그대로 요구되는 타입인 `Equaler`가 아닙니다.
+Unlike the analogous situation in some polymorphic type systems,
+`T` does not implement `Equaler`.
+The argument type of `T.Equal` is `T`,
+not literally the required type `Equaler`.
 
-Go에서 타입 시스템은 `Equal`의 인자를 자동으로 승격(promote)시키지 않습니다. 이는 다음과 같이 `Equaler`를 구현하는 `T2` 타입의 사례에서 볼 수 있듯이 프로그래머의 책임입니다.
+In Go, the type system does not promote the argument of
+`Equal`; that is the programmer's responsibility, as
+illustrated by the type `T2`, which does implement
+`Equaler`:
 
 ```
 type T2 int
-func (t T2) Equal(u Equaler) bool { return t == u.(T2) }  // Equaler를 만족함
+func (t T2) Equal(u Equaler) bool { return t == u.(T2) }  // satisfies Equaler
 ```
 
-하지만 이것조차 다른 타입 시스템과는 다릅니다. Go에서는 `Equaler`를 만족하는 *어떤* 타입이라도 `T2.Equal`의 인자로 전달될 수 있기 때문에, 런타임에 해당 인자가 `T2` 타입인지 확인해야 하기 때문입니다. 일부 언어들은 이러한 보장을 컴파일 타임에 수행하도록 설계되어 있습니다.
+Even this isn't like other type systems, though, because in Go *any*
+type that satisfies `Equaler` could be passed as the
+argument to `T2.Equal`, and at run time we must
+check that the argument is of type `T2`.
+Some languages arrange to make that guarantee at compile time.
 
-관련된 또 다른 예시는 그 반대의 경우입니다:
+A related example goes the other way:
 
-```go
+```
 type Opener interface {
    Open() Reader
 }
@@ -373,17 +674,25 @@ type Opener interface {
 func (t T3) Open() *os.File
 ```
 
-Go에서 `T3`는 `Opener`를 만족하지 않습니다. 다른 언어에서는 만족할 수도 있겠지만 말입니다.
+In Go, `T3` does not satisfy `Opener`,
+although it might in another language.
 
-이런 경우 Go의 타입 시스템이 프로그래머를 위해 제공하는 기능이 적은 것은 사실이지만, 서브타이핑(subtyping)이 없기 때문에 인터페이스 충족에 관한 규칙을 매우 간단하게 정의할 수 있습니다. 즉, 함수의 이름과 시그니처가 인터페이스의 것과 정확히 일치하는가 하는 점입니다.
+While it is true that Go's type system does less for the programmer
+in such cases, the lack of subtyping makes the rules about
+interface satisfaction very easy to state: are the function's names
+and signatures exactly those of the interface?
+Go's rule is also easy to implement efficiently.
+We feel these benefits offset the lack of
+automatic type promotion.
 
-Go의 이 규칙은 효율적으로 구현하기도 쉽습니다. 우리는 이러한 장점들이 자동 타입 승격(automatic type promotion)의 부재라는 단점을 상쇄한다고 생각합니다.
+### Can I convert a []T to an []interface{}? {#convert_slice_of_interface}
 
-### []T를 []interface{}로 변환할 수 있나요? {#convert_slice_of_interface}
-
-직접적으로는 불가능합니다.
-두 타입의 메모리 표현 방식이 서로 다르기 때문에 언어 명세(language specification)에서 이를 금지하고 있습니다.
-요소들을 대상 슬라이스로 하나씩 개별적으로 복사해야 합니다. 다음 예제는 `int` 슬라이스를 `interface{}` 슬라이스로 변환하는 방법입니다.
+Not directly.
+It is disallowed by the language specification because the two types
+do not have the same representation in memory.
+It is necessary to copy the elements individually to the destination
+slice. This example converts a slice of `int` to a slice of
+`interface{}`:
 
 ```
 t := []int{1, 2, 3, 4}
@@ -393,9 +702,9 @@ for i, v := range t {
 }
 ```
 
-### T1과 T2의 기본 타입(underlying type)이 같다면 []T1을 []T2로 변환할 수 있나요? {#convert_slice_with_same_underlying_type}
+### Can I convert []T1 to []T2 if T1 and T2 have the same underlying type? {#convert_slice_with_same_underlying_type}
 
-이 코드 샘플의 마지막 줄은 컴파일되지 않습니다.
+This last line of this code sample does not compile.
 
 ```
 type T1 int
@@ -406,24 +715,40 @@ var st1 []T1
 var sx = ([]T2)(st1) // NOT OK
 ```
 
-Go에서 타입은 메서드와 밀접하게 연관되어 있으며, 모든 이름이 있는 타입(named type)은 (비어 있을 수도 있는) 메서드 집합을 가집니다.
-일반적인 규칙은 변환하려는 타입의 이름(따라서 메서드 집합)은 변경할 수 있지만, 복합 타입(composite type) 요소의 이름(및 메서드 집합)은 변경할 수 없다는 것입니다.
-Go는 타입 변환에 대해 명시적으로 작성할 것을 요구합니다.
+In Go, types are closely tied to methods, in that every named type has
+a (possibly empty) method set.
+The general rule is that you can change the name of the type being
+converted (and thus possibly change its method set) but you can't
+change the name (and method set) of elements of a composite type.
+Go requires you to be explicit about type conversions.
 
-### 왜 나의 nil 에러 값이 nil과 같지 않은가요? {#nil_error}
+### Why is my nil error value not equal to nil? {#nil_error}
 
-내부적으로 인터페이스는 타입 `T`와 값 `V`라는 두 가지 요소로 구현됩니다.
-`V`는 `int`, `struct` 또는 포인터와 같은 구체적인 값이며, 인터페이스 그 자체일 수는 없으며 타입 `T`를 가집니다.
-예를 들어, `int` 값 3을 인터페이스에 저장하면, 결과로 생성되는 인터페이스 값은 도식적으로 (`T=int`, `V=3`)가 됩니다.
-값 `V`는 인터페이스의 *동적(dynamic)* 값으로도 알려져 있는데, 이는 프로그램 실행 중에 주어진 인터페이스 변수가 서로 다른 값 `V`(그리고 그에 대응하는 타입 `T`)를 가질 수 있기 때문입니다.
+Under the covers, interfaces are implemented as two elements, a type `T`
+and a value `V`.
+`V` is a concrete value such as an `int`,
+`struct` or pointer, never an interface itself, and has
+type `T`.
+For instance, if we store the `int` value 3 in an interface,
+the resulting interface value has, schematically,
+(`T=int`, `V=3`).
+The value `V` is also known as the interface's
+*dynamic* value,
+since a given interface variable might hold different values `V`
+(and corresponding types `T`)
+during the execution of the program.
 
-인터페이스 값은 `V`와 `T`가 모두 설정되지 않았을 때만 (`T=nil`, `V`가 설정되지 않음) `nil`입니다.
-특히, `nil` 인터페이스는 항상 `nil` 타입을 가집니다.
-만약 인터페이스 값 내부에 `*int` 타입의 `nil` 포인터를 저장하면, 포인터의 값과 관계없이 내부 타입은 `*int`가 됩니다:
+An interface value is `nil` only if the `V` and `T`
+are both unset, (`T=nil`, `V` is not set),
+In particular, a `nil` interface will always hold a `nil` type.
+If we store a `nil` pointer of type `*int` inside
+an interface value, the inner type will be `*int` regardless of the value of the pointer:
 (`T=*int`, `V=nil`).
-따라서 이러한 인터페이스 값은 내부의 포인터 값 `V`가 `nil`일 *때조차* non-`nil`이 됩니다.
+Such an interface value will therefore be non-`nil`
+*even when the pointer value `V` inside is* `nil`.
 
-이 상황은 혼란스러울 수 있으며, `error` 반환 값과 같은 인터페이스 값 내부에 `nil` 값이 저장될 때 발생합니다.
+This situation can be confusing, and arises when a `nil` value is
+stored inside an interface value such as an `error` return:
 
 ```
 func returnsError() error {
@@ -431,13 +756,19 @@ func returnsError() error {
     if bad() {
         p = ErrBad
     }
-    return p // 항상 non-nil 에러를 반환합니다.
+    return p // Will always return a non-nil error.
 }
 ```
 
-모든 것이 정상적으로 진행되면, 함수는 `nil` `p`를 반환하며, 결과적으로 반환 값은 (`T=*MyError`, `V=nil`)을 보유한 `error` 인터페이스 값이 됩니다. 이는 호출자가 반환된 에러를 `nil`과 비교할 때, 아무런 문제가 발생하지 않았더라도 항상 에러가 발생한 것처럼 보이게 됨을 의미합니다. 호출자에게 적절한 `nil` `error`를 반환하려면, 함수는 명시적으로 `nil`을 반환해야 합니다.
+If all goes well, the function returns a `nil` `p`,
+so the return value is an `error` interface
+value holding (`T=*MyError`, `V=nil`).
+This means that if the caller compares the returned error to `nil`,
+it will always look as if there was an error even if nothing bad happened.
+To return a proper `nil` `error` to the caller,
+the function must return an explicit `nil`:
 
-```go
+```
 func returnsError() error {
     if bad() {
         return ErrBad
@@ -446,30 +777,51 @@ func returnsError() error {
 }
 ```
 
-에러를 반환하는 함수가 에러가 올바르게 생성되도록 보장하기 위해, `*MyError`와 같은 구체적인 타입보다는 (위에서 했던 것처럼) 항상 시그니처에 `error` 타입을 사용하는 것이 좋습니다. 예를 들어, [`os.Open`](/pkg/os/#Open)은 `nil`이 아닐 경우 항상 [`*os.PathError`](/pkg/os/#PathError)라는 구체적인 타입을 반환하지만, 반환 타입은 `error`로 정의되어 있습니다.
+It's a good idea for functions
+that return errors always to use the `error` type in
+their signature (as we did above) rather than a concrete type such
+as `*MyError`, to help guarantee the error is
+created correctly. As an example,
+[`os.Open`](/pkg/os/#Open)
+returns an `error` even though, if not `nil`,
+it's always of concrete type
+[`*os.PathError`](/pkg/os/#PathError).
 
-인터페이스가 사용되는 모든 곳에서 여기서 설명한 것과 유사한 상황이 발생할 수 있습니다.
-구체적인 값(concrete value)이 인터페이스에 저장되었다면, 해당 인터페이스는 `nil`이 아니라는 점을 명심하십시오.
-더 자세한 정보는 [The Laws of Reflection](/doc/articles/laws_of_reflection.html)을 참조하십시오.
+Similar situations to those described here can arise whenever interfaces are used.
+Just keep in mind that if any concrete value
+has been stored in the interface, the interface will not be `nil`.
+For more information, see
+[The Laws of Reflection](/doc/articles/laws_of_reflection.html).
 
-### 제로 사이즈 타입(zero-size types)은 왜 이상하게 동작하나요? {#zero_size_types}
+### Why do zero-size types behave oddly? {#zero_size_types}
 
-Go는 필드가 없는 구조체(`struct{}`)나 요소가 없는 배열(`[0]byte`)과 같이 크기가 0인 타입(zero-size types)을 지원합니다.
-크기가 0인 타입에는 저장할 수 있는 것이 없지만, `map[int]struct{}`와 같이 값이 필요 없는 경우나, 값은 없지만 메서드를 가진 타입을 정의할 때 유용하게 사용됩니다.
+Go supports zero-size types, such as a struct with no fields
+(`struct{}`) or an array with no elements (`[0]byte`).
+There is nothing you can store in a zero-size type, but these types
+are sometimes useful when no value is needed, as in
+`map[int]struct{}` or a type that has methods but no value.
 
-크기가 0인 타입(zero-size type)을 가진 서로 다른 변수들은 메모리의 동일한 위치에 배치될 수 있습니다.
-해당 변수들에는 어떤 값도 저장될 수 없으므로 이는 안전합니다.
+Different variables with a zero-size type may be placed at the same
+location in memory.
+This is safe as no value can be stored in those variables.
 
-또한, 언어 차원에서 두 개의 서로 다른 제로 사이즈(zero-size) 변수를 가리키는 포인터들의 비교 결과가 동일할지 여부에 대해 어떠한 보장도 하지 않습니다.
+Moreover, the language does not make any guarantees as to whether
+pointers to two different zero-size variables will compare equal or
+not.
+Such comparisons may even return `true` at one point in the program
+and then return `false` at a different point, depending on exactly how
+the program is compiled and executed.
 
-이러한 비교는 프로그램이 정확히 어떻게 컴파일되고 실행되는지에 따라, 프로그램의 어느 시점에서는 `true`를 반환했다가 다른 시점에서는 `false`를 반환할 수도 있습니다.
+A separate issue with zero-size types is that a pointer to a zero-size
+struct field must not overlap with a pointer to a different object in
+memory.
+That could cause confusion in the garbage collector.
+This means that if the last field in a struct is zero-size, the struct
+will be padded to ensure that a pointer to the last field does not
+overlap with memory that immediately follows the struct.
+Thus, this program:
 
-zero-size 타입과 관련된 또 다른 문제는, zero-size 구조체 필드를 가리키는 포인터가 메모리 상의 다른 객체를 가리키는 포인터와 겹쳐서는 안 된다는 점입니다.
-이는 가비지 컬렉터(garbage collector)에 혼란을 줄 수 있습니다.
-따라서 구조체의 마지막 필드가 zero-size인 경우, 마지막 필드의 포인터가 구조체 바로 뒤에 이어지는 메모리와 겹치지 않도록 구조체에 패딩(padding)이 추가됩니다.
-결과적으로, 다음 프로그램은:
-
-```go
+```
 func main() {
 	type S struct {
 		f1 byte
@@ -479,418 +831,630 @@ func main() {
 }
 ```
 
-대부분의 Go 구현체에서 `1`이 아닌 `2`를 출력할 것입니다.
+will print `2`, not `1`, in most Go implementations.
 
-### 왜 C와 같은 태그 없는 공용체(untagged unions)가 없나요? {#unions}
+### Why are there no untagged unions, as in C? {#unions}
 
-태그 없는 유니온(Untagged unions)은 Go의 메모리 안전성 보장을 위반하게 됩니다.
+Untagged unions would violate Go's memory safety
+guarantees.
 
-### Go에는 왜 variant 타입이 없나요? {#variant_types}
+### Why does Go not have variant types? {#variant_types}
 
-대수적 타입(algebraic types)으로도 알려진 변체 타입(Variant types)은 값이 여러 타입 중 하나를 가질 수 있지만, 오직 지정된 타입들만 가질 수 있도록 지정하는 방법을 제공합니다. 시스템 프로그래밍에서의 일반적인 예로, 에러가 예를 들어 네트워크 에러, 보안 에러 또는 애플리케이션 에러 중 하나라고 지정함으로써, 호출자가 에러의 타입을 확인하여 문제의 원인을 구분할 수 있게 하는 것이 있습니다. 또 다른 예로는 각 노드가 선언, 문장, 할당 등 서로 다른 타입이 될 수 있는 구문 트리(syntax tree)가 있습니다.
+Variant types, also known as algebraic types, provide a way to specify
+that a value might take one of a set of other types, but only those
+types. A common example in systems programming would specify that an
+error is, say, a network error, a security error or an application
+error and allow the caller to discriminate the source of the problem
+by examining the type of the error. Another example is a syntax tree
+in which each node can be a different type: declaration, statement,
+assignment and so on.
 
-Go에 variant type(배리언트 타입)을 추가하는 것을 고려했으나, 논의 끝에 인터페이스와 혼란스러운 방식으로 중복된다는 판단하에 제외하기로 결정했습니다. 만약 variant type의 요소들이 그 자체로 인터페이스라면 어떤 일이 벌어질까요?
+We considered adding variant types to Go, but after discussion
+decided to leave them out because they overlap in confusing ways
+with interfaces. What would happen if the elements of a variant type
+were themselves interfaces?
 
-또한, variant type이 해결하려는 문제 중 일부는 이미 언어 차원에서 지원되고 있습니다. 에러 예제의 경우, 인터페이스 값으로 에러를 보유하고 타입 스위치(type switch)를 사용하여 케이스를 구분함으로써 쉽게 표현할 수 있습니다. 구문 분석 트리(syntax tree) 예제 또한 가능하지만, 그만큼 우아하게 구현되지는 않습니다.
+Also, some of what variant types address is already covered by the
+language. The error example is easy to express using an interface
+value to hold the error and a type switch to discriminate cases.  The
+syntax tree example is also doable, although not as elegantly.
 
-### 왜 Go에는 공변 결과 타입(covariant result types)이 없나요? {#covariant_types}
+### Why does Go not have covariant result types? {#covariant_types}
 
-공변 결과 타입(Covariant result types)은 다음과 같은 인터페이스를 의미합니다.
+Covariant result types would mean that an interface like
 
-```go
+```
 type Copyable interface {
     Copy() interface{}
 }
 ```
 
-제공해주신 텍스트가 매우 짧아 문맥에 따라 여러 가지로 해석될 수 있습니다. 가장 적절한 번역을 선택해 주세요.
-
-**1. 일반적인 기술 문서/설명서의 경우 (가장 권장):**
-> 해당 메서드로 충족될 것입니다.
-
-**2. 조건이나 요구사항을 만족시킨다는 의미일 경우:**
-> 해당 메서드에 의해 만족될 것입니다.
-
-**3. (사용자가) 만족할 것이라는 의미일 경우:**
-> 해당 메서드에 만족할 것입니다.
+would be satisfied by the method
 
 ```
 func (v Value) Copy() Value
 ```
 
-`Value`가 빈 인터페이스(empty interface)를 구현하기 때문입니다.
-Go에서 메서드 타입은 정확히 일치해야 하므로, `Value`는 `Copyable`을 구현하지 않습니다.
-Go는 타입이 수행하는 작업(메서드)과 타입의 구현을 분리합니다.
-두 메서드가 서로 다른 타입을 반환한다면, 그것들은 동일한 작업을 수행하는 것이 아닙니다.
-공변 결과 타입(covariant result types)을 원하는 프로그래머들은 종종 인터페이스를 통해 타입 계층 구조를 표현하려고 시도합니다.
-Go에서는 인터페이스와 구현 사이를 깔끔하게 분리하는 것이 더 자연스럽습니다.
+because `Value` implements the empty interface.
+In Go method types must match exactly, so `Value` does not
+implement `Copyable`.
+Go separates the notion of what a
+type does&mdash;its methods&mdash;from the type's implementation.
+If two methods return different types, they are not doing the same thing.
+Programmers who want covariant result types are often trying to
+express a type hierarchy through interfaces.
+In Go it's more natural to have a clean separation between interface
+and implementation.
 
-## 값 {#Values}
+## Values {#Values}
 
-### Go는 왜 암시적 숫자 변환(implicit numeric conversions)을 제공하지 않나요? {#conversions}
+### Why does Go not provide implicit numeric conversions? {#conversions}
 
-C 언어의 숫자 타입 간 자동 변환이 주는 편리함보다는 그로 인해 발생하는 혼란이 더 큽니다. 어떤 표현식이 `unsigned`가 되는 시점은 언제인가요? 값의 크기는 어느 정도인가요? 오버플로가 발생하나요? 결과가 실행되는 머신에 관계없이 이식성이 보장되나요?
+The convenience of automatic conversion between numeric types in C is
+outweighed by the confusion it causes.  When is an expression unsigned?
+How big is the value?  Does it overflow?  Is the result portable, independent
+of the machine on which it executes?
+It also complicates the compiler; C's "usual arithmetic conversions"
+are not easy to implement and inconsistent across architectures.
+For reasons of portability, we decided to make things clear and straightforward
+at the cost of some explicit conversions in the code.
+The definition of constants in Go&mdash;arbitrary precision values free
+of signedness and size annotations&mdash;ameliorates matters considerably,
+though.
 
-또한 이는 컴파일러를 복잡하게 만듭니다. C의 "일반 산술 변환(usual arithmetic conversions)"은 구현하기 쉽지 않으며 아키텍처마다 일관성이 없습니다.
+A related detail is that, unlike in C, `int` and `int64`
+are distinct types even if `int` is a 64-bit type.  The `int`
+type is generic; if you care about how many bits an integer holds, Go
+encourages you to be explicit.
 
-이식성을 위해, 우리는 코드에 일부 명시적 변환을 추가하는 비용을 감수하더라도 상황을 명확하고 단순하게 만들기로 결정했습니다.
+### How do constants work in Go? {#constants}
 
-다만, 부호(signedness)와 크기 표기가 없는 임의 정밀도 값인 Go의 상수 정의 방식이 이러한 문제를 상당히 완화해 줍니다.
+Although Go is strict about conversion between variables of different
+numeric types, constants in the language are much more flexible.
+Literal constants such as `23`, `3.14159`
+and [`math.Pi`](/pkg/math/#pkg-constants)
+occupy a sort of ideal number space, with arbitrary precision and
+no overflow or underflow.
+For instance, the value of `math.Pi` is specified to 63 decimal digits
+in the source code, and constant expressions involving the value keep
+precision beyond what a `float64` could hold.
+Only when the constant or constant expression is assigned to a
+variable&mdash;a memory location in the program&mdash;does
+it become a "computer" number with
+the usual floating-point properties and precision.
 
-관련된 세부 사항으로, C와 달리 `int`가 64비트 타입이라 하더라도 `int`와 `int64`는 서로 다른 타입입니다. `int` 타입은 제네릭하며, 정수가 몇 비트를 가지는지 중요하게 생각한다면 Go는 이를 명시적으로 작성할 것을 권장합니다.
-
-### Go에서 상수는 어떻게 작동하나요? {#constants}
-
-Go는 서로 다른 숫자 타입의 변수 간 변환에 대해 엄격하지만, 언어 내의 상수는 훨씬 더 유연합니다.
-`23`, `3.14159` 및 [`math.Pi`](/pkg/math/#pkg-constants)와 같은 리터럴 상수는 임의 정밀도를 가지며 오버플로(overflow)나 언더플로(underflow)가 없는 일종의 이상적인 숫자 공간을 차지합니다.
-예를 들어, `math.Pi` 값은 소스 코드에서 소수점 63자리까지 지정되어 있으며, 이 값을 포함하는 상수 표현식은 `float64`가 유지할 수 있는 수준 이상의 정밀도를 유지합니다.
-상수나 상수 표현식이 변수(프로그램의 메모리 위치)에 할당될 때에만, 비로소 일반적인 부동 소수점 특성과 정밀도를 가진 "컴퓨터" 숫자가 됩니다.
-
-또한,
-Go의 상수는 타입이 지정된 값이 아니라 단순한 숫자이기 때문에 변수보다 더 자유롭게 사용할 수 있으며, 이를 통해 엄격한 변환 규칙으로 인한 일부 불편함을 완화할 수 있습니다.
-예를 들어 다음과 같은 표현식을 작성할 수 있습니다.
+Also,
+because they are just numbers, not typed values, constants in Go can be
+used more freely than variables, thereby softening some of the awkwardness
+around the strict conversion rules.
+One can write expressions such as
 
 ```
 sqrt2 := math.Sqrt(2)
 ```
 
-컴파일러의 불평 없이(에러 없이) 처리됩니다. 왜냐하면 이상적인 숫자(ideal number) `2`는 `math.Sqrt` 호출을 위해 `float64`로 안전하고 정확하게 변환될 수 있기 때문입니다.
+without complaint from the compiler because the ideal number `2`
+can be converted safely and accurately
+to a `float64` for the call to `math.Sqrt`.
 
-[Constants](/blog/constants)라는 제목의 블로그 포스트에서 이 주제를 더 자세히 다룹니다.
+A blog post titled [Constants](/blog/constants)
+explores this topic in more detail.
 
-### 왜 맵(maps)이 내장되어 있나요? {#builtin_maps}
+### Why are maps built in? {#builtin_maps}
 
-문자열의 경우와 같은 이유입니다. 맵(map)은 매우 강력하고 중요한 데이터 구조이기에, 구문적 지원이 포함된 하나의 훌륭한 구현체를 제공하는 것이 프로그래밍을 더 즐겁게 만듭니다. 우리는 Go의 맵 구현이 대다수의 사용 사례를 충족할 만큼 충분히 강력하다고 믿습니다.
-특정 애플리케이션이 커스텀 구현을 통해 이득을 얻을 수 있다면 직접 작성하는 것이 가능하지만, 구문적으로는 그렇게 편리하지 않을 것입니다. 이는 합리적인 트레이드오프라고 생각합니다.
+The same reason strings are: they are such a powerful and important data
+structure that providing one excellent implementation with syntactic support
+makes programming more pleasant.  We believe that Go's implementation of maps
+is strong enough that it will serve for the vast majority of uses.
+If a specific application can benefit from a custom implementation, it's possible
+to write one but it will not be as convenient syntactically; this seems a reasonable tradeoff.
 
-### 왜 map은 슬라이스를 키로 사용할 수 없나요? {#map_keys}
+### Why don't maps allow slices as keys? {#map_keys}
 
-맵 조회(Map lookup)에는 동등 연산자(equality operator)가 필요하지만, 슬라이스는 이를 구현하지 않습니다.
-슬라이스는 동등성이 해당 타입에 대해 명확하게 정의되지 않기 때문에 이를 구현하지 않습니다.
-얕은 비교(shallow comparison) 대 깊은 비교(deep comparison), 포인터 대 값 비교, 재귀적 타입 처리 방법 등 여러 고려 사항이 있기 때문입니다.
-이 문제는 추후 다시 검토할 수 있으며—슬라이스에 대한 동등성을 구현하더라도 기존 프로그램이 무효화되지는 않을 것입니다—하지만 슬라이스의 동등성이 무엇을 의미해야 하는지에 대한 명확한 아이디어가 없는 상태에서는, 현재로서는 이를 제외하는 것이 더 간단했습니다.
+Map lookup requires an equality operator, which slices do not implement.
+They don't implement equality because equality is not well defined on such types;
+there are multiple considerations involving shallow vs. deep comparison, pointer vs.
+value comparison, how to deal with recursive types, and so on.
+We may revisit this issue&mdash;and implementing equality for slices
+will not invalidate any existing programs&mdash;but without a clear idea of what
+equality of slices should mean, it was simpler to leave it out for now.
 
-동등성(Equality)은 구조체(struct)와 배열(array)에 대해 정의되어 있으므로, 이들을 맵(map)의 키로 사용할 수 있습니다.
+Equality is defined for structs and arrays, so they can be used as map keys.
 
-### 왜 map, slice, channel은 참조 타입이고 array는 값 타입인가요? {#references}
+### Why are maps, slices, and channels references while arrays are values? {#references}
 
-그 주제에 대해서는 많은 역사가 있습니다. 초기에는 map과 channel이 구문적으로 포인터였으며, 포인터가 아닌 인스턴스를 선언하거나 사용하는 것이 불가능했습니다. 또한, 배열이 어떻게 작동해야 하는지에 대해서도 고민이 많았습니다. 결국 우리는 포인터와 값의 엄격한 구분이 언어를 더 사용하기 어렵게 만든다고 결정했습니다. 이러한 타입들이 연관된 공유 데이터 구조에 대한 참조(reference)로 동작하도록 변경함으로써 이 문제들을 해결했습니다. 이 변경으로 인해 언어에 다소 아쉬운 복잡성이 추가되었지만, 사용성 측면에서는 큰 효과가 있었습니다. 덕분에 Go는 출시 당시 더 생산적이고 편안한 언어가 될 수 있었습니다.
+There's a lot of history on that topic.  Early on, maps and channels
+were syntactically pointers and it was impossible to declare or use a
+non-pointer instance.  Also, we struggled with how arrays should work.
+Eventually we decided that the strict separation of pointers and
+values made the language harder to use.  Changing these
+types to act as references to the associated, shared data structures resolved
+these issues. This change added some regrettable complexity to the
+language but had a large effect on usability: Go became a more
+productive, comfortable language when it was introduced.
 
-## 코드 작성 {#Writing_Code}
+## Writing Code {#Writing_Code}
 
-### 라이브러리는 어떻게 문서화되나요? {#How_are_libraries_documented}
+### How are libraries documented? {#How_are_libraries_documented}
 
-커맨드 라인에서 문서에 액세스하려면, [go](/pkg/cmd/go/) 도구의 [doc](/pkg/cmd/go/#hdr-Show_documentation_for_package_or_symbol) 서브커맨드를 사용하십시오. 이 커맨드는 선언, 파일, 패키지 등에 대한 문서에 텍스트 인터페이스를 제공합니다.
+For access to documentation from the command line, the
+[go](/pkg/cmd/go/) tool has a
+[doc](/pkg/cmd/go/#hdr-Show_documentation_for_package_or_symbol)
+subcommand that provides a textual interface to the documentation
+for declarations, files, packages and so on.
 
-글로벌 패키지 검색 페이지인 [pkg.go.dev/pkg/](/pkg/)는
-웹상의 어느 곳에서든
-Go 소스 코드에서 패키지 문서를 추출하여
-선언부 및 관련 요소로 연결되는 링크가 포함된 HTML로 제공하는 서버를 실행합니다.
-이는 기존 Go 라이브러리에 대해 학습하는 가장 쉬운 방법입니다.
+The global package discovery page
+[pkg.go.dev/pkg/](/pkg/).
+runs a server that extracts package documentation from Go source code
+anywhere on the web
+and serves it as HTML with links to the declarations and related elements.
+It is the easiest way to learn about existing Go libraries.
 
-프로젝트 초기에는 로컬 머신에 있는 파일의 문서를 추출하기 위해 실행할 수 있었던 `godoc`이라는 유사한 프로그램이 있었으며, [pkg.go.dev/pkg/](/pkg/)는 기본적으로 그 후손입니다. 또 다른 후손으로는 [`pkgsite`](https://pkg.go.dev/golang.org/x/pkgsite/cmd/pkgsite) 명령어가 있는데, 이는 `godoc`과 마찬가지로 로컬에서 실행할 수 있지만 아직 `go` `doc`이 보여주는 결과에는 통합되지 않았습니다.
+In the early days of the project, there was a similar program, `godoc`,
+that could also be run to extract documentation for files on the local machine;
+[pkg.go.dev/pkg/](/pkg/) is essentially a descendant.
+Another descendant is the
+[`pkgsite`](https://pkg.go.dev/golang.org/x/pkgsite/cmd/pkgsite)
+command that, like `godoc`, can be run locally, although
+it is not yet integrated into
+the results shown by `go` `doc`.
 
-### Go 프로그래밍 스타일 가이드가 있나요? {#Is_there_a_Go_programming_style_guide}
+### Is there a Go programming style guide? {#Is_there_a_Go_programming_style_guide}
 
-명시적인 스타일 가이드는 없지만, 분명히 인식 가능한 "Go 스타일"이 존재합니다.
+There is no explicit style guide, although there is certainly
+a recognizable "Go style".
 
-Go는 명명 규칙, 레이아웃 및 파일 구성에 관한 결정을 내릴 때 지침이 되는 관례를 수립해 두었습니다.
-[Effective Go](effective_go.html) 문서에는 이러한 주제들에 대한 몇 가지 조언이 포함되어 있습니다.
-더 직접적으로는, `gofmt` 프로그램이 레이아웃 규칙을 강제하기 위한 프리티 프린터(pretty-printer) 역할을 하며, 이는 해석의 여지가 있는 일반적인 권장 및 금지 사항 목록을 대체합니다.
-저장소 내의 모든 Go 코드와 오픈 소스 세상의 대다수 코드는 `gofmt`를 통해 처리되었습니다.
+Go has established conventions to guide decisions around
+naming, layout, and file organization.
+The document [Effective Go](effective_go.html)
+contains some advice on these topics.
+More directly, the program `gofmt` is a pretty-printer
+whose purpose is to enforce layout rules; it replaces the usual
+compendium of dos and don'ts that allows interpretation.
+All the Go code in the repository, and the vast majority in the
+open source world, has been run through `gofmt`.
 
-[Go Code Review Comments](/s/comments)라는 제목의 문서는 프로그래머들이 자주 놓치는 Go 관용구(idiom)의 세부 사항들에 관한 짧은 에세이 모음집입니다.
-Go 프로젝트의 코드 리뷰를 수행하는 분들에게 유용한 참고 자료입니다.
+The document titled
+[Go Code Review Comments](/s/comments)
+is a collection of very short essays about details of Go idiom that are often
+missed by programmers.
+It is a handy reference for people doing code reviews for Go projects.
 
-### Go 라이브러리에 패치를 제출하려면 어떻게 해야 하나요? {#How_do_I_submit_patches_to_the_Go_libraries}
+### How do I submit patches to the Go libraries? {#How_do_I_submit_patches_to_the_Go_libraries}
 
-라이브러리 소스는 저장소의 `src` 디렉토리에 있습니다.
-중요한 변경을 원하시는 경우, 작업을 시작하시기 전에 메일링 리스트에서 논의해 주시기 바랍니다.
+The library sources are in the `src` directory of the repository.
+If you want to make a significant change, please discuss on the mailing list before embarking.
 
-진행 방법에 대한 자세한 내용은 [Contributing to the Go project](contribute.html) 문서를 참조하십시오.
+See the document
+[Contributing to the Go project](contribute.html)
+for more information about how to proceed.
 
-### 왜 "go get"은 저장소를 클론할 때 HTTPS를 사용하나요? {#git_https}
+### Why does "go get" use HTTPS when cloning a repository? {#git_https}
 
-많은 기업이 표준 TCP 포트인 80(HTTP)과 443(HTTPS)을 통한 아웃바운드 트래픽만 허용하며, TCP 포트 9418(git) 및 TCP 포트 22(SSH)를 포함한 다른 포트의 아웃바운드 트래픽은 차단하는 경우가 많습니다.
-HTTP 대신 HTTPS를 사용할 때, `git`은 기본적으로 인증서 검증을 강제하여 중간자 공격(man-in-the-middle), 도청 및 변조 공격으로부터 보호를 제공합니다.
-따라서 `go get` 명령어는 안전을 위해 HTTPS를 사용합니다.
+Companies often permit outgoing traffic only on the standard TCP ports 80 (HTTP)
+and 443 (HTTPS), blocking outgoing traffic on other ports, including TCP port 9418
+(git) and TCP port 22 (SSH).
+When using HTTPS instead of HTTP, `git` enforces certificate validation by
+default, providing protection against man-in-the-middle, eavesdropping and tampering attacks.
+The `go get` command therefore uses HTTPS for safety.
 
-`Git`은 HTTPS를 통해 인증하거나, HTTPS 대신 SSH를 사용하도록 설정할 수 있습니다.
-HTTPS를 통해 인증하려면 git이 참조하는 `$HOME/.netrc` 파일에 다음과 같은 줄을 추가하면 됩니다.
+`Git` can be configured to authenticate over HTTPS or to use SSH in place of HTTPS.
+To authenticate over HTTPS, you can add a line
+to the `$HOME/.netrc` file that git consults:
 
 ```
 machine github.com login *USERNAME* password *APIKEY*
 ```
 
-GitHub 계정의 경우, 비밀번호로 [개인 액세스 토큰(personal access token)](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/)을 사용할 수 있습니다.
+For GitHub accounts, the password can be a
+[personal access token](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/).
 
-`Git`은 특정 접두사와 일치하는 URL에 대해 HTTPS 대신 SSH를 사용하도록 설정할 수 있습니다.
-예를 들어, 모든 GitHub 액세스에 SSH를 사용하려면 `~/.gitconfig` 파일에 다음 줄을 추가하십시오.
+`Git` can also be configured to use SSH in place of HTTPS for URLs matching a given prefix.
+For example, to use SSH for all GitHub access,
+add these lines to your `~/.gitconfig`:
 
 ```
 [url "ssh://git@github.com/"]
 	insteadOf = https://github.com/
 ```
 
-프라이빗 모듈을 사용하면서 의존성 해결을 위해 퍼블릭 모듈 프록시를 사용하는 경우, `GOPRIVATE`를 설정해야 할 수도 있습니다.
-자세한 내용과 추가 설정은 [프라이빗 모듈](/ref/mod#private-modules)을 참조하세요.
+When working with private modules, but using a public module proxy for dependencies, you may need to set `GOPRIVATE`.
+See [private modules](/ref/mod#private-modules) for details and additional settings.
 
-### "go get"을 사용하여 패키지 버전을 어떻게 관리해야 하나요? {#get_version}
+### How should I manage package versions using "go get"? {#get_version}
 
-Go 툴체인에는 *모듈(modules)*이라고 알려진, 관련 패키지들의 버전 관리 세트를 관리하기 위한 내장 시스템이 있습니다.
-모듈은 [Go 1.11](/doc/go1.11#modules)에서 도입되었으며, [1.14](/doc/go1.14#introduction)부터 프로덕션 환경에서 사용할 준비가 되었습니다.
+The Go toolchain has a built-in system for managing versioned sets of related packages, known as *modules*.
+Modules were introduced in [Go 1.11](/doc/go1.11#modules) and have been ready for production use since [1.14](/doc/go1.14#introduction).
 
-모듈을 사용하여 프로젝트를 생성하려면 [`go mod init`](/ref/mod#go-mod-init)을 실행하십시오.
-이 명령은 의존성 버전을 추적하는 `go.mod` 파일을 생성합니다.
+To create a project using modules, run [`go mod init`](/ref/mod#go-mod-init).
+This command creates a `go.mod` file that tracks dependency versions.
 
 ```
 go mod init example/project
 ```
 
-의존성을 추가, 업그레이드 또는 다운그레이드하려면 [`go get`](/ref/mod#go-get)을 실행하십시오:
+To add, upgrade, or downgrade a dependency, run [`go get`](/ref/mod#go-get):
 
 ```
 go get golang.org/x/text@v0.3.5
 ```
 
-시작하는 방법에 대한 자세한 내용은 [Tutorial: Create a module](/doc/tutorial/create-module.html)을 참조하십시오.
+See [Tutorial: Create a module](/doc/tutorial/create-module.html) for more information on getting started.
 
-모듈을 사용하여 의존성을 관리하는 방법에 대한 가이드는 [Developing modules](/doc/#developing-modules)를 참조하십시오.
+See [Developing modules](/doc/#developing-modules) for guides on managing dependencies with modules.
 
-모듈 내의 패키지는 발전함에 따라 [import compatibility rule](https://research.swtch.com/vgo-import)을 준수하며 하위 호환성을 유지해야 합니다.
+Packages within modules should maintain backward compatibility as they evolve, following the [import compatibility rule](https://research.swtch.com/vgo-import):
 
-> 기존 패키지와 새 패키지의 import 경로가 같다면,
-> 새 패키지는 기존 패키지와 하위 호환성을 유지해야 합니다.
+> If an old package and a new package have the same import path,\
+> the new package must be backwards compatible with the old package.
 
-[Go 1 호환성 가이드라인](/doc/go1compat.html)이 좋은 참고 자료가 될 것입니다.
-내보낸(exported) 이름을 삭제하지 말고, 태그가 지정된 복합 리터럴(tagged composite literals) 사용을 권장하는 등의 내용이 포함되어 있습니다.
-다른 기능이 필요한 경우에는 기존 이름을 변경하는 대신 새로운 이름을 추가하십시오.
+The [Go 1 compatibility guidelines](/doc/go1compat.html) are a good reference here:
+don't remove exported names, encourage tagged composite literals, and so on.
+If different functionality is required, add a new name instead of changing an old one.
 
-모듈은 이를 [semantic versioning](https://semver.org/)과 시맨틱 임포트 버전 관리(semantic import versioning)를 통해 체계화합니다.
-호환성 파괴가 필요한 경우, 새로운 메이저 버전으로 모듈을 릴리스하십시오.
-메이저 버전 2 이상의 모듈은 경로의 일부로 [major version suffix](/ref/mod#major-version-suffixes) (예: `/v2`)가 필요합니다.
-이는 임포트 호환성 규칙을 유지합니다. 즉, 모듈의 서로 다른 메이저 버전에 있는 패키지들은 서로 다른 경로를 갖게 됩니다.
+Modules codify this with [semantic versioning](https://semver.org/) and semantic import versioning.
+If a break in compatibility is required, release a module at a new major version.
+Modules at major version 2 and higher require a [major version suffix](/ref/mod#major-version-suffixes) as part of their path (like `/v2`).
+This preserves the import compatibility rule: packages in different major versions of a module have distinct paths.
 
-## 포인터와 할당 {#Pointers}
+## Pointers and Allocation {#Pointers}
 
-### 함수 파라미터는 언제 값에 의해 전달(pass by value)되나요? {#pass_by_value}
+### When are function parameters passed by value? {#pass_by_value}
 
-C 계열의 모든 언어와 마찬가지로, Go의 모든 것은 값으로 전달(passed by value)됩니다.
-즉, 함수는 항상 전달되는 값의 복사본을 받으며, 이는 마치 대입 문이 값을 매개변수에 할당하는 것과 같습니다. 예를 들어, `int` 값을 함수에 전달하면 `int`의 복사본이 생성되고, 포인터 값을 전달하면 포인터의 복사본이 생성되지만 포인터가 가리키는 데이터까지 복사되지는 않습니다.
-(이것이 메서드 리시버에 어떤 영향을 미치는지에 대한 논의는 [이후 섹션](/doc/faq#methods_on_values_or_pointers)을 참조하십시오.)
+As in all languages in the C family, everything in Go is passed by value.
+That is, a function always gets a copy of the
+thing being passed, as if there were an assignment statement assigning the
+value to the parameter.  For instance, passing an `int` value
+to a function makes a copy of the `int`, and passing a pointer
+value makes a copy of the pointer, but not the data it points to.
+(See a [later section](/doc/faq#methods_on_values_or_pointers)
+for a discussion of how this affects method receivers.)
 
-Map과 slice 값은 포인터처럼 동작합니다. 즉, 이들은 실제 map이나 slice 데이터에 대한 포인터를 포함하는 디스크립터(descriptors)입니다. map이나 slice 값을 복사한다고 해서 그 값이 가리키는 데이터까지 복사되지는 않습니다. interface 값을 복사하면 interface 값에 저장된 내용이 복사됩니다. 만약 interface 값이 struct를 가지고 있다면, interface 값을 복사할 때 struct가 복사됩니다. 만약 interface 값이 포인터를 가지고 있다면, interface 값을 복사할 때 포인터가 복사되지만, 앞서 언급했듯이 포인터가 가리키는 데이터는 복사되지 않습니다.
+Map and slice values behave like pointers: they are descriptors that
+contain pointers to the underlying map or slice data.  Copying a map or
+slice value doesn't copy the data it points to.  Copying an interface value
+makes a copy of the thing stored in the interface value.  If the interface
+value holds a struct, copying the interface value makes a copy of the
+struct.  If the interface value holds a pointer, copying the interface value
+makes a copy of the pointer, but again not the data it points to.
 
-이 논의는 연산의 시맨틱(semantics)에 관한 것임을 유의하십시오.
-실제 구현에서는 시맨틱을 변경하지 않는 한, 복사를 피하기 위한 최적화가 적용될 수 있습니다.
+Note that this discussion is about the semantics of the operations.
+Actual implementations may apply optimizations to avoid copying
+as long as the optimizations do not change the semantics.
 
-### 인터페이스 포인터는 언제 사용해야 하나요? {#pointer_to_interface}
+### When should I use a pointer to an interface? {#pointer_to_interface}
 
-거의 없습니다. 인터페이스 값에 대한 포인터는 지연 평가(delayed evaluation)를 위해 인터페이스 값의 타입을 숨겨야 하는 드물고 까다로운 상황에서만 발생합니다.
+Almost never. Pointers to interface values arise only in rare, tricky situations involving
+disguising an interface value's type for delayed evaluation.
 
-인터페이스를 기대하는 함수에 인터페이스 값의 포인터를 전달하는 것은 흔히 발생하는 실수입니다. 컴파일러가 이 오류에 대해 경고를 보내겠지만, 때로는 [인터페이스를 충족하기 위해 포인터가 필요한 경우](#different_method_sets)가 있기 때문에 상황이 여전히 혼란스러울 수 있습니다. 여기서 핵심은 구체적인 타입(concrete type)의 포인터는 인터페이스를 충족할 수 있지만, 한 가지 예외를 제외하고 *인터페이스에 대한 포인터는 절대 인터페이스를 충족할 수 없다*는 점입니다.
+It is a common mistake to pass a pointer to an interface value
+to a function expecting an interface. The compiler will complain about this
+error but the situation can still be confusing, because sometimes a
+[pointer
+is necessary to satisfy an interface](#different_method_sets).
+The insight is that although a pointer to a concrete type can satisfy
+an interface, with one exception *a pointer to an interface can never satisfy an interface*.
 
-다음 변수 선언을 고려해 보십시오.
+Consider the variable declaration,
 
 ```
 var w io.Writer
 ```
 
-출력 함수 `fmt.Fprintf`는 첫 번째 인자로 `io.Writer`를 충족하는 값, 즉 표준 `Write` 메서드를 구현하는 값을 받습니다. 따라서 우리는 다음과 같이 작성할 수 있습니다.
+The printing function `fmt.Fprintf` takes as its first argument
+a value that satisfies `io.Writer`—something that implements
+the canonical `Write` method. Thus we can write
 
 ```
 fmt.Fprintf(w, "hello, world\n")
 ```
 
-하지만 `w`의 주소를 전달하면 프로그램이 컴파일되지 않습니다.
+If however we pass the address of `w`, the program will not compile.
 
 ```
-fmt.Fprintf(&w, "hello, world\n") // 컴파일 타임 에러.
+fmt.Fprintf(&w, "hello, world\n") // Compile-time error.
 ```
 
-단 하나의 예외는 인터페이스에 대한 포인터를 포함하여 어떤 값이라도 빈 인터페이스 타입(`interface{}`)의 변수에 할당될 수 있다는 점입니다.
-그럼에도 불구하고, 값이 인터페이스에 대한 포인터라면 이는 거의 확실히 실수이며, 그 결과는 혼란스러울 수 있습니다.
+The one exception is that any value, even a pointer to an interface, can be assigned to
+a variable of empty interface type (`interface{}`).
+Even so, it's almost certainly a mistake if the value is a pointer to an interface;
+the result can be confusing.
 
-### 값에 메서드를 정의해야 할까요, 포인터에 정의해야 할까요? {#methods_on_values_or_pointers}
+### Should I define methods on values or pointers? {#methods_on_values_or_pointers}
 
-```go
-func (s *MyStruct) pointerMethod() { } // 포인터 메서드
-func (s MyStruct)  valueMethod()   { } // 값 메서드
+```
+func (s *MyStruct) pointerMethod() { } // method on pointer
+func (s MyStruct)  valueMethod()   { } // method on value
 ```
 
-포인터에 익숙하지 않은 프로그래머에게는 이 두 예제의 차이점이 혼란스러울 수 있지만, 실제 상황은 매우 간단합니다. 타입에 메서드를 정의할 때, 리시버(위 예제의 `s`)는 정확히 메서드의 인자와 동일하게 동작합니다. 따라서 리시버를 값으로 정의할지 포인터로 정의할지는, 함수 인자를 값으로 전달할지 포인터로 전달할지와 동일한 문제입니다.
+For programmers unaccustomed to pointers, the distinction between these
+two examples can be confusing, but the situation is actually very simple.
+When defining a method on a type, the receiver (`s` in the above
+examples) behaves exactly as if it were an argument to the method.
+Whether to define the receiver as a value or as a pointer is the same
+question, then, as whether a function argument should be a value or
+a pointer.
+There are several considerations.
 
-여기에는 몇 가지 고려 사항이 있습니다.
+First, and most important, does the method need to modify the
+receiver?
+If it does, the receiver *must* be a pointer.
+(Slices and maps act as references, so their story is a little
+more subtle, but for instance to change the length of a slice
+in a method the receiver must still be a pointer.)
+In the examples above, if `pointerMethod` modifies
+the fields of `s`,
+the caller will see those changes, but `valueMethod`
+is called with a copy of the caller's argument (that's the definition
+of passing a value), so changes it makes will be invisible to the caller.
 
-가장 먼저, 그리고 가장 중요한 점은 해당 메서드가 리시버(receiver)를 수정해야 하는가입니다.
-만약 그렇다면, 리시버는 *반드시* 포인터여야 합니다.
-(슬라이스와 맵은 참조처럼 동작하므로 상황이 조금 더 미묘하지만, 예를 들어 메서드 내에서 슬라이스의 길이를 변경하려면 리시버가 여전히 포인터여야 합니다.)
-위의 예시에서 `pointerMethod`가 `s`의 필드를 수정하면 호출자가 그 변경 사항을 볼 수 있지만, `valueMethod`는 호출자 인자의 복사본으로 호출되므로(이것이 값 전달의 정의입니다), 해당 메서드에서 발생시킨 변경 사항은 호출자에게 보이지 않습니다.
+By the way, in Java method receivers have always been pointers,
+although their pointer nature is somewhat disguised
+(and recent developments are bringing value receivers to Java).
+It is the value receivers in Go that are unusual.
 
-참고로, Java의 메서드 리시버(method receiver)는 항상 포인터였습니다. 비록 그 포인터로서의 성격이 어느 정도 숨겨져 있긴 하지만 말입니다 (그리고 최근의 발전으로 Java에도 값 리시버(value receiver)가 도입되고 있습니다). Go에서 특이한 점은 바로 값 리시버를 허용한다는 것입니다.
+Second is the consideration of efficiency. If the receiver is large,
+a big `struct` for instance, it may be cheaper to
+use a pointer receiver.
 
-두 번째는 효율성에 대한 고려입니다. 수신자(receiver)가 큰 경우, 예를 들어 큰 `struct`인 경우, 포인터 수신자를 사용하는 것이 더 저렴할(효율적일) 수 있습니다.
+Next is consistency. If some of the methods of the type must have
+pointer receivers, the rest should too, so the method set is
+consistent regardless of how the type is used.
+See the section on [method sets](#different_method_sets)
+for details.
 
-다음은 일관성입니다. 타입의 일부 메서드가 포인터 리시버(pointer receivers)를 가져야 한다면, 나머지 메서드들도 마찬가지로 가져야 합니다. 그래야 타입이 어떻게 사용되든 메서드 집합(method set)이 일관되게 유지됩니다.
+For types such as basic types, slices, and small `structs`,
+a value receiver is very cheap so unless the semantics of the method
+requires a pointer, a value receiver is efficient and clear.
 
-자세한 내용은 [메서드 집합](#different_method_sets) 섹션을 참조하십시오.
+### What's the difference between new and make? {#new_and_make}
 
-기본 타입, 슬라이스, 작은 `structs`와 같은 타입의 경우, 값 리시버(value receiver)는 비용이 매우 저렴하므로 메서드의 시맨틱상 포인터가 필요한 경우가 아니라면 값 리시버를 사용하는 것이 효율적이고 명확합니다.
+In short: `new` allocates memory, while `make` initializes
+the slice, map, and channel types.
 
-### new와 make의 차이점은 무엇인가요? {#new_and_make}
+See the [relevant section
+of Effective Go](/doc/effective_go.html#allocation_new) for more details.
 
-요약하자면: `new`는 메모리를 할당하는 반면, `make`는 slice, map, channel 타입을 초기화합니다.
+### What is the size of an `int` on a 64 bit machine? {#q_int_sizes}
 
-더 자세한 내용은 [Effective Go의 관련 섹션](/doc/effective_go.html#allocation_new)을 참조하십시오.
+The sizes of `int` and `uint` are implementation-specific
+but the same as each other on a given platform.
+For portability, code that relies on a particular
+size of value should use an explicitly sized type, like `int64`.
+On 32-bit machines the compilers use 32-bit integers by default,
+while on 64-bit machines integers have 64 bits.
+(Historically, this was not always true.)
 
-### 64비트 머신에서 `int`의 크기는 얼마인가요? {#q_int_sizes}
-
-`int`와 `uint`의 크기는 구현마다 다르지만, 주어진 플랫폼에서는 서로 동일합니다.
-이식성을 위해 특정 값의 크기에 의존하는 코드는 `int64`와 같이 크기가 명시된 타입을 사용해야 합니다.
-32비트 머신에서 컴파일러는 기본적으로 32비트 정수를 사용하며, 64비트 머신에서 정수는 64비트를 가집니다.
-(역사적으로 항상 그랬던 것은 아닙니다.)
-
-반면에, 부동 소수점 스칼라와 복소수 타입은 항상 크기가 지정되어 있습니다(`float`나 `complex` 기본 타입은 존재하지 않습니다). 이는 프로그래머가 부동 소수점 숫자를 사용할 때 정밀도에 유의해야 하기 때문입니다.
-(타입이 지정되지 않은) 부동 소수점 상수에 사용되는 기본 타입은 `float64`입니다.
-따라서 `foo` `:=` `3.0`은 `float64` 타입의 변수 `foo`를 선언합니다.
-(타입이 지정되지 않은) 상수로 초기화되는 `float32` 변수의 경우, 변수 선언 시 변수 타입을 명시적으로 지정해야 합니다.
+On the other hand, floating-point scalars and complex
+types are always sized (there are no `float` or `complex` basic types),
+because programmers should be aware of precision when using floating-point numbers.
+The default type used for an (untyped) floating-point constant is `float64`.
+Thus `foo` `:=` `3.0` declares a variable `foo`
+of type `float64`.
+For a `float32` variable initialized by an (untyped) constant, the variable type
+must be specified explicitly in the variable declaration:
 
 ```
 var foo float32 = 3.0
 ```
 
-또는 `foo := float32(3.0)`와 같이 변환을 통해 상수에 타입을 지정해야 합니다.
+Alternatively, the constant must be given a type with a conversion as in
+`foo := float32(3.0)`.
 
-### 변수가 힙(heap)에 할당되었는지 스택(stack)에 할당되었는지 어떻게 알 수 있나요? {#stack_or_heap}
+### How do I know whether a variable is allocated on the heap or the stack? {#stack_or_heap}
 
-정확성 관점에서는 이를 알 필요가 없습니다.
-Go의 각 변수는 해당 변수를 참조하는 곳이 있는 한 계속 존재합니다.
-구현체에 의해 선택된 저장 위치는 언어의 의미론(semantics)과 무관합니다.
+From a correctness standpoint, you don't need to know.
+Each variable in Go exists as long as there are references to it.
+The storage location chosen by the implementation is irrelevant to the
+semantics of the language.
 
-저장 위치는 효율적인 프로그램을 작성하는 데 영향을 미칩니다.
-가능한 경우, Go 컴파일러는 함수 내의 지역 변수를 해당 함수의 스택 프레임(stack frame)에 할당합니다. 하지만 컴파일러가 함수가 반환된 후에도 해당 변수가 참조되지 않는다는 것을 증명할 수 없다면, 댕글링 포인터(dangling pointer) 오류를 방지하기 위해 해당 변수를 가비지 컬렉션이 수행되는 힙(heap)에 할당해야 합니다.
-또한, 지역 변수의 크기가 매우 큰 경우 스택보다는 힙에 저장하는 것이 더 합리적일 수 있습니다.
+The storage location does have an effect on writing efficient programs.
+When possible, the Go compilers will allocate variables that are
+local to a function in that function's stack frame.  However, if the
+compiler cannot prove that the variable is not referenced after the
+function returns, then the compiler must allocate the variable on the
+garbage-collected heap to avoid dangling pointer errors.
+Also, if a local variable is very large, it might make more sense
+to store it on the heap rather than the stack.
 
-현재의 컴파일러에서는 변수의 주소가 참조되면, 해당 변수는 힙(heap)에 할당될 후보가 됩니다. 하지만 기본적인 *탈출 분석(escape analysis)*을 통해 이러한 변수들이 함수의 반환 이후까지 유지되지 않는 일부 케이스를 인식하여 스택(stack)에 배치할 수 있습니다.
+In the current compilers, if a variable has its address taken, that variable
+is a candidate for allocation on the heap. However, a basic *escape
+analysis* recognizes some cases when such variables will not
+live past the return from the function and can reside on the stack.
 
-### 왜 내 Go 프로세스는 가상 메모리를 그렇게 많이 사용하나요? {#Why_does_my_Go_process_use_so_much_virtual_memory}
+### Why does my Go process use so much virtual memory? {#Why_does_my_Go_process_use_so_much_virtual_memory}
 
-Go 메모리 할당자는 할당을 위한 arena로 가상 메모리의 큰 영역을 예약합니다. 이 가상 메모리는 특정 Go 프로세스에 로컬로 할당되며, 이 예약이 다른 프로세스의 메모리를 빼앗지는 않습니다.
+The Go memory allocator reserves a large region of virtual memory as an arena
+for allocations. This virtual memory is local to the specific Go process; the
+reservation does not deprive other processes of memory.
 
-Go 프로세스에 실제로 할당된 메모리 양을 확인하려면, Unix `top` 명령어를 사용하고 `RES`(Linux) 또는 `RSIZE`(macOS) 열을 참조하십시오.
+To find the amount of actual memory allocated to a Go process, use the Unix
+`top` command and consult the `RES` (Linux) or
+`RSIZE` (macOS) columns.
 <!-- TODO(adg): find out how this works on Windows -->
 
-## 동시성 (Concurrency) {#Concurrency}
+## Concurrency {#Concurrency}
 
-### 어떤 연산이 원자적(atomic)인가요? 뮤텍스(mutex)는 어떤가요? {#What_operations_are_atomic_What_about_mutexes}
+### What operations are atomic? What about mutexes? {#What_operations_are_atomic_What_about_mutexes}
 
-Go에서 연산의 원자성에 대한 설명은 [Go Memory Model](/ref/mem) 문서에서 확인할 수 있습니다.
+A description of the atomicity of operations in Go can be found in
+the [Go Memory Model](/ref/mem) document.
 
-저수준 동기화 및 원자적 프리미티브(atomic primitives)는
-[sync](/pkg/sync) 및
+Low-level synchronization and atomic primitives are available in the
+[sync](/pkg/sync) and
 [sync/atomic](/pkg/sync/atomic)
-패키지에서 제공됩니다.
-이 패키지들은 참조 횟수(reference counts)를 증가시키거나 소규모의 상호 배제(mutual exclusion)를 보장하는 것과 같은 간단한 작업에 유용합니다.
+packages.
+These packages are good for simple tasks such as incrementing
+reference counts or guaranteeing small-scale mutual exclusion.
 
-동시성 서버 간의 조정과 같은 상위 수준의 작업의 경우, 상위 수준의 기술을 사용하면 더 깔끔한 프로그램을 만들 수 있으며, Go는 goroutine과 channel을 통해 이러한 접근 방식을 지원합니다.
+For higher-level operations, such as coordination among
+concurrent servers, higher-level techniques can lead
+to nicer programs, and Go supports this approach through
+its goroutines and channels.
+For instance, you can structure your program so that only one
+goroutine at a time is ever responsible for a particular piece of data.
+That approach is summarized by the original
+[Go proverb](https://www.youtube.com/watch?v=PAAkCSZUG1c),
 
-예를 들어, 한 번에 오직 하나의 goroutine만이 특정 데이터 조각을 책임지도록 프로그램을 구성할 수 있습니다. 이러한 접근 방식은 원래의 [Go proverb](https://www.youtube.com/watch?v=PAAkCSZUG1c)에 요약되어 있습니다.
+Do not communicate by sharing memory. Instead, share memory by communicating.
 
-메모리를 공유하여 통신하지 마십시오. 대신, 통신함으로써 메모리를 공유하십시오.
+See the [Share Memory By Communicating](/doc/codewalk/sharemem/) code walk
+and its [associated article](/blog/share-memory-by-communicating)
+for a detailed discussion of this concept.
 
-이 개념에 대한 자세한 논의는 [Share Memory By Communicating](/doc/codewalk/sharemem/) 코드 워크와 [관련 문서](/blog/share-memory-by-communicating)를 참조하세요.
+Large concurrent programs are likely to borrow from both these toolkits.
 
-대규모 동시성 프로그램들은 이 두 툴킷 모두에서 요소를 차용할 가능성이 높습니다.
+### Why doesn't my program run faster with more CPUs? {#parallel_slow}
 
-### 왜 CPU를 더 많이 사용해도 프로그램 속도가 빨라지지 않나요? {#parallel_slow}
+Whether a program runs faster with more CPUs depends on the problem
+it is solving.
+The Go language provides concurrency primitives, such as goroutines
+and channels, but concurrency only enables parallelism
+when the underlying problem is intrinsically parallel.
+Problems that are intrinsically sequential cannot be sped up by adding
+more CPUs, while those that can be broken into pieces that can
+execute in parallel can be sped up, sometimes dramatically.
 
-프로그램이 더 많은 CPU로 더 빠르게 실행되는지 여부는 해결하려는 문제에 따라 다릅니다.
-Go 언어는 goroutine과 channel 같은 동시성 프리미티브(concurrency primitives)를 제공하지만, 동시성은 기본적으로 문제가 본질적으로 병렬적일 때만 병렬성을 가능하게 합니다.
-본질적으로 순차적인 문제는 CPU를 더 추가한다고 해서 빨라지지 않지만, 병렬로 실행 가능한 조각으로 나눌 수 있는 문제는 때때로 극적으로 속도를 높일 수 있습니다.
+Sometimes adding more CPUs can slow a program down.
+In practical terms, programs that spend more time
+synchronizing or communicating than doing useful computation
+may experience performance degradation when using
+multiple OS threads.
+This is because passing data between threads involves switching
+contexts, which has significant cost, and that cost can increase
+with more CPUs.
+For instance, the [prime sieve example](/ref/spec#An_example_package)
+from the Go specification has no significant parallelism although it launches many
+goroutines; increasing the number of threads (CPUs) is more likely to slow it down than
+to speed it up.
 
-때로는 CPU를 더 추가하는 것이 프로그램의 속도를 더 느리게 만들 수 있습니다.
-실질적으로, 유용한 계산을 수행하는 시간보다 동기화나 통신에 더 많은 시간을 소비하는 프로그램은 여러 OS 스레드를 사용할 때 성능 저하를 겪을 수 있습니다.
-이는 스레드 간에 데이터를 전달할 때 컨텍스트 스위칭(switching contexts)이 발생하며, 여기에는 상당한 비용이 따르고 CPU가 많아질수록 그 비용이 증가할 수 있기 때문입니다.
-예를 들어, Go 명세의 [prime sieve 예제](/ref/spec#An_example_package)는 많은 goroutine을 실행하지만 실질적인 병렬성은 없습니다. 이 경우 스레드(CPU) 수를 늘리는 것은 속도를 높이기보다 오히려 느리게 만들 가능성이 더 큽니다.
+For more detail on this topic see the talk entitled
+[Concurrency is not Parallelism](/blog/concurrency-is-not-parallelism).
 
-이 주제에 대한 더 자세한 내용은 [Concurrency is not Parallelism](/blog/concurrency-is-not-parallelism)이라는 제목의 강연을 참조하세요.
+### How can I control the number of CPUs? {#number_cpus}
 
-### CPU 수를 어떻게 제어할 수 있나요? {#number_cpus}
+The number of CPUs available simultaneously to executing goroutines is
+controlled by the `GOMAXPROCS` shell environment variable,
+whose default value is the number of CPU cores available.
+Programs with the potential for parallel execution should therefore
+achieve it by default on a multiple-CPU machine.
+To change the number of parallel CPUs to use,
+set the environment variable or use the similarly-named
+[function](/pkg/runtime/#GOMAXPROCS)
+of the runtime package to configure the
+run-time support to utilize a different number of threads.
+Setting it to 1 eliminates the possibility of true parallelism,
+forcing independent goroutines to take turns executing.
 
-실행 중인 goroutine들이 동시에 사용할 수 있는 CPU의 수는 `GOMAXPROCS` 셸 환경 변수에 의해 제어되며, 기본값은 사용 가능한 CPU 코어 수입니다. 따라서 병렬 실행 가능성이 있는 프로그램은 멀티 CPU 머신에서 기본적으로 이를 달성할 수 있습니다. 사용할 병렬 CPU 수를 변경하려면 환경 변수를 설정하거나, runtime 패키지의 동일한 이름의 [함수](/pkg/runtime/#GOMAXPROCS)를 사용하여 런타임 지원이 다른 수의 스레드를 활용하도록 구성하십시오. 이 값을 1로 설정하면 진정한 병렬 처리의 가능성이 제거되어, 독립적인 goroutine들이 순차적으로 실행되도록 강제합니다.
+The runtime can allocate more threads than the value
+of `GOMAXPROCS` to service multiple outstanding
+I/O requests.
+`GOMAXPROCS` only affects how many goroutines
+can actually execute at once; arbitrarily more may be blocked
+in system calls.
 
-런타임은 여러 개의 대기 중인 I/O 요청을 처리하기 위해 `GOMAXPROCS` 값보다 더 많은 스레드를 할당할 수 있습니다.
-`GOMAXPROCS`는 실제로 동시에 실행될 수 있는 고루틴(goroutine)의 수에만 영향을 미치며, 그보다 훨씬 많은 수의 고루틴이 시스템 콜(system call)에서 블록(blocked)될 수 있습니다.
+Go's goroutine scheduler does well at balancing goroutines
+and threads, and can even preempt execution of a goroutine
+to make sure others on the same thread are not starved.
+However, it is not perfect.
+If you see performance issues,
+setting `GOMAXPROCS` on a per-application basis may help.
 
-Go의 goroutine 스케줄러는 goroutine과 스레드 간의 균형을 잘 맞추며, 동일한 스레드에 있는 다른 goroutine들이 기아 상태(starvation)에 빠지지 않도록 goroutine의 실행을 선점(preempt)할 수도 있습니다.
-하지만 이것이 완벽한 것은 아닙니다.
-성능 문제가 발생한다면, 애플리케이션별로 `GOMAXPROCS`를 설정하는 것이 도움이 될 수 있습니다.
+### Why is there no goroutine ID? {#no_goroutine_id}
 
-### 왜 goroutine ID가 없나요? {#no_goroutine_id}
+Goroutines do not have names; they are just anonymous workers.
+They expose no unique identifier, name, or data structure to the programmer.
+Some people are surprised by this, expecting the `go`
+statement to return some item that can be used to access and control
+the goroutine later.
 
-Goroutine에는 이름이 없으며, 단지 익명의 작업자일 뿐입니다.
-프로그래머에게 고유 식별자, 이름 또는 데이터 구조를 노출하지 않습니다.
-일부 사람들은 `go` 문이 나중에 goroutine에 접근하고 제어하는 데 사용할 수 있는 어떤 항목을 반환할 것이라고 기대하며 이 점에 놀라곤 합니다.
+The fundamental reason goroutines are anonymous is so that
+the full Go language is available when programming concurrent code.
+By contrast, the usage patterns that develop when threads and goroutines are
+named can restrict what a library using them can do.
 
-고루틴(goroutine)이 익명인 근본적인 이유는 동시성 코드를 프로그래밍할 때 Go 언어의 모든 기능을 사용할 수 있도록 하기 위함입니다. 이와 대조적으로, 스레드(thread)나 고루틴에 이름이 지정되었을 때 발생하는 사용 패턴은 이를 사용하는 라이브러리가 수행할 수 있는 작업을 제한할 수 있습니다.
+Here is an illustration of the difficulties.
+Once one names a goroutine and constructs a model around
+it, it becomes special, and one is tempted to associate all computation
+with that goroutine, ignoring the possibility
+of using multiple, possibly shared goroutines for the processing.
+If the `net/http` package associated per-request
+state with a goroutine,
+clients would be unable to use more goroutines
+when serving a request.
 
-여기에 그 어려움에 대한 예시가 있습니다.
-일단 고루틴(goroutine)에 이름을 붙이고 이를 중심으로 모델을 구축하면, 해당 고루틴은 특별한 존재가 됩니다. 그러면 처리를 위해 여러 개의 고루틴을 사용하거나 공유 고루틴을 사용할 가능성을 무시한 채, 모든 계산을 해당 고루틴과 연관시키려는 유혹에 빠지게 됩니다.
-만약 `net/http` 패키지가 요청당 상태를 특정 고루틴과 연관시켰다면, 클라이언트는 요청을 처리할 때 더 많은 고루틴을 사용할 수 없었을 것입니다.
+Moreover, experience with libraries such as those for graphics systems
+that require all processing to occur on the "main thread"
+has shown how awkward and limiting the approach can be when
+deployed in a concurrent language.
+The very existence of a special thread or goroutine forces
+the programmer to distort the program to avoid crashes
+and other problems caused by inadvertently operating
+on the wrong thread.
 
-게다가, 모든 처리가 "메인 스레드"에서 발생해야 하는 그래픽 시스템 라이브러리와 같은 라이브러리를 사용해 본 경험은, 이러한 방식이 동시성 언어에 적용되었을 때 얼마나 어색하고 제한적일 수 있는지를 보여주었습니다.
-특정 스레드나 goroutine이 존재한다는 사실만으로도, 프로그래머는 실수로 잘못된 스레드에서 작업을 수행하여 발생하는 충돌 및 기타 문제들을 피하기 위해 프로그램의 구조를 왜곡해야만 합니다.
+For those cases where a particular goroutine is truly special,
+the language provides features such as channels that can be
+used in flexible ways to interact with it.
 
-특정 goroutine이 정말로 특별한 경우를 위해, 언어는 해당 goroutine과 유연한 방식으로 상호작용하는 데 사용할 수 있는 채널(channels)과 같은 기능들을 제공합니다.
+## Functions and Methods {#Functions_methods}
 
-## 함수 및 메서드 {#Functions_methods}
+### Why do T and *T have different method sets? {#different_method_sets}
 
-### T와 *T의 메서드 집합(method sets)이 왜 다른가요? {#different_method_sets}
+As the [Go specification](/ref/spec#Types) says,
+the method set of a type `T` consists of all methods
+with receiver type `T`,
+while that of the corresponding pointer
+type `*T` consists of all methods with receiver `*T` or
+`T`.
+That means the method set of `*T`
+includes that of `T`,
+but not the reverse.
 
-[Go 명세](/ref/spec#Types)에 따르면,
-타입 `T`의 메서드 집합(method set)은 리시버 타입이 `T`인 모든 메서드로 구성되는 반면,
-그에 대응하는 포인터 타입 `*T`의 메서드 집합은 리시버가 `*T` 또는 `T`인 모든 메서드로 구성됩니다.
-이는 `*T`의 메서드 집합이 `T`의 메서드 집합을 포함하지만,
-그 반대는 성립하지 않음을 의미합니다.
+This distinction arises because
+if an interface value contains a pointer `*T`,
+a method call can obtain a value by dereferencing the pointer,
+but if an interface value contains a value `T`,
+there is no safe way for a method call to obtain a pointer.
+(Doing so would allow a method to modify the contents of
+the value inside the interface, which is not permitted by
+the language specification.)
 
-이러한 구분은 다음과 같은 이유로 발생합니다.
-인터페이스 값이 포인터 `*T`를 포함하고 있다면,
-메서드 호출 시 포인터를 역참조하여 값을 얻을 수 있습니다.
-하지만 인터페이스 값이 값 `T`를 포함하고 있다면,
-메서드 호출이 포인터를 얻을 수 있는 안전한 방법이 없습니다.
-(그렇게 하게 되면 메서드가 인터페이스 내부 값의 내용을 수정할 수 있게 되며, 이는 언어 명세에서 허용되지 않습니다.)
+Even in cases where the compiler could take the address of a value
+to pass to the method, if the method modifies the value the changes
+will be lost in the caller.
 
-컴파일러가 메서드에 전달하기 위해 값의 주소를 취할 수 있는 경우라도, 메서드가 해당 값을 수정하면 호출자(caller)에서는 그 변경 사항이 유지되지 않고 사라집니다.
-
-예를 들어, 아래의 코드가 유효하다고 가정한다면:
+As an example, if the code below were valid:
 
 ```
 var buf bytes.Buffer
 io.Copy(buf, os.Stdin)
 ```
 
-이는 `buf` 자체가 아니라 `buf`의 *복사본*에 표준 입력을 복사하게 됩니다.
-이는 거의 항상 의도하지 않은 동작이며, 따라서 언어 차원에서 금지되어 있습니다.
+it would copy standard input into a *copy* of `buf`,
+not into `buf` itself.
+This is almost never the desired behavior and is therefore disallowed by the language.
 
-### 고루틴으로 실행되는 클로저에는 어떤 일이 발생하나요? {#closures_and_goroutines}
+### What happens with closures running as goroutines? {#closures_and_goroutines}
 
-루프 변수가 작동하는 방식 때문에, Go 버전 1.22 이전에는(업데이트 내용은 이 섹션의 끝부분을 참조하십시오) 동시성과 함께 클로저를 사용할 때 일부 혼란이 발생할 수 있었습니다. 다음 프로그램을 살펴보십시오:
+Due to the way loop variables work, before Go version 1.22 (see
+the end of this section for an update),
+some confusion could arise when using closures with concurrency.
+Consider the following program:
 
+{{raw `
 <pre>
 func main() {
-    done := make(chan bool)</pre>
+    done := make(chan bool)
 
-```go
-values := []string{"a", "b", "c"}
+    values := []string{"a", "b", "c"}
     for _, v := range values {
         go func() {
             fmt.Println(v)
-            done <- true
+            done &lt;- true
         }()
     }
-```
 
-// 모든 고루틴이 종료될 때까지 기다린 후 종료합니다.
+    // wait for all goroutines to complete before exiting
     for _ = range values {
         &lt;-done
     }
@@ -898,12 +1462,18 @@ values := []string{"a", "b", "c"}
 </pre>
 `}}
 
-출력 결과가 `a, b, c`일 것이라고 잘못 예상할 수 있습니다.
-하지만 아마도 `c, c, c`가 출력되는 것을 보게 될 것입니다. 이는 루프의 각 반복에서 변수 `v`의 동일한 인스턴스를 사용하므로, 각 클로저가 해당 단일 변수를 공유하기 때문입니다. 클로저가 실행될 때 `fmt.Println`이 호출되는 시점의 `v` 값을 출력하지만, 고루틴이 시작된 이후에 `v` 값이 변경되었을 수 있습니다.
-이러한 문제와 다른 잠재적 문제들을 사전에 감지하려면 [`go vet`](/cmd/go/#hdr-Run_go_tool_vet_on_packages)을 실행하십시오.
+One might mistakenly expect to see `a, b, c` as the output.
+What you'll probably see instead is `c, c, c`.  This is because
+each iteration of the loop uses the same instance of the variable `v`, so
+each closure shares that single variable. When the closure runs, it prints the
+value of `v` at the time `fmt.Println` is executed,
+but `v` may have been modified since the goroutine was launched.
+To help detect this and other problems before they happen, run
+[`go vet`](/cmd/go/#hdr-Run_go_tool_vet_on_packages).
 
-`v`의 현재 값을 각 클로저가 실행될 때 바인딩하려면, 내부 루프를 수정하여 매 반복마다 새로운 변수를 생성해야 합니다.
-한 가지 방법은 변수를 클로저의 인자로 전달하는 것입니다:
+To bind the current value of `v` to each closure as it is launched, one
+must modify the inner loop to create a new variable each iteration.
+One way is to pass the variable as an argument to the closure:
 
 {{raw `
 <pre>
@@ -916,14 +1486,17 @@ values := []string{"a", "b", "c"}
 </pre>
 `}}
 
-이 예제에서 `v`의 값은 익명 함수로 전달되는 인자로 사용됩니다. 그 값은 함수 내부에서 변수 `u`를 통해 접근할 수 있습니다.
+In this example, the value of `v` is passed as an argument to the
+anonymous function. That value is then accessible inside the function as
+the variable `u`.
 
-더욱 간단한 방법은 새로운 변수를 생성하는 것입니다. 선언 스타일이 다소 이상해 보일 수 있지만 Go에서는 문제없이 작동합니다.
+Even easier is just to create a new variable, using a declaration style that may
+seem odd but works fine in Go:
 
 {{raw `
 <pre>
     for _, v := range values {
-        <b>v := v</b> // 새로운 'v'를 생성합니다.
+        <b>v := v</b> // create a new 'v'.
         go func() {
             fmt.Println(<b>v</b>)
             done &lt;- true
@@ -932,14 +1505,18 @@ values := []string{"a", "b", "c"}
 </pre>
 `}}
 
-각 반복마다 새로운 변수를 정의하지 않는 이러한 언어의 동작은 나중에 실수로 간주되었으며, [Go 1.22](/wiki/LoopvarExperiment)에서 해결되었습니다. Go 1.22에서는 실제로 각 반복마다 새로운 변수를 생성하여 이 문제를 제거했습니다.
+This behavior of the language, not defining a new variable for
+each iteration, was considered a mistake in retrospect,
+and has been addressed in [Go 1.22](/wiki/LoopvarExperiment), which
+does indeed create a new variable for each iteration, eliminating this issue.
 
-## 제어 흐름 {#Control_flow}
+## Control Flow {#Control_flow}
 
-### Go에는 왜 `?:` 연산자가 없나요? {#Does_Go_have_a_ternary_form}
+### Why does Go not have the `?:` operator? {#Does_Go_have_a_ternary_form}
 
-Go에는 삼항 연산자가 없습니다.
-대신 다음과 같은 방법을 사용하여 동일한 결과를 얻을 수 있습니다:
+There is no ternary testing operation in Go.
+You may use the following to achieve the same
+result:
 
 ```
 if expr {
@@ -949,68 +1526,118 @@ if expr {
 }
 ```
 
-Go에 `?:` 연산자가 없는 이유는 언어 설계자들이 이 연산자가 이해하기 힘들 정도로 복잡한 표현식을 만드는 데 너무 자주 사용되는 것을 보았기 때문입니다. `if-else` 형태는 비록 더 길지만, 의심할 여지 없이 더 명확합니다. 언어에는 단 하나의 조건부 제어 흐름 구조만 있으면 충분합니다.
+The reason `?:` is absent from Go is that the language's designers
+had seen the operation used too often to create impenetrably complex expressions.
+The `if-else` form, although longer,
+is unquestionably clearer.
+A language needs only one conditional control flow construct.
 
-## 타입 파라미터 (Type Parameters) {#Type_Parameters}
+## Type Parameters {#Type_Parameters}
 
-### Go에 타입 파라미터가 있는 이유는 무엇인가요? {#why_generics}
+### Why does Go have type parameters? {#why_generics}
 
-타입 파라미터는 제네릭 프로그래밍(generic programming)이라 알려진 기법을 가능하게 합니다. 제네릭 프로그래밍에서는 함수와 데이터 구조를 정의할 때 타입을 미리 정하지 않고, 나중에 해당 함수와 데이터 구조를 사용할 때 타입을 지정합니다. 예를 들어, 정렬 가능한 모든 타입에 대해 두 값 중 최솟값을 반환하는 함수를 작성할 때, 가능한 모든 타입별로 별도의 함수를 작성할 필요 없이 하나의 함수만으로 구현할 수 있게 해줍니다.
+Type parameters permit what is known as generic programming, in which
+functions and data structures are defined in terms of types that are
+specified later, when those functions and data structures are used.
+For example, they make it possible to write a function that returns
+the minimum of two values of any ordered type, without having to write
+a separate version for each possible type.
+For a more in-depth explanation with examples see the blog post
+[Why Generics?](/blog/why-generics).
 
-예제와 함께 더 자세한 설명을 확인하시려면 블로그 포스트 [Why Generics?](/blog/why-generics)를 참조하세요.
+### How are generics implemented in Go? {#generics_implementation}
 
-### Go에서 제네릭은 어떻게 구현되나요? {#generics_implementation}
+The compiler can choose whether to compile each instantiation
+separately or whether to compile similar instantiations as
+a single implementation.
+The single implementation approach is similar to a function with an
+interface parameter.
+Different compilers will make different choices for different cases.
+The standard Go compiler ordinarily emits a single instantiation
+for every type argument with the same shape, where the shape is
+determined by properties of the type such as the size and the location
+of pointers that it contains.
+Future releases may experiment with the tradeoff between compile
+time, run-time efficiency, and code size.
 
-컴파일러는 각 인스턴스화를 개별적으로 컴파일할지, 아니면 유사한 인스턴스화들을 하나의 구현체로 컴파일할지를 선택할 수 있습니다.
-단일 구현체 방식은 인터페이스 매개변수를 가진 함수와 유사합니다.
-컴파일러마다 케이스별로 서로 다른 선택을 내릴 것입니다.
-표준 Go 컴파일러는 일반적으로 동일한 shape를 가진 모든 타입 인자(type argument)에 대해 단일 인스턴스화를 생성하며, 여기서 shape는 타입이 포함하는 포인터의 크기 및 위치와 같은 타입의 속성에 의해 결정됩니다.
-향후 릴리스에서는 컴파일 시간, 런타임 효율성, 그리고 코드 크기 사이의 트레이드오프(tradeoff)에 대한 실험이 이루어질 수 있습니다.
+### How do generics in Go compare to generics in other languages? {#generics_comparison}
 
-### Go의 제네릭은 다른 언어의 제네릭과 어떻게 다른가요? {#generics_comparison}
-
-모든 언어에서의 기본 기능은 비슷합니다. 나중에 정의될 타입을 사용하여 타입과 함수를 작성하는 것이 가능합니다.
-그럼에도 불구하고, 몇 가지 차이점이 있습니다.
+The basic functionality in all languages is similar: it is possible to
+write types and functions using types that are specified later.
+That said, there are some differences.
 
 * Java
 
-Java에서는 컴파일러가 컴파일 타임에 제네릭 타입을 확인하지만, 런타임에는 해당 타입을 제거합니다.
-	이를 [type erasure](https://en.wikipedia.org/wiki/Generics_in_Java#Problems_with_type_erasure)(타입 소거)라고 합니다.
-	예를 들어, 컴파일 타임에 `List<Integer>`로 알려진 Java 타입은 런타임에 제네릭이 아닌 타입인 `List`가 됩니다.
-	이는 예를 들어, Java 방식의 타입 리플렉션을 사용할 때 `List<Integer>` 타입의 값과 `List<Float>` 타입의 값을 구분하는 것이 불가능함을 의미합니다.
-	Go에서는 제네릭 타입에 대한 리플렉션 정보에 컴파일 타임의 전체 타입 정보가 포함됩니다.
+	In Java, the compiler checks generic types at compile time but removes
+	the types at run time.
+	This is known as
+	[type erasure](https://en.wikipedia.org/wiki/Generics_in_Java#Problems_with_type_erasure).
+	For example, a Java type known as `List<Integer>` at
+	compile time will become the non-generic type `List` at run
+	time.
+	This means, for example, that when using the Java form of type
+	reflection it is impossible to distinguish a value of
+	type `List<Integer>` from a value of
+	type `List<Float>`.
+	In Go the reflection information for a generic type includes the full
+	compile-time type information.
 
-Java는 제네릭 공변성(covariance)과 반공변성(contravariance)을 구현하기 위해 {{raw `<code>List&lt;? extends Number&gt;</code>`}} 또는 {{raw `<code>List<? super Number></code>`}}와 같은 타입 와일드카드를 사용합니다.
-Go에는 이러한 개념이 없으며, 덕분에 Go의 제네릭 타입은 훨씬 더 단순합니다.
+	Java uses type wildcards such as {{raw `<code>List&lt;? extends Number&gt;</code>`}}
+	or {{raw `<code>List<? super Number></code>`}} to implement generic
+	covariance and contravariance.
+	Go does not have these concepts, which makes generic types in Go much
+	simpler.
 
 * C++
 
-전통적으로 C++ 템플릿은 타입 인자에 대해 어떠한 제약 조건도 강제하지 않지만, C++20부터는 [concepts](https://en.wikipedia.org/wiki/Concepts_(C%2B%2B))를 통해 선택적인 제약 조건을 지원합니다.
-반면 Go에서는 모든 타입 파라미터에 대해 제약 조건이 필수적입니다.
-C++20의 concepts는 타입 인자와 함께 컴파일되어야 하는 작은 코드 조각으로 표현됩니다.
-Go의 제약 조건은 허용되는 모든 타입 인자의 집합을 정의하는 인터페이스 타입입니다.
+	Traditionally C++ templates do not enforce any constraints on type
+	arguments, although C++20 supports optional constraints via
+	[concepts](https://en.wikipedia.org/wiki/Concepts_(C%2B%2B)).
+	In Go constraints are mandatory for all type parameters.
+	C++20 concepts are expressed as small code fragments that must compile
+	with the type arguments.
+	Go constraints are interface types that define the set of all
+	permitted type arguments.
 
-C++는 템플릿 메타프로그래밍을 지원하지만, Go는 지원하지 않습니다.
-실제로 모든 C++ 컴파일러는 각 템플릿이 인스턴스화되는 시점에 이를 컴파일합니다. 위에서 언급했듯이, Go는 서로 다른 인스턴스화에 대해 서로 다른 접근 방식을 사용할 수 있으며 실제로 그렇게 하고 있습니다.
+	C++ supports template metaprogramming; Go does not.
+	In practice, all C++ compilers compile each template at the point
+	where it is instantiated; as noted above, Go can and does use
+	different approaches for different instantiations.
 
 * Rust
 
-제약 조건(constraints)의 Rust 버전은 트레이트 바운드(trait bounds)로 알려져 있습니다.
-Rust에서 트레이트 바운드와 타입 간의 연관 관계는 트레이트 바운드를 정의하는 크레이트(crate)나 타입을 정의하는 크레이트 중 한 곳에서 명시적으로 정의되어야 합니다.
-반면 Go의 타입 인자(type arguments)는 Go 타입이 인터페이스 타입을 암시적으로 구현하는 것과 마찬가지로, 제약 조건을 암시적으로 충족합니다.
-Rust 표준 라이브러리는 비교나 덧셈과 같은 연산을 위한 표준 트레이트를 정의하지만, Go 표준 라이브러리는 이를 정의하지 않습니다. 이러한 연산들은 인터페이스 타입을 통해 사용자 코드에서 표현될 수 있기 때문입니다. 유일한 예외는 Go의 사전 정의된 인터페이스인 `comparable`로, 이는 타입 시스템으로 표현할 수 없는 속성을 캡처합니다.
+	The Rust version of constraints is known as trait bounds.
+	In Rust the association between a trait bound and a type must be
+	defined explicitly, either in the crate that defines the trait bound
+	or the crate that defines the type.
+	In Go type arguments implicitly satisfy constraints, just as Go types
+	implicitly implement interface types.
+	The Rust standard library defines standard traits for operations such as
+	comparison or addition; the Go standard library does not, as these can
+	be expressed in user code via interface types. The one exception
+	is Go's `comparable` predefined interface, which
+	captures a property not expressible in the type system.
 
 * Python
 
-Python은 정적 타입 언어가 아니므로, 모든 Python 함수는 기본적으로 항상 제네릭(generic)이라고 합리적으로 말할 수 있습니다. 즉, 어떤 타입의 값으로도 항상 호출할 수 있으며, 모든 타입 오류는 런타임에 감지됩니다.
+	Python is not a statically typed language, so one can reasonably say
+	that all Python functions are always generic by default: they can
+	always be called with values of any type, and any type errors are
+	detected at run time.
 
-### Go는 왜 타입 파라미터 목록에 대괄호를 사용하나요? {#generic_brackets}
+### Why does Go use square brackets for type parameter lists? {#generic_brackets}
 
-Java와 C++는 Java의 `List<Integer>`나 C++의 `std::vector<int>`처럼 타입 파라미터 목록에 앵글 브래킷(angle brackets)을 사용합니다.
-하지만 Go에서는 이 옵션을 사용할 수 없었는데, 이는 구문론적인 문제를 일으키기 때문입니다. 예를 들어 함수 내에서 `v := F<T>`와 같은 코드를 파싱할 때, ` < ` 기호를 만나는 시점에서 이것이 인스턴스화인지 아니면 ` < ` 연산자를 사용하는 표현식인지 모호해집니다.
-이 문제는 타입 정보 없이는 해결하기가 매우 어렵습니다.
+Java and C++ use angle brackets for type parameter lists, as in
+Java `List<Integer>` and C++
+`std::vector<int>`.
+However, that option was not available for Go, because it leads to
+a syntactic problem: when parsing code within a function, such
+as `v := F<T>`, at the point of seeing
+the {{raw `<code>&lt;</code>`}} it's ambiguous whether we are seeing an
+instantiation or an expression using the {{raw `<code>&lt;</code>`}} operator.
+This is very difficult to resolve without type information.
 
-예를 들어, 다음과 같은 문장을 생각해 보겠습니다.
+For example, consider a statement like
 
 {{raw `
 <pre>
@@ -1018,23 +1645,34 @@ Java와 C++는 Java의 `List<Integer>`나 C++의 `std::vector<int>`처럼 타입
 </pre>
 `}}
 
-타입 정보가 없다면, 할당문의 우변이 표현식의 쌍({{raw `<code>w &lt; x</code>`}} 및 {{raw `<code>y &gt; z</code>`}})인지, 아니면 두 개의 결과 값을 반환하는 제네릭 함수 인스턴스화 및 호출({{raw `<code>(w&lt;x, y&gt;)(z)</code>`}})인지 결정하는 것이 불가능합니다.
+Without type information, it is impossible to decide whether the right
+hand side of the assignment is a pair of expressions ({{raw `<code>w &lt; x</code>`}}
+and {{raw `<code>y &gt; z</code>`}}), or whether it is a generic function
+instantiation and call that returns two result values
+({{raw `<code>(w&lt;x, y&gt;)(z)</code>`}}).
 
-Go의 핵심 설계 결정 중 하나는 타입 정보 없이도 파싱이 가능해야 한다는 것이며, 제네릭에 앵글 브래킷(`< >`)을 사용할 경우 이는 불가능해 보입니다.
+It is a key design decision of Go that parsing be possible without
+type information, which seems impossible when using angle brackets for
+generics.
 
-Go가 대괄호를 사용하는 것이 유일하거나 독창적인 것은 아닙니다. Scala와 같은 다른 언어들도 제네릭 코드를 위해 대괄호를 사용합니다.
+Go is not unique or original in using square brackets; there are other
+languages such as Scala that also use square brackets for generic
+code.
 
-### Go는 왜 타입 매개변수가 있는 메서드(generic methods)를 지원하지 않나요? {#generic_methods}
+### Why does Go not support methods with type parameters? {#generic_methods}
 
-Go는 제네릭 타입이 메서드를 갖는 것을 허용하지만, 리시버를 제외하고 해당 메서드의 인자에는 매개변수화된 타입(parameterized types)을 사용할 수 없습니다.
+Go permits a generic type to have methods, but, other than the
+receiver, the arguments to those methods cannot use parameterized
+types.
+We do not anticipate that Go will ever add generic methods.
 
-우리는 Go에 제네릭 메서드가 추가될 것으로 예상하지 않습니다.
+The problem is how to implement them.
+Specifically, consider checking whether a value in an
+interface implements another interface with additional methods.
+For example, consider this type, an empty struct with a
+generic `Nop` method that returns its argument, for any possible type:
 
-문제는 이를 어떻게 구현하느냐 하는 것입니다.
-구체적으로, 인터페이스의 값이 추가 메서드가 포함된 또 다른 인터페이스를 구현하는지 확인하는 경우를 생각해 보십시오.
-예를 들어, 가능한 모든 타입에 대해 인자를 그대로 반환하는 제네릭 `Nop` 메서드를 가진 빈 구조체 타입인 다음을 고려해 보겠습니다.
-
-```go
+```
 type Empty struct{}
 
 func (Empty) Nop[T any](x T) T {
@@ -1042,9 +1680,10 @@ func (Empty) Nop[T any](x T) T {
 }
 ```
 
-이제 `Empty` 값이 `any`에 저장되어, 수행 가능한 동작을 확인하는 다른 코드로 전달된다고 가정해 보겠습니다.
+Now suppose an `Empty` value is stored in an `any` and passed
+to other code that checks what it can do:
 
-```go
+```
 func TryNops(x any) {
 	if x, ok := x.(interface{ Nop(string) string }); ok {
 		fmt.Printf("string %s\n", x.Nop("hello"))
@@ -1059,46 +1698,70 @@ func TryNops(x any) {
 }
 ```
 
-그 코드에서 `x`가 `Empty`일 때 어떻게 작동하나요?
-`x`가 다른 모든 타입의 다른 형태들과 더불어, 세 가지 테스트를 모두 만족해야 하는 것으로 보입니다.
+How does that code work if `x` is an `Empty`?
+It seems that `x` must satisfy all three tests,
+along with any other form with any other type.
 
-해당 메서드들이 호출될 때 어떤 코드가 실행될까요?
-제네릭이 아닌 메서드의 경우, 컴파일러는 모든 메서드 구현에 대한 코드를 생성하여 최종 프로그램에 연결합니다.
-하지만 제네릭 메서드의 경우, 메서드 구현이 무한히 많을 수 있으므로 다른 전략이 필요합니다.
+What code runs when those methods are called?
+For non-generic methods, the compiler generates the code
+for all method implementations and links them into the final program.
+But for generic methods, there can be an infinite number of method
+implementations, so a different strategy is needed.
 
-네 가지 선택지가 있습니다:
+There are four choices:
 
-1. 링크 시점에 가능한 모든 동적 인터페이스 체크(dynamic interface checks) 목록을 작성하고, 이를 충족하지만 컴파일된 메서드가 누락된 타입들을 찾은 다음, 컴파일러를 다시 호출하여 해당 메서드들을 추가합니다.
+ 1. At link time, make a list of all the possible dynamic interface checks,
+    and then look for types that would satisfy them but are missing
+    compiled methods, and then reinvoke the compiler to add those methods.
 
-이렇게 하면 링크 후 중단하고 일부 컴파일을 반복해야 하므로 빌드 속도가 상당히 느려집니다. 특히 증분 빌드(incremental builds) 속도가 매우 느려질 것입니다. 더 심각한 점은 새로 컴파일된 메서드 코드 자체에 새로운 동적 인터페이스 체크(dynamic interface checks)가 포함될 수 있어, 이 과정이 계속 반복되어야 할 가능성이 있다는 것입니다. 심지어 이 과정이 결코 끝나지 않는 예시를 구성하는 것도 가능합니다.
+    This would make builds significantly slower, by needing to stop after
+    linking and repeat some compilations. It would especially slow down
+    incremental builds. Worse, it is possible that the newly compiled method
+    code would itself have new dynamic interface checks, and the process
+    would have to be repeated. Examples can be constructed where
+    the process never even finishes.
 
-2. 런타임에 필요한 메서드 코드를 컴파일하는 일종의 JIT를 구현합니다.
+ 2. Implement some kind of JIT, compiling the needed method code at runtime.
 
-Go는 순수하게 ahead-of-time 컴파일 방식이기 때문에 얻을 수 있는 단순함과 예측 가능한 성능으로부터 큰 이점을 얻습니다.
-단 하나의 언어 기능을 구현하기 위해 JIT의 복잡함을 감수하는 것은 꺼려집니다.
+    Go benefits greatly from the simplicity and predictable performance
+    of being purely ahead-of-time compiled.
+    We are reluctant to take on the complexity of a JIT just to implement
+    one language feature.
 
-3. 타입 파라미터에 대한 가능한 모든 언어 작업에 대해 함수 테이블을 사용하는 느린 폴백(slow fallback)을 각 제네릭 메서드마다 생성하도록 설정하고, 동적 테스트(dynamic tests)에 해당 폴백 구현을 사용하십시오.
+ 3. Arrange to emit a slow fallback for each generic method that uses
+    a table of functions for every possible language operation on the type parameter,
+    and then use that fallback implementation for the dynamic tests.
 
-이러한 접근 방식은 컴파일 시간에 관찰된 타입으로 매개변수화된 동일한 메서드보다, 예상치 못한 타입으로 매개변수화된 제네릭 메서드의 속도를 훨씬 느리게 만들 것입니다. 이는 성능 예측 가능성을 크게 떨어뜨릴 것입니다.
+    This approach would make a generic method parameterized by an
+    unexpected type much slower than the same method
+    parameterized by a type observed at compile time.
+    This would make performance much less predictable.
 
-4. 제네릭 메서드는 인터페이스를 충족하는 데 전혀 사용될 수 없음을 정의합니다.
+ 4. Define that generic methods cannot be used to satisfy interfaces at all.
 
-인터페이스는 Go 프로그래밍의 필수적인 부분입니다.
-제네릭 메서드가 인터페이스를 만족시키는 것을 허용하지 않는 것은 설계 관점에서 받아들일 수 없습니다.
+    Interfaces are an essential part of programming in Go.
+    Disallowing generic methods from satisfying interfaces is unacceptable
+    from a design point of view.
 
-이 선택지들 중 어느 것도 적절하지 않으므로, 저희는 "해당 없음"을 선택했습니다.
+None of these choices are good ones, so we chose “none of the above.”
 
-타입 매개변수가 있는 메서드 대신, 타입 매개변수가 있는 최상위 함수를 사용하거나 리시버 타입에 타입 매개변수를 추가하세요.
+Instead of methods with type parameters, use top-level functions with
+type parameters, or add the type parameters to the receiver type.
 
-더 많은 예시를 포함한 자세한 내용은 [제안서](/design/43651-type-parameters#no-parameterized-methods)를 참조하세요.
+For more details, including more examples, see the
+[proposal](/design/43651-type-parameters#no-parameterized-methods).
 
-### 매개변수화된 타입(parameterized type)의 리시버에 더 구체적인 타입을 사용할 수 없는 이유는 무엇인가요? {#types_in_method_declaration}
+### Why can't I use a more specific type for the receiver of a parameterized type? {#types_in_method_declaration}
 
-제네릭 타입의 메서드 선언은 타입 파라미터 이름을 포함하는 리시버와 함께 작성됩니다.
-호출 사이트(call site)에서 타입을 지정하는 구문과 유사하기 때문에,
-일부에서는 리시버에 `string`과 같이 특정 타입을 명시함으로써 특정 타입 인자에 최적화된 메서드를 생성하는 메커니즘을 제공한다고 생각하기도 했습니다.
+The method declarations of a generic type are written with a receiver
+that includes the type parameter names.
+Perhaps because of the similarity of the syntax for specifying types
+at a call site,
+some have thought this provides a mechanism for producing
+a method customized for certain type arguments by naming
+a specific type in the receiver, such as `string`:
 
-```go
+```
 type S[T any] struct { f T }
 
 func (s S[string]) Add(t string) string {
@@ -1106,36 +1769,48 @@ func (s S[string]) Add(t string) string {
 }
 ```
 
-이 코드가 실패하는 이유는 `string`이라는 단어를 컴파일러가 해당 메서드의 타입 인자(type argument) 이름으로 인식하기 때문입니다.
-컴파일러 에러 메시지는 "`operator + not defined on s.f (variable of type string)`"와 같이 표시될 것입니다.
-이는 미리 선언된 `string` 타입에서는 `+` 연산자가 정상적으로 작동하기 때문에 혼란스러울 수 있습니다.
-하지만 해당 선언으로 인해 이 메서드 내에서는 `string`의 정의가 덮어씌워졌으며, 연산자는 그와 무관한 버전의 `string`에서는 작동하지 않습니다.
-이처럼 미리 선언된 이름을 덮어쓰는 것은 문법적으로 가능하지만, 매우 이례적인 일이며 종종 실수로 인해 발생합니다.
+This fails because the word `string` is taken by
+the compiler to be the name of the type argument in the method.
+The compiler error message will be something like "`operator + not defined on
+s.f (variable of type string)`".
+This can be confusing because the `+` operator
+works fine on the predeclared type `string`,
+but the declaration has overwritten, for this method, the definition of `string`,
+and the operator does not work on that unrelated version of `string`.
+It's valid to overwrite a predeclared name like this, but is an odd thing to do and
+often a mistake.
 
-### 왜 내 프로그램에서 컴파일러가 타입 인자를 추론하지 못하나요? {#type_inference}
+### Why can't the compiler infer the type argument in my program? {#type_inference}
 
-프로그래머가 제네릭 타입이나 함수의 타입 인자가 무엇이어야 하는지 쉽게 알 수 있는 경우가 많지만, 언어 사양상 컴파일러가 이를 추론하는 것을 허용하지 않는 경우가 있습니다.
+There are many cases where a programmer can easily see what the type
+argument for a generic type or function must be, but the language does
+not permit the compiler to infer it.
+Type inference is intentionally limited to ensure that there is never
+any confusion as to which type is inferred.
+Experience with other languages suggests that unexpected type
+inference can lead to considerable confusion when reading and
+debugging a program.
+It is always possible to specify the explicit type argument to be used
+in the call.
+In the future new forms of inference may be supported, as long as the
+rules remain simple and clear.
 
-타입 추론은 어떤 타입이 추론되었는지에 대해 절대 혼동이 없도록 하기 위해 의도적으로 제한되었습니다.
+## Packages and Testing {#Packages_Testing}
 
-다른 언어에서의 경험에 따르면, 예상치 못한 타입 추론은 프로그램을 읽고 디버깅할 때 상당한 혼란을 야기할 수 있습니다.
+### How do I create a multifile package? {#How_do_I_create_a_multifile_package}
 
-호출 시 사용할 명시적인 타입 인자를 지정하는 것은 언제나 가능합니다.
+Put all the source files for the package in a directory by themselves.
+Source files can refer to items from different files at will; there is
+no need for forward declarations or a header file.
 
-향후 규칙이 단순하고 명확하게 유지되는 한, 새로운 형태의 추론이 지원될 수 있습니다.
+Other than being split into multiple files, the package will compile and test
+just like a single-file package.
 
-## 패키지와 테스트 {#Packages_Testing}
+### How do I write a unit test? {#How_do_I_write_a_unit_test}
 
-### 어떻게 여러 파일로 구성된 패키지를 만드나요? {#How_do_I_create_a_multifile_package}
-
-패키지의 모든 소스 파일을 별도의 디렉터리에 넣으십시오.
-소스 파일은 다른 파일의 항목을 자유롭게 참조할 수 있으며, 전방 선언(forward declarations)이나 헤더 파일이 필요하지 않습니다.
-
-여러 파일로 분할된 것 외에, 이 패키지는 단일 파일 패키지와 동일하게 컴파일되고 테스트됩니다.
-
-### 단위 테스트는 어떻게 작성하나요? {#How_do_I_write_a_unit_test}
-
-패키지 소스 파일과 동일한 디렉토리에 `_test.go`로 끝나는 새 파일을 생성하세요. 해당 파일 내부에서 `import "testing"`을 수행하고 다음과 같은 형태의 함수를 작성하세요.
+Create a new file ending in `_test.go` in the same directory
+as your package sources. Inside that file, `import "testing"`
+and write functions of the form
 
 ```
 func TestFoo(t *testing.T) {
@@ -1143,235 +1818,434 @@ func TestFoo(t *testing.T) {
 }
 ```
 
-해당 디렉토리에서 `go test`를 실행하세요.
-이 스크립트는 `Test` 함수들을 찾아 테스트 바이너리를 빌드하고 실행합니다.
+Run `go test` in that directory.
+That script finds the `Test` functions,
+builds a test binary, and runs it.
 
-더 자세한 내용은 [How to Write Go Code](/doc/code.html) 문서,
-[`testing`](/pkg/testing/) 패키지 및
-[`go test`](/cmd/go/#hdr-Test_packages) 서브커맨드를 참조하세요.
+See the [How to Write Go Code](/doc/code.html) document,
+the [`testing`](/pkg/testing/) package
+and the [`go test`](/cmd/go/#hdr-Test_packages) subcommand for more details.
 
-### 테스트를 위한 제가 가장 좋아하는 헬퍼 함수는 어디에 있나요? {#testing_framework}
+### Where is my favorite helper function for testing? {#testing_framework}
 
-Go의 표준 [`testing`](/pkg/testing/) 패키지는 단위 테스트를 쉽게 작성할 수 있게 해주지만, assertion 함수와 같이 다른 언어의 테스트 프레임워크에서 제공하는 기능들이 부족합니다. 이 문서의 [이전 섹션](#assertions)에서 Go에 assertion이 없는 이유를 설명했으며, 테스트에서 `assert`를 사용하는 경우에도 동일한 논리가 적용됩니다.
+Go's standard [`testing`](/pkg/testing/) package makes it easy to write unit tests, but it lacks
+features provided in other language's testing frameworks such as assertion functions.
+An [earlier section](#assertions) of this document explained why Go
+doesn't have assertions, and
+the same arguments apply to the use of `assert` in tests.
+Proper error handling means letting other tests run after one has failed, so
+that the person debugging the failure gets a complete picture of what is
+wrong. It is more useful for a test to report that
+`isPrime` gives the wrong answer for 2, 3, 5, and 7 (or for
+2, 4, 8, and 16) than to report that `isPrime` gives the wrong
+answer for 2 and therefore no more tests were run. The programmer who
+triggers the test failure may not be familiar with the code that fails.
+Time invested writing a good error message now pays off later when the
+test breaks.
 
-적절한 에러 처리란 하나의 테스트가 실패하더라도 다른 테스트들이 계속 실행되도록 하는 것을 의미하며, 이를 통해 디버깅하는 사람이 무엇이 잘못되었는지에 대한 전체적인 그림을 파악할 수 있게 합니다. 테스트가 `isPrime`이 2에 대해 잘못된 답을 내놓았기 때문에 더 이상 테스트를 실행하지 않았다고 보고하는 것보다, 2, 3, 5, 7(또는 2, 4, 8, 16)에 대해 잘못된 답을 내놓았다고 보고하는 것이 더 유용합니다. 테스트 실패를 유발한 프로그래머가 실패한 코드를 잘 모르고 있을 수도 있기 때문입니다. 지금 좋은 에러 메시지를 작성하는 데 투자한 시간은 나중에 테스트가 깨졌을 때 보상받게 됩니다.
+A related point is that testing frameworks tend to develop into mini-languages
+of their own, with conditionals and controls and printing mechanisms,
+but Go already has all those capabilities; why recreate them?
+We'd rather write tests in Go; it's one fewer language to learn and the
+approach keeps the tests straightforward and easy to understand.
 
-관련된 점은 테스트 프레임워크가 조건문, 제어문, 출력 메커니즘 등을 갖춘 그들만의 미니 언어로 발전하는 경향이 있다는 것입니다. 하지만 Go에는 이미 이러한 기능들이 모두 포함되어 있는데, 굳이 이를 다시 만들 이유가 있을까요?
+If the amount of extra code required to write
+good errors seems repetitive and overwhelming, the test might work better if
+table-driven, iterating over a list of inputs and outputs defined
+in a data structure (Go has excellent support for data structure literals).
+The work to write a good test and good error messages will then be amortized over many
+test cases. The standard Go library is full of illustrative examples, such as in
+[the formatting tests for the `fmt` package](/src/fmt/fmt_test.go).
 
-우리는 테스트를 Go로 작성하는 것을 선호합니다. 그렇게 하면 배워야 할 언어가 하나 줄어들며, 이러한 접근 방식은 테스트를 단순하고 이해하기 쉽게 유지해 줍니다.
+### Why isn't *X* in the standard library? {#x_in_std}
 
-좋은 에러 메시지를 작성하기 위해 필요한 추가 코드의 양이 반복적이고 너무 많게 느껴진다면, 데이터 구조에 정의된 입력 및 출력 목록을 반복 처리하는 테이블 기반 테스트(table-driven test) 방식이 더 효과적일 수 있습니다(Go는 데이터 구조 리터럴을 매우 잘 지원합니다). 이렇게 하면 좋은 테스트와 좋은 에러 메시지를 작성하는 노력이 여러 테스트 케이스에 걸쳐 분산되어 효율적이 됩니다. Go 표준 라이브러리에는 [`fmt` 패키지의 포맷팅 테스트](/src/fmt/fmt_test.go)와 같이 이를 잘 보여주는 예시가 많이 있습니다.
+The standard library's purpose is to support the runtime library, connect to
+the operating system, and provide key functionality that many Go
+programs require, such as formatted I/O and networking.
+It also contains elements important for web programming, including
+cryptography and support for standards like HTTP, JSON, and XML.
 
-### 왜 *X*가 표준 라이브러리에 없나요? {#x_in_std}
+There is no clear criterion that defines what is included because for
+a long time, this was the *only* Go library.
+There are criteria that define what gets added today, however.
 
-표준 라이브러리의 목적은 런타임 라이브러리를 지원하고, 운영 체제와 연결하며, 포맷팅된 I/O 및 네트워킹과 같이 많은 Go 프로그램에 필요한 핵심 기능을 제공하는 것입니다.
-또한 암호화와 HTTP, JSON, XML과 같은 표준 지원을 포함하여 웹 프로그래밍에 중요한 요소들을 포함하고 있습니다.
+New additions to the standard library are rare and the bar for
+inclusion is high.
+Code included in the standard library bears a large ongoing maintenance cost
+(often borne by those other than the original author),
+is subject to the [Go 1 compatibility promise](/doc/go1compat.html)
+(blocking fixes to any flaws in the API),
+and is subject to the Go
+[release schedule](/s/releasesched),
+preventing bug fixes from being available to users quickly.
 
-오랫동안 이것이 *유일한* Go 라이브러리였기 때문에, 무엇이 포함되는지를 정의하는 명확한 기준은 없습니다.
-하지만 오늘날 무엇이 추가되는지를 정의하는 기준은 존재합니다.
+Most new code should live outside of the standard library and be accessible
+via the [`go` tool](/cmd/go/)'s
+`go get` command.
+Such code can have its own maintainers, release cycle,
+and compatibility guarantees.
+Users can find packages and read their documentation at
+[pkg.go.dev](https://pkg.go.dev/).
 
-표준 라이브러리에 새로운 기능이 추가되는 경우는 드물며, 포함되기 위한 기준은 매우 높습니다.
-표준 라이브러리에 포함된 코드는 지속적으로 큰 유지보수 비용이 발생하며(종종 원작자가 아닌 다른 이들이 이를 부담하게 됩니다),
-[Go 1 호환성 약속](/doc/go1compat.html)의 대상이 되어(API의 결함에 대한 수정을 제한함),
-Go [릴리스 일정](/s/releasesched)의 영향을 받으므로 사용자가 버그 수정 사항을 빠르게 이용하는 것이 어렵습니다.
+Although there are pieces in the standard library that don't really belong,
+such as `log/syslog`, we continue to maintain everything in the
+library because of the Go 1 compatibility promise.
+But we encourage most new code to live elsewhere.
 
-대부분의 새로운 코드는 표준 라이브러리 외부에 위치해야 하며, [`go` 도구](/cmd/go/)의 `go get` 명령어를 통해 접근 가능해야 합니다.
-이러한 코드는 자체적인 유지관리자, 릴리스 주기 및 호환성 보장 범위를 가질 수 있습니다.
-사용자는 [pkg.go.dev](https://pkg.go.dev/)에서 패키지를 찾고 관련 문서를 읽을 수 있습니다.
+## Implementation {#Implementation}
 
-`log/syslog`와 같이 표준 라이브러리에 정말로 어울리지 않는 부분들이 있긴 하지만, Go 1 호환성 약속으로 인해 라이브러리의 모든 내용을 계속해서 유지 관리하고 있습니다. 하지만 저희는 대부분의 새로운 코드가 다른 곳에 위치하는 것을 권장합니다.
+### What compiler technology is used to build the compilers? {#What_compiler_technology_is_used_to_build_the_compilers}
 
-## 구현 {#Implementation}
+There are several production compilers for Go, and a number of others
+in development for various platforms.
 
-### 컴파일러를 빌드하는 데 어떤 컴파일러 기술이 사용되나요? {#What_compiler_technology_is_used_to_build_the_compilers}
+The default compiler, `gc`, is included with the
+Go distribution as part of the support for the `go`
+command.
+`Gc` was originally written in C
+because of the difficulties of bootstrapping&mdash;you'd need a Go compiler to
+set up a Go environment.
+But things have advanced and since the Go 1.5 release the compiler has been
+a Go program.
+The compiler was converted from C to Go using automatic translation tools, as
+described in this [design document](/s/go13compiler)
+and [talk](/talks/2015/gogo.slide#1).
+Thus the compiler is now "self-hosting", which means we needed to face
+the bootstrapping problem.
+The solution is to have a working Go installation already in place,
+just as one normally has with a working C installation.
+The story of how to bring up a new Go environment from source
+is described [here](/s/go15bootstrap) and
+[here](/doc/install/source).
 
-Go를 위한 여러 상용 컴파일러가 존재하며, 다양한 플랫폼을 위해 개발 중인 다른 컴파일러들도 다수 있습니다.
+`Gc` is written in Go with a recursive descent parser
+and uses a custom loader, also written in Go but
+based on the Plan 9 loader, to generate ELF/Mach-O/PE binaries.
 
-기본 컴파일러인 `gc`는 `go` 명령어를 지원하기 위해 Go 배포판에 포함되어 있습니다.
+The `Gccgo` compiler is a front end written in C++
+with a recursive descent parser coupled to the
+standard GCC back end. An experimental
+[LLVM back end](https://go.googlesource.com/gollvm/) is
+using the same front end.
 
-`gc`는 원래 C로 작성되었는데, 이는 부트스트래핑(bootstrapping)의 어려움 때문이었습니다. Go 환경을 구축하려면 Go 컴파일러가 필요했기 때문입니다. 하지만 기술이 발전하여 Go 1.5 릴리스 이후부터 컴파일러는 Go 프로그램으로 작성되었습니다.
+At the beginning of the project we considered using LLVM for
+`gc` but decided it was too large and slow to meet
+our performance goals.
+More important in retrospect, starting with LLVM would have made it
+harder to introduce some of the ABI and related changes, such as
+stack management, that Go requires but are not part of the standard
+C setup.
 
-컴파일러는 이 [설계 문서](/s/go13compiler)와 [강연](/talks/2015/gogo.slide#1)에서 설명된 것처럼 자동 변환 도구를 사용하여 C에서 Go로 변환되었습니다. 이로 인해 컴파일러는 이제 "셀프 호스팅(self-hosting)" 상태가 되었으며, 이는 우리가 부트스트래핑 문제에 직면해야 했음을 의미합니다.
+Go turned out to be a fine language in which to implement a Go compiler,
+although that was not its original goal.
+Not being self-hosting from the beginning allowed Go's design to
+concentrate on its original use case, which was networked servers.
+Had we decided Go should compile itself early on, we might have
+ended up with a language targeted more for compiler construction,
+which is a worthy goal but not the one we had initially.
 
-이에 대한 해결책은 보통 작동하는 C 설치 환경을 갖추고 있는 것과 마찬가지로, 이미 작동하는 Go 설치 환경을 미리 마련해 두는 것입니다. 소스 코드로부터 새로운 Go 환경을 구축하는 방법은 [여기](/s/go15bootstrap)와 [여기](/doc/install/source)에 설명되어 있습니다.
+Although `gc` has its own implementation, a native lexer and
+parser are available in the [`go/parser`](/pkg/go/parser/) package
+and there is also a native [type checker](/pkg/go/types).
+The `gc` compiler uses variants of these libraries.
 
-`Gc`는 재귀 하강 파서(recursive descent parser)를 포함하여 Go로 작성되었으며, ELF/Mach-O/PE 바이너리를 생성하기 위해 Plan 9 로더를 기반으로 하여 역시 Go로 작성된 커스텀 로더를 사용합니다.
+### How is the run-time support implemented? {#How_is_the_run_time_support_implemented}
 
-`Gccgo` 컴파일러는 표준 GCC 백엔드와 결합된 재귀 하강 파서(recursive descent parser)를 갖춘 C++로 작성된 프론트엔드입니다. 실험적인 [LLVM 백엔드](https://go.googlesource.com/gollvm/) 또한 동일한 프론트엔드를 사용하고 있습니다.
+Again due to bootstrapping issues, the run-time code was originally written mostly in C (with a
+tiny bit of assembler) but it has since been translated to Go
+(except for some assembler bits).
+`Gccgo`'s run-time support uses `glibc`.
+The `gccgo` compiler implements goroutines using
+a technique called segmented stacks,
+supported by recent modifications to the gold linker.
+`Gollvm` similarly is built on the corresponding
+LLVM infrastructure.
 
-프로젝트 시작 당시 `gc`를 위해 LLVM을 사용하는 것을 검토했으나, 우리의 성능 목표를 달성하기에는 너무 방대하고 느리다고 판단했습니다.
-더 중요한 점은, 돌이켜 보았을 때 LLVM으로 시작했다면 스택 관리와 같이 Go에서는 필요하지만 표준 C 설정에는 포함되지 않는 일부 ABI 및 관련 변경 사항들을 도입하기가 더 어려웠을 것이라는 점입니다.
+### Why is my trivial program such a large binary? {#Why_is_my_trivial_program_such_a_large_binary}
 
-Go는 비록 그것이 원래 목표는 아니었지만, Go 컴파일러를 구현하기에 훌륭한 언어임이 밝혀졌습니다.
-처음부터 셀프 호스팅(self-hosting)을 하지 않았기에 Go의 설계는 원래의 사용 사례였던 네트워크 서버에 집중할 수 있었습니다.
-만약 우리가 초기에 Go가 스스로를 컴파일해야 한다고 결정했다면, 결과적으로 컴파일러 구축에 더 특화된 언어가 되었을지도 모릅니다. 그것 또한 가치 있는 목표였겠지만, 우리가 처음에 가졌던 목표는 아니었습니다.
+The linker in the `gc` toolchain
+creates statically-linked binaries by default.
+All Go binaries therefore include the Go
+runtime, along with the run-time type information necessary to support dynamic
+type checks, reflection, and even panic-time stack traces.
 
-`gc`는 자체적인 구현체를 가지고 있지만, [`go/parser`](/pkg/go/parser/) 패키지에서 네이티브 렉서(lexer)와 파서(parser)를 사용할 수 있으며 네이티브 [타입 체커](/pkg/go/types)도 제공됩니다. `gc` 컴파일러는 이러한 라이브러리들의 변형된 버전을 사용합니다.
+A simple C "hello, world" program compiled and linked statically using
+gcc on Linux is around 750 kB, including an implementation of
+`printf`.
+An equivalent Go program using
+`fmt.Printf` weighs a couple of megabytes, but that includes
+more powerful run-time support and type and debugging information.
 
-### 런타임 지원은 어떻게 구현되나요? {#How_is_the_run_time_support_implemented}
+A Go program compiled with `gc` can be linked with
+the `-ldflags=-w` flag to disable DWARF generation,
+removing debugging information from the binary but with no
+other loss of functionality.
+This can reduce the binary size substantially.
 
-부트스트래핑 문제로 인해, 런타임 코드는 원래 대부분 C(와 아주 약간의 어셈블러)로 작성되었으나, 이후 Go로 변환되었습니다(일부 어셈블러 부분 제외).
-`Gccgo`의 런타임 지원은 `glibc`를 사용합니다.
-`gccgo` 컴파일러는 gold 링커의 최신 수정 사항을 통해 지원되는 segmented stacks라는 기술을 사용하여 goroutines를 구현합니다.
-`Gollvm` 역시 이와 유사하게 해당 LLVM 인프라를 기반으로 구축되었습니다.
+### Can I stop these complaints about my unused variable/import? {#unused_variables_and_imports}
 
-### 내 단순한 프로그램의 바이너리 크기가 왜 이렇게 큰가요? {#Why_is_my_trivial_program_such_a_large_binary}
+The presence of an unused variable may indicate a bug, while
+unused imports just slow down compilation,
+an effect that can become substantial as a program accumulates
+code and programmers over time.
+For these reasons, Go refuses to compile programs with unused
+variables or imports,
+trading short-term convenience for long-term build speed and
+program clarity.
 
-`gc` 툴체인의 링커는 기본적으로 정적 링크된 바이너리를 생성합니다. 따라서 모든 Go 바이너리에는 Go 런타임과 더불어, 동적 타입 체크, 리플렉션, 그리고 패닉 발생 시의 스택 트레이스를 지원하는 데 필요한 런타임 타입 정보가 포함됩니다.
+Still, when developing code, it's common to create these situations
+temporarily and it can be annoying to have to edit them out before the
+program will compile.
 
-Linux에서 `gcc`를 사용하여 정적으로 컴파일 및 링크한 간단한 C "hello, world" 프로그램은 `printf` 구현을 포함하여 약 750 kB입니다.
-`fmt.Printf`를 사용하는 동일한 Go 프로그램은 몇 메가바이트에 달하지만, 여기에는 더 강력한 런타임 지원과 타입 및 디버깅 정보가 포함되어 있습니다.
+Some have asked for a compiler option to turn those checks off
+or at least reduce them to warnings.
+Such an option has not been added, though,
+because compiler options should not affect the semantics of the
+language and because the Go compiler does not report warnings, only
+errors that prevent compilation.
 
-`gc`로 컴파일된 Go 프로그램은 `-ldflags=-w` 플래그를 사용하여 링크함으로써 DWARF 생성을 비활성화할 수 있습니다. 이렇게 하면 바이너리에서 디버깅 정보가 제거되지만, 그 외의 기능 손실은 없습니다.
+There are two reasons for having no warnings.  First, if it's worth
+complaining about, it's worth fixing in the code.  (Conversely, if it's not
+worth fixing, it's not worth mentioning.) Second, having the compiler
+generate warnings encourages the implementation to warn about weak
+cases that can make compilation noisy, masking real errors that
+*should* be fixed.
 
-이를 통해 바이너리 크기를 상당히 줄일 수 있습니다.
+It's easy to address the situation, though.  Use the blank identifier
+to let unused things persist while you're developing.
 
-### 사용하지 않는 변수/임포트에 대한 경고를 중단할 수 있나요? {#unused_variables_and_imports}
-
-사용되지 않는 변수의 존재는 버그를 나타낼 수 있으며, 사용되지 않는 임포트(import)는 단순히 컴파일 속도를 늦춥니다. 이러한 효과는 시간이 흐르며 프로그램에 코드가 쌓이고 프로그래머가 늘어남에 따라 상당해질 수 있습니다.
-
-이러한 이유로 Go는 사용되지 않는 변수나 임포트가 포함된 프로그램의 컴파일을 거부하며, 단기적인 편의성 대신 장기적인 빌드 속도와 프로그램의 명확성을 선택했습니다.
-
-그럼에도 불구하고, 코드를 개발할 때 이러한 상황을 일시적으로 만드는 경우가 많으며, 프로그램이 컴파일되기 전에 이를 일일이 수정해서 제거해야 하는 것은 번거로운 일이 될 수 있습니다.
-
-일부에서는 이러한 검사를 끄거나, 적어도 경고 수준으로 낮추는 컴파일러 옵션을 요청했습니다.
-하지만 컴파일러 옵션이 언어의 의미론(semantics)에 영향을 주어서는 안 되며, Go 컴파일러는 경고를 보고하지 않고 컴파일을 방해하는 오류만을 보고하기 때문에 그러한 옵션은 추가되지 않았습니다.
-
-경고가 없는 이유는 두 가지입니다. 첫째, 불평할 만한 가치가 있다면 코드에서 수정할 가치가 있다는 것입니다. (반대로, 수정할 가치가 없다면 언급할 가치도 없습니다.) 둘째, 컴파일러가 경고를 생성하게 하면 구현 단계에서 컴파일 과정을 소란스럽게 만드는 취약한 사례들에 대해 경고하도록 유도하며, 이는 *반드시* 수정해야 할 실제 오류를 가릴 수 있습니다.
-
-하지만 이 상황을 해결하는 방법은 간단합니다. 개발하는 동안에는 blank identifier를 사용하여 사용하지 않는 항목들을 그대로 유지하세요.
-
-```go
+```
 import "unused"
 
-// 이 선언은 패키지의 항목을 참조함으로써 import가 사용된 것으로 표시합니다.
-var _ = unused.Item  // TODO: 커밋 전 삭제하세요!
+// This declaration marks the import as used by referencing an
+// item from the package.
+var _ = unused.Item  // TODO: Delete before committing!
 
 func main() {
     debugData := debug.Profile()
-    _ = debugData // 디버깅 중에만 사용됩니다.
+    _ = debugData // Used only during debugging.
     ....
 }
 ```
 
-요즘 대부분의 Go 프로그래머들은 [goimports](https://godoc.org/golang.org/x/tools/cmd/goimports)라는 도구를 사용합니다. 이 도구는 Go 소스 파일을 자동으로 다시 작성하여 올바른 import를 갖게 함으로써, 실질적으로 사용하지 않는 import 문제를 제거해 줍니다.
-이 프로그램은 대부분의 에디터 및 IDE와 쉽게 연결되어 Go 소스 파일이 저장될 때 자동으로 실행되도록 설정할 수 있습니다.
-이 기능은 [위에서 논의한 바와 같이](/doc/faq#ide) `gopls`에도 내장되어 있습니다.
+Nowadays, most Go programmers use a tool,
+[goimports](https://godoc.org/golang.org/x/tools/cmd/goimports),
+which automatically rewrites a Go source file to have the correct imports,
+eliminating the unused imports issue in practice.
+This program is easily connected to most editors and IDEs to run automatically when a Go source file is written.
+This functionality is also built into `gopls`, as
+[discussed above](/doc/faq#ide).
 
-### 왜 바이러스 검사 소프트웨어가 Go 배포판이나 컴파일된 바이너리를 감염되었다고 판단하나요? {#virus}
+### Why does my virus-scanning software think my Go distribution or compiled binary is infected? {#virus}
 
-이는 특히 Windows 머신에서 흔히 발생하는 현상이며, 거의 항상 오탐(false positive)입니다.
-상용 바이러스 스캔 프로그램들은 다른 언어로 컴파일된 바이너리만큼 자주 접하지 못하는 Go 바이너리의 구조 때문에 종종 혼동을 일으킵니다.
+This is a common occurrence, especially on Windows machines, and is almost always a false positive.
+Commercial virus scanning programs are often confused by the structure of Go binaries, which
+they don't see as often as those compiled from other languages.
 
-Go 배포판을 방금 설치했는데 시스템에서 감염되었다고 보고한다면, 이는 분명히 오류입니다.
-정말 철저하게 확인하려면, [다운로드 페이지](/dl/)에 있는 체크섬과 비교하여 다운로드 파일을 검증할 수 있습니다.
+If you've just installed the Go distribution and the system reports it is infected, that's certainly a mistake.
+To be really thorough, you can verify the download by comparing the checksum with those on the
+[downloads page](/dl/).
 
-어떤 경우든, 리포트에 오류가 있다고 판단하신다면 사용 중인 바이러스 스캐너 공급업체에 버그를 보고하시기 바랍니다.
-시간이 흐르면 바이러스 스캐너들이 Go 프로그램을 이해하는 법을 배울 수도 있을 것입니다.
+In any case, if you believe the report is in error, please report a bug to the supplier of your virus scanner.
+Maybe in time virus scanners can learn to understand Go programs.
 
-## 성능 {#Performance}
+## Performance {#Performance}
 
-### 왜 Go는 벤치마크 X에서 성능이 낮게 나오나요? {#Why_does_Go_perform_badly_on_benchmark_x}
+### Why does Go perform badly on benchmark X? {#Why_does_Go_perform_badly_on_benchmark_x}
 
-Go의 설계 목표 중 하나는 유사한 프로그램에 대해 C의 성능에 근접하는 것이지만, [golang.org/x/exp/shootout](https://go.googlesource.com/exp/+/master/shootout/)에 포함된 여러 벤치마크를 포함하여 일부 벤치마크에서는 성능이 상당히 낮게 나타납니다. 가장 느린 항목들은 Go에서 그와 대등한 성능을 내는 버전이 없는 라이브러리에 의존하는 경우입니다.
+One of Go's design goals is to approach the performance of C for comparable
+programs, yet on some benchmarks it does quite poorly, including several
+in [golang.org/x/exp/shootout](https://go.googlesource.com/exp/+/master/shootout/).
+The slowest depend on libraries for which versions of comparable performance
+are not available in Go.
+For instance, [pidigits.go](https://go.googlesource.com/exp/+/master/shootout/pidigits.go)
+depends on a multi-precision math package, and the C
+versions, unlike Go's, use [GMP](https://gmplib.org/) (which is
+written in optimized assembler).
+Benchmarks that depend on regular expressions
+([regex-dna.go](https://go.googlesource.com/exp/+/master/shootout/regex-dna.go),
+for instance) are essentially comparing Go's native [regexp package](/pkg/regexp) to
+mature, highly optimized regular expression libraries like PCRE.
 
-예를 들어, [pidigits.go](https://go.googlesource.com/exp/+/master/shootout/pidigits.go)는 다정밀도 산술(multi-precision math) 패키지에 의존하는데, Go의 패키지와 달리 C 버전은 (최적화된 어셈블리로 작성된) [GMP](https://gmplib.org/)를 사용합니다.
+Benchmark games are won by extensive tuning and the Go versions of most
+of the benchmarks need attention.  If you measure truly comparable C
+and Go programs
+([reverse-complement.go](https://go.googlesource.com/exp/+/master/shootout/reverse-complement.go)
+is one example), you'll see the two languages are much closer in raw performance
+than this suite would indicate.
 
-정규 표현식에 의존하는 벤치마크([regex-dna.go](https://go.googlesource.com/exp/+/master/shootout/regex-dna.go) 등)는 본질적으로 Go의 기본 [regexp 패키지](/pkg/regexp)를 PCRE와 같이 성숙하고 고도로 최적화된 정규 표현식 라이브러리와 비교하는 것입니다.
+Still, there is room for improvement. The compilers are good but could be
+better, many libraries need major performance work, and the garbage collector
+isn't fast enough yet. (Even if it were, taking care not to generate unnecessary
+garbage can have a huge effect.)
 
-벤치마크 게임은 광범위한 튜닝을 통해 승패가 결정되며, 대부분의 벤치마크 중 Go 버전들은 세심한 주의가 필요합니다. 진정으로 비교 가능한 C와 Go 프로그램([reverse-complement.go](https://go.googlesource.com/exp/+/master/shootout/reverse-complement.go)가 한 가지 예입니다)을 측정해 본다면, 두 언어의 순수 성능 차이가 이 벤치마크 세트가 나타내는 것보다 훨씬 더 가깝다는 것을 알 수 있을 것입니다.
+In any case, Go can often be very competitive.
+There has been significant improvement in the performance of many programs
+as the language and tools have developed.
+See the blog post about
+[profiling
+Go programs](/blog/profiling-go-programs) for an informative example.
+It's quite old but still contains helpful information.
 
-하지만 여전히 개선의 여지가 있습니다. 컴파일러는 훌륭하지만 더 나아질 수 있고, 많은 라이브러리들이 대대적인 성능 개선 작업이 필요하며, 가비지 컬렉터는 아직 충분히 빠르지 않습니다. (설령 빠르다 하더라도, 불필요한 가비지를 생성하지 않도록 주의하는 것이 매우 큰 효과를 낼 수 있습니다.)
+## Changes from C {#change_from_c}
 
-어떤 경우든, Go는 종종 매우 경쟁력 있을 수 있습니다.
-언어와 도구들이 발전함에 따라 많은 프로그램의 성능이 상당히 향상되었습니다.
-유익한 예시로 [Go 프로그램 프로파일링](/blog/profiling-go-programs)에 관한 블로그 게시물을 참조하십시오.
-상당히 오래된 글이지만 여전히 도움이 되는 정보를 담고 있습니다.
+### Why is the syntax so different from C? {#different_syntax}
 
-## C에서의 변경 사항 {#change_from_c}
+Other than declaration syntax, the differences are not major and stem
+from two desires.  First, the syntax should feel light, without too
+many mandatory keywords, repetition, or arcana.  Second, the language
+has been designed to be easy to analyze
+and can be parsed without a symbol table.  This makes it much easier
+to build tools such as debuggers, dependency analyzers, automated
+documentation extractors, IDE plug-ins, and so on.  C and its
+descendants are notoriously difficult in this regard.
 
-### 왜 C와 문법이 그렇게 다른가요? {#different_syntax}
+### Why are declarations backwards? {#declarations_backwards}
 
-선언 구문을 제외하면 차이점은 그리 크지 않으며, 이는 두 가지 지향점에서 비롯되었습니다. 첫째, 너무 많은 필수 키워드, 반복 또는 난해한 표현 없이 구문이 가볍게 느껴져야 한다는 점입니다. 둘째, 분석하기 쉽도록 설계되어 심볼 테이블 없이도 파싱이 가능해야 한다는 점입니다. 덕분에 디버거, 의존성 분석기, 자동 문서 추출기, IDE 플러그인과 같은 도구들을 훨씬 더 쉽게 구축할 수 있습니다. C 언어와 그 후손들은 이 점에 있어 매우 까다로운 것으로 유명합니다.
-
-### 왜 선언이 역순인가요? {#declarations_backwards}
-
-C 언어에 익숙한 분들에게만 거꾸로 보일 뿐입니다. C 언어의 개념은 변수가 해당 타입을 나타내는 식(expression)처럼 선언된다는 것인데, 이는 좋은 아이디어지만 타입 문법과 식 문법이 서로 잘 섞이지 않아 결과적으로 혼란스러울 수 있습니다. 함수 포인터를 생각해보십시오. Go는 식 문법과 타입 문법을 대부분 분리하여 상황을 단순화했습니다 (포인터에 접두사 `*`를 사용하는 것은 규칙을 증명하는 예외 사례입니다). C 언어에서 선언은
+They're only backwards if you're used to C. In C, the notion is that a
+variable is declared like an expression denoting its type, which is a
+nice idea, but the type and expression grammars don't mix very well and
+the results can be confusing; consider function pointers.  Go mostly
+separates expression and type syntax and that simplifies things (using
+prefix `*` for pointers is an exception that proves the rule).  In C,
+the declaration
 
 ```
     int* a, b;
 ```
 
-`a`는 포인터로 선언하지만 `b`는 그렇지 않습니다; Go 언어에서
+declares `a` to be a pointer but not `b`; in Go
 
 ```
     var a, b *int
 ```
 
-두 변수 모두 포인터로 선언합니다. 이 방식이 더 명확하고 일관성이 있습니다.
-또한, `:=` 짧은 선언 형태를 고려할 때, 전체 변수 선언 역시 `:=`와 동일한 순서로 제시되어야 하므로
+declares both to be pointers.  This is clearer and more regular.
+Also, the `:=` short declaration form argues that a full variable
+declaration should present the same order as `:=` so
 
 ```
     var a uint64 = 1
 ```
 
-이 표현은 문맥에 따라 다음과 같이 번역될 수 있습니다.
-
-1. **일반적인 기술 문서 (동일한 결과/효과를 낼 때):**
-   - "~와 동일한 효과를 가집니다"
-   - "~와 같은 효과가 있습니다"
-
-2. **코드나 설정의 기능적 동일성을 설명할 때:**
-   - "~와 동일하게 작동합니다"
-   - "~와 결과적으로 같습니다"
-
-**예시:**
-* "Using `flag A` has the same effect as `flag B`."
-* " `flag A`를 사용하는 것은 `flag B`를 사용하는 것과 **동일한 효과를 가집니다**." (또는 **동일하게 작동합니다**.)
+has the same effect as
 
 ```
     a := uint64(1)
 ```
 
-타입을 위한 문법이 단순히 표현식 문법이 아닌 별도의 문법으로 존재함으로써 파싱이 더 단순해집니다. `func`나 `chan`과 같은 키워드들이 구조를 명확하게 유지해 줍니다.
+Parsing is also simplified by having a distinct grammar for types that
+is not just the expression grammar; keywords such as `func`
+and `chan` keep things clear.
 
-더 자세한 내용은 [Go의 선언 구문](/doc/articles/gos_declaration_syntax.html)에 관한 문서를 참조하세요.
+See the article about
+[Go's Declaration Syntax](/doc/articles/gos_declaration_syntax.html)
+for more details.
 
-### 왜 포인터 연산이 없나요? {#no_pointer_arithmetic}
+### Why is there no pointer arithmetic? {#no_pointer_arithmetic}
 
-안전성. 포인터 연산이 없다면, 잘못된 주소를 생성하여 오동작하는 경우가 절대 발생하지 않는 언어를 만드는 것이 가능합니다. 컴파일러와 하드웨어 기술은 배열 인덱스를 사용하는 루프가 포인터 연산을 사용하는 루프만큼 효율적일 수 있는 수준까지 발전했습니다. 또한, 포인터 연산의 부재는 가비지 컬렉터(garbage collector)의 구현을 단순화할 수 있습니다.
+Safety.  Without pointer arithmetic it's possible to create a
+language that can never derive an illegal address that succeeds
+incorrectly.  Compiler and hardware technology have advanced to the
+point where a loop using array indices can be as efficient as a loop
+using pointer arithmetic.  Also, the lack of pointer arithmetic can
+simplify the implementation of the garbage collector.
 
-### `++`와 `--`는 왜 표현식(expression)이 아니라 문장(statement)인가요? 그리고 왜 전위(prefix)가 아닌 후위(postfix) 방식인가요? {#inc_dec}
+### Why are `++` and `--` statements and not expressions?  And why postfix, not prefix? {#inc_dec}
 
-포인터 연산이 없다면, 전위 및 후위 증감 연산자의 편의성은 떨어집니다. 이를 표현식 계층 구조에서 완전히 제거함으로써 표현식 구문이 단순해지며, `++`와 `--`의 평가 순서와 관련된 복잡한 문제들(`f(i++)`나 `p[i] = q[++i]`와 같은 사례) 또한 해결됩니다. 이러한 단순화의 효과는 상당합니다. 후위와 전위 방식 중 어느 것이든 괜찮겠지만, 후위 버전이 더 전통적입니다. 전위 방식에 대한 고집은 STL과 함께 등장했는데, 아이러니하게도 STL은 이름 자체에 후위 증감이 포함된 언어의 라이브러리입니다.
+Without pointer arithmetic, the convenience value of pre- and postfix
+increment operators drops.  By removing them from the expression
+hierarchy altogether, expression syntax is simplified and the messy
+issues around order of evaluation of `++` and `--`
+(consider `f(i++)` and `p[i] = q[++i]`)
+are eliminated as well.  The simplification is
+significant.  As for postfix vs. prefix, either would work fine but
+the postfix version is more traditional; insistence on prefix arose
+with the STL, a library for a language whose name contains, ironically, a
+postfix increment.
 
-### 왜 중괄호는 있지만 세미콜론은 없나요? 그리고 왜 여는 중괄호를 다음 줄에 넣을 수 없나요? {#semicolons}
+### Why are there braces but no semicolons? And why can't I put the opening brace on the next line?  {#semicolons}
 
-Go는 문장 그룹화를 위해 중괄호(`{}`)를 사용하며, 이는 C 계열의 언어를 다루어 본 프로그래머들에게 익숙한 구문입니다. 하지만 세미콜론은 사람이 아닌 파서(parser)를 위한 것이기에, 우리는 이를 가능한 한 제거하고 싶었습니다. 이 목표를 달성하기 위해 Go는 BCPL의 기법을 빌려왔습니다. 문장을 구분하는 세미콜론은 형식 문법(formal grammar)에는 존재하지만, 렉서(lexer)가 문장이 끝날 수 있는 모든 줄의 끝에 룩어헤드(lookahead) 없이 자동으로 삽입합니다. 이 방식은 실제로 매우 잘 작동하지만, 특정 중괄호 스타일을 강제하는 결과가 있습니다. 예를 들어, 함수의 시작 중괄호는 단독 줄에 올 수 없습니다.
+Go uses brace brackets for statement grouping, a syntax familiar to
+programmers who have worked with any language in the C family.
+Semicolons, however, are for parsers, not for people, and we wanted to
+eliminate them as much as possible.  To achieve this goal, Go borrows
+a trick from BCPL: the semicolons that separate statements are in the
+formal grammar but are injected automatically, without lookahead, by
+the lexer at the end of any line that could be the end of a statement.
+This works very well in practice but has the effect that it forces a
+brace style.  For instance, the opening brace of a function cannot
+appear on a line by itself.
 
-일부에서는 중괄호(`{`)가 다음 줄에 올 수 있도록 lexer가 lookahead(앞서보기)를 수행해야 한다고 주장해 왔습니다. 하지만 저희는 이에 동의하지 않습니다. Go 코드는 [`gofmt`](/cmd/gofmt/)에 의해 자동으로 포맷팅되도록 설계되었으므로, *어떠한* 스타일이든 선택되어야만 합니다. 그 스타일이 여러분이 C나 Java에서 사용했던 것과 다를 수 있지만, Go는 다른 언어이며 `gofmt`의 스타일은 다른 어떤 스타일만큼이나 훌륭합니다. 더 중요한 점은—훨씬 더 중요한 점은—모든 Go 프로그램에 대해 프로그램적으로 강제되는 단일 포맷이 갖는 이점이 특정 스타일에 대해 느껴지는 그 어떤 단점보다 훨씬 크다는 것입니다. 또한, Go의 스타일 덕분에 Go의 대화형 구현(interactive implementation)이 특별한 규칙 없이도 표준 구문을 한 줄씩 사용할 수 있다는 점에도 주목하십시오.
+Some have argued that the lexer should do lookahead to permit the
+brace to live on the next line.  We disagree.  Since Go code is meant
+to be formatted automatically by
+[`gofmt`](/cmd/gofmt/),
+*some* style must be chosen.  That style may differ from what
+you've used in C or Java, but Go is a different language and
+`gofmt`'s style is as good as any other.  More
+important&mdash;much more important&mdash;the advantages of a single,
+programmatically mandated format for all Go programs greatly outweigh
+any perceived disadvantages of the particular style.
+Note too that Go's style means that an interactive implementation of
+Go can use the standard syntax one line at a time without special rules.
 
-### 왜 가비지 컬렉션을 하나요? 비용이 너무 많이 들지 않을까요? {#garbage_collection}
+### Why do garbage collection?  Won't it be too expensive? {#garbage_collection}
 
-시스템 프로그램에서 가장 큰 관리 부담 중 하나는 할당된 객체의 수명을 관리하는 것입니다.
-C와 같이 이를 수동으로 처리하는 언어에서는 프로그래머의 시간을 상당 부분 소모하며, 흔히 치명적인 버그의 원인이 됩니다.
-C++나 Rust처럼 도움을 주는 메커니즘을 제공하는 언어에서조차, 해당 메커니즘은 소프트웨어 설계에 상당한 영향을 미칠 수 있으며, 종종 그 자체로 프로그래밍 오버헤드를 추가합니다.
-우리는 이러한 프로그래머의 오버헤드를 제거하는 것이 매우 중요하다고 느꼈으며, 지난 몇 년간의 가비지 컬렉션 기술의 발전은 이를 충분히 저렴한 비용과 낮은 지연 시간으로 구현할 수 있어 네트워크 시스템에서도 실행 가능한 접근 방식이 될 수 있다는 확신을 주었습니다.
+One of the biggest sources of bookkeeping in systems programs is
+managing the lifetimes of allocated objects.
+In languages such as C in which it is done manually,
+it can consume a significant amount of programmer time and is
+often the cause of pernicious bugs.
+Even in languages like C++ or Rust that provide mechanisms
+to assist, those mechanisms can have a significant effect on the
+design of the software, often adding programming overhead
+of its own.
+We felt it was critical to eliminate such
+programmer overheads, and advances in garbage collection
+technology in the last few years gave us confidence that it
+could be implemented cheaply enough, and with low enough
+latency, that it could be a viable approach for networked
+systems.
 
-동시성 프로그래밍의 많은 어려움은 객체 수명 문제에 뿌리를 두고 있습니다. 객체가 스레드 간에 전달됨에 따라, 해당 객체들이 안전하게 해제되도록 보장하는 것이 번거로워지기 때문입니다.
+Much of the difficulty of concurrent programming
+has its roots in the object lifetime problem:
+as objects get passed among threads it becomes cumbersome
+to guarantee they become freed safely.
+Automatic garbage collection makes concurrent code far easier to write.
+Of course, implementing garbage collection in a concurrent environment is
+itself a challenge, but meeting it once rather than in every
+program helps everyone.
 
-자동 가비지 컬렉션(Automatic garbage collection)은 동시성 코드를 훨씬 더 쉽게 작성할 수 있게 해줍니다. 물론 동시성 환경에서 가비지 컬렉션을 구현하는 것 자체가 하나의 도전 과제이지만, 모든 프로그램에서 매번 이 문제를 해결하는 대신 한 번만 해결해 두는 것이 모두에게 도움이 됩니다.
+Finally, concurrency aside, garbage collection makes interfaces
+simpler because they don't need to specify how memory is managed across them.
 
-마지막으로, 동시성 문제를 제외하더라도, 가비지 컬렉션(garbage collection)은 인터페이스를 통해 메모리가 어떻게 관리되는지를 명시할 필요가 없게 하므로 인터페이스를 더 단순하게 만듭니다.
+This is not to say that the recent work in languages
+like Rust that bring new ideas to the problem of managing
+resources is misguided; we encourage this work and are excited to see
+how it evolves.
+But Go takes a more traditional approach by addressing
+object lifetimes through
+garbage collection, and garbage collection alone.
 
-이는 리소스 관리 문제에 새로운 아이디어를 도입한 Rust와 같은 언어들의 최근 연구가 잘못되었다는 뜻이 아닙니다. 우리는 이러한 연구를 권장하며, 이것이 어떻게 발전할지 기대하고 있습니다.
+The current implementation is a mark-and-sweep collector.
+If the machine is a multiprocessor, the collector runs on a separate CPU
+core in parallel with the main program.
+Major work on the collector in recent years has reduced pause times
+often to the sub-millisecond range, even for large heaps,
+all but eliminating one of the major objections to garbage collection
+in networked servers.
+Work continues to refine the algorithm, reduce overhead and
+latency further, and to explore new approaches.
+The 2018
+[ISMM keynote](/blog/ismmkeynote)
+by Rick Hudson of the Go team
+describes the progress so far and suggests some future approaches.
 
-하지만 Go는 가비지 컬렉션(garbage collection), 오직 가비지 컬렉션만을 통해 객체의 생명 주기를 처리하는 보다 전통적인 접근 방식을 취합니다.
-
-현재 구현 방식은 mark-and-sweep 컬렉터입니다.
-머신이 멀티프로세서인 경우, 컬렉터는 메인 프로그램과 병렬로 별도의 CPU 코어에서 실행됩니다.
-최근 몇 년간 컬렉터에 이루어진 주요 작업들을 통해, 대규모 힙에서도 일시 중지 시간(pause times)을 흔히 1밀리초 미만(sub-millisecond range)으로 단축시켰으며, 이는 네트워크 서버에서 가비지 컬렉션에 대해 제기되었던 주요 반대 의견 중 하나를 거의 완전히 해결한 것입니다.
-알고리즘을 정교화하고, 오버헤드와 지연 시간을 더욱 줄이며, 새로운 접근 방식을 탐색하는 작업이 계속되고 있습니다.
-Go 팀의 Rick Hudson이 발표한 2018년 [ISMM keynote](/blog/ismmkeynote)에서는 지금까지의 진행 상황과 향후 접근 방식에 대해 설명하고 있습니다.
-
-성능에 관해서는, Go가 가비지 컬렉션(garbage-collected) 언어에서 일반적인 수준보다 훨씬 더 메모리 레이아웃과 할당에 대해 프로그래머에게 상당한 제어권을 부여한다는 점을 기억하십시오. 신중한 프로그래머는 언어를 잘 활용함으로써 가비지 컬렉션 오버헤드를 획기적으로 줄일 수 있습니다. Go의 프로파일링 도구 시연을 포함한 구체적인 예시는 [profiling Go programs](/blog/profiling-go-programs) 문서를 참조하십시오.
+On the topic of performance, keep in mind that Go gives the programmer
+considerable control over memory layout and allocation, much more than
+is typical in garbage-collected languages. A careful programmer can reduce
+the garbage collection overhead dramatically by using the language well;
+see the article about
+[profiling Go programs](/blog/profiling-go-programs) for a worked example,
+including a demonstration of Go's profiling tools.

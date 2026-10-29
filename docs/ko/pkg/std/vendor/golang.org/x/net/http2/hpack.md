@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`hpack` 패키지는 HTTP/2 환경에서 HTTP 헤더 필드를 효율적으로 표현하기 위한 압축 형식인 HPACK을 구현합니다.
+Package hpack implements HPACK, a compression format for efficiently representing HTTP header fields in the context of HTTP/2.
 
 ## 원문 요약
 

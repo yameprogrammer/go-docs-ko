@@ -1,117 +1,144 @@
 <!--{
-  "Title": "튜토리얼: Go와 Gin을 이용한 RESTful API 개발",
+  "Title": "Tutorial: Developing a RESTful API with Go and Gin",
   "Breadcrumb": true
 }-->
 
-이 튜토리얼에서는 Go와 [Gin Web Framework](https://gin-gonic.com/en/docs/) (Gin)를 사용하여 RESTful 웹 서비스 API를 작성하는 기본 방법을 소개합니다.
+This tutorial introduces the basics of writing a RESTful web service API with Go
+and the [Gin Web Framework](https://gin-gonic.com/en/docs/) (Gin).
 
-Go와 그 툴링에 대해 기본적인 익숙함이 있다면 이 튜토리얼을 가장 효과적으로 활용하실 수 있습니다. Go를 처음 접하신다면, [Tutorial: Get started with Go](/doc/tutorial/getting-started)를 통해 빠르게 입문해 보세요.
+You'll get the most out of this tutorial if you have a basic familiarity with Go
+and its tooling. If this is your first exposure to Go, please see
+[Tutorial: Get started with Go](/doc/tutorial/getting-started)
+for a quick introduction.
 
-Gin은 웹 서비스 구축을 포함하여 웹 애플리케이션 빌드와 관련된 많은 코딩 작업을 단순화합니다. 이 튜토리얼에서는 Gin을 사용하여 요청을 라우팅하고, 요청 세부 정보를 검색하며, 응답을 위한 JSON 마샬링을 수행하는 방법을 알아봅니다.
+Gin simplifies many coding tasks associated with building web applications,
+including web services. In this tutorial, you'll use Gin to route requests,
+retrieve request details, and marshal JSON for responses.
 
-이 튜토리얼에서는 두 개의 엔드포인트를 가진 RESTful API 서버를 구축하게 됩니다. 예제 프로젝트는 빈티지 재즈 레코드 데이터 저장소입니다.
+In this tutorial, you will build a RESTful API server with two endpoints. Your
+example project will be a repository of data about vintage jazz records.
 
-튜토리얼은 다음 섹션들로 구성되어 있습니다:
+The tutorial includes the following sections:
 
-1. API 엔드포인트를 설계합니다.
-2. 코드를 위한 폴더를 생성합니다.
-3. 데이터를 생성합니다.
-4. 모든 아이템을 반환하는 핸들러를 작성합니다.
-5. 새로운 아이템을 추가하는 핸들러를 작성합니다.
-6. 특정 아이템을 반환하는 핸들러를 작성합니다.
+1. Design API endpoints.
+2. Create a folder for your code.
+3. Create the data.
+4. Write a handler to return all items.
+5. Write a handler to add a new item.
+6. Write a handler to return a specific item.
 
-**참고:** 다른 튜토리얼은 [Tutorials](/doc/tutorial/index.html)를 참조하세요.
+**Note:** For other tutorials, see [Tutorials](/doc/tutorial/index.html).
 
-Google Cloud Shell에서 완료할 수 있는 대화형 튜토리얼로 시도하시려면, 아래 버튼을 클릭하세요.
+To try this as an interactive tutorial you complete in Google Cloud Shell,
+click the button below.
 
 [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.png)](https://ide.cloud.google.com/?cloudshell_workspace=~&walkthrough_tutorial_url=https://raw.githubusercontent.com/golang/tour/master/tutorial/web-service-gin.md)
 
-## 사전 요구 사항
 
-*   **Go.** 이 튜토리얼을 따라하기 위해 최신 버전의 Go 사용을 권장합니다.
-    설치 방법은 [Installing Go](/doc/install)를 참조하세요.
-*   **코드 편집 도구.** 사용 중인 어떤 텍스트 편집기라도 괜찮습니다.
-*   **명령어 터미널.** Go는 Linux 및 Mac의 모든 터미널, 그리고 Windows의 PowerShell 또는 cmd에서 잘 작동합니다.
-*   **curl 도구.** Linux 및 Mac에는 이미 설치되어 있을 것입니다. Windows의 경우, Windows 10 Insider 빌드 17063 및 이후 버전에는 포함되어 있습니다. 이전 Windows 버전의 경우 별도로 설치해야 할 수도 있습니다. 자세한 내용은 [Tar and Curl Come to Windows](https://docs.microsoft.com/en-us/virtualization/community/team-blog/2017/20171219-tar-and-curl-come-to-windows)를 참조하세요.
+## Prerequisites
 
-## API 엔드포인트 설계 {#design_endpoints}
+*   **Go.** We recommend using the latest version of Go to follow this tutorial.
+    For installation instructions, see [Installing Go](/doc/install).
+*   **A tool to edit your code.** Any text editor you have will work fine.
+*   **A command terminal.** Go works well using any terminal on Linux and Mac,
+    and on PowerShell or cmd in Windows.
+*   **The curl tool.** On Linux and Mac, this should already be installed. On
+    Windows, it's included on Windows 10 Insider build 17063 and later. For earlier
+    Windows versions, you might need to install it. For more, see
+    [Tar and Curl Come to Windows](https://docs.microsoft.com/en-us/virtualization/community/team-blog/2017/20171219-tar-and-curl-come-to-windows).
 
-빈티지 바이닐 레코드를 판매하는 상점에 액세스할 수 있는 API를 구축하게 됩니다. 따라서 클라이언트가 사용자를 위해 앨범을 조회하고 추가할 수 있는 엔드포인트를 제공해야 합니다.
+## Design API endpoints {#design_endpoints}
 
-API를 개발할 때, 일반적으로 엔드포인트를 설계하는 것부터 시작합니다. 엔드포인트를 이해하기 쉽게 설계하면 API 사용자들이 더 효율적으로 사용할 수 있습니다.
+You'll build an API that provides access to a store selling vintage recordings
+on vinyl. So you'll need to provide endpoints through which a client can get
+and add albums for users.
 
-이 튜토리얼에서 생성하게 될 엔드포인트들은 다음과 같습니다.
+When developing an API, you typically begin by designing the endpoints. Your
+API's users will have more success if the endpoints are easy to understand.
+
+Here are the endpoints you'll create in this tutorial.
 
 /albums
-*   `GET` – 모든 앨범 목록을 JSON으로 반환하여 가져옵니다.
-*   `POST` – JSON으로 전송된 요청 데이터를 통해 새 앨범을 추가합니다.
+*   `GET` – Get a list of all albums, returned as JSON.
+*   `POST` – Add a new album from request data sent as JSON.
 
 /albums/:id
-*   `GET` – ID를 통해 앨범을 조회하며, 앨범 데이터를 JSON으로 반환합니다.
+*   `GET` – Get an album by its ID, returning the album data as JSON.
 
-다음으로, 코드를 저장할 폴더를 생성하겠습니다.
+Next, you'll create a folder for your code.
 
-## 코드 폴더 생성하기 {#create_folder}
+## Create a folder for your code {#create_folder}
 
-먼저, 작성할 코드를 위한 프로젝트를 생성하세요.
+To begin, create a project for the code you'll write.
 
-1. 명령 프롬프트를 열고 홈 디렉토리로 이동하십시오.
+1. Open a command prompt and change to your home directory.
 
-Linux 또는 Mac에서:
+    On Linux or Mac:
 
-```
+    ```
     $ cd
     ```
 
-Windows에서:
+    On Windows:
 
-```
+    ```
     C:\> cd %HOMEPATH%
     ```
 
-2. 명령 프롬프트를 사용하여 코드를 저장할 `web-service-gin`이라는 디렉토리를 생성하세요.
+2. Using the command prompt, create a directory for your code called
+    web-service-gin.
 
-```
+    ```
     $ mkdir web-service-gin
     $ cd web-service-gin
     ```
 
-3. 의존성을 관리할 수 있는 모듈을 생성하세요.
+3. Create a module in which you can manage dependencies.
 
-`go mod init` 명령어를 실행하고, 코드가 위치하게 될 모듈의 경로를 지정하십시오.
+    Run the `go mod init` command, giving it the path of the module your code
+    will be in.
 
-```
+    ```
     $ go mod init example/web-service-gin
     go: creating new go.mod: module example/web-service-gin
     ```
 
-이 명령은 추가하는 의존성들이 추적을 위해 나열되는 go.mod 파일을 생성합니다. 모듈 경로를 사용한 모듈 명명법에 대한 자세한 내용은 [Managing dependencies](/doc/modules/managing-dependencies#naming_module)를 참조하세요.
+    This command creates a go.mod file in which dependencies you add will be
+    listed for tracking. For more about naming a module with a module path, see
+    [Managing dependencies](/doc/modules/managing-dependencies#naming_module).
 
-다음으로, 데이터를 처리하기 위한 데이터 구조를 설계하게 됩니다.
+Next, you'll design data structures for handling data.
 
-## 데이터 생성 {#create_data}
+## Create the data {#create_data}
 
-튜토리얼을 단순하게 유지하기 위해, 데이터는 메모리에 저장합니다. 실제 일반적인 API는 데이터베이스와 상호작용합니다.
+To keep things simple for the tutorial, you'll store data in memory. A more
+typical API would interact with a database.
 
-데이터를 메모리에 저장하면 서버를 중지할 때마다 앨범 세트가 손실되며, 서버를 시작할 때 다시 생성된다는 점에 유의하세요.
+Note that storing data in memory means that the set of albums will be lost each
+time you stop the server, then recreated when you start it.
 
-#### 코드 작성하기
+#### Write the code
 
-1. 텍스트 에디터를 사용하여 `web-service` 디렉토리에 `main.go`라는 파일을 생성하세요. 이 파일에 Go 코드를 작성하게 됩니다.
-2. `main.go` 파일의 최상단에 다음 패키지 선언을 붙여넣으세요.
+1. Using your text editor, create a file called main.go in the web-service
+    directory. You'll write your Go code in this file.
+2. Into main.go, at the top of the file, paste the following package declaration.
 
-```
+    ```
     package main
     ```
 
-독립 실행형 프로그램(라이브러리와 반대되는 개념)은 항상 `main` 패키지에 포함됩니다.
+    A standalone program (as opposed to a library) is always in package `main`.
 
-3. 패키지 선언 아래에 다음과 같은 `album` struct 선언을 붙여넣으세요. 이를 사용하여 앨범 데이터를 메모리에 저장하게 됩니다.
+3. Beneath the package declaration, paste the following declaration of an
+    `album` struct. You'll use this to store album data in memory.
 
-``json:"artist"``와 같은 구조체 태그(Struct tags)는 구조체의 내용이 JSON으로 직렬화될 때 필드 이름이 어떻게 되어야 하는지를 지정합니다. 태그가 없으면 JSON은 구조체의 대문자로 시작하는 필드 이름을 그대로 사용하게 되는데, 이는 JSON에서 흔히 사용하는 스타일이 아닙니다.
+    Struct tags such as ``json:"artist"`` specify what a field's name should be
+    when the struct's contents are serialized into JSON. Without them, the JSON
+    would use the struct's capitalized field names – a style not as common in
+    JSON.
 
-```
-    // album은 레코드 앨범에 관한 데이터를 나타냅니다.
+    ```
+    // album represents data about a record album.
     type album struct {
     	ID     string  `json:"id"`
     	Title  string  `json:"title"`
@@ -120,10 +147,11 @@ Windows에서:
     }
     ```
 
-4. 방금 추가한 struct 선언 아래에, 시작할 때 사용할 데이터가 포함된 다음 `album` struct 슬라이스를 붙여넣으세요.
+4. Beneath the struct declaration you just added, paste the following slice of
+    `album` structs containing data you'll use to start.
 
-```
-    // 레코드 앨범 데이터를 시딩하기 위한 albums 슬라이스입니다.
+    ```
+    // albums slice to seed record album data.
     var albums = []album{
     	{ID: "1", Title: "Blue Train", Artist: "John Coltrane", Price: 56.99},
     	{ID: "2", Title: "Jeru", Artist: "Gerry Mulligan", Price: 17.99},
@@ -131,122 +159,144 @@ Windows에서:
     }
     ```
 
-다음으로, 첫 번째 엔드포인트를 구현하기 위한 코드를 작성하겠습니다.
+Next, you'll write code to implement your first endpoint.
 
-## 모든 항목을 반환하는 핸들러 작성하기 {#all_items}
+## Write a handler to return all items {#all_items}
 
-클라이언트가 `GET /albums`로 요청을 보낼 때, 모든 앨범 정보를 JSON으로 반환하고자 합니다.
+When the client makes a request at `GET /albums`, you want to return all the
+albums as JSON.
 
-이를 위해 다음과 같이 작성합니다:
+To do this, you'll write the following:
 
-*   응답을 준비하는 로직
-*   요청 경로를 로직에 매핑하는 코드
+*   Logic to prepare a response
+*   Code to map the request path to your logic
 
-이는 런타임 시 실행되는 순서와는 반대라는 점에 유의하십시오. 하지만 먼저 의존성을 추가한 다음, 해당 의존성에 의존하는 코드를 추가하는 방식입니다.
+Note that this is the reverse of how they'll be executed at runtime, but you're
+adding dependencies first, then the code that depends on them.
 
-#### 코드 작성하기
+#### Write the code
 
-1. 이전 섹션에서 추가한 struct 코드 아래에 다음 코드를 붙여넣어 앨범 목록을 가져오십시오.
+1. Beneath the struct code you added in the preceding section, paste the
+    following code to get the album list.
 
-이 `getAlbums` 함수는 `album` 구조체 슬라이스로부터 JSON을 생성하여, 해당 JSON을 응답에 씁니다.
+    This `getAlbums` function creates JSON from the slice of `album` structs,
+    writing the JSON into the response.
 
-```
-    // getAlbums는 모든 앨범 목록을 JSON으로 응답합니다.
+    ```
+    // getAlbums responds with the list of all albums as JSON.
     func getAlbums(c *gin.Context) {
     	c.IndentedJSON(http.StatusOK, albums)
     }
     ```
 
-이 코드에서 당신은 다음과 같은 작업을 수행합니다:
+    In this code, you:
 
-*   [`gin.Context`](https://pkg.go.dev/github.com/gin-gonic/gin#Context) 파라미터를 받는 `getAlbums` 함수를 작성하세요. 이 함수의 이름은 자유롭게 정할 수 있습니다. Gin과 Go 모두 특정한 함수 이름 형식을 요구하지 않습니다.
+    *   Write a `getAlbums` function that takes a
+        [`gin.Context`](https://pkg.go.dev/github.com/gin-gonic/gin#Context)
+        parameter. Note that you could have given this function any name – neither
+        Gin nor Go require a particular function name format.
 
-`gin.Context`는 Gin에서 가장 중요한 부분입니다. 요청 세부 정보를 전달하고, JSON을 검증 및 직렬화하며, 그 외 다양한 기능을 수행합니다. (이름은 비슷하지만, Go의 내장 [`context`](/pkg/context/) 패키지와는 다릅니다.)
+        `gin.Context` is the most important part of Gin. It carries request
+        details, validates and serializes JSON, and more. (Despite the similar
+        name, this is different from Go's built-in
+        [`context`](/pkg/context/) package.)
 
-*   [`Context.IndentedJSON`](https://pkg.go.dev/github.com/gin-gonic/gin#Context.IndentedJSON)을 호출하여
-        struct를 JSON으로 직렬화하고 응답에 추가합니다.
+    *   Call [`Context.IndentedJSON`](https://pkg.go.dev/github.com/gin-gonic/gin#Context.IndentedJSON)
+        to serialize the struct into JSON and add it to the response.
 
-함수의 첫 번째 인자는 클라이언트로 보내고자 하는 HTTP 상태 코드입니다. 여기서는 `200 OK`를 나타내기 위해 `net/http` 패키지의 [`StatusOK`](https://pkg.go.dev/net/http#StatusOK) 상수를 전달하고 있습니다.
+        The function's first argument is the HTTP status code you want to send to
+        the client. Here, you're passing the [`StatusOK`](https://pkg.go.dev/net/http#StatusOK)
+        constant from the `net/http` package to indicate `200 OK`.
 
-더 간결한 JSON을 전송하려면 `Context.IndentedJSON`을 [`Context.JSON`](https://pkg.go.dev/github.com/gin-gonic/gin#Context.JSON) 호출로 대체할 수 있습니다. 실제로 디버깅 시에는 들여쓰기 형태가 훨씬 다루기 쉬우며, 크기 차이는 보통 미미합니다.
+        Note that you can replace `Context.IndentedJSON` with a call to
+        [`Context.JSON`](https://pkg.go.dev/github.com/gin-gonic/gin#Context.JSON)
+        to send more compact JSON. In practice, the indented form is much easier to
+        work with when debugging and the size difference is usually small.
 
-2. `main.go` 파일 상단, `albums` 슬라이스 선언 바로 아래에 다음 코드를 붙여넣어 핸들러 함수를 엔드포인트 경로에 할당하세요.
+2. Near the top of main.go, just beneath the `albums` slice declaration, paste
+    the code below to assign the handler function to an endpoint path.
 
-이 설정은 `getAlbums`가 `/albums` 엔드포인트 경로로 들어오는 요청을 처리하는 연관 관계를 설정합니다.
+    This sets up an association in which `getAlbums` handles requests to the
+    `/albums` endpoint path.
 
-```go
+    ```
     func main() {
     	router := gin.Default()
     	router.GET("/albums", getAlbums)
-```
 
-```go
-router.Run("localhost:8080")
+    	router.Run("localhost:8080")
     }
     ```
 
-이 코드에서 당신은 다음과 같은 작업을 수행합니다:
+    In this code, you:
 
-*   [`Default`](https://pkg.go.dev/github.com/gin-gonic/gin#Default)를 사용하여 Gin 라우터를 초기화합니다.
-    *   [`GET`](https://pkg.go.dev/github.com/gin-gonic/gin#RouterGroup.GET) 함수를 사용하여 `GET` HTTP 메서드와 `/albums` 경로를 핸들러 함수에 연결합니다.
+    *   Initialize a Gin router using
+        [`Default`](https://pkg.go.dev/github.com/gin-gonic/gin#Default).
+    *   Use the [`GET`](https://pkg.go.dev/github.com/gin-gonic/gin#RouterGroup.GET)
+        function to associate the `GET` HTTP method and `/albums` path with a handler
+        function.
 
-`getAlbums` 함수의 _이름_을 전달하고 있다는 점에 유의하세요. 이는 `getAlbums()`(괄호에 주의)를 통해 함수의 _결과_를 전달하는 것과는 다릅니다.
+        Note that you're passing the _name_ of the `getAlbums` function. This is
+        different from passing the _result_ of the function, which you would do by
+        passing `getAlbums()` (note the parenthesis).
 
-*   [`Run`](https://pkg.go.dev/github.com/gin-gonic/gin#Engine.Run) 함수를 사용하여 라우터를 `http.Server`에 연결하고 서버를 시작하십시오.
+    *   Use the [`Run`](https://pkg.go.dev/github.com/gin-gonic/gin#Engine.Run)
+        function to attach the router to an `http.Server` and start the server.
 
-3. `main.go` 파일의 상단, package 선언 바로 아래에 방금 작성한 코드를 지원하는 데 필요한 패키지들을 import 하세요.
+3. Near the top of main.go, just beneath the package declaration, import the
+    packages you'll need to support the code you've just written.
 
-코드의 첫 부분은 다음과 같아야 합니다:
+    The first lines of code should look like this:
 
-```markdown
+    ```
     package main
-```
 
-제공해주신 내용이 코드 조각(`import` 문)뿐이라 번역할 텍스트가 없지만, 요청하신 기술 번역 가이드라인에 따라 해당 부분을 유지하여 전달해 드립니다.
-
-```go
-import (
+    import (
     	"net/http"
-```
 
-"github.com/gin-gonic/gin"
+    	"github.com/gin-gonic/gin"
     )
     ```
 
-4. main.go를 저장하세요.
+4. Save main.go.
 
-#### 코드 실행하기
+#### Run the code
 
-1. Gin 모듈을 종속성으로 추적하기 시작합니다.
+1. Begin tracking the Gin module as a dependency.
 
-커맨드 라인에서 [`go get`](/cmd/go/#hdr-Add_dependencies_to_current_module_and_install_them)을 사용하여 github.com/gin-gonic/gin 모듈을 현재 모듈의 의존성으로 추가하세요.
-점(`.`) 인수를 사용하여 "현재 디렉터리에 있는 코드의 의존성을 가져오기"를 의미하도록 하세요.
+    At the command line, use [`go get`](/cmd/go/#hdr-Add_dependencies_to_current_module_and_install_them)
+    to add the github.com/gin-gonic/gin module as a dependency for your module.
+    Use a dot argument to mean "get dependencies for code in the current
+    directory."
 
-```
+    ```
     $ go get .
     go get: added github.com/gin-gonic/gin v1.7.2
     ```
 
-Go는 이전 단계에서 추가한 `import` 선언을 충족하기 위해 이 의존성을 해결하고 다운로드했습니다.
+    Go resolved and downloaded this dependency to satisfy the `import`
+    declaration you added in the previous step.
 
-2. `main.go` 파일이 포함된 디렉토리의 명령줄에서 코드를 실행하세요.
-    "현재 디렉토리의 코드를 실행하라"는 의미로 점(`.`) 인자를 사용하세요.
+2. From the command line in the directory containing main.go, run the code.
+    Use a dot argument to mean "run code in the current directory."
 
-```
+    ```
     $ go run .
     ```
 
-코드가 실행되면, 요청을 보낼 수 있는 HTTP 서버가 구동됩니다.
+    Once the code is running, you have a running HTTP server to which you can
+    send requests.
 
-3. 새로운 명령줄 창에서 `curl`을 사용하여 실행 중인 웹 서비스에 요청을 보내십시오.
+3. From a new command line window, use `curl` to make a request to your running
+    web service.
 
-```
+    ```
     $ curl http://localhost:8080/albums
     ```
 
-해당 명령어는 서비스에 시딩(seed)한 데이터를 표시해야 합니다.
+    The command should display the data you seeded the service with.
 
-```
+    ```
     [
             {
                     "id": "1",
@@ -269,78 +319,88 @@ Go는 이전 단계에서 추가한 `import` 선언을 충족하기 위해 이 �
     ]
     ```
 
-API를 시작하셨습니다! 다음 섹션에서는 아이템을 추가하기 위한 `POST` 요청을 처리하는 코드가 포함된 또 다른 엔드포인트를 생성하게 됩니다.
+You've started an API! In the next section, you'll create another endpoint with
+code to handle a `POST` request to add an item.
 
-## 새로운 항목을 추가하는 핸들러 작성하기 {#add_item}
+## Write a handler to add a new item {#add_item}
 
-클라이언트가 `/albums` 경로로 `POST` 요청을 보낼 때, 요청 본문에 기술된 앨범을 기존 앨범 데이터에 추가하고자 합니다.
+When the client makes a `POST` request at `/albums`, you want to add the album
+described in the request body to the existing albums' data.
 
-이를 위해 다음과 같이 작성합니다:
+To do this, you'll write the following:
 
-*   새 앨범을 기존 리스트에 추가하는 로직.
-*   `POST` 요청을 해당 로직으로 라우팅하는 간단한 코드.
+*   Logic to add the new album to the existing list.
+*   A bit of code to route the `POST` request to your logic.
 
-#### 코드 작성하기
+#### Write the code
 
-1. 앨범 목록에 앨범 데이터를 추가하는 코드를 추가합니다.
+1. Add code to add albums data to the list of albums.
 
-`import` 문 이후 적절한 위치에 다음 코드를 붙여넣으세요. (파일의 끝부분이 적당하지만, Go는 함수 선언 순서를 강제하지 않습니다.)
+    Somewhere after the `import` statements, paste the following code. (The end
+    of the file is a good place for this code, but Go doesn't enforce the order
+    in which you declare functions.)
 
-```go
-    // postAlbums는 요청 본문에서 받은 JSON으로부터 앨범을 추가합니다.
+    ```
+    // postAlbums adds an album from JSON received in the request body.
     func postAlbums(c *gin.Context) {
     	var newAlbum album
-```
 
-// BindJSON을 호출하여 수신된 JSON을
-    	// newAlbum에 바인딩합니다.
+    	// Call BindJSON to bind the received JSON to
+    	// newAlbum.
     	if err := c.BindJSON(&newAlbum); err != nil {
     		return
     	}
 
-// 새 앨범을 슬라이스에 추가합니다.
+    	// Add the new album to the slice.
     	albums = append(albums, newAlbum)
     	c.IndentedJSON(http.StatusCreated, newAlbum)
     }
     ```
 
-이 코드에서 당신은 다음과 같은 작업을 수행합니다:
+    In this code, you:
 
-*   [`Context.BindJSON`](https://pkg.go.dev/github.com/gin-gonic/gin#Context.BindJSON)을 사용하여 요청 본문을 `newAlbum`에 바인딩하세요.
-    *   JSON에서 초기화된 `album` 구조체를 `albums` 슬라이스에 추가하세요.
-    *   응답에 `201` 상태 코드와 함께 추가한 앨범을 나타내는 JSON을 추가하세요.
+    *   Use [`Context.BindJSON`](https://pkg.go.dev/github.com/gin-gonic/gin#Context.BindJSON)
+        to bind the request body to `newAlbum`.
+    *   Append the `album` struct initialized from the JSON to the `albums`
+        slice.
+    *   Add a `201` status code to the response, along with JSON representing
+        the album you added.
 
-2. `main` 함수를 다음과 같이 `router.POST` 함수를 포함하도록 변경하세요.
+2. Change your `main` function so that it includes the `router.POST` function,
+    as in the following.
 
-```go
+    ```
     func main() {
     	router := gin.Default()
     	router.GET("/albums", getAlbums)
     	router.POST("/albums", postAlbums)
-```
 
-router.Run("localhost:8080")
+    	router.Run("localhost:8080")
     }
     ```
 
-이 코드에서 당신은 다음과 같은 작업을 수행합니다:
+    In this code, you:
 
-*   `/albums` 경로의 `POST` 메서드를 `postAlbums` 함수와 연결합니다.
+    *   Associate the `POST` method at the `/albums` path with the `postAlbums`
+        function.
 
-Gin을 사용하면 핸들러를 HTTP 메서드와 경로의 조합에 연결할 수 있습니다. 이러한 방식으로, 클라이언트가 사용하는 메서드에 따라 단일 경로로 전송된 요청을 별도로 라우팅할 수 있습니다.
+        With Gin, you can associate a handler with an HTTP method-and-path
+        combination. In this way, you can separately route requests sent to a
+        single path based on the method the client is using.
 
-#### 코드 실행하기
+#### Run the code
 
-1. 이전 섹션에서 서버가 여전히 실행 중이라면, 서버를 중지하세요.
-2. `main.go` 파일이 포함된 디렉토리의 명령줄에서 코드를 실행하세요.
+1. If the server is still running from the last section, stop it.
+2. From the command line in the directory containing main.go, run the code.
 
-```
+    ```
     $ go run .
     ```
 
-3. 다른 명령줄 창에서 `curl`을 사용하여 실행 중인 웹 서비스에 요청을 보내십시오.
+3. From a different command line window, use `curl` to make a request to your
+    running web service.
 
-```
+    ```
     $ curl http://localhost:8080/albums \
         --include \
         --header "Content-Type: application/json" \
@@ -348,17 +408,15 @@ Gin을 사용하면 핸들러를 HTTP 메서드와 경로의 조합에 연결할
         --data '{"id": "4","title": "The Modern Sound of Betty Carter","artist": "Betty Carter","price": 49.99}'
     ```
 
-명령어는 추가된 앨범의 헤더와 JSON을 표시해야 합니다.
+    The command should display headers and JSON for the added album.
 
-```
+    ```
     HTTP/1.1 201 Created
     Content-Type: application/json; charset=utf-8
     Date: Wed, 02 Jun 2021 00:34:12 GMT
     Content-Length: 116
-```
 
-```json
-{
+    {
         "id": "4",
         "title": "The Modern Sound of Betty Carter",
         "artist": "Betty Carter",
@@ -366,17 +424,18 @@ Gin을 사용하면 핸들러를 HTTP 메서드와 경로의 조합에 연결할
     }
     ```
 
-4. 이전 섹션에서와 같이 `curl`을 사용하여 앨범 전체 목록을 조회하고, 새 앨범이 추가되었는지 확인하십시오.
+4. As in the previous section, use `curl` to retrieve the full list of albums,
+    which you can use to confirm that the new album was added.
 
-```
+    ```
     $ curl http://localhost:8080/albums \
         --header "Content-Type: application/json" \
         --request "GET"
     ```
 
-해당 명령어는 앨범 목록을 표시해야 합니다.
+    The command should display the album list.
 
-```
+    ```
     [
             {
                     "id": "1",
@@ -405,32 +464,34 @@ Gin을 사용하면 핸들러를 HTTP 메서드와 경로의 조합에 연결할
     ]
     ```
 
-다음 섹션에서는 특정 항목에 대한 `GET` 요청을 처리하는 코드를 추가합니다.
+In the next section, you'll add code to handle a `GET` for a specific item.
 
-## 특정 항목을 반환하는 핸들러 작성하기 {#specific_item}
+## Write a handler to return a specific item {#specific_item}
 
-클라이언트가 `GET /albums/[id]` 요청을 보낼 때, `id` 경로 파라미터와 일치하는 ID를 가진 앨범을 반환하고자 합니다.
+When the client makes a request to `GET /albums/[id]`, you want to return the
+album whose ID matches the `id` path parameter.
 
-이를 위해 다음 단계를 수행합니다:
+To do this, you will:
 
-*   요청된 앨범을 가져오는 로직을 추가합니다.
-*   경로를 해당 로직에 매핑합니다.
+*   Add logic to retrieve the requested album.
+*   Map the path to the logic.
 
-#### 코드 작성하기
+#### Write the code
 
-1. 이전 섹션에서 추가한 `postAlbums` 함수 아래에, 특정 앨범을 조회하기 위한 다음 코드를 붙여넣으세요.
+1. Beneath the `postAlbums` function you added in the preceding section, paste
+    the following code to retrieve a specific album.
 
-이 `getAlbumByID` 함수는 요청 경로(request path)에서 ID를 추출한 다음, 그에 맞는 앨범을 찾습니다.
+    This `getAlbumByID` function will extract the ID in the request path, then
+    locate an album that matches.
 
-```go
-    // getAlbumByID는 클라이언트가 보낸 id 파라미터와 ID 값이 일치하는 앨범을 찾아
-    // 해당 앨범을 응답으로 반환합니다.
+    ```
+    // getAlbumByID locates the album whose ID value matches the id
+    // parameter sent by the client, then returns that album as a response.
     func getAlbumByID(c *gin.Context) {
     	id := c.Param("id")
-```
 
-```go
-    	// 앨범 리스트를 반복하며 ID 값이 매개변수와 일치하는 앨범을 찾습니다.
+    	// Loop over the list of albums, looking for
+    	// an album whose ID value matches the parameter.
     	for _, a := range albums {
     		if a.ID == id {
     			c.IndentedJSON(http.StatusOK, a)
@@ -441,52 +502,64 @@ Gin을 사용하면 핸들러를 HTTP 메서드와 경로의 조합에 연결할
     }
     ```
 
-이 코드에서 당신은 다음과 같은 작업을 수행합니다:
+    In this code, you:
 
-*   URL에서 `id` 경로 파라미터를 가져오려면 [`Context.Param`](https://pkg.go.dev/github.com/gin-gonic/gin#Context.Param)을 사용하세요. 이 핸들러를 경로에 매핑할 때, 경로에 파라미터를 위한 플레이스홀더를 포함하게 됩니다.
-    *   슬라이스 내의 `album` 구조체들을 루프 돌며, `ID` 필드 값이 `id` 파라미터 값과 일치하는 항목을 찾으세요. 일치하는 항목을 찾으면, 해당 `album` 구조체를 JSON으로 직렬화하여 `200 OK` HTTP 코드와 함께 응답으로 반환합니다.
+    *   Use [`Context.Param`](https://pkg.go.dev/github.com/gin-gonic/gin#Context.Param)
+        to retrieve the `id` path parameter from the URL. When you map this
+        handler to a path, you'll include a placeholder for the parameter in the
+        path.
+    *   Loop over the `album` structs in the slice, looking for one whose `ID`
+        field value matches the `id` parameter value. If it's found, you serialize
+        that `album` struct to JSON and return it as a response with a `200 OK`
+        HTTP code.
 
-앞서 언급했듯이, 실제 서비스에서는 이러한 조회를 수행하기 위해 데이터베이스 쿼리를 사용할 가능성이 높습니다.
+        As mentioned above, a real-world service would likely use a database
+        query to perform this lookup.
 
-*   앨범을 찾을 수 없는 경우 [`http.StatusNotFound`](https://pkg.go.dev/net/http#StatusNotFound)와 함께 HTTP `404` 에러를 반환합니다.
+    *   Return an HTTP `404` error with [`http.StatusNotFound`](https://pkg.go.dev/net/http#StatusNotFound)
+        if the album isn't found.
 
-2. 마지막으로, 다음 예제와 같이 경로가 `/albums/:id`인 `router.GET` 호출을 새로 추가하여 `main` 함수를 수정하세요.
+2. Finally, change your `main` so that it includes a new call to `router.GET`,
+    where the path is now `/albums/:id`, as shown in the following example.
 
-```go
+    ```
     func main() {
     	router := gin.Default()
     	router.GET("/albums", getAlbums)
     	router.GET("/albums/:id", getAlbumByID)
     	router.POST("/albums", postAlbums)
-```
 
-router.Run("localhost:8080")
+    	router.Run("localhost:8080")
     }
     ```
 
-이 코드에서 당신은 다음과 같은 작업을 수행합니다:
+    In this code, you:
 
-*   `/albums/:id` 경로를 `getAlbumByID` 함수와 연결합니다.
-        Gin에서 경로 항목 앞에 붙는 콜론(`:`)은 해당 항목이 경로 매개변수(path parameter)임을 의미합니다.
+    *   Associate the `/albums/:id` path with the `getAlbumByID` function. In
+        Gin, the colon preceding an item in the path signifies that the item is
+        a path parameter.
 
-#### 코드 실행하기
+#### Run the code
 
-1. 이전 섹션에서 서버가 여전히 실행 중이라면, 서버를 중지하세요.
-2. `main.go` 파일이 포함된 디렉토리의 명령줄에서 코드를 실행하여 서버를 시작하세요.
+1. If the server is still running from the last section, stop it.
+2. From the command line in the directory containing main.go, run the code to
+    start the server.
 
-```
+    ```
     $ go run .
     ```
 
-3. 다른 명령줄 창에서 `curl`을 사용하여 실행 중인 웹 서비스에 요청을 보내십시오.
+3. From a different command line window, use `curl` to make a request to your
+    running web service.
 
-```
+    ```
     $ curl http://localhost:8080/albums/2
     ```
 
-해당 명령어는 사용자가 입력한 ID에 해당하는 앨범의 JSON을 표시해야 합니다. 만약 앨범을 찾지 못한 경우, 에러 메시지가 포함된 JSON을 받게 됩니다.
+    The command should display JSON for the album whose ID you used. If the
+    album wasn't found, you'll get JSON with an error message.
 
-```
+    ```
     {
             "id": "2",
             "title": "Jeru",
@@ -495,21 +568,26 @@ router.Run("localhost:8080")
     }
     ```
 
-## 결론 {#conclusion}
+## Conclusion {#conclusion}
 
-축하합니다! 방금 Go와 Gin을 사용하여 간단한 RESTful 웹 서비스를 작성하셨습니다.
+Congratulations! You've just used Go and Gin to write a simple RESTful web
+service.
 
-추천 다음 주제:
+Suggested next topics:
 
-*   Go가 처음이시라면 [Effective Go](/doc/effective_go)와 [How to write Go code](/doc/code)에서 유용한 모범 사례를 확인하실 수 있습니다.
-*   [Go Tour](/tour/)는 Go의 기초를 단계별로 배울 수 있는 훌륭한 입문 가이드입니다.
-*   Gin에 대한 더 자세한 내용은 [Gin Web Framework 패키지 문서](https://pkg.go.dev/github.com/gin-gonic/gin) 또는 [Gin Web Framework 문서](https://gin-gonic.com/en/docs/)를 참조하세요.
+*   If you're new to Go, you'll find useful best practices described in
+    [Effective Go](/doc/effective_go) and
+    [How to write Go code](/doc/code).
+*   The [Go Tour](/tour/) is a great step-by-step
+    introduction to Go fundamentals.
+*   For more about Gin, see the [Gin Web Framework package documentation](https://pkg.go.dev/github.com/gin-gonic/gin)
+    or the [Gin Web Framework docs](https://gin-gonic.com/en/docs/).
 
-## 완성된 코드 {#completed_code}
+## Completed code {#completed_code}
 
-이 섹션에는 이 튜토리얼을 통해 구축하는 애플리케이션의 코드가 포함되어 있습니다.
+This section contains the code for the application you build with this tutorial.
 
-```go
+```
 package main
 
 import (
@@ -518,7 +596,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// album은 레코드 앨범에 대한 데이터를 나타냅니다.
+// album represents data about a record album.
 type album struct {
 	ID     string  `json:"id"`
 	Title  string  `json:"title"`
@@ -526,7 +604,7 @@ type album struct {
 	Price  float64 `json:"price"`
 }
 
-// albums 슬라이스는 초기 레코드 앨범 데이터를 심기(seed) 위해 사용됩니다.
+// albums slice to seed record album data.
 var albums = []album{
 	{ID: "1", Title: "Blue Train", Artist: "John Coltrane", Price: 56.99},
 	{ID: "2", Title: "Jeru", Artist: "Gerry Mulligan", Price: 17.99},
@@ -542,33 +620,33 @@ func main() {
 	router.Run("localhost:8080")
 }
 
-// getAlbums는 모든 앨범의 목록을 JSON으로 응답합니다.
+// getAlbums responds with the list of all albums as JSON.
 func getAlbums(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, albums)
 }
 
-// postAlbums는 요청 본문에서 받은 JSON을 통해 앨범을 추가합니다.
+// postAlbums adds an album from JSON received in the request body.
 func postAlbums(c *gin.Context) {
 	var newAlbum album
 
-	// BindJSON을 호출하여 수신된 JSON을
-	// newAlbum에 바인딩합니다.
+	// Call BindJSON to bind the received JSON to
+	// newAlbum.
 	if err := c.BindJSON(&newAlbum); err != nil {
 		return
 	}
 
-	// 새 앨범을 슬라이스에 추가합니다.
+	// Add the new album to the slice.
 	albums = append(albums, newAlbum)
 	c.IndentedJSON(http.StatusCreated, newAlbum)
 }
 
-// getAlbumByID는 클라이언트가 보낸 id 파라미터와 일치하는 ID 값을 가진
-// 앨범을 찾아 해당 앨범을 응답으로 반환합니다.
+// getAlbumByID locates the album whose ID value matches the id
+// parameter sent by the client, then returns that album as a response.
 func getAlbumByID(c *gin.Context) {
 	id := c.Param("id")
 
-	// 앨범 목록을 순회하며 ID 값이
-	// 파라미터와 일치하는 앨범을 찾습니다.
+	// Loop through the list of albums, looking for
+	// an album whose ID value matches the parameter.
 	for _, a := range albums {
 		if a.ID == id {
 			c.IndentedJSON(http.StatusOK, a)

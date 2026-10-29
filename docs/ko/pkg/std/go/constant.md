@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`constant` 패키지는 타입이 지정되지 않은 Go 상수를 나타내는 `Values`와 그에 대응하는 연산들을 구현합니다.
+Package constant implements Values representing untyped Go constants and their corresponding operations.
 
 ## 원문 요약
 

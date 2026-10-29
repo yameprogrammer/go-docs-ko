@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`cpu` 패키지는 Go 표준 라이브러리에서 사용하는 프로세서 기능 탐지 기능을 구현합니다.
+Package cpu implements processor feature detection used by the Go standard library.
 
 ## 원문 요약
 

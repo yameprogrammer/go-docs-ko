@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`plan9obj` 패키지는 Plan 9 a.out 객체 파일에 대한 액세스를 구현합니다.
+Package plan9obj implements access to Plan 9 a.out object files.
 
 ## 원문 요약
 

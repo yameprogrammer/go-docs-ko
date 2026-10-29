@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`os` 패키지는 운영 체제 기능에 대한 플랫폼 독립적인 인터페이스를 제공합니다.
+Package os provides a platform-independent interface to operating system functionality.
 
 ## 원문 요약
 

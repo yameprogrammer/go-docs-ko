@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`field` 패키지는 $2^{255}-19$ 모듈로에 대한 빠른 산술 연산을 구현합니다.
+Package field implements fast arithmetic modulo 2^255-19.
 
 ## 원문 요약
 

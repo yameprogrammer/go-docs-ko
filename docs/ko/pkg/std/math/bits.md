@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`bits` 패키지는 미리 선언된 부호 없는 정수 타입에 대한 비트 카운팅 및 조작 함수를 구현합니다.
+Package bits implements bit counting and manipulation functions for the predeclared unsigned integer types.
 
 ## 원문 요약
 

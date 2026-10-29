@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`scanner` 패키지는 UTF-8로 인코딩된 텍스트를 위한 스캐너와 토크나이저를 제공합니다.
+Package scanner provides a scanner and tokenizer for UTF-8-encoded text.
 
 ## 원문 요약
 

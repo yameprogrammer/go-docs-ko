@@ -1,644 +1,874 @@
 <!--
-참고: 이 문서 및 이 디렉토리의 다른 문서에서는 `hello` `world`와 같이 고정폭 문구를 비고정폭 공백으로 구분하여 설정하는 관례를 따릅니다.
-이러한 문구에서 내부 태그를 제거하는 CL을 보내지 마십시오.
+NOTE: In this document and others in this directory, the convention is to
+set fixed-width phrases with non-fixed-width spaces, as in
+`hello` `world`.
+Do not send CLs removing the interior tags from such phrases.
 -->
 
 <style>
   main ul li { margin: 0.5em 0; }
 </style>
 
-## Go 1.9 소개 {#introduction}
+## Introduction to Go 1.9 {#introduction}
 
-최신 Go 릴리스인 버전 1.9는 [Go 1.8](go1.8) 이후 6개월 만에 출시되었으며, [Go 1.x 시리즈](/doc/devel/release.html)의 열 번째 릴리스입니다.
-언어에는 두 가지 [변경 사항](#language)이 있습니다: 타입 별칭(type aliases)에 대한 지원 추가와 부동 소수점 연산의 결합(fuse) 가능 시점 정의입니다.
-대부분의 변경 사항은 툴체인, 런타임 및 라이브러리의 구현에 포함되어 있습니다.
-언제나 그렇듯, 이번 릴리스는 Go 1의 [호환성 약속](/doc/go1compat.html)을 유지합니다.
-거의 모든 Go 프로그램이 이전과 동일하게 컴파일되고 실행될 것으로 예상합니다.
+The latest Go release, version 1.9, arrives six months
+after [Go 1.8](go1.8) and is the tenth release in
+the [Go 1.x
+series](/doc/devel/release.html).
+There are two [changes to the language](#language):
+adding support for type aliases and defining when implementations
+may fuse floating point operations.
+Most of the changes are in the implementation of the toolchain,
+runtime, and libraries.
+As always, the release maintains the Go 1
+[promise of compatibility](/doc/go1compat.html).
+We expect almost all Go programs to continue to compile and run as
+before.
 
-이번 릴리스에서는
-[투명한 단조 시간(monotonic time) 지원](#monotonic-time)이 추가되었고,
-패키지 내 [함수의 병렬 컴파일](#parallel-compile)이 가능해졌으며,
-[테스트 헬퍼 함수](#test-helper)에 대한 지원이 개선되었고,
-새로운 [비트 조작 패키지](#math-bits)가 포함되었으며,
-새로운 [동시성 맵 타입](#sync-map)이 추가되었습니다.
+The release
+adds [transparent monotonic time support](#monotonic-time),
+[parallelizes compilation of functions](#parallel-compile) within a package,
+better supports [test helper functions](#test-helper),
+includes a new [bit manipulation package](#math-bits),
+and has a new [concurrent map type](#sync-map).
 
-## 언어 변경 사항 {#language}
+## Changes to the language {#language}
 
-언어에 두 가지 변경 사항이 있습니다.
+There are two changes to the language.
 
-Go는 이제 타입을 패키지 간에 이동할 때 점진적인 코드 수정을 지원하기 위해 타입 별칭(type aliases)을 지원합니다.
-[타입 별칭 설계 문서](/design/18130-type-alias)와 [리팩토링에 관한 문서](/talks/2016/refactor.article)에서 이 문제에 대해 자세히 다루고 있습니다.
-요약하자면, 타입 별칭 선언은 다음과 같은 형태를 갖습니다:
+Go now supports type aliases to support gradual code repair while
+moving a type between packages.
+The [type alias
+design document](/design/18130-type-alias)
+and [an
+article on refactoring](/talks/2016/refactor.article) cover the problem in detail.
+In short, a type alias declaration has the form:
 
-`type T1 = T2`
+	type T1 = T2
 
-이 선언은 `T2`로 표시된 타입에 대해 `T1`이라는 별칭(alias)—즉, 대체 표기법—을 도입합니다. 다시 말해, `T1`과 `T2`는 모두 동일한 타입을 나타냅니다.
+This declaration introduces an alias name `T1`—an
+alternate spelling—for the type denoted by `T2`; that is,
+both `T1` and `T2` denote the same type.
 
 <!-- CL 40391 -->
-작은 언어 변경 사항으로, [언어 명세서](/ref/spec#Floating_point_operators)에 구현체가 부동 소수점 연산을 서로 결합할 수 있는 경우가 명시되었습니다. 예를 들어, 아키텍처의 "fused multiply and add"(FMA) 명령어를 사용하여 중간 결과인 `x*y`를 반올림하지 않고 `x*y` `+` `z`를 계산하는 경우가 이에 해당합니다.
-중간 반올림을 강제하려면 `float64(x*y)` `+` `z`와 같이 작성하십시오.
+A smaller language change is that the
+[language specification
+now states](/ref/spec#Floating_point_operators) when implementations are allowed to fuse floating
+point operations together, such as by using an architecture's "fused
+multiply and add" (FMA) instruction to compute `x*y` `+` `z`
+without rounding the intermediate result `x*y`.
+To force the intermediate rounding, write `float64(x*y)` `+` `z`.
 
-## 포트 {#ports}
+## Ports {#ports}
 
-이번 릴리스에서 새롭게 지원되는 운영 체제나 프로세서 아키텍처는 없습니다.
+There are no new supported operating systems or processor
+architectures in this release.
 
-### ppc64x는 POWER8이 필요합니다 {#power8}
+### ppc64x requires POWER8 {#power8}
 
 <!-- CL 36725, CL 36832 -->
-이제 `GOARCH=ppc64`와 `GOARCH=ppc64le` 모두 최소 POWER8 지원이 필요합니다. 이전 릴리스에서는 `GOARCH=ppc64le`만 POWER8을 필요로 했으며, 빅 엔디안(big endian) `ppc64` 아키텍처는 더 오래된 하드웨어를 지원했습니다.
+Both `GOARCH=ppc64` and `GOARCH=ppc64le` now
+require at least POWER8 support. In previous releases,
+only `GOARCH=ppc64le` required POWER8 and the big
+endian `ppc64` architecture supported older
+hardware.
+
 
 ### FreeBSD {#freebsd}
 
-Go 1.9는 FreeBSD 9.3에서 실행되는 마지막 릴리스이며, 해당 버전은 이미 [FreeBSD에서 지원되지 않습니다](https://www.freebsd.org/security/unsupported.html). Go 1.10부터는 FreeBSD 10.3 이상 버전이 필요합니다.
+Go 1.9 is the last release that will run on FreeBSD 9.3,
+which is already
+[unsupported by FreeBSD](https://www.freebsd.org/security/unsupported.html).
+Go 1.10 will require FreeBSD 10.3+.
 
 ### OpenBSD 6.0 {#openbsd}
 
 <!-- CL 40331 -->
-Go 1.9부터 cgo 바이너리에 대한 PT\_TLS 생성이 활성화되었으며, 이에 따라 OpenBSD 6.0 이상 버전이 필요합니다. Go 1.9는 더 이상 OpenBSD 5.9를 지원하지 않습니다.
+Go 1.9 now enables PT\_TLS generation for cgo binaries and thus
+requires OpenBSD 6.0 or newer. Go 1.9 no longer supports
+OpenBSD 5.9.
 
-### 알려진 문제 {#known_issues}
 
-FreeBSD에서 알려져 있으나 원인이 파악되지 않은 일부 불안정성 문제가 있습니다.
-이로 인해 드문 경우로 프로그램 충돌이 발생할 수 있습니다.
-[issue 15658](/issue/15658)을 참조하십시오.
-이 FreeBSD 전용 문제를 해결하는 데 도움을 주신다면 감사하겠습니다.
+### Known Issues {#known_issues}
 
-Go 1.9 개발 주기 동안 NetBSD 7.1을 포함한 이전 버전에서 NetBSD 커널 충돌이 발생하여 Go는 NetBSD 빌더 실행을 중단했습니다. Go 1.9가 출시됨에 따라, 수정 사항이 포함된 NetBSD 7.1.1이 출시되고 있습니다. 하지만 현재로서는 테스트 스위트를 통과하는 NetBSD 빌더가 없는 상태입니다. [다양한 NetBSD 이슈](https://github.com/golang/go/labels/OS-NetBSD)를 조사하는 데 도움을 주시면 감사하겠습니다.
+There are some instabilities on FreeBSD that are known but not understood.
+These can lead to program crashes in rare cases.
+See [issue 15658](/issue/15658).
+Any help in solving this FreeBSD-specific issue would be appreciated.
 
-## 도구 {#tools}
+Go stopped running NetBSD builders during the Go 1.9 development
+cycle due to NetBSD kernel crashes, up to and including NetBSD 7.1.
+As Go 1.9 is being released, NetBSD 7.1.1 is being released with a fix.
+However, at this time we have no NetBSD builders passing our test suite.
+Any help investigating the
+[various NetBSD issues](https://github.com/golang/go/labels/OS-NetBSD)
+would be appreciated.
 
-### 병렬 컴파일 {#parallel-compile}
+## Tools {#tools}
 
-이제 Go 컴파일러는 멀티코어를 활용하여 패키지 내의 함수들을 병렬로 컴파일하는 기능을 지원합니다. 이는 개별 패키지들을 병렬로 컴파일하는 `go` 명령어의 기존 지원 기능에 더해진 것입니다.
-병렬 컴파일은 기본적으로 활성화되어 있으며, 환경 변수 `GO19CONCURRENTCOMPILATION`을 `0`으로 설정하여 비활성화할 수 있습니다.
+### Parallel Compilation {#parallel-compile}
 
-### `./...`를 이용한 벤더 매칭 {#vendor-dotdotdot}
+The Go compiler now supports compiling a package's functions in parallel, taking
+advantage of multiple cores. This is in addition to the `go` command's
+existing support for parallel compilation of separate packages.
+Parallel compilation is on by default, but it can be disabled by setting the
+environment variable `GO19CONCURRENTCOMPILATION` to `0`.
+
+### Vendor matching with ./... {#vendor-dotdotdot}
 
 <!-- CL 38745 -->
-많은 요청에 따라, `go` `test`와 같이 패키지 이름을 입력받는 도구에서 `./...`가 더 이상 `vendor` 디렉토리 내의 패키지를 일치시키지 않습니다. vendor 디렉토리를 일치시키려면 `./vendor/...`라고 작성하십시오.
+By popular request, `./...` no longer matches packages
+in `vendor` directories in tools accepting package names,
+such as `go` `test`. To match vendor
+directories, write `./vendor/...`.
 
-### GOROOT 이동 {#goroot}
+### Moved GOROOT {#goroot}
 
 <!-- CL 42533 -->
-이제 [go tool](/cmd/go/)은 Go 설치 트리의 루트를 찾기 위해 해당 도구가 호출된 경로를 사용합니다.
-이는 Go 설치 전체가 새로운 위치로 이동하더라도 go tool이 평소처럼 계속 작동해야 함을 의미합니다.
-환경 변수에서 `GOROOT`를 설정하여 이를 무시할 수 있으며, 이는 특수한 상황에서만 수행해야 합니다.
-이 변경 사항은 [runtime.GOROOT](/pkg/runtime/#GOROOT) 함수의 결과에는 영향을 미치지 않으며, 해당 함수는 계속해서 원래의 설치 위치를 보고합니다. 이 문제는 이후 릴리스에서 수정될 수 있습니다.
+The [go tool](/cmd/go/) will now use the path from which it
+was invoked to attempt to locate the root of the Go install tree.
+This means that if the entire Go installation is moved to a new
+location, the go tool should continue to work as usual.
+This may be overridden by setting `GOROOT` in the environment,
+which should only be done in unusual circumstances.
+Note that this does not affect the result of
+the [runtime.GOROOT](/pkg/runtime/#GOROOT) function, which
+will continue to report the original installation location;
+this may be fixed in later releases.
 
-### 컴파일러 툴체인 {#compiler}
+### Compiler Toolchain {#compiler}
 
 <!-- CL 37441 -->
-이제 복소수 나눗셈이 C99와 호환됩니다. 이는 gccgo에서는 항상 지원되던 사항이며, 이제 gc 툴체인에서도 수정되었습니다.
+Complex division is now C99-compatible. This has always been the
+case in gccgo and is now fixed in the gc toolchain.
 
 <!-- CL 36983 -->
-이제 링커가 Windows의 cgo 실행 파일에 대해 DWARF 정보를 생성합니다.
+The linker will now generate DWARF information for cgo executables on Windows.
 
 <!-- CL 44210, CL 40095 -->
-이제 `-N -l` 플래그가 제공되면 컴파일러가 생성된 DWARF에 어휘적 범위(lexical scopes)를 포함하여, 디버거가 범위 밖에 있는 변수를 숨길 수 있게 합니다. `.debug_info` 섹션은 이제 DWARF 버전 4를 사용합니다.
+The compiler now includes lexical scopes in the generated DWARF if the
+`-N -l` flags are provided, allowing
+debuggers to hide variables that are not in scope. The `.debug_info`
+section is now DWARF version 4.
 
 <!-- CL 43855 -->
-이제 `GOARM` 및 `GO386` 값은 `go` 도구의 의존성 캐싱에 사용되는 컴파일된 패키지의 build ID에 영향을 줍니다.
+The values of `GOARM` and `GO386` now affect a
+compiled package's build ID, as used by the `go` tool's
+dependency caching.
 
 ### Assembler {#asm}
 
 <!-- CL 42028 -->
-이제 4-피연산자 ARM `MULA` 명령어가 올바르게 어셈블됩니다. 덧셈 피연산자(addend) 레지스터가 세 번째 인자로, 결과 레지스터가 네 번째이자 마지막 인자로 지정됩니다.
-이전 릴리스에서는 이 두 가지 의미가 서로 바뀌어 있었습니다.
-네 번째 인자가 암시적으로 세 번째 인자와 동일한 3-피연산자 형태는 영향을 받지 않습니다.
-4-피연산자 `MULA` 명령어를 사용하는 코드는 업데이트가 필요하지만, 이 형태는 매우 드물게 사용되는 것으로 판단됩니다.
-`MULAWT` 및 `MULAWB`는 이미 모든 형태에서 올바른 순서를 사용하고 있었으므로 변경 사항이 없습니다.
+The four-operand ARM `MULA` instruction is now assembled correctly,
+with the addend register as the third argument and the result
+register as the fourth and final argument.
+In previous releases, the two meanings were reversed.
+The three-operand form, in which the fourth argument is implicitly
+the same as the third, is unaffected.
+Code using four-operand `MULA` instructions
+will need to be updated, but we believe this form is very rarely used.
+`MULAWT` and `MULAWB` were already
+using the correct order in all forms and are unchanged.
 
 <!-- CL 42990 -->
-어셈블러가 이제 `ADDSUBPS/PD`를 지원하며, 누락되었던 두 가지 x86 SSE3 명령어가 모두 구현되었습니다.
+The assembler now supports `ADDSUBPS/PD`, completing the
+two missing x86 SSE3 instructions.
 
 ### Doc {#go-doc}
 
 <!-- CL 36031 -->
-이제 긴 인자 목록이 생략됩니다. 이를 통해 일부 생성된 코드에 대한 `go` `doc`의 가독성이 향상됩니다.
+Long lists of arguments are now truncated. This improves the readability
+of `go` `doc` on some generated code.
 
 <!-- CL 38438 -->
-이제 구조체 필드의 문서 확인이 지원됩니다.
-예를 들어, `go` `doc` `http.Client.Jar`와 같이 사용할 수 있습니다.
+Viewing documentation on struct fields is now supported.
+For example, `go` `doc` `http.Client.Jar`.
 
 ### Env {#go-env-json}
 
 <!-- CL 38757 -->
-새로운 `go` `env` `-json` 플래그는
-기본 OS별 출력 형식 대신 JSON 출력을 활성화합니다.
+The new `go` `env` `-json` flag
+enables JSON output, instead of the default OS-specific output
+format.
 
-### 테스트 {#go-test-list}
+### Test {#go-test-list}
 
 <!-- CL 41195 -->
-[`go` `test`](/cmd/go/#hdr-Description_of_testing_flags)
-명령어는 새로운 `-list` 플래그를 지원합니다. 이 플래그는 정규 표현식을 인자로 받으며, 일치하는 테스트, 벤치마크 또는 예제의 이름을 실행하지 않고 stdout에 출력합니다.
+The [`go` `test`](/cmd/go/#hdr-Description_of_testing_flags)
+command accepts a new `-list` flag, which takes a regular
+expression as an argument and prints to stdout the name of any
+tests, benchmarks, or examples that match it, without running them.
 
 ### Pprof {#go-tool-pprof}
 
 <!-- CL 34192 -->
-`runtime/pprof` 패키지에서 생성된 프로파일에 이제 심볼 정보가 포함되므로, 프로파일을 생성한 바이너리 없이도 `go` `tool` `pprof`에서 확인할 수 있습니다.
+Profiles produced by the `runtime/pprof` package now
+include symbol information, so they can be viewed
+in `go` `tool` `pprof`
+without the binary that produced the profile.
 
 <!-- CL 38343 -->
-이제 `go` `tool` `pprof` 명령은 [`http.ProxyFromEnvironment`](/pkg/net/http/#ProxyFromEnvironment)를 사용하여 환경에 정의된 HTTP 프록시 정보를 사용합니다.
+The `go` `tool` `pprof` command now
+uses the HTTP proxy information defined in the environment, using
+[`http.ProxyFromEnvironment`](/pkg/net/http/#ProxyFromEnvironment).
 
 ### Vet {#vet}
 
 <!-- CL 40112 -->
 
-[`vet` 명령어](/cmd/vet/)가
-[`go` 도구](/cmd/go/)에 더 잘 통합되었습니다.
-따라서 이제 `go` `vet`은 모든 표준 빌드 플래그를 지원하며, `vet` 자체의 플래그 역시 `go` `vet`뿐만 아니라
-`go` `tool` `vet`에서도 사용할 수 있습니다.
+The [`vet` command](/cmd/vet/)
+has been better integrated into the
+[`go` tool](/cmd/go/),
+so `go` `vet` now supports all standard build
+flags while `vet`'s own flags are now available
+from `go` `vet` as well as
+from `go` `tool` `vet`.
 
 ### Gccgo {#gccgo}
 
-Go의 반기별 릴리스 일정과 GCC의 연간 릴리스 일정이 맞물림에 따라,
-GCC 릴리스 7에는 gccgo의 Go 1.8.3 버전이 포함되어 있습니다.
-다음 릴리스인 GCC 8에는 gccgo의 Go 1.10 버전이 포함될 것으로 예상합니다.
+Due to the alignment of Go's semiannual release schedule with GCC's
+annual release schedule,
+GCC release 7 contains the Go 1.8.3 version of gccgo.
+We expect that the next release, GCC 8, will contain the Go 1.10
+version of gccgo.
 
-## 런타임 {#runtime}
+## Runtime {#runtime}
 
-### 인라인 프레임이 포함된 콜 스택 {#callersframes}
+### Call stacks with inlined frames {#callersframes}
 
+Users of
 [`runtime.Callers`](/pkg/runtime#Callers)
-사용자는 결과로 반환된 PC 슬라이스를 직접 검사하는 것을 피해야 하며, 대신
+should avoid directly inspecting the resulting PC slice and instead use
 [`runtime.CallersFrames`](/pkg/runtime#CallersFrames)
-를 사용하여 호출 스택의 전체 뷰를 얻거나,
+to get a complete view of the call stack, or
 [`runtime.Caller`](/pkg/runtime#Caller)
-를 사용하여 단일 호출자에 대한 정보를 얻어야 합니다.
-이는 PC 슬라이스의 개별 요소가 인라인된 프레임이나 호출 스택의 다른 세부 사항들을 모두 반영할 수 없기 때문입니다.
+to get information about a single caller.
+This is because an individual element of the PC slice cannot account
+for inlined frames or other nuances of the call stack.
 
-구체적으로, PC 슬라이스를 직접 반복(iterate)하며 [`runtime.FuncForPC`](/pkg/runtime#FuncForPC)와 같은 함수를 사용하여 각 PC를 개별적으로 분석하는 코드는 인라인된 프레임(inlined frames)을 놓치게 됩니다.
-스택의 전체 뷰를 얻으려면, 이러한 코드는 대신 `CallersFrames`를 사용해야 합니다.
-마찬가지로, 코드는 `Callers`가 반환하는 길이가 호출 깊이(call depth)를 나타낸다고 가정해서는 안 됩니다.
-대신 `CallersFrames`가 반환하는 프레임의 수를 세어야 합니다.
+Specifically, code that directly iterates over the PC slice and uses
+functions such as
+[`runtime.FuncForPC`](/pkg/runtime#FuncForPC)
+to resolve each PC individually will miss inlined frames.
+To get a complete view of the stack, such code should instead use
+`CallersFrames`.
+Likewise, code should not assume that the length returned by
+`Callers` is any indication of the call depth.
+It should instead count the number of frames returned by
+`CallersFrames`.
 
-특정 깊이의 단일 호출자를 쿼리하는 코드는 `Callers`에 길이가 1인 슬라이스를 전달하는 대신 `Caller`를 사용해야 합니다.
+Code that queries a single caller at a specific depth should use
+`Caller` rather than passing a slice of length 1 to
+`Callers`.
 
-[`runtime.CallersFrames`](/pkg/runtime#CallersFrames)는 Go 1.7부터 사용할 수 있었으므로, Go 1.9로 업그레이드하기 전에 코드를 업데이트할 수 있습니다.
+[`runtime.CallersFrames`](/pkg/runtime#CallersFrames)
+has been available since Go 1.7, so code can be updated prior to
+upgrading to Go 1.9.
 
-## 성능 {#performance}
+## Performance {#performance}
 
-언제나 그렇듯, 변경 사항이 매우 일반적이고 다양하여 성능에 대한 정확한 진술을 하기는 어렵습니다. 하지만 가비지 컬렉터의 속도 향상, 더 개선된 코드 생성, 그리고 코어 라이브러리의 최적화 덕분에 대부분의 프로그램이 조금 더 빠르게 실행될 것입니다.
+As always, the changes are so general and varied that precise
+statements about performance are difficult to make. Most programs
+should run a bit faster, due to speedups in the garbage collector,
+better generated code, and optimizations in the core library.
 
 ### Garbage Collector {#gc}
 
 <!-- CL 37520 -->
-이전에 stop-the-world 가비지 컬렉션을 트리거하던 라이브러리 함수들이 이제는 동시성(concurrent) 가비지 컬렉션을 트리거합니다.
-구체적으로, [`runtime.GC`](/pkg/runtime/#GC),
+Library functions that used to trigger stop-the-world garbage
+collection now trigger concurrent garbage collection.
+Specifically, [`runtime.GC`](/pkg/runtime/#GC),
 [`debug.SetGCPercent`](/pkg/runtime/debug/#SetGCPercent),
-그리고
-[`debug.FreeOSMemory`](/pkg/runtime/debug/#FreeOSMemory)가
-이제 동시성 가비지 컬렉션을 트리거하며, 가비지 컬렉션이 완료될 때까지 호출한 goroutine만 차단합니다.
+and
+[`debug.FreeOSMemory`](/pkg/runtime/debug/#FreeOSMemory),
+now trigger concurrent garbage collection, blocking only the calling
+goroutine until the garbage collection is done.
 
 <!-- CL 34103, CL 39835 -->
+The
 [`debug.SetGCPercent`](/pkg/runtime/debug/#SetGCPercent)
-함수는 새로운 GOGC 값으로 인해 가비지 컬렉션이 즉시 필요한 경우에만 가비지 컬렉션을 트리거합니다.
-이를 통해 GOGC 값을 실시간으로 조정할 수 있습니다.
+function only triggers a garbage collection if one is immediately
+necessary because of the new GOGC value.
+This makes it possible to adjust GOGC on-the-fly.
 
 <!-- CL 38732 -->
-많은 수의 대형 객체를 포함하는 대규모(>50GB) 힙을 사용하는 애플리케이션에서 대형 객체 할당 성능이 크게 향상되었습니다.
+Large object allocation performance is significantly improved in
+applications using large (>50GB) heaps containing many large
+objects.
 
 <!-- CL 34937 -->
-[`runtime.ReadMemStats`](/pkg/runtime/#ReadMemStats)
-함수는 이제 매우 큰 힙(heap)에 대해서도 100µs 미만이 소요됩니다.
+The [`runtime.ReadMemStats`](/pkg/runtime/#ReadMemStats)
+function now takes less than 100µs even for very large heaps.
 
-## 표준 라이브러리 {#library}
+## Standard library {#library}
 
-### 투명한 단조 시간(Monotonic Time) 지원 {#monotonic-time}
+### Transparent Monotonic Time support {#monotonic-time}
 
 <!-- CL 36255 -->
-이제 [`time`](/pkg/time/) 패키지는 각 [`Time`](/pkg/time/#Time) 값에서 단조 시간(monotonic time)을 투명하게 추적합니다. 이를 통해 월 클락(wall clock) 조정이 발생하는 상황에서도 두 `Time` 값 사이의 지속 시간(duration)을 계산하는 작업이 안전하게 수행됩니다. 자세한 내용은 [패키지 문서](/pkg/time/#hdr-Monotonic_Clocks)와 [설계 문서](/design/12914-monotonic)를 참조하십시오.
+The [`time`](/pkg/time/) package now transparently
+tracks monotonic time in each [`Time`](/pkg/time/#Time)
+value, making computing durations between two `Time` values
+a safe operation in the presence of wall clock adjustments.
+See the [package docs](/pkg/time/#hdr-Monotonic_Clocks) and
+[design document](/design/12914-monotonic)
+for details.
 
-### 새로운 비트 조작 패키지 {#math-bits}
+### New bit manipulation package {#math-bits}
 
 <!-- CL 36315 -->
-Go 1.9에는 비트 조작을 위한 최적화된 구현을 제공하는 새로운 패키지 [`math/bits`](/pkg/math/bits/)가 포함되었습니다. 대부분의 아키텍처에서 이 패키지의 함수들은 컴파일러에 의해 추가로 인식되어, 성능 향상을 위해 인트린직(intrinsics)으로 처리됩니다.
+Go 1.9 includes a new package,
+[`math/bits`](/pkg/math/bits/), with optimized
+implementations for manipulating bits. On most architectures,
+functions in this package are additionally recognized by the
+compiler and treated as intrinsics for additional performance.
 
-### 테스트 헬퍼 함수 {#test-helper}
+### Test Helper Functions {#test-helper}
 
 <!-- CL 38796 -->
-새로운 [`(*T).Helper`](/pkg/testing/#T.Helper) 및 [`(*B).Helper`](/pkg/testing/#B.Helper) 메서드는 호출한 함수를 테스트 헬퍼 함수로 표시합니다. 파일 및 줄 정보(line information)를 출력할 때 해당 함수는 건너뛰게 됩니다. 이를 통해 사용자에게 여전히 유용한 줄 번호를 제공하면서 테스트 헬퍼 함수를 작성할 수 있습니다.
+The
+new [`(*T).Helper`](/pkg/testing/#T.Helper)
+and [`(*B).Helper`](/pkg/testing/#B.Helper)
+methods mark the calling function as a test helper function. When
+printing file and line information, that function will be skipped.
+This permits writing test helper functions while still having useful
+line numbers for users.
 
 ### Concurrent Map {#sync-map}
 
 <!-- CL 36617 -->
-[`sync`](/pkg/sync/) 패키지의 새로운 [`Map`](/pkg/sync/#Map) 타입은 분할 상환 상수 시간(amortized-constant-time)의 로드(load), 저장(store) 및 삭제(delete)를 지원하는 동시성 맵입니다. 여러 고루틴(goroutine)이 `Map`의 메서드를 동시에 호출해도 안전합니다.
+The new [`Map`](/pkg/sync/#Map) type
+in the [`sync`](/pkg/sync/) package
+is a concurrent map with amortized-constant-time loads, stores, and
+deletes. It is safe for multiple goroutines to call a `Map`'s methods
+concurrently.
 
-### 프로파일러 레이블 (Profiler Labels) {#pprof-labels}
+### Profiler Labels {#pprof-labels}
 
 <!-- CL 34198 -->
-[`runtime/pprof` 패키지](/pkg/runtime/pprof)가 이제 `pprof` 프로파일러 레코드에 레이블을 추가하는 기능을 지원합니다.
-레이블은 키-값 맵 형태로 구성되며, [`pprof` 명령어](/cmd/pprof/)로 프로파일을 분석할 때 서로 다른 컨텍스트에서 호출된 동일한 함수의 호출들을 구분하는 데 사용됩니다.
-`pprof` 패키지의 새로운 [`Do` 함수](/pkg/runtime/pprof/#Do)는 제공된 레이블과 연결된 코드를 실행합니다. 패키지에 추가된 다른 새로운 함수들은 레이블 작업을 돕습니다.
+The [`runtime/pprof` package](/pkg/runtime/pprof)
+now supports adding labels to `pprof` profiler records.
+Labels form a key-value map that is used to distinguish calls of the
+same function in different contexts when looking at profiles
+with the [`pprof` command](/cmd/pprof/).
+The `pprof` package's
+new [`Do` function](/pkg/runtime/pprof/#Do)
+runs code associated with some provided labels. Other new functions
+in the package help work with labels.
 
 <!-- runtime/pprof -->
 
-### 라이브러리의 사소한 변경 사항 {#minor_library_changes}
+### Minor changes to the library {#minor_library_changes}
 
-언제나 그렇듯, Go 1의 [호환성 약속](/doc/go1compat)을 염두에 두고 라이브러리에 다양한 소규모 변경 사항 및 업데이트가 이루어졌습니다.
+As always, there are various minor changes and updates to the library,
+made with the Go 1 [promise of compatibility](/doc/go1compat)
+in mind.
 
 #### [archive/zip](/pkg/archive/zip/)
 
 <!-- CL 39570 -->
-이제 ZIP [`Writer`](/pkg/archive/zip/#Writer)는 적절한 경우 [`FileHeader.Flags`](/pkg/archive/zip/#FileHeader.Flags)의 UTF-8 비트를 설정합니다.
+The
+ZIP [`Writer`](/pkg/archive/zip/#Writer)
+now sets the UTF-8 bit in
+the [`FileHeader.Flags`](/pkg/archive/zip/#FileHeader.Flags)
+when appropriate.
 
 <!-- archive/zip -->
 
 #### [crypto/rand](/pkg/crypto/rand/)
 
 <!-- CL 43852 -->
-Linux에서 Go는 이제 `GRND_NONBLOCK` 플래그 없이 `getrandom` 시스템 콜을 호출합니다. 이제 커널에 충분한 무작위성이 확보될 때까지 블록(block)됩니다. `getrandom` 시스템 콜이 도입되기 이전의 커널에서는 계속해서 `/dev/urandom`에서 읽어옵니다.
+On Linux, Go now calls the `getrandom` system call
+without the `GRND_NONBLOCK` flag; it will now block
+until the kernel has sufficient randomness. On kernels predating
+the `getrandom` system call, Go continues to read
+from `/dev/urandom`.
 
 <!-- crypto/rand -->
 
 #### [crypto/x509](/pkg/crypto/x509/)
 
 <!-- CL 36093 -->
-Unix 시스템에서 환경 변수 `SSL_CERT_FILE` 및 `SSL_CERT_DIR`을 사용하여 각각 SSL 인증서 파일과 SSL 인증서 파일 디렉터리의 시스템 기본 위치를 재정의할 수 있습니다.
+On Unix systems the environment
+variables `SSL_CERT_FILE`
+and `SSL_CERT_DIR` can now be used to override the
+system default locations for the SSL certificate file and SSL
+certificate files directory, respectively.
 
-FreeBSD 파일 `/usr/local/etc/ssl/cert.pem`이 이제 인증서 검색 경로에 포함됩니다.
+The FreeBSD file `/usr/local/etc/ssl/cert.pem` is
+now included in the certificate search path.
 
 <!-- CL 36900 -->
-이제 패키지에서 이름 제약 조건(name constraints)의 제외 도메인(excluded domains)을 지원합니다.
-이러한 제약 조건을 강제하는 것 외에도,
-제공된 템플릿 인증서에 새로운 필드인
-[`ExcludedDNSDomains`](/pkg/crypto/x509/#Certificate.ExcludedDNSDomains)
-가 채워져 있다면,
+The package now supports excluded domains in name constraints.
+In addition to enforcing such constraints,
 [`CreateCertificate`](/pkg/crypto/x509/#CreateCertificate)
-는 제외된 이름 제약 조건이 포함된 인증서를 생성합니다.
+will create certificates with excluded name constraints
+if the provided template certificate has the new
+field
+[`ExcludedDNSDomains`](/pkg/crypto/x509/#Certificate.ExcludedDNSDomains)
+populated.
 
 <!-- CL 36696 -->
-DNS 이름이 없는 경우를 포함하여 인증서에 SAN 확장(extension)이 하나라도 존재하는 경우, [`Subject`](/pkg/crypto/x509/#Certificate.Subject)의 Common Name은 무시됩니다.
-이전 릴리스에서는 코드에서 인증서에 DNS-name SAN이 존재하는지만 확인했습니다.
+If any SAN extension, including with no DNS names, is present
+in the certificate, then the Common Name from
+[`Subject`](/pkg/crypto/x509/#Certificate.Subject) is ignored.
+In previous releases, the code tested only whether DNS-name SANs were
+present in a certificate.
 
 <!-- crypto/x509 -->
 
 #### [database/sql](/pkg/database/sql/)
 
 <!-- CL 35476 -->
-이제 [`Tx.Stmt`](/pkg/database/sql/#Tx.Stmt)에서 사용 가능한 [`Stmt`](/pkg/database/sql/#Stmt)가 있다면 캐시된 항목을 사용합니다.
-이를 통해 [`Tx.Stmt`](/pkg/database/sql/#Tx.Stmt)가 호출될 때마다 문(statement)을 매번 다시 준비(re-prepare)하는 것을 방지합니다.
+The package will now use a cached [`Stmt`](/pkg/database/sql/#Stmt) if
+available in [`Tx.Stmt`](/pkg/database/sql/#Tx.Stmt).
+This prevents statements from being re-prepared each time
+[`Tx.Stmt`](/pkg/database/sql/#Tx.Stmt) is called.
 
 <!-- CL 38533 -->
-이제 드라이버가 [`driver.NamedValueChecker`](/pkg/database/sql/driver/#NamedValueChecker)를 구현하여 자체적인 인자 검사기(argument checker)를 구현할 수 있습니다.
-이를 통해 드라이버에서 `OUTPUT` 및 `INOUT` 매개변수 타입을 지원할 수 있습니다.
-드라이버가 이를 지원하는 경우, 출력 매개변수를 반환하기 위해 [`Out`](/pkg/database/sql/#Out)을 사용해야 합니다.
+The package now allows drivers to implement their own argument checkers by implementing
+[`driver.NamedValueChecker`](/pkg/database/sql/driver/#NamedValueChecker).
+This also allows drivers to support `OUTPUT` and `INOUT` parameter types.
+[`Out`](/pkg/database/sql/#Out) should be used to return output parameters
+when supported by the driver.
 
 <!-- CL 39031 -->
-[`Rows.Scan`](/pkg/database/sql/#Rows.Scan)이 이제 사용자 정의 문자열 타입을 스캔할 수 있습니다.
-이전에는 `type` `Int` `int64`와 같은 숫자 타입으로의 스캔만 지원했지만, 이제는 `type` `String` `string`과 같은 문자열 타입으로의 스캔도 지원합니다.
+[`Rows.Scan`](/pkg/database/sql/#Rows.Scan) can now scan user-defined string types.
+Previously the package supported scanning into numeric types like `type` `Int` `int64`. It now also supports
+scanning into string types like `type` `String` `string`.
 
 <!-- CL 40694 -->
-새로운 [`DB.Conn`](/pkg/database/sql/#DB.Conn) 메서드는 커넥션 풀에서 데이터베이스로의 독점적인 연결을 나타내는 새로운 [`Conn`](/pkg/database/sql/#Conn) 타입을 반환합니다. [`Conn`](/pkg/database/sql/#Conn)에서 실행되는 모든 쿼리는 [`Conn.Close`](/pkg/database/sql/#Conn.Close)가 호출되어 커넥션 풀로 연결을 반환할 때까지 동일한 기본 연결을 사용합니다.
+The new [`DB.Conn`](/pkg/database/sql/#DB.Conn) method returns the new
+[`Conn`](/pkg/database/sql/#Conn) type representing an
+exclusive connection to the database from the connection pool. All queries run on
+a [`Conn`](/pkg/database/sql/#Conn) will use the same underlying
+connection until [`Conn.Close`](/pkg/database/sql/#Conn.Close) is called
+to return the connection to the connection pool.
 
 <!-- database/sql -->
 
 #### [encoding/asn1](/pkg/encoding/asn1/)
 
 <!-- CL 38660 -->
-새로운
+The new
 [`NullBytes`](/pkg/encoding/asn1/#NullBytes)
-및
+and
 [`NullRawValue`](/pkg/encoding/asn1/#NullRawValue)
-는 ASN.1 NULL 타입을 나타냅니다.
+represent the ASN.1 NULL type.
 
 <!-- encoding/asn1 -->
 
 #### [encoding/base32](/pkg/encoding/base32/)
 
 <!-- CL 38634 -->
-새로운 [Encoding.WithPadding](/pkg/encoding/base32/#Encoding.WithPadding)
-메서드는 사용자 정의 패딩 문자 지원 및 패딩 비활성화 기능을 추가합니다.
+The new [Encoding.WithPadding](/pkg/encoding/base32/#Encoding.WithPadding)
+method adds support for custom padding characters and disabling padding.
 
 <!-- encoding/base32 -->
-
-# encoding/base32
-
-`base32` 패키지는 Base32 인코딩 및 디코딩을 지원합니다.
-
-## 인덱스
-
-- [함수](#함수)
-- [변수](#변수)
-
-## 함수
-
-### func Encode(src []byte, dst []byte) int
-`Encode`는 `src`를 Base32로 인코딩하여 `dst`에 씁니다. 작성된 바이트 수를 반환합니다.
-
-### func Decode(dst, src []byte) (n int, err error)
-`Decode`는 `src`를 Base32로 디코딩하여 `dst`에 씁니다. 작성된 바이트 수 `n`과 혹시 발생한 에러 `err`를 반환합니다.
-
-## 변수
-
-### var StdEncoding
-`StdEncoding`은 RFC 4648에서 정의한 표준 Base32 알파벳을 사용하는 인코딩입니다.
 
 #### [encoding/csv](/pkg/encoding/csv/)
 
 <!-- CL 41730 -->
-새로운 필드인
-[`Reader.ReuseRecord`](/pkg/encoding/csv/#Reader.ReuseRecord)는
+The new field
+[`Reader.ReuseRecord`](/pkg/encoding/csv/#Reader.ReuseRecord)
+controls whether calls to
 [`Read`](/pkg/encoding/csv/#Reader.Read)
-호출 시 성능 향상을 위해 이전 호출에서 반환된 슬라이스의 backing array를 공유하는 슬라이스를 반환할 수 있는지 여부를 제어합니다.
+may return a slice sharing the backing array of the previous
+call's returned slice for improved performance.
 
 <!-- encoding/csv -->
 
 #### [fmt](/pkg/fmt/)
 
 <!-- CL 37051 -->
-부동 소수점 및 복소수 출력 시 샵 플래그('`#`')가 이제 지원됩니다. `%e`, `%E`, `%f`, `%F`, `%g` 및 `%G`에 대해 항상 소수점을 출력하며, `%g` 및 `%G`의 경우 후행 제로(trailing zeros)를 제거하지 않습니다.
+The sharp flag ('`#`') is now supported when printing
+floating point and complex numbers. It will always print a
+decimal point
+for `%e`, `%E`, `%f`, `%F`, `%g`
+and `%G`; it will not remove trailing zeros
+for `%g` and `%G`.
 
 <!-- fmt -->
 
 #### [hash/fnv](/pkg/hash/fnv/)
 
 <!-- CL 38356 -->
-이제 이 패키지는 각각 [`New128`](/pkg/hash/fnv/#New128) 및 [`New128a`](/pkg/hash/fnv/#New128a)를 통해 128비트 FNV-1 및 FNV-1a 해시 지원을 포함합니다.
+The package now includes 128-bit FNV-1 and FNV-1a hash support with
+[`New128`](/pkg/hash/fnv/#New128) and
+[`New128a`](/pkg/hash/fnv/#New128a), respectively.
 
 <!-- hash/fnv -->
 
 #### [html/template](/pkg/html/template/)
 
 <!-- CL 37880, CL 40936 -->
-이제 파이프라인에서 사전 정의된 escaper("html", "urlquery", "js" 중 하나)가 발견되었으나, auto-escaper가 스스로 결정했을 결과와 일치하지 않는 경우 패키지가 에러를 보고합니다.
-이는 특정 보안 또는 정확성 문제를 방지하기 위함입니다.
-이제 이러한 escaper 중 하나를 사용하는 것은 항상 아무 작업도 수행하지 않거나(no-op) 에러가 발생합니다.
-(no-op 케이스는 [text/template](/pkg/text/template/)로부터의 마이그레이션을 용이하게 합니다.)
+The package now reports an error if a predefined escaper (one of
+"html", "urlquery" and "js") is found in a pipeline and does not match
+what the auto-escaper would have decided on its own.
+This avoids certain security or correctness issues.
+Now use of one of these escapers is always either a no-op or an error.
+(The no-op case eases migration from [text/template](/pkg/text/template/).)
 
 <!-- html/template -->
 
 #### [image](/pkg/image/)
 
 <!-- CL 36734 -->
-[`Rectangle.Intersect`](/pkg/image/#Rectangle.Intersect) 메서드는 이제 문서에 기재된 대로, 인접해 있지만 겹치지 않는 사각형들에 대해 호출되었을 때 zero `Rectangle`을 반환합니다. 이전 릴리스에서는 비어 있지만 zero가 아닌 `Rectangle`을 잘못 반환했습니다.
+The [`Rectangle.Intersect`](/pkg/image/#Rectangle.Intersect)
+method now returns a zero `Rectangle` when called on
+adjacent but non-overlapping rectangles, as documented. In
+earlier releases it would incorrectly return an empty but
+non-zero `Rectangle`.
 
-<!-- 이미지 -->
+<!-- image -->
 
 #### [image/color](/pkg/image/color/)
 
 <!-- CL 36732 -->
-반올림 조정 값이 [0, 0xffff] RGBA 전체 범위에 걸쳐 적용되도록 YCbCr에서 RGBA로의 변환 공식이 수정되었습니다.
+The YCbCr to RGBA conversion formula has been tweaked to ensure
+that rounding adjustments span the complete [0, 0xffff] RGBA
+range.
 
 <!-- image/color -->
 
 #### [image/png](/pkg/image/png/)
 
 <!-- CL 34150 -->
-새로운 [`Encoder.BufferPool`](/pkg/image/png/#Encoder.BufferPool)
-필드를 통해 [`EncoderBufferPool`](/pkg/image/png/#EncoderBufferPool)을 지정할 수 있으며,
-인코더는 PNG 이미지를 인코딩할 때 임시 `EncoderBuffer`
-버퍼를 가져오기 위해 이를 사용합니다.
-`BufferPool`을 사용하면 여러 이미지를 인코딩하는 동안 발생하는
-메모리 할당 횟수를 줄일 수 있습니다.
+The new [`Encoder.BufferPool`](/pkg/image/png/#Encoder.BufferPool)
+field allows specifying an [`EncoderBufferPool`](/pkg/image/png/#EncoderBufferPool),
+that will be used by the encoder to get temporary `EncoderBuffer`
+buffers when encoding a PNG image.
+The use of a `BufferPool` reduces the number of
+memory allocations performed while encoding multiple images.
 
 <!-- CL 38271 -->
-이제 이 패키지는 투명 8비트 그레이스케일("Gray8") 이미지의 디코딩을 지원합니다.
+The package now supports the decoding of transparent 8-bit
+grayscale ("Gray8") images.
 
-제공해주신 내용에 텍스트가 포함되어 있지 않습니다. 번역할 내용을 입력해 주세요.
+<!-- image/png -->
 
 #### [math/big](/pkg/math/big/)
 
 <!-- CL 36487 -->
-새로운
+The new
 [`IsInt64`](/pkg/math/big/#Int.IsInt64)
-및
+and
 [`IsUint64`](/pkg/math/big/#Int.IsUint64)
-메서드는 `Int`가
-`int64` 또는 `uint64`
-값으로 표현될 수 있는지 여부를 보고합니다.
+methods report whether an `Int`
+may be represented as an `int64` or `uint64`
+value.
 
 <!-- math/big -->
 
 #### [mime/multipart](/pkg/mime/multipart/)
 
 <!-- CL 39223 -->
-새로운 [`FileHeader.Size`](/pkg/mime/multipart/#FileHeader.Size) 필드는 멀티파트 메시지 내 파일의 크기를 나타냅니다.
+The new
+[`FileHeader.Size`](/pkg/mime/multipart/#FileHeader.Size)
+field describes the size of a file in a multipart message.
 
-제공해주신 내용이 비어 있거나 유효한 텍스트가 포함되어 있지 않습니다. 번역할 Markdown 내용을 입력해 주세요.
+<!-- mime/multipart -->
 
 #### [net](/pkg/net/)
 
 <!-- CL 32572 -->
-새로운 [`Resolver.StrictErrors`](/pkg/net/#Resolver.StrictErrors)는 A+AAAA 주소 조회와 같이 여러 개의 하위 쿼리로 구성된 쿼리 도중 발생하는 일시적인 오류를 Go의 내장 DNS 리졸버가 처리하는 방식에 대한 제어 기능을 제공합니다.
+The new
+[`Resolver.StrictErrors`](/pkg/net/#Resolver.StrictErrors)
+provides control over how Go's built-in DNS resolver handles
+temporary errors during queries composed of multiple sub-queries,
+such as an A+AAAA address lookup.
 
 <!-- CL 37260 -->
-새로운 [`Resolver.Dial`](/pkg/net/#Resolver.Dial)을 통해 `Resolver`에서 커스텀 dial 함수를 사용할 수 있습니다.
+The new
+[`Resolver.Dial`](/pkg/net/#Resolver.Dial)
+allows a `Resolver` to use a custom dial function.
 
 <!-- CL 40510 -->
-[`JoinHostPort`](/pkg/net/#JoinHostPort)는 이제 호스트에 콜론(`:`)이 포함된 경우에만 주소를 대괄호로 묶습니다.
-이전 릴리스에서는 주소에 퍼센트('`%`') 기호가 포함된 경우에도 대괄호로 묶었습니다.
+[`JoinHostPort`](/pkg/net/#JoinHostPort) now only places an address in square brackets if the host contains a colon.
+In previous releases it would also wrap addresses in square brackets if they contained a percent ('`%`') sign.
 
 <!-- CL 37913 -->
-새로운 메서드인
+The new methods
 [`TCPConn.SyscallConn`](/pkg/net/#TCPConn.SyscallConn),
 [`IPConn.SyscallConn`](/pkg/net/#IPConn.SyscallConn),
 [`UDPConn.SyscallConn`](/pkg/net/#UDPConn.SyscallConn),
-및
-[`UnixConn.SyscallConn`](/pkg/net/#UnixConn.SyscallConn)은(는)
-연결의 기본 파일 디스크립터(file descriptor)에 대한 접근을 제공합니다.
+and
+[`UnixConn.SyscallConn`](/pkg/net/#UnixConn.SyscallConn)
+provide access to the connections' underlying file descriptors.
 
 <!-- 45088 -->
-이제 `<code>[Listen](/pkg/net/#Listen)("tcp", ":0")</code>`으로 리스너를 생성한 후 `(*TCPListener).String()`에서 얻은 주소를 사용하여 [`Dial`](/pkg/net/#Dial)을 호출해도 안전합니다.
-이전에는 IPv6 스택이 불완전하게 설정된 일부 머신에서 실패하는 문제가 있었습니다.
+It is now safe to call [`Dial`](/pkg/net/#Dial) with the address obtained from
+`(*TCPListener).String()` after creating the listener with
+<code>[Listen](/pkg/net/#Listen)("tcp", ":0")</code>.
+Previously it failed on some machines with half-configured IPv6 stacks.
 
 <!-- net -->
 
 #### [net/http](/pkg/net/http/)
 
 <!-- CL 37328 -->
-`Cookie` 및 `Set-Cookie` 헤더에 사용되는 [`Cookie.String`](/pkg/net/http/#Cookie.String) 메서드는 이제 값에 공백이나 쉼표가 포함되어 있는 경우 해당 값을 큰따옴표로 감쌉니다.
+The [`Cookie.String`](/pkg/net/http/#Cookie.String) method, used for
+`Cookie` and `Set-Cookie` headers, now encloses values in double quotes
+if the value contains either a space or a comma.
 
-서버 변경 사항:
+Server changes:
 
-- <!-- CL 38194 -->
-    [`ServeMux`](/pkg/net/http/#ServeMux)가 핸들러를 매칭할 때 이제 host 헤더의 포트 번호를 무시합니다. `CONNECT` 요청의 경우 host는 수정 없이 매칭됩니다.
+  - <!-- CL 38194 -->
+    [`ServeMux`](/pkg/net/http/#ServeMux) now ignores ports in the host
+    header when matching handlers. The host is matched unmodified for `CONNECT` requests.
   - <!-- CL 44074 -->
-    새로운 [`Server.ServeTLS`](/pkg/net/http/#Server.ServeTLS) 메서드는 TLS 지원이 추가된 [`Server.Serve`](/pkg/net/http/#Server.Serve)를 래핑합니다.
+    The new [`Server.ServeTLS`](/pkg/net/http/#Server.ServeTLS) method wraps
+    [`Server.Serve`](/pkg/net/http/#Server.Serve) with added TLS support.
   - <!-- CL 34727 -->
-    [`Server.WriteTimeout`](/pkg/net/http/#Server.WriteTimeout)이 이제 HTTP/2 연결에도 적용되며, 스트림별로 강제됩니다.
+    [`Server.WriteTimeout`](/pkg/net/http/#Server.WriteTimeout)
+    now applies to HTTP/2 connections and is enforced per-stream.
   - <!-- CL 43231 -->
-    HTTP/2가 이제 기본적으로 우선순위 쓰기 스케줄러(priority write scheduler)를 사용합니다. 프레임은 [RFC 7540 Section 5.3](https://tools.ietf.org/html/rfc7540#section-5.3)에 기술된 HTTP/2 우선순위에 따라 스케줄링됩니다.
+    HTTP/2 now uses the priority write scheduler by default.
+    Frames are scheduled by following HTTP/2 priorities as described in
+    [RFC 7540 Section 5.3](https://tools.ietf.org/html/rfc7540#section-5.3).
   - <!-- CL 36483 -->
-    [`StripPrefix`](/pkg/net/http/#StripPrefix)가 반환하는 HTTP 핸들러가 이제 원본 `*http.Request`를 수정하여 복제한 후 제공된 핸들러를 호출합니다. `*http.Request`를 키로 사용하는 맵에 요청별 상태를 저장하는 코드는 대신 [`Request.Context`](/pkg/net/http/#Request.Context), [`Request.WithContext`](/pkg/net/http/#Request.WithContext), 그리고 [`context.WithValue`](/pkg/context/#WithValue)를 사용해야 합니다.
+    The HTTP handler returned by [`StripPrefix`](/pkg/net/http/#StripPrefix)
+    now calls its provided handler with a modified clone of the original `*http.Request`.
+    Any code storing per-request state in maps keyed by `*http.Request` should
+    use
+    [`Request.Context`](/pkg/net/http/#Request.Context),
+    [`Request.WithContext`](/pkg/net/http/#Request.WithContext),
+    and
+    [`context.WithValue`](/pkg/context/#WithValue) instead.
   - <!-- CL 35490 -->
-    [`LocalAddrContextKey`](/pkg/net/http/#LocalAddrContextKey)가 이제 리스너가 사용하는 인터페이스 주소 대신 연결의 실제 네트워크 주소를 포함합니다.
+    [`LocalAddrContextKey`](/pkg/net/http/#LocalAddrContextKey) now contains
+    the connection's actual network address instead of the interface address used by the listener.
 
-클라이언트 및 전송(Transport) 변경 사항:
+Client & Transport changes:
 
-- <!-- CL 35488 -->
-    이제 [`Transport`](/pkg/net/http/#Transport)는 [`Transport.Proxy`](/pkg/net/http/#Transport.Proxy)가 반환한 URL의 스킴(scheme)이 `socks5`인 경우, SOCKS5 프록시를 통해 요청을 보내는 기능을 지원합니다.
+  - <!-- CL 35488 -->
+    The [`Transport`](/pkg/net/http/#Transport)
+    now supports making requests via SOCKS5 proxy when the URL returned by
+    [`Transport.Proxy`](/pkg/net/http/#Transport.Proxy)
+    has the scheme `socks5`.
 
 <!-- net/http -->
 
 #### [net/http/fcgi](/pkg/net/http/fcgi/)
 
 <!-- CL 40012 -->
-새로운 [`ProcessEnv`](/pkg/net/http/fcgi/#ProcessEnv) 함수는 `REMOTE_USER`와 같이 [`http.Request`](/pkg/net/http/#Request) 필드에 적절한 항목이 없는 HTTP 요청과 관련된 FastCGI 환경 변수를 반환합니다.
+The new
+[`ProcessEnv`](/pkg/net/http/fcgi/#ProcessEnv)
+function returns FastCGI environment variables associated with an HTTP request
+for which there are no appropriate
+[`http.Request`](/pkg/net/http/#Request)
+fields, such as `REMOTE_USER`.
 
 <!-- net/http/fcgi -->
 
 #### [net/http/httptest](/pkg/net/http/httptest/)
 
 <!-- CL 34639 -->
-새로운 [`Server.Client`](/pkg/net/http/httptest/#Server.Client) 메서드는 테스트 서버로 요청을 보내도록 설정된 HTTP 클라이언트를 반환합니다.
+The new
+[`Server.Client`](/pkg/net/http/httptest/#Server.Client)
+method returns an HTTP client configured for making requests to the test server.
 
-새로운 [`Server.Certificate`](/pkg/net/http/httptest/#Server.Certificate) 메서드는 테스트 서버의 TLS 인증서가 있는 경우 이를 반환합니다.
+The new
+[`Server.Certificate`](/pkg/net/http/httptest/#Server.Certificate)
+method returns the test server's TLS certificate, if any.
 
 <!-- net/http/httptest -->
 
 #### [net/http/httputil](/pkg/net/http/httputil/)
 
 <!-- CL 43712 -->
-[`ReverseProxy`](/pkg/net/http/httputil/#ReverseProxy)는 이제 초기 응답 헤더에 선언되지 않은 트레일러를 포함하여 모든 HTTP/2 응답 트레일러를 프록시합니다. 이러한 미선언 트레일러는 gRPC 프로토콜에서 사용됩니다.
+The [`ReverseProxy`](/pkg/net/http/httputil/#ReverseProxy)
+now proxies all HTTP/2 response trailers, even those not declared in the initial response
+header. Such undeclared trailers are used by the gRPC protocol.
 
 <!-- net/http/httputil -->
 
 #### [os](/pkg/os/)
 
 <!-- CL 36800 -->
-`os` 패키지가 이제 파일 I/O에 내부 런타임 폴러(runtime poller)를 사용합니다.
-이를 통해 파이프의 읽기/쓰기 작업에 필요한 스레드 수가 줄어들며, 한 고루틴이 파일을 닫는 동안 다른 고루틴이 해당 파일을 I/O에 사용할 때 발생하는 레이스 컨디션(race)이 제거됩니다.
+The `os` package now uses the internal runtime poller
+for file I/O.
+This reduces the number of threads required for read/write
+operations on pipes, and it eliminates races when one goroutine
+closes a file while another is using the file for I/O.
 
 <!-- CL 37915 -->
-Windows에서,
+On Windows,
 [`Args`](/pkg/os/#Args)
-가 이제 `shell32.dll` 없이 채워지며, 이를 통해 프로세스 시작 시간이 1-7ms 개선되었습니다.
+is now populated without `shell32.dll`, improving process start-up time by 1-7 ms.
 
 <!-- os -->
 
 #### [os/exec](/pkg/os/exec/)
 
 <!-- CL 37586 -->
-이제 `os/exec` 패키지는 자식 프로세스가 중복된 환경 변수를 가지고 생성되는 것을 방지합니다.
-[`Cmd.Env`](/pkg/os/exec/#Cmd.Env)에 중복된 환경 변수 키가 포함되어 있는 경우, 각 중복 키에 대해 슬라이스의 마지막 값만 사용됩니다.
+The `os/exec` package now prevents child processes from being created with
+any duplicate environment variables.
+If [`Cmd.Env`](/pkg/os/exec/#Cmd.Env)
+contains duplicate environment keys, only the last
+value in the slice for each duplicate key is used.
 
 <!-- os/exec -->
 
 #### [os/user](/pkg/os/user/)
 
 <!-- CL 37664 -->
-이제 [`Lookup`](/pkg/os/user/#Lookup) 및 [`LookupId`](/pkg/os/user/#LookupId)는 `CGO_ENABLED=0`인 Unix 시스템에서 `/etc/passwd` 파일을 읽어 동작합니다.
+[`Lookup`](/pkg/os/user/#Lookup) and
+[`LookupId`](/pkg/os/user/#LookupId) now
+work on Unix systems when `CGO_ENABLED=0` by reading
+the `/etc/passwd` file.
 
 <!-- CL 33713 -->
-[`LookupGroup`](/pkg/os/user/#LookupGroup) 및
-[`LookupGroupId`](/pkg/os/user/#LookupGroupId)가 이제
-`CGO_ENABLED=0`인 Unix 시스템에서 `/etc/group` 파일을 읽어
-작동합니다.
+[`LookupGroup`](/pkg/os/user/#LookupGroup) and
+[`LookupGroupId`](/pkg/os/user/#LookupGroupId) now
+work on Unix systems when `CGO_ENABLED=0` by reading
+the `/etc/group` file.
 
 <!-- os/user -->
 
 #### [reflect](/pkg/reflect/)
 
 <!-- CL 38335 -->
-새로운 [`MakeMapWithSize`](/pkg/reflect/#MakeMapWithSize) 함수는 용량 힌트(capacity hint)가 지정된 맵을 생성합니다.
+The new
+[`MakeMapWithSize`](/pkg/reflect/#MakeMapWithSize)
+function creates a map with a capacity hint.
 
 <!-- reflect -->
 
 #### [runtime](/pkg/runtime/)
 
 <!-- CL 37233, CL 37726 -->
-런타임에서 생성되어 프로파일에 기록되는 Traceback이 이제 인라이닝(inlining)이 발생한 상황에서도 정확하게 나타납니다.
-프로그래밍 방식으로 Traceback을 가져오려면, 애플리케이션은 [`runtime.Callers`](/pkg/runtime/#Callers)의 결과를 직접 반복 처리하는 대신 [`runtime.CallersFrames`](/pkg/runtime/#CallersFrames)를 사용해야 합니다.
+Tracebacks generated by the runtime and recorded in profiles are
+now accurate in the presence of inlining.
+To retrieve tracebacks programmatically, applications should use
+[`runtime.CallersFrames`](/pkg/runtime/#CallersFrames)
+rather than directly iterating over the results of
+[`runtime.Callers`](/pkg/runtime/#Callers).
 
 <!-- CL 38403 -->
-Windows에서 Go는 더 이상 프로그램이 유휴 상태일 때 시스템 타이머가 고해상도로 작동하도록 강제하지 않습니다.
-이를 통해 Go 프로그램이 배터리 수명에 미치는 영향이 줄어들 것입니다.
+On Windows, Go no longer forces the system timer to run at high
+resolution when the program is idle.
+This should reduce the impact of Go programs on battery life.
 
 <!-- CL 29341 -->
-FreeBSD에서 `GOMAXPROCS`와
+On FreeBSD, `GOMAXPROCS` and
 [`runtime.NumCPU`](/pkg/runtime/#NumCPU)
-는 이제 전체 CPU 수가 아닌 프로세스의 CPU 마스크를 기준으로 합니다.
+are now based on the process' CPU mask, rather than the total
+number of CPUs.
 
 <!-- CL 43641 -->
-런타임은 Android O에 대한 예비 지원을 제공합니다.
+The runtime has preliminary support for Android O.
 
 <!-- runtime -->
 
 #### [runtime/debug](/pkg/runtime/debug/)
 
 <!-- CL 34013 -->
-[`SetGCPercent`](/pkg/runtime/debug/#SetGCPercent)를 음수 값으로 호출해도 더 이상 즉시 가비지 컬렉션(garbage collection)이 실행되지 않습니다.
+Calling
+[`SetGCPercent`](/pkg/runtime/debug/#SetGCPercent)
+with a negative value no longer runs an immediate garbage collection.
 
 <!-- runtime/debug -->
 
 #### [runtime/trace](/pkg/runtime/trace/)
 
 <!-- CL 36015 -->
-이제 실행 트레이스(execution trace)에 mark assist 이벤트가 표시됩니다. 이 이벤트는 애플리케이션 고루틴이 너무 빠르게 메모리를 할당하여 가비지 컬렉션을 돕도록 강제되는 시점을 나타냅니다.
+The execution trace now displays mark assist events, which
+indicate when an application goroutine is forced to assist
+garbage collection because it is allocating too quickly.
 
 <!-- CL 40810 -->
-이제 "Sweep" 이벤트는 스윕(sweep)된 각 개별 span을 기록하는 대신, 할당을 위한 빈 공간을 찾는 전체 프로세스를 포괄합니다.
-이를 통해 할당 작업이 많은 프로그램의 트레이싱 시 할당 지연 시간(allocation latency)이 감소합니다.
-sweep 이벤트는 몇 바이트가 스윕되었고 몇 바이트가 회수되었는지를 보여줍니다.
+"Sweep" events now encompass the entire process of finding free
+space for an allocation, rather than recording each individual
+span that is swept.
+This reduces allocation latency when tracing allocation-heavy
+programs.
+The sweep event shows how many bytes were swept and how many
+were reclaimed.
 
 <!-- runtime/trace -->
 
 #### [sync](/pkg/sync/)
 
 <!-- CL 34310 -->
-[`Mutex`](/pkg/sync/#Mutex)가 이제 더 공정(fair)하게 동작합니다.
+[`Mutex`](/pkg/sync/#Mutex) is now more fair.
 
 <!-- sync -->
 
 #### [syscall](/pkg/syscall/)
 
 <!-- CL 36697 -->
-새로운 필드인
-[`Credential.NoSetGroups`](/pkg/syscall/#Credential.NoSetGroups)는
-Unix 시스템이 새로운 프로세스를 시작할 때 보조 그룹(supplementary groups)을 설정하기 위해
-`setgroups` 시스템 호출을 수행할지 여부를 제어합니다.
+The new field
+[`Credential.NoSetGroups`](/pkg/syscall/#Credential.NoSetGroups)
+controls whether Unix systems make a `setgroups` system call
+to set supplementary groups when starting a new process.
 
 <!-- CL 43512 -->
-새로운 필드
+The new field
 [`SysProcAttr.AmbientCaps`](/pkg/syscall/#SysProcAttr.AmbientCaps)
-를 사용하면 새 프로세스를 생성할 때 Linux 4.3 이상 버전에서 ambient capabilities를 설정할 수 있습니다.
+allows setting ambient capabilities on Linux 4.3+ when creating
+a new process.
 
 <!-- CL 37439 -->
-64비트 x86 Linux에서 `CLONE_VFORK` 및 `CLONE_VM`을 사용하여 프로세스 생성 지연 시간이 최적화되었습니다.
+On 64-bit x86 Linux, process creation latency has been optimized with
+use of `CLONE_VFORK` and `CLONE_VM`.
 
 <!-- CL 37913 -->
-새로운
+The new
 [`Conn`](/pkg/syscall/#Conn)
-인터페이스는 새로운
-[`RawConn`](/pkg/syscall/#RawConn)
-인터페이스를 사용하여 기본 파일 디스크립터(file descriptor)에 대한 액세스를 제공할 수 있는
+interface describes some types in the
 [`net`](/pkg/net/)
-패키지의 일부 타입들을 설명합니다.
+package that can provide access to their underlying file descriptor
+using the new
+[`RawConn`](/pkg/syscall/#RawConn)
+interface.
 
 <!-- syscall -->
 
 #### [testing/quick](/pkg/testing/quick/)
 
 <!-- CL 39152 -->
-이제 이 패키지는 `int64` 및 `uint64` 난수를 생성할 때 전체 범위 내에서 값을 선택합니다. 이전 릴리스에서는 생성된 값이 항상 [-2<sup>62</sup>, 2<sup>62</sup>) 범위로 제한되었습니다.
+The package now chooses values in the full range when
+generating `int64` and `uint64` random
+numbers; in earlier releases generated values were always
+limited to the [-2<sup>62</sup>, 2<sup>62</sup>) range.
 
-이전 릴리스에서는 [`Config.Rand`](/pkg/testing/quick/#Config.Rand) 값으로 `nil`을 사용하면 고정된 결정론적 난수 생성기가 사용되었습니다. 이제는 현재 시간으로 시드(seed)가 설정된 난수 생성기를 사용합니다. 이전의 동작이 필요한 경우, `Config.Rand`를 `rand.New(rand.NewSource(0))`로 설정하십시오.
+In previous releases, using a nil
+[`Config.Rand`](/pkg/testing/quick/#Config.Rand)
+value caused a fixed deterministic random number generator to be used.
+It now uses a random number generator seeded with the current time.
+For the old behavior, set `Config.Rand` to `rand.New(rand.NewSource(0))`.
 
 <!-- testing/quick -->
 
 #### [text/template](/pkg/text/template/)
 
 <!-- CL 38420 -->
-템플릿의 순서에 따라 결과가 달라지게 만든 Go 1.8의 변경 사항으로 인해 발생했던 빈 블록(empty blocks) 처리 문제가 수정되어, 이전의 Go 1.7 동작 방식으로 복구되었습니다.
+The handling of empty blocks, which was broken by a Go 1.8
+change that made the result dependent on the order of templates,
+has been fixed, restoring the old Go 1.7 behavior.
 
 <!-- text/template -->
 
 #### [time](/pkg/time/)
 
 <!-- CL 36615 -->
-새로운 메서드인
+The new methods
 [`Duration.Round`](/pkg/time/#Duration.Round)
-와
+and
 [`Duration.Truncate`](/pkg/time/#Duration.Truncate)
-는 기간(duration)을 주어진 기간의 배수로 반올림하거나 절삭하는 기능을 처리합니다.
+handle rounding and truncating durations to multiples of a given duration.
 
 <!-- CL 35710 -->
-이제 Wine 환경에서 시간 조회 및 슬립(sleeping) 기능이 정상적으로 작동합니다.
+Retrieving the time and sleeping now work correctly under Wine.
 
-`Time` 값에 단조 시계(monotonic clock) 판독값이 있는 경우, `String` 메서드에 의해 반환되는 문자열 표현에 이제 마지막 필드로 `"m=±value"`가 포함됩니다. 여기서 `value`는 초 단위의 십진수로 포맷된 단조 시계 판독값입니다.
+If a `Time` value has a monotonic clock reading, its
+string representation (as returned by `String`) now includes a
+final field `"m=±value"`, where `value` is the
+monotonic clock reading formatted as a decimal number of seconds.
 
 <!-- CL 44832 -->
-포함된 `tzdata` 시간대 데이터베이스가 2017b 버전으로 업데이트되었습니다. 언제나 그렇듯이, 이 데이터베이스는 시스템에 이미 사용 가능한 데이터베이스가 없는 경우에만 사용됩니다.
+The included `tzdata` timezone database has been
+updated to version 2017b. As always, it is only used if the
+system does not already have the database available.
 
 <!-- time -->

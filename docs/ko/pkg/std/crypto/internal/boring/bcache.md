@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`bcache` 패키지는 BoringCrypto를 위한 GC 친화적인 캐시([Cache] 참조)를 구현합니다.
+Package bcache implements a GC-friendly cache (see [Cache]) for BoringCrypto.
 
 ## 원문 요약
 

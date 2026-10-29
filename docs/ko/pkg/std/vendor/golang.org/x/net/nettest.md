@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`nettest` 패키지는 네트워크 테스트를 위한 유틸리티를 제공합니다.
+Package nettest provides utilities for network testing.
 
 ## 원문 요약
 

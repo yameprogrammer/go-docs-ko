@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`sys` 패키지는 런타임에서 사용하는 시스템, 설정 및 아키텍처 전용 상수를 포함합니다.
+package sys contains system- and configuration- and architecture-specific constants used by the runtime.
 
 ## 원문 요약
 

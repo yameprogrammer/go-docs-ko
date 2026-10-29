@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`traceviewer` 패키지는 Chrome trace viewer에서 사용하는 JSON 데이터 구조의 정의를 제공합니다.
+Package traceviewer provides definitions of the JSON data structures used by the Chrome trace viewer.
 
 ## 원문 요약
 

@@ -1,35 +1,35 @@
-목차:
+Table of Contents:
 
-[개요](#overview)\
- [커버리지 프로파일링을 위한 바이너리 빌드](#building)\
- [커버리지 계측 바이너리 실행](#running)\
- [커버리지 데이터 파일 작업](#working)\
- [자주 묻는 질문](#FAQ)\
- [리소스](#resources)\
- [용어 사전](#glossary)
+ [Overview](#overview)\
+ [Building a binary for coverage profiling](#building)\
+ [Running a coverage-instrumented binary](#running)\
+ [Working with coverage data files](#working)\
+ [Frequently Asked Questions](#FAQ)\
+ [Resources](#resources)\
+ [Glossary](#glossary)
 
-Go 1.20부터 Go는 애플리케이션과 통합 테스트(Go 프로그램에 대한 더 크고 복잡한 테스트)로부터 커버리지 프로필을 수집하는 기능을 지원합니다.
 
-# 개요 {#overview}
+Beginning in Go 1.20, Go supports collection of coverage profiles from applications and from integration tests, larger and more complex tests for Go programs.
 
-Go는 "`go test -coverprofile=... <pkg_target>`" 명령어를 통해 패키지 단위 테스트 수준에서 커버리지 프로필을 수집할 수 있는 사용하기 쉬운 지원을 제공합니다.
-Go 1.20부터 사용자는 더 큰 규모의 [통합 테스트](#glos-integration-test), 즉 주어진 애플리케이션 바이너리를 여러 번 실행하는 더 무겁고 복잡한 테스트에 대한 커버리지 프로필을 수집할 수 있습니다.
+# Overview {#overview}
 
-단위 테스트의 경우, 커버리지 프로필을 수집하고 보고서를 생성하려면 두 단계가 필요합니다. 먼저 `go test -coverprofile=...`를 실행한 다음, `go tool cover {-func,-html}`를 호출하여 보고서를 생성해야 합니다.
+Go provides easy-to-use support for collecting coverage profiles at the level of package unit tests via the "`go test -coverprofile=... <pkg_target>`" command.
+Starting with Go 1.20, users can now collect coverage profiles for larger [integration tests](#glos-integration-test): more heavy-weight, complex tests that perform multiple runs of a given application binary.
 
-통합 테스트를 위해서는 다음과 같이 설명된 세 단계가 필요합니다: [빌드](#building) 단계, [실행](#running) 단계(빌드 단계에서 생성된 바이너리를 여러 번 호출하는 과정이 포함될 수 있음), 그리고 마지막으로 [보고](#reporting) 단계입니다.
+For unit tests, collecting a coverage profile and generating a report requires two steps: a `go test -coverprofile=...` run, followed by an invocation of `go tool cover {-func,-html}` to generate a report.
 
-# 커버리지 프로파일링을 위한 바이너리 빌드 {#building}
+For integration tests, three steps are needed: a [build](#building) step, a [run](#running) step (which may involve multiple invocations of the binary from the build step), and finally a [reporting](#reporting) step, as described below.
 
-커버리지 프로필을 수집하는 애플리케이션을 빌드하려면, 애플리케이션 바이너리 타겟에 대해 `go build`를 호출할 때 `-cover` 플래그를 전달하십시오. `go build -cover` 호출 예제는 [아래](#packageselection) 섹션을 참조하십시오.
+# Building a binary for coverage profiling {#building}
 
-이렇게 생성된 바이너리는 환경 변수 설정을 통해 커버리지 프로필을 캡처하며 실행할 수 있습니다 ([실행](#running)에 관한 다음 섹션 참조).
+To build an application for collecting coverage profiles, pass the `-cover` flag when invoking `go build` on your application binary target. See the section [below](#packageselection) for a sample `go build -cover` invocation.
+The resulting binary can then be run using an environment variable setting to capture coverage profiles (see the next section on [running](#running)).
 
-## 인스트루멘테이션을 위한 패키지 선택 방법 {#packageselection}
+## How packages are selected for instrumentation {#packageselection}
 
-특정 "`go build -cover`" 호출 중에, `go` 커맨드는 커버리지 프로파일링을 위해 메인 모듈 내의 패키지들을 선택합니다. 빌드에 포함되는 다른 패키지들(`go.mod`에 나열된 의존성 또는 Go 표준 라이브러리의 일부인 패키지들)은 기본적으로 포함되지 않습니다.
+During a given "`go build -cover`" invocation, the Go command will select packages in the main module for coverage profiling; other packages that feed into the build (dependencies listed in go.mod, or packages that are part of the Go standard library) will not be included by default.
 
-예를 들어, 여기 `main` 패키지와 로컬 main-module 패키지인 `greetings`, 그리고 `rsc.io/quote` 및 `fmt`를 포함하여 모듈 외부에서 가져온 패키지 세트를 포함하는 토이 프로그램이 있습니다 ([전체 프로그램 링크](/play/p/VSQJN8xkkf-?v=gotip)).
+For example, here is a toy program containing a main package, a local main-module package `greetings` and a set of packages imported from outside the module, including (among others) `rsc.io/quote` and `fmt` ([link to full program](/play/p/VSQJN8xkkf-?v=gotip)).
 
 ```
 $ cat go.mod
@@ -66,20 +66,20 @@ $ go build -cover -o myprogram.exe .
 $
 ```
 
-이 프로그램을 "`-cover`" 명령줄 플래그와 함께 빌드하고 실행하면, `main`과 `mydomain.com/greetings`라는 정확히 두 개의 패키지만 프로파일에 포함되며, 그 외의 의존 패키지들은 제외됩니다.
+If you build this program with the "`-cover`" command line flag and run it, exactly two packages will be included in the profile: `main` and `mydomain.com/greetings`; the other dependent packages will be excluded.
 
-커버리지에 포함될 패키지를 더 세밀하게 제어하고 싶은 사용자는 `"-coverpkg"` 플래그를 사용하여 빌드할 수 있습니다. 예시:
+Users who want to have more control over which packages are included for coverage can build with the "`-coverpkg`" flag. Example:
 
 ```
 $ go build -cover -o myprogramMorePkgs.exe -coverpkg=io,mydomain.com,rsc.io/quote .
 $
 ```
 
-위의 빌드에서 `mydomain.com`의 main 패키지와 `rsc.io/quote` 및 `io` 패키지가 프로파일링 대상으로 선택되었습니다. `mydomain.com/greetings`는 구체적으로 목록에 지정되지 않았으므로, 메인 모듈 내에 있더라도 프로파일에서 제외됩니다.
+In the build above, the main package from `mydomain.com` as well as the `rsc.io/quote` and `io` packages are selected for profiling; since  `mydomain.com/greetings` isn't specifically listed, it will be excluded from the profile, even though it resides in the main module.
 
-# 커버리지 계측 바이너리 실행하기 {#running}
+# Running a coverage-instrumented binary {#running}
 
-"`-cover`"로 빌드된 바이너리는 실행이 종료될 때 환경 변수 `GOCOVERDIR`를 통해 지정된 디렉토리에 프로파일 데이터 파일을 기록합니다. 예시:
+Binaries built with "`-cover`" write out profile data files at the end of their execution to a directory specified via the environment variable `GOCOVERDIR`. Example:
 
 ```
 $ go build -cover -o myprogram.exe myprogram.go
@@ -92,10 +92,10 @@ covmeta.c6de772f99010ef5925877a7b05db4cc
 $
 ```
 
-`somedata` 디렉토리에 작성된 두 개의 파일을 확인하십시오. 이 (바이너리) 파일들은 커버리지 결과를 포함하고 있습니다. 이 데이터 파일들로부터 사람이 읽을 수 있는 결과물을 생성하는 방법에 대한 자세한 내용은 [reporting](#reporting) 섹션을 참조하십시오.
+Note the two files that were written to the directory `somedata`: these (binary) files contain the coverage results.  See the following section on [reporting](#reporting) for more on how to produce human-readable results from these data files.
 
-`GOCOVERDIR` 환경 변수가 설정되어 있지 않으면, 커버리지 계측(instrumented)된 바이너리는 여전히 올바르게 실행되지만 경고를 발생시킵니다.
-예시:
+If the `GOCOVERDIR` environment variable is not set, a coverage-instrumented binary will still execute correctly, but will issue a warning.
+Example:
 
 ```
 $ ./myprogram.exe
@@ -104,15 +104,15 @@ I say "Hello, world." and "see ya"
 $
 ```
 
-## 여러 번의 실행을 포함하는 테스트
+## Tests involving multiple runs
 
-통합 테스트의 경우 많은 상황에서 여러 번의 프로그램 실행이 포함될 수 있습니다. 프로그램이 "`-cover`" 옵션으로 빌드되면, 각 실행마다 새로운 데이터 파일이 생성됩니다. 예시:
+Integration tests can in many cases involve multiple program runs; when the program is built with "`-cover`", each run will produce a new data file. Example
 
 ```
 $ mkdir somedata2
-$ GOCOVERDIR=somedata2 ./myprogram.exe          // 첫 번째 실행
+$ GOCOVERDIR=somedata2 ./myprogram.exe          // first run
 I say "Hello, world." and "see ya"
-$ GOCOVERDIR=somedata2 ./myprogram.exe -flag    // 두 번째 실행
+$ GOCOVERDIR=somedata2 ./myprogram.exe -flag    // second run
 I say "Hello, world." and "see ya"
 $ ls somedata2
 covcounters.890814fca98ac3a4d41b9bd2a7ec9f7f.2456041.1670259309405583534
@@ -121,30 +121,30 @@ covmeta.890814fca98ac3a4d41b9bd2a7ec9f7f
 $
 ```
 
-커버리지 데이터 출력 파일은 두 가지 유형으로 제공됩니다. 메타데이터 파일(소스 파일 이름 및 함수 이름과 같이 실행 시마다 변하지 않는 항목을 포함)과 카운터 데이터 파일(프로그램에서 실행된 부분을 기록)입니다.
+Coverage data output files come in two flavors: meta-data files (containing the items that are invariant from run to run, such as source file names and function names), and counter data files (which record the parts of the program that executed).
 
-위의 예시에서, 첫 번째 실행에서는 두 개의 파일(`counter`와 `meta`)이 생성되었지만, 두 번째 실행에서는 `counter` 데이터 파일만 생성되었습니다. 메타데이터는 실행 시마다 변경되지 않으므로 한 번만 기록하면 되기 때문입니다.
+In the example above, the first run produced two files (counter and meta), whereas the second run generated only a counter data file: since meta-data doesn't change from run to run, it only needs to be written once.
 
-# 커버리지 데이터 파일 작업하기 {#working}
+# Working with coverage data files {#working}
 
-Go 1.20에서는 `GOCOVERDIR` 디렉토리의 커버리지 데이터 파일을 읽고 조작하는 데 사용할 수 있는 새로운 도구인 '`covdata`'가 도입되었습니다.
+Go 1.20 introduces a new tool, '`covdata`', that can be used to read and manipulate coverage data files from a `GOCOVERDIR` directory.
 
-Go의 `covdata` 도구는 다양한 모드로 실행됩니다. `covdata` 도구 호출의 일반적인 형식은 다음과 같습니다.
+Go's `covdata` tool runs in a variety of modes. The general form of a `covdata` tool invocation takes the form
 
 ```
 $ go tool covdata <mode> -i=<dir1,dir2,...> ...flags...
 ```
 
-여기서 "`-i`" 플래그는 읽어올 디렉터리 목록을 제공하며, 각 디렉터리는 ( `GOCOVERDIR`을 통해) 커버리지 계측(instrumentation)이 적용된 바이너리의 실행 결과로부터 생성됩니다.
+where the "`-i`" flag provides a list of directories to read, where each directories is derived from an execution of a coverage-instrumented binary (via `GOCOVERDIR`).
 
-## 커버리지 프로파일 보고서 생성하기 {#reporting}
+## Creating coverage profile reports {#reporting}
 
-이 섹션에서는 커버리지 데이터 파일로부터 사람이 읽을 수 있는 보고서를 생성하기 위해 "`go tool covdata`"를 사용하는 방법을 설명합니다.
+This section discusses how to use "`go tool covdata`" to produce human-readable reports from coverage data files.
 
-### 커버된 퍼센트 문장 보고하기
+### Reporting percent statements covered
 
-각 계측된 패키지에 대해 "퍼센트 문장 커버리지(percent statements covered)" 메트릭을 보고하려면, "`go tool covdata percent -i=<directory>`" 명령어를 사용하십시오.
-위의 [실행(running)](#running) 섹션에 있는 예시를 사용하면 다음과 같습니다.
+To report a "percent statements covered" metric for each instrumented package, use the command "`go tool covdata percent -i=<directory>`".
+Using the example from the [running](#running) section above:
 
 ```
 $ ls somedata
@@ -156,11 +156,11 @@ $ go tool covdata percent -i=somedata
 $
 ```
 
-여기에서 "statements covered" 백분율은 `go test -cover`에 의해 보고된 수치와 직접적으로 일치합니다.
+The "statements covered" percentages here correspond directly to those reported by `go test -cover`.
 
-## 레거시 텍스트 형식으로 변환하기
+## Converting to legacy text format
 
-`covdata textfmt` 셀렉터를 사용하여 바이너리 커버리지 데이터 파일을 "`go test -coverprofile=<outfile>`"로 생성된 레거시 텍스트 형식으로 변환할 수 있습니다. 이렇게 생성된 텍스트 파일은 "`go tool cover -func`" 또는 "`go tool cover -html`"과 함께 사용하여 추가 보고서를 생성하는 데 사용할 수 있습니다. 예시:
+You can convert binary coverage data files into the legacy textual format generated by "`go test -coverprofile=<outfile>`" using the covdata `textfmt` selector. The resulting text file can then be used with "`go tool cover -func`" or "`go tool cover -html`" to create additional reports. Example:
 
 ```
 $ ls somedata
@@ -180,11 +180,13 @@ $
 
 ## Merging
 
-`go tool covdata`의 `merge` 서브커맨드는 여러 데이터 디렉토리의 프로필을 하나로 병합하는 데 사용할 수 있습니다.
+The `merge` subcommand of "`go tool covdata`" can be used to merge together profiles from multiple data directories.
 
-예를 들어, macOS와 Windows 모두에서 실행되는 프로그램을 생각해 보겠습니다.
-이 프로그램의 작성자는 각 운영 체제에서 별도로 실행한 커버리지 프로필을 하나의 프로필 코퍼스(corpus)로 결합하여, 크로스 플랫폼 커버리지 요약을 생성하고 싶을 수 있습니다.
-예를 들면 다음과 같습니다:
+For example, consider a program that runs on both macOS and on Windows.
+The author of this program might want to combine coverage profiles from separate
+runs on each operating system into a single profile corpus, so as to produce a
+cross-platform coverage summary.
+For example:
 
 ```
 $ ls windows_datadir
@@ -201,12 +203,12 @@ $ go tool covdata merge -i=windows_datadir,macos_datadir -o merged
 $
 ```
 
-위의 merge 작업은 지정된 입력 디렉터리의 데이터를 결합하여 "merged" 디렉터리에 병합된 새로운 데이터 파일 세트를 기록합니다.
+The merge operation above will combine the data from the specified input directories and write a new set of merged data files to the directory "merged".
 
-## 패키지 선택
+## Package selection
 
-대부분의 "`go tool covdata`" 명령은 작업의 일부로 패키지 선택을 수행하는 "`-pkg`" 플래그를 지원합니다. "`-pkg`"에 전달되는 인수는 Go 명령의 "`-coverpkg`" 플래그에서 사용하는 것과 동일한 형식을 갖습니다.
-예시:
+Most "`go tool covdata`" commands support a "`-pkg`" flag to perform package selection as part of the operation; the argument to "`-pkg`" takes the same form as that used by the Go command's "`-coverpkg`" flag.
+Example:
 
 ```
 
@@ -219,22 +221,27 @@ $ go tool covdata percent -i=somedata -pkg=nonexistentpackage
 $
 ```
 
-"`-pkg`" 플래그를 사용하여 특정 보고서에 대해 관심 있는 패키지의 특정 하위 집합을 선택할 수 있습니다.
+The "`-pkg`" flag can be used to select the specific subset of packages of interest for a given report.
 
-번역할 원문 콘텐츠가 제공되지 않았습니다. 번역이 필요한 Markdown 내용을 입력해 주세요. 세심한 기술 번역을 통해 Markdown 구조, 표, 링크, 리스트, 인라인 코드 및 코드 펜스를 그대로 유지하며, Go 패키지 이름, 식별자, URL, 명령어 또는 코드 스니펫은 번역하지 않고 정확하게 전달해 드리겠습니다.
+#
 
-## 자주 묻는 질문 {#FAQ}
+## Frequently Asked Questions {#FAQ}
 
-1. [`go.mod` 파일에 언급된 모든 가져온 패키지에 대해 커버리지 인스트루멘테이션(instrumentation)을 요청하려면 어떻게 해야 하나요?](#gomodselect)
-2. [GOPATH/GO111MODULE=off 모드에서 `go build -cover`를 사용할 수 있나요?](#gopathmode)
-3. [프로그램에 패닉(panic)이 발생하면 커버리지 데이터가 기록되나요?](#panicprof)
-4. [`-coverpkg=main`을 사용하면 프로파일링을 위해 main 패키지가 선택되나요?](#mainpkg)
+1. [How can I request coverage instrumentation for all imported packages mentioned in my `go.mod` file](#gomodselect)
+2. [Can I use `go build -cover` in GOPATH/GO111MODULE=off mode?](#gopathmode)
+3. [If my program panics, will coverage data be written?](#panicprof)
+4. [Will `-coverpkg=main` select my main package for profiling?](#mainpkg)
 
-#### `go.mod` 파일에 언급된 모든 임포트된 패키지에 대해 커버리지 인스트루먼테이션(instrumentation)을 요청하려면 어떻게 해야 하나요? {#gomodselect}
 
-기본적으로 `go build -cover`는 모든 메인 모듈 패키지에 대해 커버리지 계측(instrument)을 수행하지만, 메인 모듈 외부의 임포트(예: 표준 라이브러리 패키지 또는 `go.mod`에 나열된 임포트)는 계측하지 않습니다.
-표준 라이브러리를 제외한 모든 의존성에 대해 계측을 요청하는 한 가지 방법은 `go list`의 출력을 `-coverpkg`에 전달하는 것입니다.
-위에서 언급한 [예제 프로그램](/play/p/VSQJN8xkkf-?v=gotip)을 사용한 예시는 다음과 같습니다.
+#### How can I request coverage instrumentation for all imported packages mentioned in my `go.mod` file {#gomodselect}
+
+By default, `go build -cover` will instrument all main module packages
+for coverage, but will not instrument imports outside the main module
+(e.g. standard library packages or imports listed in `go.mod`).
+One way to request instrumentation for all non-stdlib dependencies
+is to feed the output of `go list` into `-coverpkg`.
+Here is an example, again using
+the [example program](/play/p/VSQJN8xkkf-?v=gotip) cited above:
 
 ```
 $ go list -f '{{"{{if not .Standard}}{{.ImportPath}}{{end}}"}}' -deps . | paste -sd "," > pkgs.txt
@@ -251,20 +258,23 @@ $ go tool covdata percent -i=somedata
 $
 ```
 
-#### GO111MODULE=off 모드에서 `go build -cover`를 사용할 수 있나요? {#gopathmode}
+#### Can I use `go build -cover` in GO111MODULE=off mode? {#gopathmode}
 
-네, `go build -cover`는 `GO111MODULE=off` 설정에서도 작동합니다.
-`GO111MODULE=off` 모드로 프로그램을 빌드할 때, 커맨드 라인에서 타겟으로 명시된 패키지만 프로파일링을 위해 계측(instrumented)됩니다. 프로파일에 추가 패키지를 포함하려면 `-coverpkg` 플래그를 사용하십시오.
+Yes, `go build -cover` does work with `GO111MODULE=off`.
+When building a program in GO111MODULE=off mode, only the package specifically named as the target on the command line will be instrumented for profiling. Use the `-coverpkg` flag to include additional packages in the profile.
 
-#### 프로그램이 패닉(panic)이 발생하면 커버리지 데이터가 기록되나요? {#panicprof}
+#### If my program panics, will coverage data be written? {#panicprof}
 
-`go build -cover`로 빌드된 프로그램은 프로그램이 `os.Exit()`를 호출하거나 `main.main`에서 정상적으로 반환되는 경우에만 실행 종료 시 완전한 프로파일 데이터를 기록합니다.
+Programs built with `go build -cover` will only write out complete profile
+data at the end of execution if the program invokes `os.Exit()` or returns
+normally from `main.main`.
+If a program terminates in an unrecovered panic, or if the program hits a
+fatal exception (such as a segmentation violation, divide by zero, etc),
+profile data from statements executed during the run will be lost.
 
-만약 프로그램이 복구되지 않은 panic으로 종료되거나, 치명적인 예외(세그멘테이션 위반, 0으로 나누기 등)가 발생하면 실행 중에 수행된 문장들의 프로파일 데이터가 손실됩니다.
+#### Will `-coverpkg=main` select my main package for profiling? {#mainpkg}
 
-#### `-coverpkg=main`을 사용하면 프로파일링을 위해 main 패키지가 선택되나요? {#mainpkg}
-
-`-coverpkg` 플래그는 패키지 이름의 목록이 아니라 임포트 경로(import paths)의 목록을 받습니다. 커버리지 계측(instrumentation) 대상으로 `main` 패키지를 선택하려면, 이름이 아닌 임포트 경로로 지정하십시오. 예시 ([이 예제 프로그램](/play/p/VSQJN8xkkf-?v=gotip) 사용):
+The `-coverpkg` flag accepts a list of import paths, not a list of package names. If you want to select your `main` package for coverage instrumention, please identify it by import path, not by name. Example (using [this example program](/play/p/VSQJN8xkkf-?v=gotip)):
 
 ```
 $ go list -m
@@ -280,20 +290,23 @@ $ go tool covdata percent -i=somedata
 $
 ```
 
-## 리소스 {#resources}
+## Resources {#resources}
 
-- **Go 1.2의 유닛 테스트 커버리지를 소개하는 블로그 포스트**:
-  - 유닛 테스트를 위한 커버리지 프로파일링이 Go 1.2 릴리스의 일부로 도입되었습니다. 자세한 내용은 [이 블로그 포스트](/blog/cover)를 참조하십시오.
-- **문서**:
-  - [`cmd/go`](https://pkg.go.dev/cmd/go) 패키지 문서는 커버리지와 관련된 빌드 및 테스트 플래그에 대해 설명합니다.
-- **기술 세부 정보**:
-  - [디자인 초안](/design/51430-revamp-code-coverage)
-  - [제안서](/issue/51430)
+- **Blog post introducing unit test coverage in Go 1.2**:
+  - Coverage profiling for unit tests was introduced as part of the
+    Go 1.2 release; see [this blog post](/blog/cover) for details.
+- **Documentation**:
+  - The [`cmd/go`](https://pkg.go.dev/cmd/go) package docs describe the
+    build and test flags associated with coverage.
+- **Technical details**:
+  - [Design draft](/design/51430-revamp-code-coverage)
+  - [Proposal](/issue/51430)
 
-## 용어집 {#glossary}
+## Glossary {#glossary}
 
 <a id="glos-unit-test"></a>
-**unit test:** Go의 `testing` 패키지를 활용하여, 특정 Go 패키지와 연관된 `*_test.go` 파일 내에서 수행하는 테스트입니다.
+**unit test:** Tests within a `*_test.go` file associated with a specific Go package, utilizing Go's `testing` package.
 
 <a id="glos-integration-test"></a>
-**integration test (통합 테스트):** 특정 애플리케이션이나 바이너리에 대해 수행하는 더 포괄적이고 비중이 큰 테스트입니다. 통합 테스트는 일반적으로 프로그램 또는 프로그램 집합을 빌드한 다음, Go의 `testing` 패키지 기반 여부와 상관없이 테스트 하네스(test harness)의 제어 하에 다양한 입력값과 시나리오를 사용하여 해당 프로그램들을 여러 번 실행하는 과정을 포함합니다.
+**integration test:** A more comprehensive, heavier weight test for a given application or binary. Integration tests typically involve building a program or set of programs, then performing a series of runs of the programs using multiple inputs and scenarios, under control of a test harness that may or may not be based on Go's `testing` package.
+

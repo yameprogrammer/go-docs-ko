@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`syntax` 패키지는 정규 표현식을 파스 트리(parse tree)로 파싱하고, 파스 트리를 프로그램으로 컴파일합니다.
+Package syntax parses regular expressions into parse trees and compiles parse trees into programs.
 
 ## 원문 요약
 

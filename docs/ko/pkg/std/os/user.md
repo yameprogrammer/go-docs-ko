@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`user` 패키지는 이름 또는 ID를 통한 사용자 계정 조회를 지원합니다.
+Package user allows user account lookups by name or id.
 
 ## 원문 요약
 

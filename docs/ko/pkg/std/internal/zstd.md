@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`zstd` 패키지는 RFC 8878에 설명된 zstd 스트림을 위한 압축 해제 도구(decompressor)를 제공합니다.
+Package zstd provides a decompressor for zstd streams, described in RFC 8878.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`quick` 패키지는 블랙박스 테스트를 돕는 유틸리티 함수들을 제공합니다.
+Package quick implements utility functions to help with black box testing.
 
 ## 원문 요약
 

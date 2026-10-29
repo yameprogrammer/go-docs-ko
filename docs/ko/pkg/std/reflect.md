@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`reflect` 패키지는 런타임 리플렉션(run-time reflection)을 구현하여, 프로그램이 임의의 타입을 가진 객체를 조작할 수 있도록 합니다.
+Package reflect implements run-time reflection, allowing a program to manipulate objects with arbitrary types.
 
 ## 원문 요약
 

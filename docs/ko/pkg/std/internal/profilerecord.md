@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`profilerecord` 패키지는 깊은 스택 트레이스를 가진 프로파일링 레코드를 표현하는 데 사용되는 내부 타입을 포함합니다.
+Package profilerecord holds internal types used to represent profiling records with deep stack traces.
 
 ## 원문 요약
 

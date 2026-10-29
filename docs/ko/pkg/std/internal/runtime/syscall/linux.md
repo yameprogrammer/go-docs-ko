@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`linux` 패키지는 런타임에 필요한 syscall 프리미티브를 제공합니다.
+Package linux provides the syscall primitives required for the runtime.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`fnv` 패키지는 Glenn Fowler, Landon Curt Noll, Phong Vo가 만든 비암호화 해시 함수인 FNV-1 및 FNV-1a를 구현합니다.
+Package fnv implements FNV-1 and FNV-1a, non-cryptographic hash functions created by Glenn Fowler, Landon Curt Noll, and Phong Vo.
 
 ## 원문 요약
 

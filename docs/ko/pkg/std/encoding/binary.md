@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`binary` 패키지는 숫자와 바이트 시퀀스 간의 간단한 변환 및 varint의 인코딩과 디코딩을 구현합니다.
+Package binary implements simple translation between numbers and byte sequences and encoding and decoding of varints.
 
 ## 원문 요약
 

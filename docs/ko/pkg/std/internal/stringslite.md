@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`stringslite` 패키지는 "os"에서 임포트할 수 있는 패키지만을 사용하여 `strings` 패키지의 서브셋(subset)을 구현합니다.
+Package stringslite implements a subset of strings, only using packages that may be imported by "os".
 
 ## 원문 요약
 

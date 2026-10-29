@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`startlinetest` 패키지는 `runtime_test.TestStartLineAsm`을 위한 헬퍼들을 포함합니다.
+Package startlinetest contains helpers for runtime_test.TestStartLineAsm.
 
 ## 원문 요약
 

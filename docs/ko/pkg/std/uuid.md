@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`uuid` 패키지는 UUID 생성 및 조작을 위한 지원을 제공합니다.
+Package uuid provides support for generating and manipulating UUIDs.
 
 ## 원문 요약
 

@@ -5,7 +5,7 @@
 
 ## 한국어 요약
 
-`httpguts` 패키지는 HTTP 명세의 다양한 세부 사항을 구현하는 함수들을 제공합니다.
+Package httpguts provides functions implementing various details of the HTTP specification.
 
 ## 원문 요약
 
